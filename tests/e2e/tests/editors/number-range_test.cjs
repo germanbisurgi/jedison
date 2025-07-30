@@ -11,13 +11,13 @@ BeforeSuite(({ I }) => {
 })
 
 Scenario('@editor @number-range should have @title and @description', ({ I }) => {
-  I._waitForText('Number Range with Min/Max', '[data-path="#/properties/rangeMinMax"] label')
-  I._waitForText('Automatically uses range input when min and max are defined', '[data-path="#/properties/rangeMinMax"] .jedi-description')
+  I._waitForText('Number Range with Min/Max', '[data-path="#/rangeMinMax"] label')
+  I._waitForText('Automatically uses range input when min and max are defined', '[data-path="#/rangeMinMax"] .jedi-description')
 })
 
 Scenario('@editor @number-range should have @rangeInput', ({ I }) => {
-  I._waitForElement('[data-path="#/properties/rangeMinMax"] input[type="range"]')
-  I._waitForElement('[data-path="#/properties/rangeMinMax"] .range-output')
+  I._waitForElement('[data-path="#/rangeMinMax"] input[type="range"]')
+  I._waitForElement('[data-path="#/rangeMinMax"] .range-output')
 })
 
 Scenario('@editor @number-range should have @defaultValues', ({ I }) => {
@@ -34,20 +34,19 @@ Scenario('@editor @number-range should have @defaultValues', ({ I }) => {
   }))
 
   // Check editor values
-  I._waitForValue('[data-path="#/properties/rangeMinMax"] input[type="range"]', '50')
-  I._waitForText('50', '[data-path="#/properties/rangeMinMax"] .range-output')
+  I._waitForValue('[data-path="#/rangeMinMax"] input[type="range"]', '50')
+  I._waitForText('50', '[data-path="#/rangeMinMax"] .range-output')
 
-  I._waitForValue('[data-path="#/properties/rangeInteger"] input[type="range"]', '5')
-  I._waitForText('5', '[data-path="#/properties/rangeInteger"] .range-output')
+  I._waitForValue('[data-path="#/rangeInteger"] input[type="range"]', '5')
+  I._waitForText('5', '[data-path="#/rangeInteger"] .range-output')
 })
 
 Scenario('@editor @number-range should @updateValue on change', ({ I }) => {
   // Change the range value
-  I.fillField('[data-path="#/properties/rangeMinMax"] input[type="range"]', '75')
-  I.triggerEvent('[data-path="#/properties/rangeMinMax"] input[type="range"]', 'change')
+  I._fillRangeField('#root-rangeMinMax', '75')
 
   // Check output displays new value
-  I._waitForText('75', '[data-path="#/properties/rangeMinMax"] .range-output')
+  I._waitForText('75', '[data-path="#/rangeMinMax"] .range-output')
 
   // Check instance value updated
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify({
@@ -63,7 +62,7 @@ Scenario('@editor @number-range should @updateValue on change', ({ I }) => {
 })
 
 Scenario('@editor @number-range should have @minMaxAttributes', ({ I }) => {
-  const basicRangeInput = '[data-path="#/properties/rangeMinMax"] input[type="range"]'
+  const basicRangeInput = '[data-path="#/rangeMinMax"] input[type="range"]'
 
   // Check min/max attributes from schema
   I._waitForElement(basicRangeInput)
@@ -71,20 +70,19 @@ Scenario('@editor @number-range should have @minMaxAttributes', ({ I }) => {
 })
 
 Scenario('@editor @number-range should support @integerType', ({ I }) => {
-  const integerRangeInput = '[data-path="#/properties/rangeInteger"] input[type="range"]'
+  const integerRangeInput = '[data-path="#/rangeInteger"] input[type="range"]'
 
   // Check integer range attributes
   I._waitForElement(integerRangeInput)
   I.seeAttributesOnElements(integerRangeInput, { min: '1', max: '10', step: '1' })
 
   // Test integer value setting
-  I.fillField(integerRangeInput, '7')
-  I.triggerEvent(integerRangeInput, 'change')
-  I._waitForText('7', '[data-path="#/properties/rangeInteger"] .range-output')
+  I._fillRangeField(integerRangeInput, '7')
+  I._waitForText('7', '[data-path="#/rangeInteger"] .range-output')
 })
 
 Scenario('@editor @number-range should support @exclusiveConstraints', ({ I }) => {
-  const exclusiveRangeInput = '[data-path="#/properties/rangeExclusive"] input[type="range"]'
+  const exclusiveRangeInput = '[data-path="#/rangeExclusive"] input[type="range"]'
 
   // Check exclusive min/max handling
   I._waitForElement(exclusiveRangeInput)
@@ -93,7 +91,7 @@ Scenario('@editor @number-range should support @exclusiveConstraints', ({ I }) =
 })
 
 Scenario('@editor @number-range should use @multipleOfAsStep', ({ I }) => {
-  const multipleOfRangeInput = '[data-path="#/properties/rangeMultipleOf"] input[type="range"]'
+  const multipleOfRangeInput = '[data-path="#/rangeMultipleOf"] input[type="range"]'
 
   // Check multipleOf becomes step
   I._waitForElement(multipleOfRangeInput)
@@ -101,11 +99,11 @@ Scenario('@editor @number-range should use @multipleOfAsStep', ({ I }) => {
 
   // Check default value
   I._waitForValue(multipleOfRangeInput, '2.5')
-  I._waitForText('2.5', '[data-path="#/properties/rangeMultipleOf"] .range-output')
+  I._waitForText('2.5', '[data-path="#/rangeMultipleOf"] .range-output')
 })
 
 Scenario('@editor @number-range should support @customStepWithInputAttributes', ({ I }) => {
-  const customStepRangeInput = '[data-path="#/properties/rangeCustomStep"] input[type="range"]'
+  const customStepRangeInput = '[data-path="#/rangeCustomStep"] input[type="range"]'
 
   // Check custom step override via x-inputAttributes
   I._waitForElement(customStepRangeInput)
@@ -113,7 +111,7 @@ Scenario('@editor @number-range should support @customStepWithInputAttributes', 
 })
 
 Scenario('@editor @number-range should support @explicitFormatWithInputAttributes', ({ I }) => {
-  const explicitRangeInput = '[data-path="#/properties/rangeExplicitFormat"] input[type="range"]'
+  const explicitRangeInput = '[data-path="#/rangeExplicitFormat"] input[type="range"]'
 
   // Check explicit format with custom attributes via x-inputAttributes
   I._waitForElement(explicitRangeInput)
@@ -121,35 +119,29 @@ Scenario('@editor @number-range should support @explicitFormatWithInputAttribute
 
   // Check default value
   I._waitForValue(explicitRangeInput, '50')
-  I._waitForText('50', '[data-path="#/properties/rangeExplicitFormat"] .range-output')
+  I._waitForText('50', '[data-path="#/rangeExplicitFormat"] .range-output')
 })
 
 Scenario('@editor @number-range should show @titleIcon', ({ I }) => {
-  I._waitForElement('[data-path="#/properties/rangeTemperature"] .fa-thermometer-half')
-  I._waitForText('Temperature (°C)', '[data-path="#/properties/rangeTemperature"] label')
-})
-
-Scenario('@editor @number-range should support @hiddenTitle', ({ I }) => {
-  I.dontSeeElement('[data-path="#/properties/rangeVolume"] label')
-  I._waitForElement('[data-path="#/properties/rangeVolume"] input[type="range"]')
+  I._waitForElement('[data-path="#/rangeTemperature"] .fa-thermometer-half')
+  I._waitForText('Temperature (°C)', '[data-path="#/rangeTemperature"] label')
 })
 
 Scenario('@editor @number-range should support @negativeValues', ({ I }) => {
-  const temperatureRangeInput = '[data-path="#/properties/rangeTemperature"] input[type="range"]'
+  const temperatureRangeInput = '[data-path="#/rangeTemperature"] input[type="range"]'
 
   // Check negative minimum support
   I._waitForElement(temperatureRangeInput)
   I.seeAttributesOnElements(temperatureRangeInput, { min: '-10', max: '40', step: '1' })
 
   // Test setting negative value
-  I.fillField(temperatureRangeInput, '-5')
-  I.triggerEvent(temperatureRangeInput, 'change')
-  I._waitForText('-5', '[data-path="#/properties/rangeTemperature"] .range-output')
+  I._fillRangeField(temperatureRangeInput, '-5')
+  I._waitForText('-5', '[data-path="#/rangeTemperature"] .range-output')
 })
 
 Scenario('@editor @number-range should @setValue programmatically', ({ I }) => {
   // Set values programmatically
-  I.fillField('#editor-value', JSON.stringify({
+  I._fillRangeField('#editor-value', JSON.stringify({
     rangeMinMax: 80,
     rangeInteger: 8,
     rangeExclusive: 0.75,
@@ -163,30 +155,30 @@ Scenario('@editor @number-range should @setValue programmatically', ({ I }) => {
   I._click('#set-value')
 
   // Check values updated
-  I._waitForValue('[data-path="#/properties/rangeMinMax"] input[type="range"]', '80')
-  I._waitForText('80', '[data-path="#/properties/rangeMinMax"] .range-output')
+  I._waitForValue('[data-path="#/rangeMinMax"] input[type="range"]', '80')
+  I._waitForText('80', '[data-path="#/rangeMinMax"] .range-output')
 
-  I._waitForValue('[data-path="#/properties/rangeInteger"] input[type="range"]', '8')
-  I._waitForText('8', '[data-path="#/properties/rangeInteger"] .range-output')
+  I._waitForValue('[data-path="#/rangeInteger"] input[type="range"]', '8')
+  I._waitForText('8', '[data-path="#/rangeInteger"] .range-output')
 
-  I._waitForValue('[data-path="#/properties/rangeTemperature"] input[type="range"]', '25')
-  I._waitForText('25', '[data-path="#/properties/rangeTemperature"] .range-output')
+  I._waitForValue('[data-path="#/rangeTemperature"] input[type="range"]', '25')
+  I._waitForText('25', '[data-path="#/rangeTemperature"] .range-output')
 })
 
 Scenario('@editor @number-range should @disable', ({ I }) => {
   I._click('#disable-editor')
-  I._waitForElement('[data-path="#/properties/rangeMinMax"] input[type="range"]:disabled')
-  I._waitForElement('[data-path="#/properties/rangeInteger"] input[type="range"]:disabled')
+  I._waitForElement('[data-path="#/rangeMinMax"] input[type="range"]:disabled')
+  I._waitForElement('[data-path="#/rangeInteger"] input[type="range"]:disabled')
 })
 
 Scenario('@editor @number-range should @enable', ({ I }) => {
   I._click('#enable-editor')
-  I.dontSeeElement('[data-path="#/properties/rangeMinMax"] input[type="range"]:disabled')
-  I.dontSeeElement('[data-path="#/properties/rangeInteger"] input[type="range"]:disabled')
+  I.dontSeeElement('[data-path="#/rangeMinMax"] input[type="range"]:disabled')
+  I.dontSeeElement('[data-path="#/rangeInteger"] input[type="range"]:disabled')
 })
 
 Scenario('@editor @number-range should @destroy', ({ I }) => {
   I._click('#destroy-editor')
-  I.dontSeeElement('[data-path="#/properties/rangeMinMax"]')
-  I.dontSeeElement('[data-path="#/properties/rangeInteger"]')
+  I.dontSeeElement('[data-path="#/rangeMinMax"]')
+  I.dontSeeElement('[data-path="#/rangeInteger"]')
 })

@@ -47,6 +47,12 @@ module.exports = function () {
       this.fillField(locator, value)
       this.pressKey('Tab')
     },
+    _fillRangeField: function (locator, value) {
+      this.executeScript(function (locator, value) {
+        document.querySelector(locator).value = value
+        document.querySelector(locator).dispatchEvent(new Event('change'))
+      }, locator, value)
+    },
     _setEditorValue: function (value) {
       this.fillField('#editor-value', value)
       this._scrollTo('#set-value')

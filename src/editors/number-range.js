@@ -90,6 +90,11 @@ class EditorNumberRange extends EditorNumber {
   }
 
   addEventListeners () {
+    // Update output on input
+    this.control.input.addEventListener('input', () => {
+      this.control.output.textContent = parseFloat(this.control.input.value)
+    })
+
     // Update value on change
     this.control.input.addEventListener('change', () => {
       const value = parseFloat(this.control.input.value)

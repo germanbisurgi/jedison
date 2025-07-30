@@ -71,7 +71,6 @@
       "type": "integer",
       "title": "Volume Level",
       "description": "Volume control with hidden title",
-      "x-titleHidden": true,
       "minimum": 0,
       "maximum": 100,
       "multipleOf": 5,

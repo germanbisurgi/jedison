@@ -4709,6 +4709,9 @@ class EditorNumberRange extends EditorNumber {
     this.theme.adaptForTableInputControl(this.control);
   }
   addEventListeners() {
+    this.control.input.addEventListener("input", () => {
+      this.control.output.textContent = parseFloat(this.control.input.value);
+    });
     this.control.input.addEventListener("change", () => {
       const value = parseFloat(this.control.input.value);
       this.control.output.textContent = value;
