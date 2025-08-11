@@ -1,3 +1,7 @@
+### 0.3.13
+
+- Fixed syntax issue
+
 ### 0.3.12
 
 - Fixed double id issue with navs

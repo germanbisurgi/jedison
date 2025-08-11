@@ -1,15 +1,16 @@
 ## Todo
+- error messages subcategories by data type?
 - parse template documentation
 - x-selectEnum and x-selectEnumTitles
 - context params in events
-- enum titles content parsing (to allow html icons and stuff)
+- enum titles are content parsing (to allow HTML icons and stuff)
 - focus issues with safari?
 - rename:
   - x-sortable to x-arrayDrag
   - x-enableCollapseToggle to x-collapseToggle
   - x-startCollapsed to x-collapsed
 - section about exposing external libraries window.['__LIBRARY__'] when importing esm
-- collapse expand text and animation, collapse children on collapse
+- collapse expands text and animation, collapse children on collapse
 - array nav drag
 - translation with template compiling
 - refactor setInitialValue
@@ -31,11 +32,10 @@
 
 - Editor: SignaturePad
 - Editor: Void instance (for buttons, and other stuff). Does not register
-- Editor: input range
 - Editor: input file
 - Editor: color picker
 
-- Themes: theme option should be a string. to better handle config and config options and avoid duplication
+- Themes: a theme option should be a string. to better handle config and config options and avoid duplication
 - Themes: refactor theme.getCollapseToggle
 - Themes: ionic
 - Themes: material

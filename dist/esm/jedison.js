@@ -3358,7 +3358,7 @@ class EditorNumberInput extends EditorNumber {
     });
     this.control.input.addEventListener("focus", () => {
       if (this.control.input.value === "0") {
-        this.control.input.value = this.instance.getValue().toString;
+        this.control.input.value = this.instance.getValue().toString();
       }
     });
     this.control.input.addEventListener("blur", () => {
