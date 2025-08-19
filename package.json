@@ -1,6 +1,6 @@
 {
   "name": "jedison",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "JavaScript Library for JSON Validation and Editing",
   "main": "./dist/cjs/jedison.cjs",
   "module": "./dist/esm/jedison.js",
