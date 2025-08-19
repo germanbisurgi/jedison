@@ -1,3 +1,7 @@
+### 0.3.14
+
+- Fixed range resolve function issue
+
 ### 0.3.13
 
 - Fixed syntax issue
