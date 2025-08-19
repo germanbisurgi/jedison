@@ -1,8 +1,12 @@
 {
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
+  "type": "number",
+  "minimum": 0,
+  "maximum": 99999.99,
+  "default": 0,
+  "description": "Flächengröße in Hektar",
+  "x-options": {
+    "inputAttributes": {
+      "step": 0.01
     }
   }
 }

@@ -16,15 +16,9 @@ class EditorNumberRange extends EditorNumber {
     }
 
     // Check for explicit range format
-    if (getSchemaXOption(schema, 'format') === 'range') {
-      return true
-    }
+    const hasFormatRange = getSchemaXOption(schema, 'format') === 'range'
 
-    // Check for min/max constraints (including exclusive variants)
-    const hasMin = isSet(schema.minimum) || isSet(schema.exclusiveMinimum)
-    const hasMax = isSet(schema.maximum) || isSet(schema.exclusiveMaximum)
-
-    return hasMin && hasMax
+    return isNumericType && hasFormatRange
   }
 
   build () {

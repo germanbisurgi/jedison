@@ -4654,12 +4654,8 @@ class EditorNumberRange extends EditorNumber {
     if (!isNumericType) {
       return false;
     }
-    if (getSchemaXOption(schema, "format") === "range") {
-      return true;
-    }
-    const hasMin = isSet(schema.minimum) || isSet(schema.exclusiveMinimum);
-    const hasMax = isSet(schema.maximum) || isSet(schema.exclusiveMaximum);
-    return hasMin && hasMax;
+    const hasFormatRange = getSchemaXOption(schema, "format") === "range";
+    return isNumericType && hasFormatRange;
   }
   build() {
     let optionMin = 0;

@@ -5,6 +5,7 @@
     "rangeMinMax": {
       "type": "number",
       "title": "Number Range with Min/Max",
+      "x-format": "range",
       "description": "Automatically uses range input when min and max are defined",
       "minimum": 0,
       "maximum": 100,
@@ -13,6 +14,7 @@
     "rangeInteger": {
       "type": "integer",
       "title": "Integer Range",
+      "x-format": "range",
       "description": "Integer range with step=1",
       "minimum": 1,
       "maximum": 10,
@@ -21,6 +23,7 @@
     "rangeExclusive": {
       "type": "number",
       "title": "Exclusive Range",
+      "x-format": "range",
       "description": "Range with exclusive minimum and maximum",
       "exclusiveMinimum": 0,
       "exclusiveMaximum": 1,
@@ -29,6 +32,7 @@
     "rangeMultipleOf": {
       "type": "number",
       "title": "Range with MultipleOf",
+      "x-format": "range",
       "description": "Range that uses multipleOf as step",
       "minimum": 0,
       "maximum": 10,
@@ -38,6 +42,7 @@
     "rangeCustomStep": {
       "type": "number",
       "title": "Custom Step Range",
+      "x-format": "range",
       "description": "Range with custom step override using x-inputAttributes",
       "minimum": 0,
       "maximum": 50,
@@ -61,6 +66,7 @@
     "rangeTemperature": {
       "type": "integer",
       "title": "Temperature (°C)",
+      "x-format": "range",
       "description": "Temperature range with icon",
       "x-titleIconClass": "fa fa-thermometer-half",
       "minimum": -10,
@@ -70,6 +76,7 @@
     "rangeVolume": {
       "type": "integer",
       "title": "Volume Level",
+      "x-format": "range",
       "description": "Volume control with hidden title",
       "minimum": 0,
       "maximum": 100,
