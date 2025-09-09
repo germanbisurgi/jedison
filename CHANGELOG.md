@@ -1,3 +1,7 @@
+### 0.3.15
+
+- Fixed issue with more complex if-the-else + nullables scenario
+
 ### 0.3.14
 
 - Fixed range resolve function issue
