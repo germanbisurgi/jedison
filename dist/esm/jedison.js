@@ -2295,6 +2295,9 @@ class InstanceIfThenElse extends Instance {
         this.emit("change", initiator2);
       });
     });
+    if (initiator === "api" && this.hasNullableFields(this.activeInstance)) {
+      this.activeInstance.setValue(value, false, "secondary");
+    }
     this.value = this.activeInstance.getValue();
   }
   getWithoutIfValueFromValue(value) {
@@ -2323,6 +2326,35 @@ class InstanceIfThenElse extends Instance {
         else: isSet(schemaElse) ? schemaElse : {}
       });
     }
+  }
+  /**
+   * Check if an instance has nullable fields in its schema or children
+   */
+  hasNullableFields(instance) {
+    if (!instance) return false;
+    if (this.isNullableSchema(instance.schema)) {
+      return true;
+    }
+    if (instance.children) {
+      return instance.children.some((child) => this.hasNullableFields(child));
+    }
+    return false;
+  }
+  /**
+   * Check if a schema is nullable (has x-format: 'number-nullable' or similar nullable formats)
+   */
+  isNullableSchema(schema) {
+    if (!schema) return false;
+    if (schema["x-format"] && schema["x-format"].includes("nullable")) {
+      return true;
+    }
+    if (Array.isArray(schema.type) && schema.type.includes("null")) {
+      return true;
+    }
+    if (schema.properties) {
+      return Object.values(schema.properties).some((prop) => this.isNullableSchema(prop));
+    }
+    return false;
   }
   /**
    * Returns the index of the instance that has less validation errors

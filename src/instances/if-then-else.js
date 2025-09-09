@@ -134,6 +134,12 @@ class InstanceIfThenElse extends Instance {
       })
     })
 
+    // Ensure active instance processes the value again for nullable editors
+    // Only apply secondary setValue if we have nullable fields that might need it
+    if (initiator === 'api' && this.hasNullableFields(this.activeInstance)) {
+      this.activeInstance.setValue(value, false, 'secondary')
+    }
+
     this.value = this.activeInstance.getValue()
   }
 
@@ -170,6 +176,49 @@ class InstanceIfThenElse extends Instance {
         else: isSet(schemaElse) ? schemaElse : {}
       })
     }
+  }
+
+  /**
+   * Check if an instance has nullable fields in its schema or children
+   */
+  hasNullableFields (instance) {
+    if (!instance) return false
+
+    // Check if the instance itself has a nullable schema
+    if (this.isNullableSchema(instance.schema)) {
+      return true
+    }
+
+    // Check if any child instances have nullable schemas
+    if (instance.children) {
+      return instance.children.some(child => this.hasNullableFields(child))
+    }
+
+    return false
+  }
+
+  /**
+   * Check if a schema is nullable (has x-format: 'number-nullable' or similar nullable formats)
+   */
+  isNullableSchema (schema) {
+    if (!schema) return false
+
+    // Check for x-format nullable indicators
+    if (schema['x-format'] && schema['x-format'].includes('nullable')) {
+      return true
+    }
+
+    // Check for type array containing null
+    if (Array.isArray(schema.type) && schema.type.includes('null')) {
+      return true
+    }
+
+    // Recursively check properties
+    if (schema.properties) {
+      return Object.values(schema.properties).some(prop => this.isNullableSchema(prop))
+    }
+
+    return false
   }
 
   /**
