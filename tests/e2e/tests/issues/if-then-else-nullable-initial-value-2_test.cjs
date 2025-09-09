@@ -2,21 +2,21 @@
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'issue/if-then-else-nullable-initial-value-2'
 const data = {
-  "rotfuchs": {
-    "vk": "ja",
-    "anzahl": 0,
-    "grossestrecke": {
-      "erlegung": 1,
-      "fangjagd": 2,
-      "unfallwild": 3,
-      "fallwild": 4,
-      "klassifiziert": 5,
-      "summe": 4
+  "species": {
+    "presence": "yes",
+    "count": 0,
+    "statistics": {
+      "adults": 1,
+      "juveniles": 2,
+      "migrants": 3,
+      "observed": 4,
+      "unclassified": 5,
+      "total": 15
     }
   }
 }
 
-Feature('issue if-then-else-nullable-initial-value-2')
+Feature('issue if-then-else-nullable-initial-value-2 - Wildlife Survey')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)

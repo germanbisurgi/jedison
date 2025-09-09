@@ -1,5 +1,5 @@
 {
-  "title": "Raubsäuger",
+  "title": "Wildlife Survey",
   "type": "object",
   "x-options": {
     "format": "grid",
@@ -8,24 +8,24 @@
     }
   },
   "required": [
-    "rotfuchs"
+    "species"
   ],
   "properties": {
-    "rotfuchs": {
-      "title": "Rotfuchs",
-      "$ref": "#/$defs/global/vorkommen_anzahl_grossestrecke_nullable",
+    "species": {
+      "title": "Wildlife Species",
+      "$ref": "#/$defs/global/occurrence_count_statistics_nullable",
       "properties": {
-        "vk": {
-          "title": "Kam die Art im **Jagdjahr 2024/25** in Ihrem Revier vor?"
+        "presence": {
+          "title": "Was this species present in your area during **2024/25 season**?"
         },
-        "anzahl": {
-          "title": "Anzahl Gehecke im **Frühjahr 2025**"
+        "count": {
+          "title": "Number of breeding pairs in **Spring 2025**"
         },
-        "grossestrecke": {
-          "title": "Jagdstrecke im **Jagdjahr 2024/25**",
+        "statistics": {
+          "title": "Population statistics for **2024/25 season**",
           "properties": {
-            "summe": {
-              "title": "Gesamt Jagdstrecke 2024/25"
+            "total": {
+              "title": "Total population count 2024/25"
             }
           }
         }
@@ -34,34 +34,34 @@
   },
   "$defs": {
     "global": {
-      "nicht_klassifiziert_modal": {
+      "unclassified_modal": {
         "x-info": {
           "variant": "modal",
-          "title": "### nicht klassifizierte Strecke",
-          "content": "Sollte die Aufteilung der Jagdstrecke nach Erlegung, (Fangjagd,) Unfallwild und Fallwild nicht bekannt sein, bitte die Gesamtsumme der Jagdstrecke unter „nicht klassifiziert“ eintragen."
+          "title": "### Unclassified Data",
+          "content": "If the breakdown of population data is not known, please enter the total count under 'unclassified'."
         }
       },
-      "vorkommen": {
+      "occurrence": {
         "type": "object",
         "required": [
-          "vk"
+          "presence"
         ],
         "properties": {
-          "vk": {
-            "title": "Kam die Art im Frühjahr des aktuellen Jagdjahres in Ihrem Revier vor?",
+          "presence": {
+            "title": "Was this species present during the current season?",
             "type": "string",
             "enum": [
-              "ja",
-              "nein",
-              "unbekannt",
-              "keine_angabe"
+              "yes",
+              "no",
+              "unknown",
+              "no_data"
             ],
             "x-options": {
               "enumTitles": [
-                "ja",
-                "nein",
-                "unbekannt",
-                "keine Angabe"
+                "yes",
+                "no",
+                "unknown",
+                "no data"
               ],
               "enforceEnumDefault": false,
               "format": "radios-inline"
@@ -69,24 +69,24 @@
           }
         }
       },
-      "vorkommen_anzahl_grossestrecke_nullable": {
-        "$ref": "#/$defs/global/vorkommen",
+      "occurrence_count_statistics_nullable": {
+        "$ref": "#/$defs/global/occurrence",
         "properties": {
-          "anzahl": {
-            "title": "Anzahl der Gehecke",
+          "count": {
+            "title": "Number of breeding pairs",
             "x-options": {
               "enforceConst": true
             }
           },
-          "grossestrecke": {
-            "title": "Jagdstrecke aktuelles Jagdjahr",
+          "statistics": {
+            "title": "Population statistics current season",
             "type": "object",
             "x-options": {
               "format": "grid"
             },
             "properties": {
-              "erlegung": {
-                "title": "Erlegung (Stück)",
+              "adults": {
+                "title": "Adults (count)",
                 "x-options": {
                   "enforceConst": true,
                   "grid": {
@@ -94,8 +94,8 @@
                   }
                 }
               },
-              "fangjagd": {
-                "title": "Fangjagd (Stück)",
+              "juveniles": {
+                "title": "Juveniles (count)",
                 "x-options": {
                   "enforceConst": true,
                   "grid": {
@@ -103,8 +103,8 @@
                   }
                 }
               },
-              "unfallwild": {
-                "title": "Unfallwild (Stück)",
+              "migrants": {
+                "title": "Migrants (count)",
                 "x-options": {
                   "enforceConst": true,
                   "grid": {
@@ -112,8 +112,8 @@
                   }
                 }
               },
-              "fallwild": {
-                "title": "sonstiges Fallwild (Stück)",
+              "observed": {
+                "title": "Other observed (count)",
                 "x-options": {
                   "enforceConst": true,
                   "grid": {
@@ -121,9 +121,9 @@
                   }
                 }
               },
-              "klassifiziert": {
-                "$ref": "#/$defs/global/nicht_klassifiziert_modal",
-                "title": "nicht klassifiziert (Stück)",
+              "unclassified": {
+                "$ref": "#/$defs/global/unclassified_modal",
+                "title": "Unclassified (count)",
                 "x-options": {
                   "enforceConst": true,
                   "grid": {
@@ -131,8 +131,8 @@
                   }
                 }
               },
-              "summe": {
-                "title": "Summe Jagdstrecke aktuelles Jagdjahr",
+              "total": {
+                "title": "Total population current season",
                 "enforceConst": true,
                 "readOnly": true
               }
@@ -141,14 +141,14 @@
         },
         "if": {
           "properties": {
-            "vk": {
-              "const": "ja"
+            "presence": {
+              "const": "yes"
             }
           }
         },
         "then": {
           "properties": {
-            "anzahl": {
+            "count": {
               "x-format": "number-nullable",
               "type": [
                 "null",
@@ -157,22 +157,22 @@
               "maximum": 9999,
               "minimum": 0
             },
-            "grossestrecke": {
+            "statistics": {
               "$filters": {
                 "$func": "checkSum",
                 "$vars": {
                   "source": [
-                    "erlegung",
-                    "fangjagd",
-                    "unfallwild",
-                    "fallwild",
-                    "klassifiziert"
+                    "adults",
+                    "juveniles",
+                    "migrants",
+                    "observed",
+                    "unclassified"
                   ],
-                  "destination": "summe"
+                  "destination": "total"
                 }
               },
               "properties": {
-                "erlegung": {
+                "adults": {
                   "x-format": "number-nullable",
                   "type": [
                     "null",
@@ -181,7 +181,7 @@
                   "maximum": 9999,
                   "minimum": 0
                 },
-                "fangjagd": {
+                "juveniles": {
                   "x-format": "number-nullable",
                   "type": [
                     "null",
@@ -190,7 +190,7 @@
                   "maximum": 9999,
                   "minimum": 0
                 },
-                "unfallwild": {
+                "migrants": {
                   "x-format": "number-nullable",
                   "type": [
                     "null",
@@ -199,7 +199,7 @@
                   "maximum": 9999,
                   "minimum": 0
                 },
-                "fallwild": {
+                "observed": {
                   "x-format": "number-nullable",
                   "type": [
                     "null",
@@ -208,8 +208,8 @@
                   "maximum": 9999,
                   "minimum": 0
                 },
-                "klassifiziert": {
-                  "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                "unclassified": {
+                  "$ref": "#/$defs/global/unclassified_modal",
                   "x-format": "number-nullable",
                   "type": [
                     "null",
@@ -218,7 +218,7 @@
                   "maximum": 9999,
                   "minimum": 0
                 },
-                "summe": {
+                "total": {
                   "type": "integer"
                 }
               }
@@ -228,43 +228,43 @@
         "else": {
           "if": {
             "properties": {
-              "vk": {
-                "const": "nein"
+              "presence": {
+                "const": "no"
               }
             }
           },
           "then": {
             "properties": {
-              "anzahl": {
+              "count": {
                 "type": "integer",
                 "const": 0,
                 "readOnly": true
               },
-              "grossestrecke": {
+              "statistics": {
                 "readOnly": true,
                 "properties": {
-                  "erlegung": {
+                  "adults": {
                     "type": "integer",
                     "const": 0
                   },
-                  "fangjagd": {
+                  "juveniles": {
                     "type": "integer",
                     "const": 0
                   },
-                  "unfallwild": {
+                  "migrants": {
                     "type": "integer",
                     "const": 0
                   },
-                  "fallwild": {
+                  "observed": {
                     "type": "integer",
                     "const": 0
                   },
-                  "klassifiziert": {
-                    "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                  "unclassified": {
+                    "$ref": "#/$defs/global/unclassified_modal",
                     "type": "integer",
                     "const": 0
                   },
-                  "summe": {
+                  "total": {
                     "type": "integer",
                     "readOnly": true,
                     "default": 0,
@@ -277,65 +277,65 @@
           "else": {
             "if": {
               "properties": {
-                "vk": {
-                  "const": "unbekannt"
+                "presence": {
+                  "const": "unknown"
                 }
               }
             },
             "then": {
               "properties": {
-                "anzahl": {
+                "count": {
                   "type": "string",
                   "default": "",
                   "const": "",
                   "readOnly": true,
-                  "description": "unbekannt"
+                  "description": "unknown"
                 },
-                "grossestrecke": {
+                "statistics": {
                   "readOnly": true,
                   "properties": {
-                    "erlegung": {
+                    "adults": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     },
-                    "fangjagd": {
+                    "juveniles": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     },
-                    "unfallwild": {
+                    "migrants": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     },
-                    "fallwild": {
+                    "observed": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     },
-                    "klassifiziert": {
-                      "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                    "unclassified": {
+                      "$ref": "#/$defs/global/unclassified_modal",
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     },
-                    "summe": {
+                    "total": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "unbekannt"
+                      "description": "unknown"
                     }
                   }
                 }
@@ -343,58 +343,58 @@
             },
             "else": {
               "properties": {
-                "anzahl": {
+                "count": {
                   "type": "string",
                   "default": "",
                   "const": "",
                   "readOnly": true,
-                  "description": "keine Angabe"
+                  "description": "no data"
                 },
-                "grossestrecke": {
+                "statistics": {
                   "readOnly": true,
                   "properties": {
-                    "erlegung": {
+                    "adults": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     },
-                    "fangjagd": {
+                    "juveniles": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     },
-                    "unfallwild": {
+                    "migrants": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     },
-                    "fallwild": {
+                    "observed": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     },
-                    "klassifiziert": {
-                      "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                    "unclassified": {
+                      "$ref": "#/$defs/global/unclassified_modal",
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     },
-                    "summe": {
+                    "total": {
                       "type": "string",
                       "default": "",
                       "const": "",
                       "readOnly": true,
-                      "description": "keine Angabe"
+                      "description": "no data"
                     }
                   }
                 }
