@@ -1,0 +1,408 @@
+{
+  "title": "Raubsäuger",
+  "type": "object",
+  "x-options": {
+    "format": "grid",
+    "grid": {
+      "columns": 12
+    }
+  },
+  "required": [
+    "rotfuchs"
+  ],
+  "properties": {
+    "rotfuchs": {
+      "title": "Rotfuchs",
+      "$ref": "#/$defs/global/vorkommen_anzahl_grossestrecke_nullable",
+      "properties": {
+        "vk": {
+          "title": "Kam die Art im **Jagdjahr 2024/25** in Ihrem Revier vor?"
+        },
+        "anzahl": {
+          "title": "Anzahl Gehecke im **Frühjahr 2025**"
+        },
+        "grossestrecke": {
+          "title": "Jagdstrecke im **Jagdjahr 2024/25**",
+          "properties": {
+            "summe": {
+              "title": "Gesamt Jagdstrecke 2024/25"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "global": {
+      "nicht_klassifiziert_modal": {
+        "x-info": {
+          "variant": "modal",
+          "title": "### nicht klassifizierte Strecke",
+          "content": "Sollte die Aufteilung der Jagdstrecke nach Erlegung, (Fangjagd,) Unfallwild und Fallwild nicht bekannt sein, bitte die Gesamtsumme der Jagdstrecke unter „nicht klassifiziert“ eintragen."
+        }
+      },
+      "vorkommen": {
+        "type": "object",
+        "required": [
+          "vk"
+        ],
+        "properties": {
+          "vk": {
+            "title": "Kam die Art im Frühjahr des aktuellen Jagdjahres in Ihrem Revier vor?",
+            "type": "string",
+            "enum": [
+              "ja",
+              "nein",
+              "unbekannt",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "ja",
+                "nein",
+                "unbekannt",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          }
+        }
+      },
+      "vorkommen_anzahl_grossestrecke_nullable": {
+        "$ref": "#/$defs/global/vorkommen",
+        "properties": {
+          "anzahl": {
+            "title": "Anzahl der Gehecke",
+            "x-options": {
+              "enforceConst": true
+            }
+          },
+          "grossestrecke": {
+            "title": "Jagdstrecke aktuelles Jagdjahr",
+            "type": "object",
+            "x-options": {
+              "format": "grid"
+            },
+            "properties": {
+              "erlegung": {
+                "title": "Erlegung (Stück)",
+                "x-options": {
+                  "enforceConst": true,
+                  "grid": {
+                    "columns": 3
+                  }
+                }
+              },
+              "fangjagd": {
+                "title": "Fangjagd (Stück)",
+                "x-options": {
+                  "enforceConst": true,
+                  "grid": {
+                    "columns": 3
+                  }
+                }
+              },
+              "unfallwild": {
+                "title": "Unfallwild (Stück)",
+                "x-options": {
+                  "enforceConst": true,
+                  "grid": {
+                    "columns": 3
+                  }
+                }
+              },
+              "fallwild": {
+                "title": "sonstiges Fallwild (Stück)",
+                "x-options": {
+                  "enforceConst": true,
+                  "grid": {
+                    "columns": 3
+                  }
+                }
+              },
+              "klassifiziert": {
+                "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                "title": "nicht klassifiziert (Stück)",
+                "x-options": {
+                  "enforceConst": true,
+                  "grid": {
+                    "columns": 3
+                  }
+                }
+              },
+              "summe": {
+                "title": "Summe Jagdstrecke aktuelles Jagdjahr",
+                "enforceConst": true,
+                "readOnly": true
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "vk": {
+              "const": "ja"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "anzahl": {
+              "x-format": "number-nullable",
+              "type": [
+                "null",
+                "integer"
+              ],
+              "maximum": 9999,
+              "minimum": 0
+            },
+            "grossestrecke": {
+              "$filters": {
+                "$func": "checkSum",
+                "$vars": {
+                  "source": [
+                    "erlegung",
+                    "fangjagd",
+                    "unfallwild",
+                    "fallwild",
+                    "klassifiziert"
+                  ],
+                  "destination": "summe"
+                }
+              },
+              "properties": {
+                "erlegung": {
+                  "x-format": "number-nullable",
+                  "type": [
+                    "null",
+                    "integer"
+                  ],
+                  "maximum": 9999,
+                  "minimum": 0
+                },
+                "fangjagd": {
+                  "x-format": "number-nullable",
+                  "type": [
+                    "null",
+                    "integer"
+                  ],
+                  "maximum": 9999,
+                  "minimum": 0
+                },
+                "unfallwild": {
+                  "x-format": "number-nullable",
+                  "type": [
+                    "null",
+                    "integer"
+                  ],
+                  "maximum": 9999,
+                  "minimum": 0
+                },
+                "fallwild": {
+                  "x-format": "number-nullable",
+                  "type": [
+                    "null",
+                    "integer"
+                  ],
+                  "maximum": 9999,
+                  "minimum": 0
+                },
+                "klassifiziert": {
+                  "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                  "x-format": "number-nullable",
+                  "type": [
+                    "null",
+                    "integer"
+                  ],
+                  "maximum": 9999,
+                  "minimum": 0
+                },
+                "summe": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "else": {
+          "if": {
+            "properties": {
+              "vk": {
+                "const": "nein"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "anzahl": {
+                "type": "integer",
+                "const": 0,
+                "readOnly": true
+              },
+              "grossestrecke": {
+                "readOnly": true,
+                "properties": {
+                  "erlegung": {
+                    "type": "integer",
+                    "const": 0
+                  },
+                  "fangjagd": {
+                    "type": "integer",
+                    "const": 0
+                  },
+                  "unfallwild": {
+                    "type": "integer",
+                    "const": 0
+                  },
+                  "fallwild": {
+                    "type": "integer",
+                    "const": 0
+                  },
+                  "klassifiziert": {
+                    "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                    "type": "integer",
+                    "const": 0
+                  },
+                  "summe": {
+                    "type": "integer",
+                    "readOnly": true,
+                    "default": 0,
+                    "const": 0
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "vk": {
+                  "const": "unbekannt"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "anzahl": {
+                  "type": "string",
+                  "default": "",
+                  "const": "",
+                  "readOnly": true,
+                  "description": "unbekannt"
+                },
+                "grossestrecke": {
+                  "readOnly": true,
+                  "properties": {
+                    "erlegung": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    },
+                    "fangjagd": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    },
+                    "unfallwild": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    },
+                    "fallwild": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    },
+                    "klassifiziert": {
+                      "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    },
+                    "summe": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "unbekannt"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "anzahl": {
+                  "type": "string",
+                  "default": "",
+                  "const": "",
+                  "readOnly": true,
+                  "description": "keine Angabe"
+                },
+                "grossestrecke": {
+                  "readOnly": true,
+                  "properties": {
+                    "erlegung": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    },
+                    "fangjagd": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    },
+                    "unfallwild": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    },
+                    "fallwild": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    },
+                    "klassifiziert": {
+                      "$ref": "#/$defs/global/nicht_klassifiziert_modal",
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    },
+                    "summe": {
+                      "type": "string",
+                      "default": "",
+                      "const": "",
+                      "readOnly": true,
+                      "description": "keine Angabe"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
