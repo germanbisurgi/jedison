@@ -1,5 +1,4 @@
 /* global Feature Scenario */
-const assert = require("node:assert")
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'editors/object-propGroup'
 

@@ -1,5 +1,4 @@
 import { compileTemplate, hasOwn, isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import { getSchemaProperties } from '../../helpers/schema.js'
 
 export function properties (context) {
@@ -11,18 +10,16 @@ export function properties (context) {
       if (hasOwn(context.value, propertyName)) {
         const propertySchema = schemaProperties[propertyName]
 
-        const editor = new Jedison({
-          refParser: context.validator.refParser,
-          schema: propertySchema,
-          data: context.value[propertyName],
-          rootName: context.path
-        })
+        const propertyErrors = context.validator.getErrors(
+          context.value[propertyName],
+          propertySchema,
+          propertyName,
+          context.path + '/' + propertyName
+        )
 
-        if (editor.getErrors().length > 0) {
+        if (propertyErrors.length > 0) {
           invalidProperties.push(propertyName)
         }
-
-        editor.destroy()
       }
     })
   }

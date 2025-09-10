@@ -1,3 +1,7 @@
+### 0.3.16
+
+- Fixed issue oneOf and properties validator
+
 ### 0.3.15
 
 - Fixed issue with more complex if-the-else + nullables scenario

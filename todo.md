@@ -1,4 +1,6 @@
 ## Todo
+- properties button + and additionalProperties
+- disable add item if maxItems reached
 - error messages subcategories by data type?
 - parse template documentation
 - x-selectEnum and x-selectEnumTitles

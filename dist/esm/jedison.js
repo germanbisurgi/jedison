@@ -893,16 +893,15 @@ function properties(context) {
     Object.keys(schemaProperties).forEach((propertyName) => {
       if (hasOwn(context.value, propertyName)) {
         const propertySchema = schemaProperties[propertyName];
-        const editor = new Jedison({
-          refParser: context.validator.refParser,
-          schema: propertySchema,
-          data: context.value[propertyName],
-          rootName: context.path
-        });
-        if (editor.getErrors().length > 0) {
+        const propertyErrors = context.validator.getErrors(
+          context.value[propertyName],
+          propertySchema,
+          propertyName,
+          context.path + "/" + propertyName
+        );
+        if (propertyErrors.length > 0) {
           invalidProperties.push(propertyName);
         }
-        editor.destroy();
       }
     });
   }
