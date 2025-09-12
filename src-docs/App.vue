@@ -128,6 +128,11 @@
           </div>
 
           <div class="form-group mb-3">
+            <input type="checkbox" id="enforceMaxItems" v-model="enforceMaxItems" @change="initEditor()">
+            <label for="enforceMaxItems"><code>enforceMaxItems</code></label>
+          </div>
+
+          <div class="form-group mb-3">
             <input type="checkbox" id="parseMarkdown" v-model="parseMarkdown" @change="initEditor()">
             <label for="parseMarkdown"><code>parseMarkdown</code></label>
           </div>
@@ -508,6 +513,7 @@ export default {
       enforceEnum: true,
       enforceRequired: true,
       enforceMinItems: true,
+      enforceMaxItems: true,
       enforceAdditionalProperties: true
     }
   },
@@ -525,6 +531,7 @@ export default {
     this.enforceEnum = this.getQueryParam('enforceEnum') ? this.parseBooleanString(this.getQueryParam('enforceEnum')) : true
     this.enforceRequired = this.getQueryParam('enforceRequired') ? this.parseBooleanString(this.getQueryParam('enforceRequired')) : true
     this.enforceMinItems = this.getQueryParam('enforceMinItems') ? this.parseBooleanString(this.getQueryParam('enforceMinItems')) : true
+    this.enforceMaxItems = this.getQueryParam('enforceMaxItems') ? this.parseBooleanString(this.getQueryParam('enforceMaxItems')) : true
     this.enforceAdditionalProperties = this.getQueryParam('enforceAdditionalProperties') ? this.parseBooleanString(this.getQueryParam('enforceAdditionalProperties')) : true
     this.btnContents = this.getQueryParam('btnContents') ? this.parseBooleanString(this.getQueryParam('btnContents')) : false
     this.btnIcons = this.getQueryParam('btnIcons') ? this.parseBooleanString(this.getQueryParam('btnIcons')) : true
@@ -674,6 +681,7 @@ export default {
         enforceEnum: this.enforceEnum,
         enforceRequired: this.enforceRequired,
         enforceMinItems: this.enforceMinItems,
+        enforceMaxItems: this.enforceMaxItems,
         enforceAdditionalProperties: this.enforceAdditionalProperties,
         schema: this.schema,
         data: this.data,
@@ -778,6 +786,7 @@ export default {
       newUrl += "&enforceEnum=" + this.enforceEnum
       newUrl += "&enforceRequired=" + this.enforceRequired
       newUrl += "&enforceMinItems=" + this.enforceMinItems
+      newUrl += "&enforceMaxItems=" + this.enforceMaxItems
       newUrl += "&enforceAdditionalProperties=" + this.enforceAdditionalProperties
       newUrl += "&btnContents=" + this.btnContents
       newUrl += "&btnIcons=" + this.btnIcons
@@ -802,6 +811,7 @@ export default {
       newUrl += "&enforceEnum=" + this.enforceEnum
       newUrl += "&enforceRequired=" + this.enforceRequired
       newUrl += "&enforceMinItems=" + this.enforceMinItems
+      newUrl += "&enforceMaxItems=" + this.enforceMaxItems
       newUrl += "&enforceAdditionalProperties=" + this.enforceAdditionalProperties
       newUrl += "&btnContents=" + this.btnContents
       newUrl += "&btnIcons=" + this.btnIcons

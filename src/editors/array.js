@@ -132,8 +132,22 @@ class EditorArray extends Editor {
     }
   }
 
-  refreshUI () {
+  refreshAddBtn () {
     const maxItems = getSchemaMaxItems(this.instance.schema)
+    const enforceMaxItems = getSchemaXOption(this.instance.schema, 'enforceMaxItems') ?? this.instance.jedison.options.enforceMaxItems
+
+    if (isSet(maxItems) && enforceMaxItems && maxItems <= this.instance.value.length) {
+      this.control.addBtn.setAttribute('disabled', '')
+      this.control.addBtn.setAttribute('always-disabled', true)
+    } else {
+      if (!this.disabled && !this.readOnly) {
+        this.control.addBtn.removeAttribute('disabled')
+        this.control.addBtn.removeAttribute('always-disabled')
+      }
+    }
+  }
+
+  refreshUI () {
     const minItems = getSchemaMinItems(this.instance.schema)
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
@@ -183,9 +197,7 @@ class EditorArray extends Editor {
       child.ui.refreshUI()
     })
 
-    if (isSet(maxItems) && maxItems === this.instance.value.length) {
-      this.control.addBtn.setAttribute('disabled', '')
-    }
+    this.refreshAddBtn()
   }
 }
 

@@ -108,6 +108,7 @@ class EditorArrayTable extends EditorArray {
     })
 
     this.refreshSortable(table.tbody)
+    this.refreshAddBtn()
     this.refreshDisabledState()
     this.refreshScrollPosition(table.container)
 

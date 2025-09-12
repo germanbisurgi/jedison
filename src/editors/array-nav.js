@@ -113,6 +113,8 @@ class EditorArrayNav extends EditorArray {
         moveDownBtn.setAttribute('disabled', '')
       }
     })
+
+    this.refreshAddBtn()
   }
 }
 

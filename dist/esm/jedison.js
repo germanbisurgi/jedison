@@ -3818,8 +3818,20 @@ class EditorArray extends Editor {
       });
     }
   }
-  refreshUI() {
+  refreshAddBtn() {
     const maxItems2 = getSchemaMaxItems(this.instance.schema);
+    const enforceMaxItems = getSchemaXOption(this.instance.schema, "enforceMaxItems") ?? this.instance.jedison.options.enforceMaxItems;
+    if (isSet(maxItems2) && enforceMaxItems && maxItems2 <= this.instance.value.length) {
+      this.control.addBtn.setAttribute("disabled", "");
+      this.control.addBtn.setAttribute("always-disabled", true);
+    } else {
+      if (!this.disabled && !this.readOnly) {
+        this.control.addBtn.removeAttribute("disabled");
+        this.control.addBtn.removeAttribute("always-disabled");
+      }
+    }
+  }
+  refreshUI() {
     const minItems2 = getSchemaMinItems(this.instance.schema);
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
@@ -3857,9 +3869,7 @@ class EditorArray extends Editor {
     this.instance.children.forEach((child) => {
       child.ui.refreshUI();
     });
-    if (isSet(maxItems2) && maxItems2 === this.instance.value.length) {
-      this.control.addBtn.setAttribute("disabled", "");
-    }
+    this.refreshAddBtn();
   }
 }
 class EditorArrayTable extends EditorArray {
@@ -3931,6 +3941,7 @@ class EditorArrayTable extends EditorArray {
       table.tbody.appendChild(tbodyRow);
     });
     this.refreshSortable(table.tbody);
+    this.refreshAddBtn();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
     table.container.addEventListener("scroll", () => {
@@ -3995,6 +4006,9 @@ class EditorArrayTableObject extends EditorArray {
     });
     th.appendChild(label);
     table.thead.appendChild(th);
+    if (this.instance.getValue().length === 0) {
+      table.table.removeChild(table.thead);
+    }
     let schemaItems = getSchemaItems(this.instance.schema);
     if (this.instance.jedison.refParser) {
       schemaItems = this.instance.jedison.refParser.expand(schemaItems);
@@ -4053,6 +4067,7 @@ class EditorArrayTableObject extends EditorArray {
       table.tbody.appendChild(tbodyRow);
     });
     this.refreshSortable(table.tbody);
+    this.refreshAddBtn();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
     table.container.addEventListener("scroll", () => {
@@ -4247,6 +4262,7 @@ class EditorArrayNav extends EditorArray {
         moveDownBtn.setAttribute("disabled", "");
       }
     });
+    this.refreshAddBtn();
   }
 }
 class EditorMultiple extends Editor {
@@ -5132,6 +5148,7 @@ class Jedison extends EventEmitter {
       // todo: deprecated
       enforceAdditionalProperties: true,
       enforceMinItems: true,
+      enforceMaxItems: true,
       enforceEnum: true,
       debug: false
     }, options);

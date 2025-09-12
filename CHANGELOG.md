@@ -1,3 +1,8 @@
+### 0.3.17
+
+- Hide array table object header when empty
+- Added enforceMaxItems option
+
 ### 0.3.16
 
 - Fixed issue oneOf and properties validator

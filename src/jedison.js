@@ -75,6 +75,7 @@ class Jedison extends EventEmitter {
       enforceEnumDefault: true, // todo: deprecated
       enforceAdditionalProperties: true,
       enforceMinItems: true,
+      enforceMaxItems: true,
       enforceEnum: true,
       debug: false
     }, options)
