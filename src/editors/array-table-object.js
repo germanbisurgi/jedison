@@ -56,6 +56,10 @@ class EditorArrayTableObject extends EditorArray {
 
     table.thead.appendChild(th)
 
+    if (this.instance.getValue().length === 0) {
+      table.table.removeChild(table.thead)
+    }
+
     let schemaItems = getSchemaItems(this.instance.schema)
 
     if (this.instance.jedison.refParser) {
