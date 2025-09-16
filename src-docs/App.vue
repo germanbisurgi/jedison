@@ -320,7 +320,6 @@ import ifThenElseInitialValueEnforceConst from './json/issues/if-then-else-initi
 import arrayItemsDisabledStates from './json/issues/array-items-disabled-state.json'
 import ifThenElseNullableInitialValue from './json/issues/if-then-else-nullable-initial-value.json'
 import ifThenElseNullableInitialValue2 from './json/issues/if-then-else-nullable-initial-value-2.json'
-import oneOfMinItemsContamination from './json/issue/oneOf-minItems-contamination.json'
 import multipleRegister from './json/issues/multiple-register.json'
 import templates from './json/features/templates.json'
 import {isSet} from "../src/helpers/utils.js"
@@ -460,7 +459,6 @@ export default {
           'issue/array-items-disabled-state': arrayItemsDisabledStates,
           'issue/if-then-else-nullable-initial-value': ifThenElseNullableInitialValue,
           'issue/if-then-else-nullable-initial-value-2': ifThenElseNullableInitialValue2,
-          'issue/oneOf-minItems-contamination': oneOfMinItemsContamination,
           'issue/multiple-register': multipleRegister,
         }
       },

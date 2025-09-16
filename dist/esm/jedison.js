@@ -2406,7 +2406,6 @@ class InstanceMultiple extends Instance {
   prepare() {
     this.instances = [];
     this.activeInstance = null;
-    this.lastIndex = 0;
     this.index = 0;
     this.schemas = [];
     this.switcherOptionValues = [];
@@ -2504,7 +2503,6 @@ class InstanceMultiple extends Instance {
     this.switchInstance(fittestIndex, this.value);
   }
   switchInstance(index2, value, initiator = "api") {
-    this.lastIndex = this.index;
     this.index = index2;
     this.activeInstance = this.instances[index2];
     if (isSet(value)) {

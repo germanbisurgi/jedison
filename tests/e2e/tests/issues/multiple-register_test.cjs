@@ -2,7 +2,7 @@
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'issue/multiple-register'
 
-Feature('issue oneOf minItems contamination - Dynamic option should not trigger static minItems validation')
+Feature('issue multiple-register')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
@@ -10,7 +10,6 @@ BeforeSuite(({ I }) => {
   I._waitForElement('.jedi-ready')
 })
 
-Scenario('@issue @multiple-register should not show validation errors for valid dynamic option', ({ I }) => {
-  // Verify that the editor-errors textarea is empty (no validation errors)
+Scenario('@issue @multiple-register should not show validation errors of inactive instance', ({ I }) => {
   I.seeInField('#editor-errors', '[]')
 })

@@ -1,3 +1,7 @@
+### 0.3.18
+
+- Fixed issue with multiple instance registering
+
 ### 0.3.17
 
 - Hide array table object header when empty
