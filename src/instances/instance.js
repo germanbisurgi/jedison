@@ -139,7 +139,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Adds a child instance pointer to the instances list
+   * Adds a child instance pointer to the instance list
    */
   register () {
     this.jedison.register(this)
@@ -157,10 +157,21 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Deletes a child instance pointer from the instances list
+   * Deletes a child instance pointer from the instance list
    */
   unregister () {
     this.jedison.unregister(this)
+
+    if (this.children.length === 0) return
+
+    const unregisterChildRecursive = (child) => {
+      this.jedison.unregister(child)
+      if (child.children.length > 0) {
+        child.children.forEach(unregisterChildRecursive)
+      }
+    }
+
+    this.children.forEach(unregisterChildRecursive)
   }
 
   /**
@@ -331,7 +342,6 @@ class Instance extends EventEmitter {
     }
 
     const errors = this.jedison.validator.getErrors(this.getValue(), this.schema, this.getKey(), this.path)
-
     return removeDuplicatesFromArray(errors)
   }
 

@@ -1,0 +1,54 @@
+{
+  "title": "Input Field Config",
+  "anyOf": [
+    {
+      "x-switcherTitle": "Drop-Down",
+      "type": "object",
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "anyOf": [
+            {
+              "x-switcherTitle": "Dynamic",
+              "type": "object",
+              "required": [
+                "optionSet"
+              ],
+              "properties": {
+                "optionSet": {
+                  "type": "string",
+                  "title": "Option Set",
+                  "enum": [
+                    "2e6168d6-0167-4d63-a30a-4d97e10624b8",
+                    "ad73eef6-f156-4e18-a826-9de48e7ccaca"
+                  ]
+                }
+              }
+            },
+            {
+              "x-switcherTitle": "Static",
+              "type": "object",
+              "required": [
+                "items"
+              ],
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "title": "Items",
+                  "x-format": "table-object",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "title": "Item"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

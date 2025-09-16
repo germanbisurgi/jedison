@@ -1704,7 +1704,7 @@ class Instance extends EventEmitter {
     return this.schema;
   }
   /**
-   * Adds a child instance pointer to the instances list
+   * Adds a child instance pointer to the instance list
    */
   register() {
     this.jedison.register(this);
@@ -1718,10 +1718,18 @@ class Instance extends EventEmitter {
     this.children.forEach(registerChildRecursive);
   }
   /**
-   * Deletes a child instance pointer from the instances list
+   * Deletes a child instance pointer from the instance list
    */
   unregister() {
     this.jedison.unregister(this);
+    if (this.children.length === 0) return;
+    const unregisterChildRecursive = (child) => {
+      this.jedison.unregister(child);
+      if (child.children.length > 0) {
+        child.children.forEach(unregisterChildRecursive);
+      }
+    };
+    this.children.forEach(unregisterChildRecursive);
   }
   /**
    * Sets the default value of the instance based on it's type
