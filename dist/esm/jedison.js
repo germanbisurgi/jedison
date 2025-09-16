@@ -3638,27 +3638,25 @@ class EditorObjectGrid extends EditorObject {
     }
     let row = this.theme.getRow();
     this.control.childrenSlot.appendChild(row);
-    let colCount = 0;
     this.instance.children.forEach((child) => {
       if (child.isActive) {
         const childGridOptions = getSchemaXOption(child.schema, "grid") || {};
-        const columns = childGridOptions.columns ?? getSchemaXOption(child.schema, "gridColumns") ?? 12;
-        const offset = childGridOptions.offset ?? getSchemaXOption(child.schema, "gridOffset") ?? 0;
-        const col = this.theme.getCol(12, columns, offset);
+        const gridColumns = getSchemaXOption(child.schema, "gridColumns") ?? void 0;
+        const gridOffset = getSchemaXOption(child.schema, "gridOffset") ?? 0;
+        const columnsMdRetro = childGridOptions.columns ?? void 0;
+        const columnsXs = childGridOptions.columnsXs ?? gridColumns ?? 12;
+        const columnsSm = childGridOptions.columnsSm ?? gridColumns ?? columnsXs;
+        const columnsMd = childGridOptions.columnsMd ?? columnsMdRetro ?? gridColumns ?? columnsSm;
+        const columnsLg = childGridOptions.columnsLg ?? gridColumns ?? columnsMd;
+        const offset = childGridOptions.offset ?? gridOffset;
+        const col = this.theme.getCol(columnsXs, columnsSm, columnsMd, columnsLg, offset);
         const newRow = childGridOptions.newRow || false;
-        colCount += columns + offset;
         if (newRow) {
           row = this.theme.getRow();
           this.control.childrenSlot.appendChild(row);
-          colCount = 0;
         }
         row.appendChild(col);
         col.appendChild(child.ui.control.container);
-        if (colCount >= 12) {
-          const clearfix = this.theme.getClearfix();
-          row.appendChild(clearfix);
-          colCount = 0;
-        }
         if (this.disabled || this.instance.isReadOnly()) {
           child.ui.disable();
         } else {
@@ -7055,11 +7053,13 @@ class Theme {
   /**
    * A column to contain content to a specific width
    */
-  getCol(xs, md, offsetMd) {
+  getCol(xs, sm, md, lg, offsetMd) {
     const col = document.createElement("div");
     col.classList.add("jedi-col");
     col.classList.add("jedi-col-xs-" + xs);
+    col.classList.add("jedi-col-sm-" + sm);
     col.classList.add("jedi-col-md-" + md);
+    col.classList.add("jedi-col-lg-" + lg);
     if (offsetMd) {
       col.classList.add("jedi-col-md-offset-" + offsetMd);
     }
@@ -7406,10 +7406,12 @@ class ThemeBootstrap3 extends Theme {
     row.classList.add("row");
     return row;
   }
-  getCol(xs, md, offsetMd) {
+  getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol();
     col.classList.add("col-xs-" + xs);
+    col.classList.add("col-sm-" + sm);
     col.classList.add("col-md-" + md);
+    col.classList.add("col-lg-" + lg);
     if (offsetMd) {
       col.classList.add("col-md-offset-" + offsetMd);
     }
@@ -7757,10 +7759,12 @@ class ThemeBootstrap4 extends Theme {
     row.classList.add("row");
     return row;
   }
-  getCol(xs, md, offsetMd) {
+  getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol(xs, md, offsetMd);
     col.classList.add("col-" + xs);
+    col.classList.add("col-sm" + sm);
     col.classList.add("col-md-" + md);
+    col.classList.add("col-lg-" + lg);
     if (offsetMd) {
       col.classList.add("offset-md-" + offsetMd);
     }
@@ -8106,10 +8110,12 @@ class ThemeBootstrap5 extends Theme {
     row.classList.add("row");
     return row;
   }
-  getCol(xs, md, offsetMd) {
+  getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol(xs, md, offsetMd);
     col.classList.add("col-" + xs);
+    col.classList.add("col-sm" + sm);
     col.classList.add("col-md-" + md);
+    col.classList.add("col-lg-" + lg);
     if (offsetMd) {
       col.classList.add("offset-md-" + offsetMd);
     }

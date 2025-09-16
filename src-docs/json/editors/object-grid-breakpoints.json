@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "title": "Grid breakpoints",
+  "x-format": "grid",
+  "x-info": {
+    "variant": "modal",
+    "title": "### How to configure the grid",
+    "content": "You can customize the layout of this form using **grid options**.\n\n- **columnsXs / columnsSm / columnsMd / columnsLg** → Control how many columns the field spans at each breakpoint.\n- **columns** → (legacy) In the last release, this was the same as `columnsMd`.\n- **gridColumns** → (older legacy) Applied the same number of columns to all breakpoints.\n\n### Examples\n```json\n\"x-grid\": { \"columnsMd\": 6, \"columnsLg\": 4 }\n```\n➡️ This field spans half the row on medium screens and one-third on large screens.\n\n```json\n\"x-grid\": { \"columns\": 4 }\n```\n➡️ Legacy mode: the field takes 4/12 columns starting at the medium breakpoint.\n\n### Tips\n- Use multiples of 12 for a full row.\n- Combine `newRow: true` to force a new row.\n- Use `offset` to add spacing before a column."
+  },
+  "properties": {
+    "a": {
+      "title": "a",
+      "type": "string",
+      "x-grid": {
+        "columnsXs": 12,
+        "columnsSm": 6,
+        "columnsMd": 4,
+        "columnsLg": 3
+      }
+    },
+    "b": {
+      "title": "b",
+      "type": "string",
+      "x-grid": {
+        "columnsXs": 12,
+        "columnsSm": 6,
+        "columnsMd": 4,
+        "columnsLg": 3
+      }
+    },
+    "c": {
+      "title": "c",
+      "type": "string",
+      "x-grid": {
+        "columnsXs": 12,
+        "columnsSm": 6,
+        "columnsMd": 4,
+        "columnsLg": 3
+      }
+    },
+    "d": {
+      "title": "c",
+      "type": "string",
+      "x-grid": {
+        "columnsXs": 12,
+        "columnsSm": 6,
+        "columnsMd": 4,
+        "columnsLg": 3
+      }
+    }
+  }
+}

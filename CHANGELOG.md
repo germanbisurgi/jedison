@@ -1,5 +1,6 @@
 ### 0.3.18
 
+- Added grid breakpoints feature
 - Fixed issue with multiple instance registering
 
 ### 0.3.17

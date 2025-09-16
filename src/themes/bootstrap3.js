@@ -290,10 +290,12 @@ class ThemeBootstrap3 extends Theme {
     return row
   }
 
-  getCol (xs, md, offsetMd) {
+  getCol (xs, sm, md, lg, offsetMd) {
     const col = super.getCol()
     col.classList.add('col-xs-' + xs)
+    col.classList.add('col-sm-' + sm)
     col.classList.add('col-md-' + md)
+    col.classList.add('col-lg-' + lg)
 
     if (offsetMd) {
       col.classList.add('col-md-offset-' + offsetMd)

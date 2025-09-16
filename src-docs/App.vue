@@ -229,6 +229,7 @@ import numberRange from './json/editors/number-range.json'
 import objectJson from './json/editors/object.json'
 import objectButtonsContent from './json/editors/object-buttons-content.json'
 import objectGrid from './json/editors/object-grid.json'
+import objectGridBreakpoints from './json/editors/object-grid-breakpoints.json'
 import objectNavVertical from './json/editors/object-nav-vertical.json'
 import objectNavHorizontal from './json/editors/object-nav-horizontal.json'
 import objectPropertyOrder from './json/editors/object-propertyOrder.json'
@@ -369,6 +370,7 @@ export default {
           'editors/object': objectJson,
           'editors/object-buttons-content': objectButtonsContent,
           'editors/object-grid': objectGrid,
+          'editors/object-grid-breakpoints': objectGridBreakpoints,
           'editors/object-nav-vertical': objectNavVertical,
           'editors/object-nav-horizontal': objectNavHorizontal,
           'editors/object-propertyOrder': objectPropertyOrder,

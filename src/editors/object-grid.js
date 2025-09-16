@@ -18,32 +18,32 @@ class EditorObjectGrid extends EditorObject {
     let row = this.theme.getRow()
     this.control.childrenSlot.appendChild(row)
 
-    let colCount = 0
-
     this.instance.children.forEach((child) => {
       if (child.isActive) {
         const childGridOptions = getSchemaXOption(child.schema, 'grid') || {}
-        const columns = childGridOptions.columns ?? getSchemaXOption(child.schema, 'gridColumns') ?? 12
-        const offset = childGridOptions.offset ?? getSchemaXOption(child.schema, 'gridOffset') ?? 0
-        const col = this.theme.getCol(12, columns, offset)
-        const newRow = childGridOptions.newRow || false
+        const gridColumns = getSchemaXOption(child.schema, 'gridColumns') ?? undefined
+        const gridOffset = getSchemaXOption(child.schema, 'gridOffset') ?? 0
 
-        colCount += columns + offset
+        // Retro base: in the last release "columns" was columnsMd
+        const columnsMdRetro = childGridOptions.columns ?? undefined
+
+        // Breakpoints with cascade fallback
+        const columnsXs = childGridOptions.columnsXs ?? gridColumns ?? 12
+        const columnsSm = childGridOptions.columnsSm ?? gridColumns ?? columnsXs
+        const columnsMd = childGridOptions.columnsMd ?? columnsMdRetro ?? gridColumns ?? columnsSm
+        const columnsLg = childGridOptions.columnsLg ?? gridColumns ?? columnsMd
+
+        const offset = childGridOptions.offset ?? gridOffset
+        const col = this.theme.getCol(columnsXs, columnsSm, columnsMd, columnsLg, offset)
+        const newRow = childGridOptions.newRow || false
 
         if (newRow) {
           row = this.theme.getRow()
           this.control.childrenSlot.appendChild(row)
-          colCount = 0
         }
 
         row.appendChild(col)
         col.appendChild(child.ui.control.container)
-
-        if (colCount >= 12) {
-          const clearfix = this.theme.getClearfix()
-          row.appendChild(clearfix)
-          colCount = 0
-        }
 
         if (this.disabled || this.instance.isReadOnly()) {
           child.ui.disable()

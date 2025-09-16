@@ -1595,11 +1595,13 @@ class Theme {
   /**
    * A column to contain content to a specific width
    */
-  getCol (xs, md, offsetMd) {
+  getCol (xs, sm, md, lg, offsetMd) {
     const col = document.createElement('div')
     col.classList.add('jedi-col')
     col.classList.add('jedi-col-xs-' + xs)
+    col.classList.add('jedi-col-sm-' + sm)
     col.classList.add('jedi-col-md-' + md)
+    col.classList.add('jedi-col-lg-' + lg)
 
     if (offsetMd) {
       col.classList.add('jedi-col-md-offset-' + offsetMd)
