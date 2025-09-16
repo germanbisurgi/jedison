@@ -38,7 +38,8 @@ class EditorStringInput extends EditorString {
   }
 
   addEventListeners () {
-    this.control.input.addEventListener('change', () => {
+    const eventType = this.getValidationEventType()
+    this.control.input.addEventListener(eventType, () => {
       this.instance.setValue(this.control.input.value, true, 'user')
     })
   }

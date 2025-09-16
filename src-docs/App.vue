@@ -483,6 +483,7 @@ export default {
       showErrorsOptions: [
         'never',
         'change',
+        'input',
         'always'
       ],
       switcherInputOptions: [

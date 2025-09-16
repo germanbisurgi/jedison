@@ -27,7 +27,8 @@ class EditorNumberInputNullable extends EditorNumberInput {
   }
 
   addEventListeners () {
-    this.control.input.addEventListener('change', () => {
+    const eventType = this.getValidationEventType()
+    this.control.input.addEventListener(eventType, () => {
       const value = this.sanitize(this.control.input.value)
       this.instance.setValue(value, true, 'user')
     })

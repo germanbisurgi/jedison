@@ -89,8 +89,9 @@ class EditorNumberRange extends EditorNumber {
       this.control.output.textContent = parseFloat(this.control.input.value)
     })
 
-    // Update value on change
-    this.control.input.addEventListener('change', () => {
+    // Update value based on validation trigger setting
+    const eventType = this.getValidationEventType()
+    this.control.input.addEventListener(eventType, () => {
       const value = parseFloat(this.control.input.value)
       this.control.output.textContent = value
       this.instance.setValue(value, true, 'user')

@@ -149,6 +149,15 @@ class Editor {
   }
 
   /**
+   * Determines the event type to use for validation trigger based on showErrors option
+   * @returns {string} - 'input' or 'change'
+   */
+  getValidationEventType () {
+    const showErrors = getSchemaXOption(this.instance.schema, 'showErrors') ?? this.instance.jedison.options.showErrors
+    return showErrors === 'input' ? 'input' : 'change'
+  }
+
+  /**
    * Add event listeners to ui elements
    */
   addEventListeners () {

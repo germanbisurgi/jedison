@@ -2014,6 +2014,14 @@ class Editor {
     return optionId ? optionId + "-" + pathToAttribute(path) : pathToAttribute(path);
   }
   /**
+   * Determines the event type to use for validation trigger based on showErrors option
+   * @returns {string} - 'input' or 'change'
+   */
+  getValidationEventType() {
+    const showErrors = getSchemaXOption(this.instance.schema, "showErrors") ?? this.instance.jedison.options.showErrors;
+    return showErrors === "input" ? "input" : "change";
+  }
+  /**
    * Add event listeners to ui elements
    */
   addEventListeners() {
@@ -3139,7 +3147,8 @@ class EditorStringTextarea extends EditorString {
     this.theme.adaptForTableTextareaControl(this.control);
   }
   addEventListeners() {
-    this.control.input.addEventListener("change", () => {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
       this.instance.setValue(this.control.input.value, true, "user");
     });
   }
@@ -3263,7 +3272,8 @@ class EditorStringInput extends EditorString {
     this.theme.adaptForTableInputControl(this.control);
   }
   addEventListeners() {
-    this.control.input.addEventListener("change", () => {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
       this.instance.setValue(this.control.input.value, true, "user");
     });
   }
@@ -3389,7 +3399,8 @@ class EditorNumberInput extends EditorNumber {
     this.theme.adaptForTableInputControl(this.control);
   }
   addEventListeners() {
-    this.control.input.addEventListener("change", () => {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
       const value = this.sanitize(this.control.input.value);
       this.instance.setValue(value, true, "user");
     });
@@ -3417,7 +3428,8 @@ class EditorNumberInputNullable extends EditorNumberInput {
     return isSet(format2) && format2 === "number-nullable" && isSet(schemaType) && isArray(schemaType) && schemaType.length === 2 && schemaType.includes("null") && (schemaType.includes("number") || schemaType.includes("integer"));
   }
   addEventListeners() {
-    this.control.input.addEventListener("change", () => {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
       const value = this.sanitize(this.control.input.value);
       this.instance.setValue(value, true, "user");
     });
@@ -4759,7 +4771,8 @@ class EditorNumberRange extends EditorNumber {
     this.control.input.addEventListener("input", () => {
       this.control.output.textContent = parseFloat(this.control.input.value);
     });
-    this.control.input.addEventListener("change", () => {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
       const value = parseFloat(this.control.input.value);
       this.control.output.textContent = value;
       this.instance.setValue(value, true, "user");
