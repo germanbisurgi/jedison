@@ -22,7 +22,6 @@ class InstanceMultiple extends Instance {
   prepare () {
     this.instances = []
     this.activeInstance = null
-    this.lastIndex = 0
     this.index = 0
     this.schemas = []
     this.switcherOptionValues = []
@@ -139,7 +138,6 @@ class InstanceMultiple extends Instance {
   }
 
   switchInstance (index, value, initiator = 'api') {
-    this.lastIndex = this.index
     this.index = index
     this.activeInstance = this.instances[index]
 
