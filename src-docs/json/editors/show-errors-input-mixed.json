@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "title": "Show Errors Input Mixed Test",
+  "description": "Testing showErrors: 'change' at instance level with one field using 'input' at schema level",
+  "properties": {
+    "fieldWithChange": {
+      "type": "string",
+      "title": "Field with Change Event",
+      "description": "This field uses default 'change' event from instance level",
+      "maxLength": 5,
+      "default": ""
+    },
+    "fieldWithInput": {
+      "type": "string",
+      "title": "Field with Input Event", 
+      "description": "This field overrides to use 'input' event at schema level",
+      "maxLength": 5,
+      "default": "",
+      "x-showErrors": "input"
+    }
+  },
+  "required": ["fieldWithChange", "fieldWithInput"]
+}

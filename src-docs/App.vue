@@ -241,6 +241,7 @@ import stringRadiosInline from './json/editors/string-radios-inline.json'
 import stringSelect from './json/editors/string-select.json'
 import stringInput from './json/editors/string-input.json'
 import stringTextarea from './json/editors/string-textarea.json'
+import showErrorsInputMixed from './json/editors/show-errors-input-mixed.json'
 import containerAttributes from './json/editors/editor-containerAttributes.json'
 import editorHidden from './json/editors/editor-hidden.json'
 import additionalProperties from './json/validator/additionalProperties.json'
@@ -382,6 +383,7 @@ export default {
           'editors/string-select': stringSelect,
           'editors/string-input': stringInput,
           'editors/string-textarea': stringTextarea,
+          'editors/show-errors-input-mixed': showErrorsInputMixed,
           'editors/editor-containerAttributes': containerAttributes,
           'editors/editor-hidden': editorHidden
         },
