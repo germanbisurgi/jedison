@@ -1,6 +1,9 @@
-### 0.3.18
+### 0.3.19
 
 - Added showErrors on input feature
+
+### 0.3.18
+
 - Added grid breakpoints feature
 - Fixed issue with multiple instance registering
 
