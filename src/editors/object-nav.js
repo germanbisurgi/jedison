@@ -30,8 +30,8 @@ class EditorObjectNav extends EditorObject {
     const columns = formatParts[2]
     const navColumns = variant === 'horizontal' ? 12 : columns ?? 4
     const row = this.theme.getRow()
-    const tabListCol = this.theme.getCol(12, navColumns)
-    const tabContentCol = this.theme.getCol(12, (12 - navColumns))
+    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns)
+    const tabContentCol = this.theme.getCol(12, 12, (12 - navColumns), (12 - navColumns))
     const tabContent = this.theme.getTabContent()
     const tabList = this.theme.getTabList({
       variant: variant
