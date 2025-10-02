@@ -23,7 +23,6 @@ class EditorObject extends Editor {
 
   build () {
     this.propertyActivators = {}
-    const schemaOptions = this.instance.schema.options || {}
     let addProperty = true
     const additionalProperties = getSchemaAdditionalProperties(this.instance.schema)
 
@@ -37,8 +36,10 @@ class EditorObject extends Editor {
       enablePropertiesToggle = this.instance.jedison.options.enablePropertiesToggle
     }
 
-    if (isSet(schemaOptions.enablePropertiesToggle)) {
-      enablePropertiesToggle = schemaOptions.enablePropertiesToggle
+    const schemaEnablePropertiesToggle = getSchemaXOption(this.instance.schema, 'enablePropertiesToggle')
+
+    if (isSet(schemaEnablePropertiesToggle)) {
+      enablePropertiesToggle = schemaEnablePropertiesToggle
     }
 
     this.control = this.theme.getObjectControl({
