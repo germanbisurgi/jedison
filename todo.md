@@ -1,5 +1,6 @@
 ## Todo
-- properties button + and additionalProperties
+- responsive options (xs, sm, sd, lg) for nav editors
+- "properties" button + and additionalProperties
 - disable add item if maxItems reached
 - error messages subcategories by data type?
 - parse template documentation
