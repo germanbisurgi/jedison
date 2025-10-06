@@ -48,6 +48,7 @@ class Editor {
     this.init()
     this.build()
     this.setAttributes()
+    this.setReadOnlyAttribute()
     this.addEventListeners()
     this.setVisibility()
     this.setContainerAttributes()
@@ -140,6 +141,15 @@ class Editor {
           input.setAttribute(key, value)
         }
       }
+    }
+  }
+
+  setReadOnlyAttribute () {
+    if (this.readOnly) {
+      const inputElements = this.control.container.querySelectorAll('input, textarea, select')
+      inputElements.forEach((element) => {
+        element.setAttribute('always-disabled', '')
+      })
     }
   }
 

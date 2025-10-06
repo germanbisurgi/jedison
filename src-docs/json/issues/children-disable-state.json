@@ -1,0 +1,377 @@
+{
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "properties": {
+      "array": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "default": [
+          "item1"
+        ],
+        "readOnly": true
+      },
+      "array-checkboxes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "option1",
+            "option2",
+            "option3"
+          ]
+        },
+        "x-format": "checkboxes",
+        "minItems": 1,
+        "default": [
+          "option1"
+        ],
+        "readOnly": true
+      },
+      "array-choices": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "enum": [
+            "US",
+            "CA",
+            "GB"
+          ],
+          "x-enumTitles": [
+            "United States (US)",
+            "Canada (CA)",
+            "United Kingdom (GB)"
+          ]
+        },
+        "default": [
+          "US"
+        ],
+        "minItems": 1,
+        "x-format": "choices",
+        "readOnly": true
+      },
+      "array-nav": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "readOnly": true
+        },
+        "x-format": "nav-vertical",
+        "minItems": 1,
+        "default": [
+          "item1"
+        ],
+        "readOnly": true
+      },
+      "array-table": {
+        "type": "array",
+        "x-format": "table",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "readOnly": true
+            },
+            "age": {
+              "type": "integer",
+              "readOnly": true
+            }
+          }
+        },
+        "minItems": 1,
+        "default": [
+          {
+            "name": "John",
+            "age": 30
+          }
+        ],
+        "readOnly": true
+      },
+      "array-table-object": {
+        "type": "array",
+        "x-format": "table-object",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "readOnly": true
+            },
+            "age": {
+              "type": "integer",
+              "readOnly": true
+            }
+          }
+        },
+        "minItems": 1,
+        "default": [
+          {
+            "name": "John",
+            "age": 30
+          }
+        ],
+        "readOnly": true
+      },
+      "boolean": {
+        "type": "boolean",
+        "default": true,
+        "readOnly": true
+      },
+      "boolean-checkbox": {
+        "type": "boolean",
+        "x-format": "checkbox",
+        "default": true,
+        "readOnly": true
+      },
+      "boolean-radios": {
+        "type": "boolean",
+        "x-format": "radios",
+        "default": true,
+        "readOnly": true
+      },
+      "boolean-select": {
+        "type": "boolean",
+        "x-format": "select",
+        "default": true,
+        "readOnly": true
+      },
+      "multiple": {
+        "anyOf": [
+          {
+            "type": "string",
+            "readOnly": true
+          },
+          {
+            "type": "boolean",
+            "readOnly": true
+          }
+        ],
+        "default": "text",
+        "readOnly": true
+      },
+      "null": {
+        "type": "null",
+        "default": null,
+        "readOnly": true
+      },
+      "number-imask": {
+        "type": "number",
+        "default": 0.5,
+        "x-format": "imask",
+        "x-imask": {
+          "thousandsSeparator": ".",
+          "radix": ",",
+          "scale": 2,
+          "padFractionalZeros": true,
+          "normalizeZeros": false,
+          "mapToRadix": [
+            "."
+          ],
+          "autofix": "pad"
+        },
+        "readOnly": true
+      },
+      "number-input": {
+        "type": "number",
+        "default": 42.5,
+        "readOnly": true
+      },
+      "number-radios": {
+        "type": "number",
+        "enum": [
+          1.1,
+          2.2,
+          3.3
+        ],
+        "x-format": "radios",
+        "default": 1.1,
+        "readOnly": true
+      },
+      "number-range": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "x-format": "range",
+        "default": 50,
+        "readOnly": true
+      },
+      "number-raty": {
+        "type": "number",
+        "default": 3,
+        "minimum": 0.5,
+        "x-format": "raty",
+        "x-raty": {
+          "half": true,
+          "starType": "i"
+        },
+        "readOnly": true
+      },
+      "number-select": {
+        "type": "number",
+        "enum": [
+          1.1,
+          2.2,
+          3.3
+        ],
+        "default": 1.1,
+        "readOnly": true
+      },
+      "object": {
+        "type": "object",
+        "properties": {
+          "prop1": {
+            "type": "string",
+            "readOnly": true
+          },
+          "prop2": {
+            "type": "integer",
+            "readOnly": true
+          }
+        },
+        "default": {
+          "prop1": "value1",
+          "prop2": 42
+        },
+        "readOnly": true
+      },
+      "object-grid": {
+        "type": "object",
+        "x-format": "grid",
+        "properties": {
+          "col1": {
+            "type": "string",
+            "x-grid": {
+              "columns": 6
+            },
+            "readOnly": true
+          },
+          "col2": {
+            "type": "string",
+            "x-grid": {
+              "columns": 6
+            },
+            "readOnly": true
+          }
+        },
+        "default": {
+          "col1": "value1",
+          "col2": "value2"
+        },
+        "readOnly": true
+      },
+      "object-nav": {
+        "type": "object",
+        "x-format": "nav-vertical",
+        "properties": {
+          "section1": {
+            "type": "string",
+            "readOnly": true
+          },
+          "section2": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "default": {
+          "section1": "value1",
+          "section2": "value2"
+        },
+        "readOnly": true
+      },
+      "string-awesomplete": {
+        "type": "string",
+        "default": "JavaScript",
+        "minLength": 1,
+        "x-format": "awesomplete",
+        "x-awesomplete": {
+          "list": [
+            "JavaScript",
+            "Java"
+          ],
+          "minChars": 1,
+          "maxItems": 5,
+          "autoFirst": true
+        },
+        "readOnly": true
+      },
+      "string-emoji-button": {
+        "type": "string",
+        "default": "\uD83D\uDE00",
+        "minLength": 1,
+        "x-format": "emojiButton",
+        "x-emojiButton": {}
+      },
+      "string-flatpickr": {
+        "type": "string",
+        "x-format": "flatpickr",
+        "default": "2023-01-01",
+        "readOnly": true
+      },
+      "string-input": {
+        "type": "string",
+        "default": "sample text",
+        "readOnly": true
+      },
+      "string-jodit": {
+        "type": "string",
+        "x-format": "jodit",
+        "default": "<p>Rich text content</p>",
+        "readOnly": true,
+        "x-jodit": {
+          "showCharsCounter": false,
+          "showWordsCounter": false,
+          "showXPathInStatusbar": false
+        }
+      },
+      "string-quill": {
+        "title": "Quill",
+        "type": "string",
+        "default": "Quill default",
+        "x-format": "quill",
+        "x-quill": {
+          "theme": "snow"
+        },
+        "readOnly": true
+      },
+      "string-radios": {
+        "type": "string",
+        "enum": [
+          "option1",
+          "option2",
+          "option3"
+        ],
+        "x-format": "radios",
+        "default": "option1",
+        "readOnly": true
+      },
+      "string-select": {
+        "type": "string",
+        "enum": [
+          "option1",
+          "option2",
+          "option3"
+        ],
+        "default": "option1",
+        "readOnly": true
+      },
+      "string-simplemde": {
+        "type": "string",
+        "x-format": "simplemde",
+        "default": "# Markdown content",
+        "readOnly": true
+      },
+      "string-textarea": {
+        "type": "string",
+        "x-format": "textarea",
+        "default": "Multi-line\ntext content",
+        "readOnly": true
+      }
+    }
+  }
+}

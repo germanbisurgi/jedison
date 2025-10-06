@@ -27,7 +27,32 @@ class EditorStringJodit extends EditorString {
     })
 
     try {
-      const joditOptions = getSchemaXOption(this.instance.schema, 'jodit') ?? {}
+      const joditDefaultOptions = {
+        showCharsCounter: false,
+        showWordsCounter: false,
+        showXPathInStatusbar: false,
+        toolbarAdaptive: false,
+        buttons: [
+          'bold',
+          'italic',
+          'underline',
+          'strikethrough',
+          '|',
+          'ul',
+          'ol',
+          '|',
+          'link',
+          '|',
+          'source',
+          'preview'
+        ]
+      }
+
+      const joditSchemaOptions = getSchemaXOption(this.instance.schema, 'jodit') ?? {}
+
+      const joditOptions = Object.assign({}, joditDefaultOptions, joditSchemaOptions)
+
+      console.log('joditOptions', joditOptions, getSchemaXOption(this.instance.schema, 'jodit'))
       this.jodit = window.Jodit.make(this.control.input, joditOptions)
     } catch (e) {
       console.error('Jodit is not available or not loaded correctly.', e)

@@ -1930,6 +1930,7 @@ class Editor {
     this.init();
     this.build();
     this.setAttributes();
+    this.setReadOnlyAttribute();
     this.addEventListeners();
     this.setVisibility();
     this.setContainerAttributes();
@@ -2007,6 +2008,14 @@ class Editor {
           input.setAttribute(key, value);
         }
       }
+    }
+  }
+  setReadOnlyAttribute() {
+    if (this.readOnly) {
+      const inputElements = this.control.container.querySelectorAll("input, textarea, select");
+      inputElements.forEach((element) => {
+        element.setAttribute("always-disabled", "");
+      });
     }
   }
   getIdFromPath(path) {
@@ -3467,7 +3476,6 @@ class EditorObject extends Editor {
   }
   build() {
     this.propertyActivators = {};
-    const schemaOptions = this.instance.schema.options || {};
     let addProperty = true;
     const additionalProperties2 = getSchemaAdditionalProperties(this.instance.schema);
     if (isSet(additionalProperties2) && additionalProperties2 === false) {
@@ -3477,8 +3485,9 @@ class EditorObject extends Editor {
     if (isSet(this.instance.jedison.options.enablePropertiesToggle)) {
       enablePropertiesToggle = this.instance.jedison.options.enablePropertiesToggle;
     }
-    if (isSet(schemaOptions.enablePropertiesToggle)) {
-      enablePropertiesToggle = schemaOptions.enablePropertiesToggle;
+    const schemaEnablePropertiesToggle = getSchemaXOption(this.instance.schema, "enablePropertiesToggle");
+    if (isSet(schemaEnablePropertiesToggle)) {
+      enablePropertiesToggle = schemaEnablePropertiesToggle;
     }
     this.control = this.theme.getObjectControl({
       title: this.getTitle(),
@@ -3699,8 +3708,8 @@ class EditorObjectNav extends EditorObject {
     const columns = formatParts[2];
     const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
     const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12 - navColumns);
+    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
+    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -4214,8 +4223,8 @@ class EditorArrayNav extends EditorArray {
     const columns = formatParts[2];
     const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
     const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12 - navColumns);
+    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
+    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -4463,7 +4472,29 @@ class EditorStringJodit extends EditorString {
       info: this.getInfo()
     });
     try {
-      const joditOptions = getSchemaXOption(this.instance.schema, "jodit") ?? {};
+      const joditDefaultOptions = {
+        showCharsCounter: false,
+        showWordsCounter: false,
+        showXPathInStatusbar: false,
+        toolbarAdaptive: false,
+        buttons: [
+          "bold",
+          "italic",
+          "underline",
+          "strikethrough",
+          "|",
+          "ul",
+          "ol",
+          "|",
+          "link",
+          "|",
+          "source",
+          "preview"
+        ]
+      };
+      const joditSchemaOptions = getSchemaXOption(this.instance.schema, "jodit") ?? {};
+      const joditOptions = Object.assign({}, joditDefaultOptions, joditSchemaOptions);
+      console.log("joditOptions", joditOptions, getSchemaXOption(this.instance.schema, "jodit"));
       this.jodit = window.Jodit.make(this.control.input, joditOptions);
     } catch (e) {
       console.error("Jodit is not available or not loaded correctly.", e);
