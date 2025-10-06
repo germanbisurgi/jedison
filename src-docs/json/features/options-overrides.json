@@ -1,0 +1,18 @@
+{
+  "title": "Options overrides",
+  "type": "object",
+  "x-format": "nav-vertical",
+  "properties": {
+    "object": {
+      "x-enablePropertiesToggle": false,
+      "x-enableCollapseToggle": false,
+      "type": "object",
+      "description": "This editor schema overrides `enableCollapseToggle` and `enablePropertiesToggle` so that both features are disabled",
+      "properties": {
+        "prop": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

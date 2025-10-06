@@ -316,6 +316,7 @@ import allOfIfThen from './json/parsing/allOf-if-then.json'
 import oneOfRefs from './json/parsing/oneOf-refs.json'
 import anyOfRefs from './json/parsing/anyOf-refs.json'
 import recursiveRefs from './json/parsing/recursive-refs.json'
+import optionsOverrides from './json/features/options-overrides.json'
 import ifThenElseValueOverrides from './json/issues/if-then-else-value-overrides.json'
 import ifThenElseInitialValue from './json/issues/if-then-else-initial-value.json'
 import ifThenElseInitialValueEnforceConst from './json/issues/if-then-else-initial-value-enforceConst.json'
@@ -404,12 +405,13 @@ export default {
         'Features': {
           'features/templates': templates,
           'features/markdown-annotations': markdownAnnotations,
+          'features/options-overrides': optionsOverrides,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,
           'parsing/oneOf-refs': oneOfRefs,
           'parsing/anyOf-refs': anyOfRefs,
-          'parsing/recursive-refs': recursiveRefs
+          'parsing/recursive-refs': recursiveRefs,
         },
         'Validators': {
           'validator/additionalProperties': additionalProperties,
@@ -465,7 +467,7 @@ export default {
           'issue/if-then-else-nullable-initial-value': ifThenElseNullableInitialValue,
           'issue/if-then-else-nullable-initial-value-2': ifThenElseNullableInitialValue2,
           'issue/multiple-register': multipleRegister,
-          'issue/children-disable-state': childrenDisableState,
+          'issue/children-disable-state': childrenDisableState
         }
       },
       example: 'editors/all',
