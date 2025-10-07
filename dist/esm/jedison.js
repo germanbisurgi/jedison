@@ -3548,6 +3548,7 @@ class EditorObject extends Editor {
       try {
         const inputValue = JSON.parse(this.control.jsonData.input.value);
         this.instance.setValue(inputValue, true, "user");
+        this.control.jsonData.dialog.close();
       } catch (error) {
         alert("Invalid JSON");
       }
