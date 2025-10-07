@@ -36,6 +36,15 @@ class ThemeBootstrap4 extends Theme {
     return collapse
   }
 
+  getJsonData (config) {
+    const jsonData = super.getJsonData(config)
+    jsonData.control.classList.add('form-group')
+    jsonData.input.classList.add('form-control')
+    jsonData.saveBtn.classList.add('btn-primary')
+    jsonData.saveBtn.classList.add('btn-block')
+    return jsonData
+  }
+
   getFieldset () {
     const fieldset = document.createElement('fieldset')
     fieldset.setAttribute('role', 'group')

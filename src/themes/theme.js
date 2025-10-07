@@ -399,6 +399,76 @@ class Theme {
   }
 
   /**
+   * Container for properties editing elements like property activators
+   */
+  getJsonData (config) {
+    // dialog
+    const dialog = document.createElement('dialog')
+    dialog.classList.add('jedi-json-data')
+    dialog.setAttribute('id', config.id)
+
+    window.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        dialog.close()
+      }
+    })
+
+    // toggle
+    const toggle = this.getButton({
+      // content: config.propertiesToggleContent, // todo: use text config or something
+      id: 'jedi-json-data-toggle-' + config.id,
+      icon: 'edit'
+    })
+
+    toggle.classList.add('jedi-json-data-toggle')
+
+    toggle.addEventListener('click', () => {
+      if (dialog.open) {
+        dialog.close()
+      } else {
+        dialog.showModal()
+      }
+    })
+
+    const control = document.createElement('div')
+
+    // label
+    const { label } = this.getLabel({
+      for: 'json-data-input-' + config.id,
+      text: 'JSON Data'
+    })
+
+    // input
+    const input = document.createElement('textarea')
+    input.setAttribute('id', 'json-data-input-' + config.id)
+    input.cols = 40
+    input.style.whiteSpace = 'pre'
+    input.style.overflowX = 'auto'
+    input.style.resize = 'both'
+    input.style.maxHeight = '60vh'
+
+    // saveBtn
+    const saveBtn = this.getButton({
+      // content: config.propertiesToggleContent, // todo: use text config or something
+      id: 'jedi-json-data-save-' + config.id,
+      icon: 'save'
+    })
+
+    dialog.appendChild(control)
+    control.appendChild(label)
+    control.appendChild(input)
+    dialog.appendChild(saveBtn)
+
+    return {
+      dialog,
+      toggle,
+      control,
+      input,
+      saveBtn
+    }
+  }
+
+  /**
    * Container for screen reader announced messages
    */
   getPropertiesAriaLive () {
@@ -727,6 +797,9 @@ class Theme {
     const description = this.getDescription({
       content: config.description
     })
+    const jsonData = this.getJsonData({
+      id: 'json-data-' + config.id
+    })
     const propertiesContainer = this.getPropertiesSlot({
       id: 'properties-slot-' + config.id
     })
@@ -772,6 +845,11 @@ class Theme {
 
     container.appendChild(fieldset)
     container.appendChild(propertiesContainer)
+
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog)
+    }
+
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
@@ -799,6 +877,10 @@ class Theme {
       propertiesContainer.appendChild(document.createElement('hr'))
     }
 
+    if (config.editJsonData) {
+      actions.appendChild(jsonData.toggle)
+    }
+
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle)
       propertiesContainer.appendChild(ariaLive)
@@ -819,6 +901,7 @@ class Theme {
       messages,
       childrenSlot,
       propertiesToggle,
+      jsonData,
       propertiesContainer,
       addPropertyControl,
       addPropertyBtn,

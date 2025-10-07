@@ -53,10 +53,13 @@ class EditorObject extends Editor {
       startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.options.startCollapsed,
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
+      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.options.editJsonData,
       propertiesToggleContent: getSchemaXOption(this.instance.schema, 'propertiesToggleContent') ?? this.instance.jedison.translator.translate('propertiesToggle'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
       addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty')
     })
+
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
   }
 
   addEventListeners () {
@@ -92,6 +95,20 @@ class EditorObject extends Editor {
       // keeps dialog open
       this.control.propertiesContainer.close()
       this.control.propertiesContainer.showModal()
+    })
+
+    this.control.jsonData.saveBtn.addEventListener('click', () => {
+      try {
+        const inputValue = JSON.parse(this.control.jsonData.input.value)
+        this.instance.setValue(inputValue, true, 'user')
+      } catch (error) {
+        // eslint-disable-next-line no-undef
+        alert('Invalid JSON')
+      }
+    })
+
+    this.control.jsonData.toggle.addEventListener('click', () => {
+      this.refreshJsonDataInputSize()
     })
   }
 
@@ -193,6 +210,22 @@ class EditorObject extends Editor {
     }
   }
 
+  refreshJsonDataInputSize () {
+    const input = this.control.jsonData.input
+    input.style.height = 'auto'
+    input.style.height = input.scrollHeight + 'px'
+
+    setTimeout(() => {
+      if (input) {
+        input.scrollTop = 0
+      }
+    })
+  }
+
+  refreshJsonData () {
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
+  }
+
   refreshEditors () {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild)
@@ -244,6 +277,7 @@ class EditorObject extends Editor {
     super.refreshUI()
     this.refreshPropertiesSlot()
     this.refreshEditors()
+    this.refreshJsonData()
   }
 }
 

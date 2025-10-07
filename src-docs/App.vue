@@ -146,6 +146,11 @@
             <input type="checkbox" id="mergeAllOf" v-model="mergeAllOf" @change="initEditor()">
             <label for="mergeAllOf"><code>mergeAllOf</code></label>
           </div>
+
+          <div class="form-group mb-3">
+            <input type="checkbox" id="editJsonData" v-model="editJsonData" @change="initEditor()">
+            <label for="editJsonData"><code>editJsonData</code></label>
+          </div>
         </aside>
       </div>
 
@@ -326,6 +331,7 @@ import ifThenElseNullableInitialValue2 from './json/issues/if-then-else-nullable
 import multipleRegister from './json/issues/multiple-register.json'
 import childrenDisableState from './json/issues/children-disable-state.json'
 import templates from './json/features/templates.json'
+import editJsonData from './json/features/edit-json-data.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -404,6 +410,7 @@ export default {
         },
         'Features': {
           'features/templates': templates,
+          'features/edit-json-data': editJsonData,
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
           'parsing/json-patch': jsonPatch,
@@ -523,7 +530,8 @@ export default {
       enforceRequired: true,
       enforceMinItems: true,
       enforceMaxItems: true,
-      enforceAdditionalProperties: true
+      enforceAdditionalProperties: true,
+      editJsonData: false
     }
   },
   created() {
@@ -547,6 +555,7 @@ export default {
     this.enablePropertiesToggle = this.getQueryParam('enablePropertiesToggle') ? this.parseBooleanString(this.getQueryParam('enablePropertiesToggle')) : true
     this.enableCollapseToggle = this.getQueryParam('enableCollapseToggle') ? this.parseBooleanString(this.getQueryParam('enableCollapseToggle')) : true
     this.startCollapsed = this.getQueryParam('startCollapsed') ? this.parseBooleanString(this.getQueryParam('startCollapsed')) : false
+    this.editJsonData = this.getQueryParam('editJsonData') ? this.parseBooleanString(this.getQueryParam('editJsonData')) : false
   },
   mounted() {
     switch (this.theme) {
@@ -692,6 +701,7 @@ export default {
         enforceMinItems: this.enforceMinItems,
         enforceMaxItems: this.enforceMaxItems,
         enforceAdditionalProperties: this.enforceAdditionalProperties,
+        editJsonData: this.editJsonData,
         schema: this.schema,
         data: this.data,
         theme: this.getThemeInstance(this.theme),
@@ -803,6 +813,7 @@ export default {
       newUrl += "&enablePropertiesToggle=" + this.enablePropertiesToggle
       newUrl += "&enableCollapseToggle=" + this.enableCollapseToggle
       newUrl += "&startCollapsed=" + this.startCollapsed
+      newUrl += "&editJsonData=" + this.editJsonData
 
       window.open(newUrl, '_self')
     },
@@ -828,6 +839,7 @@ export default {
       newUrl += "&enablePropertiesToggle=" + this.enablePropertiesToggle
       newUrl += "&enableCollapseToggle=" + this.enableCollapseToggle
       newUrl += "&startCollapsed=" + this.startCollapsed
+      newUrl += "&editJsonData=" + this.editJsonData
       newUrl += "&schema=" + this.compress(JSON.stringify(this.schema))
       newUrl += "&data=" + this.compress(JSON.stringify(this.editor.getValue()))
 

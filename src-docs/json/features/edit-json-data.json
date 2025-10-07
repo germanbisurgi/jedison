@@ -1,0 +1,16 @@
+{
+  "x-editJsonData": true,
+  "type": "object",
+  "title": "Edit JSON Data",
+  "description": "This object has `\"x-editJsonData\": true` which enables inline JSON editing.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  }
+}

@@ -8,7 +8,9 @@ export const glyphicons = {
   expand: 'glyphicon glyphicon-plus', // Expand set to plus
   drag: 'glyphicon glyphicon-th',
   info: 'glyphicon glyphicon-question-sign',
-  close: 'glyphicon glyphicon-remove'
+  close: 'glyphicon glyphicon-remove',
+  edit: 'glyphicon glyphicon-pencil',
+  save: 'glyphicon glyphicon-floppy-disk'
 }
 
 export const bootstrapIcons = {
@@ -21,7 +23,9 @@ export const bootstrapIcons = {
   expand: 'bi bi-plus',
   drag: 'bi bi-grip-vertical',
   info: 'bi bi-question-circle',
-  close: 'bi bi-x'
+  close: 'bi bi-x',
+  edit: 'bi bi-pencil',
+  save: 'bi bi-floppy'
 }
 
 export const fontAwesome3 = {
@@ -34,7 +38,9 @@ export const fontAwesome3 = {
   expand: 'icon-plus',
   drag: 'icon-th',
   info: 'icon-question-sign',
-  close: 'icon-remove'
+  close: 'icon-remove',
+  edit: 'icon-pencil',
+  save: 'icon-save'
 }
 
 export const fontAwesome4 = {
@@ -47,7 +53,9 @@ export const fontAwesome4 = {
   expand: 'fa fa-plus',
   drag: 'fa fa-th',
   info: 'fa fa-question-circle',
-  close: 'fa fa-times'
+  close: 'fa fa-times',
+  edit: 'fa fa-pencil',
+  save: 'fa fa-floppy-o'
 }
 
 export const fontAwesome5 = {
@@ -60,7 +68,9 @@ export const fontAwesome5 = {
   expand: 'fas fa-plus',
   drag: 'fas fa-grip-vertical',
   info: 'fas fa-question-circle',
-  close: 'fas fa-times'
+  close: 'fas fa-times',
+  edit: 'fas fa-pencil-alt',
+  save: 'fas fa-save'
 }
 
 export const fontAwesome6 = {
@@ -73,5 +83,7 @@ export const fontAwesome6 = {
   expand: 'fa-solid fa-plus',
   drag: 'fa-solid fa-grip-vertical',
   info: 'fa-solid fa-circle-question',
-  close: 'fa-solid fa-xmark'
+  close: 'fa-solid fa-xmark',
+  edit: 'fa-solid fa-pencil',
+  save: 'fa-solid fa-floppy-disk'
 }

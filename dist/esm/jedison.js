@@ -2910,7 +2910,9 @@ const glyphicons = {
   // Expand set to plus
   drag: "glyphicon glyphicon-th",
   info: "glyphicon glyphicon-question-sign",
-  close: "glyphicon glyphicon-remove"
+  close: "glyphicon glyphicon-remove",
+  edit: "glyphicon glyphicon-pencil",
+  save: "glyphicon glyphicon-floppy-disk"
 };
 const bootstrapIcons = {
   properties: "bi bi-card-list",
@@ -2922,7 +2924,9 @@ const bootstrapIcons = {
   expand: "bi bi-plus",
   drag: "bi bi-grip-vertical",
   info: "bi bi-question-circle",
-  close: "bi bi-x"
+  close: "bi bi-x",
+  edit: "bi bi-pencil",
+  save: "bi bi-floppy"
 };
 const fontAwesome3 = {
   properties: "icon-list",
@@ -2934,7 +2938,9 @@ const fontAwesome3 = {
   expand: "icon-plus",
   drag: "icon-th",
   info: "icon-question-sign",
-  close: "icon-remove"
+  close: "icon-remove",
+  edit: "icon-pencil",
+  save: "icon-save"
 };
 const fontAwesome4 = {
   properties: "fa fa-list",
@@ -2946,7 +2952,9 @@ const fontAwesome4 = {
   expand: "fa fa-plus",
   drag: "fa fa-th",
   info: "fa fa-question-circle",
-  close: "fa fa-times"
+  close: "fa fa-times",
+  edit: "fa fa-pencil",
+  save: "fa fa-floppy-o"
 };
 const fontAwesome5 = {
   properties: "fas fa-list",
@@ -2958,7 +2966,9 @@ const fontAwesome5 = {
   expand: "fas fa-plus",
   drag: "fas fa-grip-vertical",
   info: "fas fa-question-circle",
-  close: "fas fa-times"
+  close: "fas fa-times",
+  edit: "fas fa-pencil-alt",
+  save: "fas fa-save"
 };
 const fontAwesome6 = {
   properties: "fa-solid fa-list",
@@ -2970,7 +2980,9 @@ const fontAwesome6 = {
   expand: "fa-solid fa-plus",
   drag: "fa-solid fa-grip-vertical",
   info: "fa-solid fa-circle-question",
-  close: "fa-solid fa-xmark"
+  close: "fa-solid fa-xmark",
+  edit: "fa-solid fa-pencil",
+  save: "fa-solid fa-floppy-disk"
 };
 class EditorBoolean extends Editor {
   sanitize(value) {
@@ -3500,10 +3512,12 @@ class EditorObject extends Editor {
       startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.options.startCollapsed,
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
+      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.options.editJsonData,
       propertiesToggleContent: getSchemaXOption(this.instance.schema, "propertiesToggleContent") ?? this.instance.jedison.translator.translate("propertiesToggle"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
       addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty")
     });
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
   addEventListeners() {
     this.control.addPropertyBtn.addEventListener("click", () => {
@@ -3529,6 +3543,17 @@ class EditorObject extends Editor {
       ariaLive.appendChild(ariaLiveMessage);
       this.control.propertiesContainer.close();
       this.control.propertiesContainer.showModal();
+    });
+    this.control.jsonData.saveBtn.addEventListener("click", () => {
+      try {
+        const inputValue = JSON.parse(this.control.jsonData.input.value);
+        this.instance.setValue(inputValue, true, "user");
+      } catch (error) {
+        alert("Invalid JSON");
+      }
+    });
+    this.control.jsonData.toggle.addEventListener("click", () => {
+      this.refreshJsonDataInputSize();
     });
   }
   sanitize(value) {
@@ -3606,6 +3631,19 @@ class EditorObject extends Editor {
       });
     }
   }
+  refreshJsonDataInputSize() {
+    const input = this.control.jsonData.input;
+    input.style.height = "auto";
+    input.style.height = input.scrollHeight + "px";
+    setTimeout(() => {
+      if (input) {
+        input.scrollTop = 0;
+      }
+    });
+  }
+  refreshJsonData() {
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
+  }
   refreshEditors() {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild);
@@ -3647,6 +3685,7 @@ class EditorObject extends Editor {
     super.refreshUI();
     this.refreshPropertiesSlot();
     this.refreshEditors();
+    this.refreshJsonData();
   }
 }
 class EditorObjectGrid extends EditorObject {
@@ -5163,6 +5202,7 @@ class Jedison extends EventEmitter {
       iconLib: null,
       theme: null,
       refParser: null,
+      editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
       btnContents: true,
@@ -6095,6 +6135,60 @@ class Theme {
     return html;
   }
   /**
+   * Container for properties editing elements like property activators
+   */
+  getJsonData(config) {
+    const dialog = document.createElement("dialog");
+    dialog.classList.add("jedi-json-data");
+    dialog.setAttribute("id", config.id);
+    window.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+    const toggle = this.getButton({
+      // content: config.propertiesToggleContent, // todo: use text config or something
+      id: "jedi-json-data-toggle-" + config.id,
+      icon: "edit"
+    });
+    toggle.classList.add("jedi-json-data-toggle");
+    toggle.addEventListener("click", () => {
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        dialog.showModal();
+      }
+    });
+    const control = document.createElement("div");
+    const { label } = this.getLabel({
+      for: "json-data-input-" + config.id,
+      text: "JSON Data"
+    });
+    const input = document.createElement("textarea");
+    input.setAttribute("id", "json-data-input-" + config.id);
+    input.cols = 40;
+    input.style.whiteSpace = "pre";
+    input.style.overflowX = "auto";
+    input.style.resize = "both";
+    input.style.maxHeight = "60vh";
+    const saveBtn = this.getButton({
+      // content: config.propertiesToggleContent, // todo: use text config or something
+      id: "jedi-json-data-save-" + config.id,
+      icon: "save"
+    });
+    dialog.appendChild(control);
+    control.appendChild(label);
+    control.appendChild(input);
+    dialog.appendChild(saveBtn);
+    return {
+      dialog,
+      toggle,
+      control,
+      input,
+      saveBtn
+    };
+  }
+  /**
    * Container for screen reader announced messages
    */
   getPropertiesAriaLive() {
@@ -6368,6 +6462,9 @@ class Theme {
     const description = this.getDescription({
       content: config.description
     });
+    const jsonData = this.getJsonData({
+      id: "json-data-" + config.id
+    });
     const propertiesContainer = this.getPropertiesSlot({
       id: "properties-slot-" + config.id
     });
@@ -6410,6 +6507,9 @@ class Theme {
     addPropertyBtn.classList.add("jedi-object-add");
     container.appendChild(fieldset);
     container.appendChild(propertiesContainer);
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog);
+    }
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
       infoContainer.appendChild(info.container);
@@ -6429,6 +6529,9 @@ class Theme {
       propertiesContainer.appendChild(addPropertyBtn);
       propertiesContainer.appendChild(document.createElement("hr"));
     }
+    if (config.editJsonData) {
+      actions.appendChild(jsonData.toggle);
+    }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
       propertiesContainer.appendChild(ariaLive);
@@ -6447,6 +6550,7 @@ class Theme {
       messages,
       childrenSlot,
       propertiesToggle,
+      jsonData,
       propertiesContainer,
       addPropertyControl,
       addPropertyBtn,
@@ -7243,6 +7347,14 @@ class ThemeBootstrap3 extends Theme {
     }
     return collapse;
   }
+  getJsonData(config) {
+    const jsonData = super.getJsonData(config);
+    jsonData.control.classList.add("form-group");
+    jsonData.input.classList.add("form-control");
+    jsonData.saveBtn.classList.add("btn-primary");
+    jsonData.saveBtn.classList.add("btn-block");
+    return jsonData;
+  }
   getFieldset() {
     const fieldset = super.getFieldset();
     fieldset.classList.add("panel");
@@ -7577,6 +7689,14 @@ class ThemeBootstrap4 extends Theme {
       collapse.classList.add("show");
     }
     return collapse;
+  }
+  getJsonData(config) {
+    const jsonData = super.getJsonData(config);
+    jsonData.control.classList.add("form-group");
+    jsonData.input.classList.add("form-control");
+    jsonData.saveBtn.classList.add("btn-primary");
+    jsonData.saveBtn.classList.add("btn-block");
+    return jsonData;
   }
   getFieldset() {
     const fieldset = document.createElement("fieldset");
@@ -7936,6 +8056,14 @@ class ThemeBootstrap5 extends Theme {
       collapse.classList.add("show");
     }
     return collapse;
+  }
+  getJsonData(config) {
+    const jsonData = super.getJsonData(config);
+    jsonData.control.classList.add("mb-3");
+    jsonData.input.classList.add("form-control");
+    jsonData.saveBtn.classList.add("btn-primary");
+    jsonData.saveBtn.classList.add("w-100");
+    return jsonData;
   }
   getFieldset() {
     const fieldset = document.createElement("fieldset");

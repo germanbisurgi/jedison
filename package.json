@@ -33,7 +33,7 @@
     "e2e:b4": "THEME='bootstrap4' npm run e2e",
     "e2e:b5": "THEME='bootstrap5' npm run e2e",
     "e2e:*": "npm run e2e && npm run e2e:b3 && npm run e2e:b4 && npm run e2e:b5",
-    "e2e:grep": "SHOW=true THEME='bootstrap5' codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep '@array-table-object'",
+    "e2e:grep": "SHOW=true THEME='bootstrap5' codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep '@edit-json-data'",
     "lint": "eslint -c ./.eslintrc.json ./src ./tests",
     "lint:fix": "eslint --fix -c ./.eslintrc.json ./src ./tests",
     "test:full": "yarn serve & yarn e2e && yarn unit",
