@@ -441,7 +441,7 @@ class Theme {
     // input
     const input = document.createElement('textarea')
     input.setAttribute('id', 'json-data-input-' + config.id)
-    input.cols = 40
+    input.cols = 60
     input.style.whiteSpace = 'pre'
     input.style.overflowX = 'auto'
     input.style.resize = 'both'

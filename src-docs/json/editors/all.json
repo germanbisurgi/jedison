@@ -2,6 +2,7 @@
   "type": "object",
   "title": "All Editors",
   "minProperties": 6,
+  "x-editJsonData": true,
   "x-info": {
     "variant": "modal",
     "title": "### Info Button title",
