@@ -1,3 +1,11 @@
+### 0.3.20
+
+- Added editJsonData feature
+- Security updates
+- Ensured disabled state for readOnly editors
+- Fixed nav editors, responsive cols
+- Fixed option override enablePropertiesToggle
+
 ### 0.3.19
 
 - Added showErrors on input feature
