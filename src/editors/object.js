@@ -211,22 +211,6 @@ class EditorObject extends Editor {
     }
   }
 
-  refreshJsonDataInputSize () {
-    const input = this.control.jsonData.input
-    input.style.height = 'auto'
-    input.style.height = input.scrollHeight + 'px'
-
-    setTimeout(() => {
-      if (input) {
-        input.scrollTop = 0
-      }
-    })
-  }
-
-  refreshJsonData () {
-    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
-  }
-
   refreshEditors () {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild)

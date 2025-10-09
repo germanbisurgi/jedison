@@ -31,15 +31,33 @@ class EditorArray extends Editor {
       startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.options.startCollapsed,
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
+      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.options.editJsonData,
       arrayAdd: getSchemaXOption(this.instance.schema, 'arrayAdd') ?? this.instance.jedison.options.arrayAdd,
       arrayAddContent: getSchemaXOption(this.instance.schema, 'arrayAddContent') ?? this.instance.jedison.translator.translate('arrayAdd'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle')
     })
+
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
   }
 
   addEventListeners () {
     this.control.addBtn.addEventListener('click', () => {
       this.instance.addItem('user')
+    })
+
+    this.control.jsonData.saveBtn.addEventListener('click', () => {
+      try {
+        const inputValue = JSON.parse(this.control.jsonData.input.value)
+        this.instance.setValue(inputValue, true, 'user')
+        this.control.jsonData.dialog.close()
+      } catch (error) {
+        // eslint-disable-next-line no-undef
+        alert('Invalid JSON')
+      }
+    })
+
+    this.control.jsonData.toggle.addEventListener('click', () => {
+      this.refreshJsonDataInputSize()
     })
   }
 
@@ -148,6 +166,7 @@ class EditorArray extends Editor {
   }
 
   refreshUI () {
+    super.refreshUI()
     const minItems = getSchemaMinItems(this.instance.schema)
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
@@ -198,6 +217,7 @@ class EditorArray extends Editor {
     })
 
     this.refreshAddBtn()
+    this.refreshJsonData()
   }
 }
 

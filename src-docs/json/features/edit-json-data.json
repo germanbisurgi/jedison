@@ -11,6 +11,81 @@
     "description": {
       "type": "string",
       "title": "Description"
+    },
+    "tags": {
+      "x-editJsonData": true,
+      "type": "array",
+      "title": "Tags",
+      "description": "Basic array with JSON editing enabled.",
+      "default": ["javascript", "json", "editor"],
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "categories": {
+      "x-editJsonData": true,
+      "x-format": "table",
+      "type": "array",
+      "title": "Categories (Table Format)",
+      "description": "Array displayed as table with JSON editing.",
+      "default": ["frontend", "backend", "database"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "features": {
+      "x-editJsonData": true,
+      "x-format": "nav-vertical",
+      "type": "array",
+      "title": "Features",
+      "description": "Array with horizontal navigation and JSON editing.",
+      "default": [
+        {"name": "Validation", "enabled": true},
+        {"name": "Themes", "enabled": true}
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Feature Name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        }
+      }
+    },
+    "users": {
+      "x-editJsonData": true,
+      "x-format": "table-object",
+      "type": "array",
+      "title": "Users",
+      "description": "Array of objects displayed as table with JSON editing.",
+      "default": [
+        {"name": "Alice", "role": "Admin", "active": true},
+        {"name": "Bob", "role": "User", "active": false}
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "enum": ["Admin", "User", "Guest"]
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        }
+      }
     }
   }
 }

@@ -2192,6 +2192,29 @@ class Editor {
     return value;
   }
   /**
+   * Refreshes the JSON data input size to match content
+   */
+  refreshJsonDataInputSize() {
+    if (this.control && this.control.jsonData && this.control.jsonData.input) {
+      const input = this.control.jsonData.input;
+      input.style.height = "auto";
+      input.style.height = input.scrollHeight + "px";
+      setTimeout(() => {
+        if (input) {
+          input.scrollTop = 0;
+        }
+      });
+    }
+  }
+  /**
+   * Refreshes the JSON data input with current instance value
+   */
+  refreshJsonData() {
+    if (this.control && this.control.jsonData && this.control.jsonData.input) {
+      this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
+    }
+  }
+  /**
    * Destroys the editor
    */
   destroy() {
@@ -3632,19 +3655,6 @@ class EditorObject extends Editor {
       });
     }
   }
-  refreshJsonDataInputSize() {
-    const input = this.control.jsonData.input;
-    input.style.height = "auto";
-    input.style.height = input.scrollHeight + "px";
-    setTimeout(() => {
-      if (input) {
-        input.scrollTop = 0;
-      }
-    });
-  }
-  refreshJsonData() {
-    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
-  }
   refreshEditors() {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild);
@@ -3803,14 +3813,28 @@ class EditorArray extends Editor {
       startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.options.startCollapsed,
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
+      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.options.editJsonData,
       arrayAdd: getSchemaXOption(this.instance.schema, "arrayAdd") ?? this.instance.jedison.options.arrayAdd,
       arrayAddContent: getSchemaXOption(this.instance.schema, "arrayAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle")
     });
+    this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
   addEventListeners() {
     this.control.addBtn.addEventListener("click", () => {
       this.instance.addItem("user");
+    });
+    this.control.jsonData.saveBtn.addEventListener("click", () => {
+      try {
+        const inputValue = JSON.parse(this.control.jsonData.input.value);
+        this.instance.setValue(inputValue, true, "user");
+        this.control.jsonData.dialog.close();
+      } catch (error) {
+        alert("Invalid JSON");
+      }
+    });
+    this.control.jsonData.toggle.addEventListener("click", () => {
+      this.refreshJsonDataInputSize();
     });
   }
   getErrorFeedback(config) {
@@ -3897,6 +3921,7 @@ class EditorArray extends Editor {
     }
   }
   refreshUI() {
+    super.refreshUI();
     const minItems2 = getSchemaMinItems(this.instance.schema);
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
@@ -3935,6 +3960,7 @@ class EditorArray extends Editor {
       child.ui.refreshUI();
     });
     this.refreshAddBtn();
+    this.refreshJsonData();
   }
 }
 class EditorArrayTable extends EditorArray {
@@ -3942,6 +3968,7 @@ class EditorArrayTable extends EditorArray {
     return getSchemaType(schema) === "array" && getSchemaXOption(schema, "format") === "table";
   }
   addEventListeners() {
+    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
@@ -4007,6 +4034,7 @@ class EditorArrayTable extends EditorArray {
     });
     this.refreshSortable(table.tbody);
     this.refreshAddBtn();
+    this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
     table.container.addEventListener("scroll", () => {
@@ -4052,6 +4080,7 @@ class EditorArrayTableObject extends EditorArray {
     return getSchemaType(schema) === "array" && itemType === "object" && getSchemaXOption(schema, "format") === "table-object";
   }
   addEventListeners() {
+    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
@@ -4133,6 +4162,7 @@ class EditorArrayTableObject extends EditorArray {
     });
     this.refreshSortable(table.tbody);
     this.refreshAddBtn();
+    this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
     table.container.addEventListener("scroll", () => {
@@ -4249,6 +4279,7 @@ class EditorArrayNav extends EditorArray {
     return getSchemaType(schema) === "array" && hasNavFormat;
   }
   addEventListeners() {
+    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
@@ -4328,6 +4359,7 @@ class EditorArrayNav extends EditorArray {
       }
     });
     this.refreshAddBtn();
+    this.refreshJsonData();
   }
 }
 class EditorMultiple extends Editor {
@@ -6580,13 +6612,16 @@ class Theme {
     });
     const fieldset = this.getFieldset();
     const info = this.getInfo(config.info);
-    const { legend, legendText } = this.getLegend({
+    const { legend, legendText, infoContainer } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
     });
     const description = this.getDescription({
       content: config.description
+    });
+    const jsonData = this.getJsonData({
+      id: "json-data-" + config.id
     });
     const collapse = this.getCollapse({
       id: collapseId,
@@ -6604,9 +6639,12 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     container.appendChild(fieldset);
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog);
+    }
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
-      legendText.appendChild(info.container);
+      infoContainer.appendChild(info.container);
     }
     fieldset.appendChild(collapse);
     collapse.appendChild(body);
@@ -6616,6 +6654,9 @@ class Theme {
     body.appendChild(messages);
     legend.appendChild(actions);
     actions.appendChild(btnGroup);
+    if (config.editJsonData) {
+      btnGroup.appendChild(jsonData.toggle);
+    }
     if (isSet(config.arrayAdd) && config.arrayAdd === true) {
       btnGroup.appendChild(addBtn);
     }
@@ -6633,6 +6674,7 @@ class Theme {
       childrenSlot,
       btnGroup,
       addBtn,
+      jsonData,
       legend,
       legendText
     };

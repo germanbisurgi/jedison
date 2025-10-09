@@ -28,6 +28,8 @@ class EditorArrayTableObject extends EditorArray {
   }
 
   addEventListeners () {
+    super.addEventListeners()
+
     this.control.addBtn.addEventListener('click', () => {
       this.activeItemIndex = this.instance.value.length
       this.instance.addItem('user')
@@ -141,6 +143,7 @@ class EditorArrayTableObject extends EditorArray {
 
     this.refreshSortable(table.tbody)
     this.refreshAddBtn()
+    this.refreshJsonData()
     this.refreshDisabledState()
     this.refreshScrollPosition(table.container)
 

@@ -371,6 +371,32 @@ class Editor {
   }
 
   /**
+   * Refreshes the JSON data input size to match content
+   */
+  refreshJsonDataInputSize () {
+    if (this.control && this.control.jsonData && this.control.jsonData.input) {
+      const input = this.control.jsonData.input
+      input.style.height = 'auto'
+      input.style.height = input.scrollHeight + 'px'
+
+      setTimeout(() => {
+        if (input) {
+          input.scrollTop = 0
+        }
+      })
+    }
+  }
+
+  /**
+   * Refreshes the JSON data input with current instance value
+   */
+  refreshJsonData () {
+    if (this.control && this.control.jsonData && this.control.jsonData.input) {
+      this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
+    }
+  }
+
+  /**
    * Destroys the editor
    */
   destroy () {

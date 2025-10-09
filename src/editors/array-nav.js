@@ -15,6 +15,7 @@ class EditorArrayNav extends EditorArray {
   }
 
   addEventListeners () {
+    super.addEventListeners()
     this.control.addBtn.addEventListener('click', () => {
       this.activeItemIndex = this.instance.value.length
       this.instance.addItem('user')
@@ -115,6 +116,7 @@ class EditorArrayNav extends EditorArray {
     })
 
     this.refreshAddBtn()
+    this.refreshJsonData()
   }
 }
 

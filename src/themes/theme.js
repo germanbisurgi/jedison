@@ -932,13 +932,16 @@ class Theme {
 
     const fieldset = this.getFieldset()
     const info = this.getInfo(config.info)
-    const { legend, legendText } = this.getLegend({
+    const { legend, legendText, infoContainer } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
     })
     const description = this.getDescription({
       content: config.description
+    })
+    const jsonData = this.getJsonData({
+      id: 'json-data-' + config.id
     })
     const collapse = this.getCollapse({
       id: collapseId,
@@ -958,10 +961,15 @@ class Theme {
     }
 
     container.appendChild(fieldset)
+
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog)
+    }
+
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
-      legendText.appendChild(info.container)
+      infoContainer.appendChild(info.container)
     }
 
     fieldset.appendChild(collapse)
@@ -976,6 +984,10 @@ class Theme {
     legend.appendChild(actions)
 
     actions.appendChild(btnGroup)
+
+    if (config.editJsonData) {
+      btnGroup.appendChild(jsonData.toggle)
+    }
 
     if (isSet(config.arrayAdd) && config.arrayAdd === true) {
       btnGroup.appendChild(addBtn)
@@ -997,6 +1009,7 @@ class Theme {
       childrenSlot,
       btnGroup,
       addBtn,
+      jsonData,
       legend,
       legendText
     }

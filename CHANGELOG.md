@@ -1,3 +1,7 @@
+### 0.3.22
+
+- Extended editJsonData feature to support arrays with toggle button and dialog functionality
+
 ### 0.3.21
 
 - Builds
@@ -5,7 +9,7 @@
 ### 0.3.20
 
 - Added editJsonData feature
-- Security updates
+- Security updates  
 - Ensured disabled state for readOnly editors
 - Fixed nav editors, responsive cols
 - Fixed option override enablePropertiesToggle
