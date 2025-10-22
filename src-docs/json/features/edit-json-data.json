@@ -44,6 +44,7 @@
         {"name": "Validation", "enabled": true},
         {"name": "Themes", "enabled": true}
       ],
+      "x-titleTemplate": "{{ i1 }}) {{ value.name }}",
       "items": {
         "type": "object",
         "properties": {

@@ -45,6 +45,10 @@ class EditorArray extends Editor {
       this.instance.addItem('user')
     })
 
+    this.addJsonDataEventListeners()
+  }
+
+  addJsonDataEventListeners () {
     this.control.jsonData.saveBtn.addEventListener('click', () => {
       try {
         const inputValue = JSON.parse(this.control.jsonData.input.value)

@@ -1,6 +1,7 @@
 ### 0.3.22
 
 - Extended editJsonData feature to support arrays with toggle button and dialog functionality
+- Implemented an event listener cleanup system to prevent memory leaks
 
 ### 0.3.21
 

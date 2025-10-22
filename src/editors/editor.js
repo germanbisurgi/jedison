@@ -45,6 +45,12 @@ class Editor {
     this.title = null
     this.description = null
 
+    /**
+     * Array to store event listeners for cleanup
+     * @type {Array}
+     */
+    this.storedEventListeners = []
+
     this.init()
     this.build()
     this.setAttributes()
@@ -171,6 +177,21 @@ class Editor {
    * Add event listeners to ui elements
    */
   addEventListeners () {
+  }
+
+  /**
+   * Clears any stored event listeners that might persist
+   * This method can be overridden by subclasses to provide custom cleanup logic
+   */
+  clearStoredEventListeners () {
+    if (this.storedEventListeners) {
+      this.storedEventListeners.forEach(listener => {
+        if (listener.element && listener.handler) {
+          listener.element.removeEventListener(listener.eventType || 'click', listener.handler)
+        }
+      })
+    }
+    this.storedEventListeners = []
   }
 
   /**

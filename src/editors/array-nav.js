@@ -15,16 +15,19 @@ class EditorArrayNav extends EditorArray {
   }
 
   addEventListeners () {
-    super.addEventListeners()
     this.control.addBtn.addEventListener('click', () => {
       this.activeItemIndex = this.instance.value.length
       this.instance.addItem('user')
     })
+
+    this.addJsonDataEventListeners()
   }
 
   refreshUI () {
     this.refreshDisabledState()
     this.control.childrenSlot.innerHTML = ''
+
+    this.clearStoredEventListeners()
 
     const format = getSchemaXOption(this.instance.schema, 'format')
     const formatParts = format.split('-')
@@ -92,8 +95,17 @@ class EditorArrayNav extends EditorArray {
 
       arrayActions.appendChild(btnGroup)
 
-      list.addEventListener('click', () => {
+      const clickHandler = () => {
         this.activeItemIndex = index
+      }
+
+      list.addEventListener('click', clickHandler)
+
+      // Store listener for cleanup
+      this.storedEventListeners.push({
+        element: list,
+        handler: clickHandler,
+        eventType: 'click'
       })
 
       this.theme.setTabPaneAttributes(child.ui.control.container, active, id)

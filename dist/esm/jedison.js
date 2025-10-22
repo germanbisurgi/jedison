@@ -1927,6 +1927,7 @@ class Editor {
     this.purifyEnabled = false;
     this.title = null;
     this.description = null;
+    this.storedEventListeners = [];
     this.init();
     this.build();
     this.setAttributes();
@@ -2034,6 +2035,20 @@ class Editor {
    * Add event listeners to ui elements
    */
   addEventListeners() {
+  }
+  /**
+   * Clears any stored event listeners that might persist
+   * This method can be overridden by subclasses to provide custom cleanup logic
+   */
+  clearStoredEventListeners() {
+    if (this.storedEventListeners) {
+      this.storedEventListeners.forEach((listener) => {
+        if (listener.element && listener.handler) {
+          listener.element.removeEventListener(listener.eventType || "click", listener.handler);
+        }
+      });
+    }
+    this.storedEventListeners = [];
   }
   /**
    * Shows validation error messages in the editor container.
@@ -3824,6 +3839,9 @@ class EditorArray extends Editor {
     this.control.addBtn.addEventListener("click", () => {
       this.instance.addItem("user");
     });
+    this.addJsonDataEventListeners();
+  }
+  addJsonDataEventListeners() {
     this.control.jsonData.saveBtn.addEventListener("click", () => {
       try {
         const inputValue = JSON.parse(this.control.jsonData.input.value);
@@ -3968,11 +3986,11 @@ class EditorArrayTable extends EditorArray {
     return getSchemaType(schema) === "array" && getSchemaXOption(schema, "format") === "table";
   }
   addEventListeners() {
-    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.addJsonDataEventListeners();
   }
   isSortable() {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
@@ -4080,11 +4098,11 @@ class EditorArrayTableObject extends EditorArray {
     return getSchemaType(schema) === "array" && itemType === "object" && getSchemaXOption(schema, "format") === "table-object";
   }
   addEventListeners() {
-    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.addJsonDataEventListeners();
   }
   isSortable() {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
@@ -4279,15 +4297,16 @@ class EditorArrayNav extends EditorArray {
     return getSchemaType(schema) === "array" && hasNavFormat;
   }
   addEventListeners() {
-    super.addEventListeners();
     this.control.addBtn.addEventListener("click", () => {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.addJsonDataEventListeners();
   }
   refreshUI() {
     this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
+    this.clearStoredEventListeners();
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
@@ -4340,8 +4359,14 @@ class EditorArrayNav extends EditorArray {
         active
       });
       arrayActions.appendChild(btnGroup);
-      list.addEventListener("click", () => {
+      const clickHandler = () => {
         this.activeItemIndex = index2;
+      };
+      list.addEventListener("click", clickHandler);
+      this.storedEventListeners.push({
+        element: list,
+        handler: clickHandler,
+        eventType: "click"
       });
       this.theme.setTabPaneAttributes(child.ui.control.container, active, id);
       tabList.appendChild(list);
