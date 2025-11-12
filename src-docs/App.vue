@@ -308,6 +308,7 @@ import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
 import europass from './json/europass.json'
+import blackParade from './json/examples/black-parade.json'
 import geojson from './json/examples/geojson.json'
 import johnFrusciante from './json/examples/john-frusciante.json'
 import resumeSchema from './json/examples/resume-schema.json'
@@ -350,6 +351,7 @@ export default {
           'custom/custom-constraint': customConstraint,
           'meta-schema': metaSchema,
           'europass-xml-3.3.0': europass,
+          'examples/black-parade': blackParade,
           'test': testJson,
         },
         'Editors': {

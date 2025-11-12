@@ -1,0 +1,92 @@
+{
+  "title": "Form",
+  "type": "object",
+  "properties": {
+    "a": {
+      "title": "When I was",
+      "type": "string",
+      "x-format": "radios",
+      "enum": [
+        "A young warthog",
+        "A young boy",
+        "A mollusc",
+        "A young boy"
+      ]
+    },
+    "b": {
+      "title": "My father took me into",
+      "type": "string",
+      "enum": [
+        "The city",
+        "The litty",
+        "The Jay Shetty",
+        "The local Quiznos"
+      ]
+    },
+    "c": {
+      "title": "To see a",
+      "type": "string",
+      "x-format": "radios",
+      "enum": [
+        "Pride parade",
+        "Trump impersonator",
+        "Marching band",
+        "The 1975 tribute act"
+      ]
+    },
+    "d": {
+      "title": "He said",
+      "type": "string"
+    },
+    "e": {
+      "title": "He said",
+      "type": "object",
+      "properties": {
+        "a": {
+          "title": "Will you",
+          "type": "string",
+          "x-format": "radios-inline",
+          "enum": [
+            "Defeat them",
+            "Join them",
+            "And all the non believers",
+            "That they have made"
+          ]
+        },
+        "b": {
+          "title": "Your demons",
+          "type": "string",
+          "x-format": "radios-inline",
+          "enum": [
+            "Defeat them",
+            "Join them",
+            "And all the non believers",
+            "That they have made"
+          ]
+        },
+        "c": {
+          "title": "The plans",
+          "type": "string",
+          "x-format": "radios-inline",
+          "enum": [
+            "Defeat them",
+            "Join them",
+            "And all the non believers",
+            "That they have made"
+          ]
+        }
+      }
+    },
+    "f": {
+      "title": "Because one day, I'll leave you a phantom. To lead you in the summer. To..",
+      "type": "string",
+      "x-format": "radios",
+      "enum": [
+        "Be baffled by charades",
+        "Joint the Boys Brigade",
+        "Enjoy Thomas Kinkade",
+        "Join the black Parade"
+      ]
+    }
+  }
+}
