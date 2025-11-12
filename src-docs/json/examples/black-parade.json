@@ -3,6 +3,9 @@
   "type": "object",
   "properties": {
     "a": {
+      "x-options": {
+        "enforceEnumDefault": false
+      },
       "title": "When I was",
       "type": "string",
       "x-format": "radios",
@@ -14,6 +17,9 @@
       ]
     },
     "b": {
+      "x-options": {
+        "enforceEnumDefault": false
+      },
       "title": "My father took me into",
       "type": "string",
       "enum": [
@@ -24,6 +30,9 @@
       ]
     },
     "c": {
+      "x-options": {
+        "enforceEnumDefault": false
+      },
       "title": "To see a",
       "type": "string",
       "x-format": "radios",
@@ -43,6 +52,7 @@
       "type": "object",
       "properties": {
         "a": {
+          "x-enforceEnum": false,
           "title": "Will you",
           "type": "string",
           "x-format": "radios-inline",
@@ -54,6 +64,7 @@
           ]
         },
         "b": {
+          "x-enforceEnum": false,
           "title": "Your demons",
           "type": "string",
           "x-format": "radios-inline",
@@ -65,6 +76,7 @@
           ]
         },
         "c": {
+          "x-enforceEnum": false,
           "title": "The plans",
           "type": "string",
           "x-format": "radios-inline",
@@ -78,6 +90,7 @@
       }
     },
     "f": {
+      "x-enforceEnumDefault": false,
       "title": "Because one day, I'll leave you a phantom. To lead you in the summer. To..",
       "type": "string",
       "x-format": "radios",
