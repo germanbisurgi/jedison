@@ -724,7 +724,7 @@ export default {
               const data = await response.json()
               return data.results || []
             },
-            renderResult: ({ item }) => {
+            renderItem: ({ item }) => {
               const element = document.createElement('div')
               element.style.cursor = 'pointer'
               element.style.textAlign = 'center'

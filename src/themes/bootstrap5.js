@@ -10,6 +10,19 @@ class ThemeBootstrap5 extends Theme {
     this.useToggleEvents = false
   }
 
+  getSearchPanelDialog () {
+    const getSearchPanelDialog = super.getSearchPanelDialog()
+    getSearchPanelDialog.openBtn.classList.remove('btn-sm')
+    getSearchPanelDialog.openBtn.classList.add('btn-primary')
+    return getSearchPanelDialog
+  }
+
+  getInputGroup () {
+    const inputGroup = super.getInputGroup()
+    inputGroup.classList.add('input-group')
+    return inputGroup
+  }
+
   getAddPropertyButton (config) {
     const btn = super.getAddPropertyButton(config)
     btn.classList.add('btn-primary')

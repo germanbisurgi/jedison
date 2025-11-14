@@ -10,7 +10,8 @@ export const glyphicons = {
   info: 'glyphicon glyphicon-question-sign',
   close: 'glyphicon glyphicon-remove',
   edit: 'glyphicon glyphicon-pencil',
-  save: 'glyphicon glyphicon-floppy-disk'
+  save: 'glyphicon glyphicon-floppy-disk',
+  search: 'glyphicon glyphicon-search'
 }
 
 export const bootstrapIcons = {
@@ -25,7 +26,8 @@ export const bootstrapIcons = {
   info: 'bi bi-question-circle',
   close: 'bi bi-x',
   edit: 'bi bi-pencil',
-  save: 'bi bi-floppy'
+  save: 'bi bi-floppy',
+  search: 'bi bi-search'
 }
 
 export const fontAwesome3 = {
@@ -40,7 +42,8 @@ export const fontAwesome3 = {
   info: 'icon-question-sign',
   close: 'icon-remove',
   edit: 'icon-pencil',
-  save: 'icon-save'
+  save: 'icon-save',
+  search: 'icon-search'
 }
 
 export const fontAwesome4 = {
@@ -55,7 +58,8 @@ export const fontAwesome4 = {
   info: 'fa fa-question-circle',
   close: 'fa fa-times',
   edit: 'fa fa-pencil',
-  save: 'fa fa-floppy-o'
+  save: 'fa fa-floppy-o',
+  search: 'fa fa-search'
 }
 
 export const fontAwesome5 = {
@@ -70,7 +74,8 @@ export const fontAwesome5 = {
   info: 'fas fa-question-circle',
   close: 'fas fa-times',
   edit: 'fas fa-pencil-alt',
-  save: 'fas fa-save'
+  save: 'fas fa-save',
+  search: 'fas fa-search'
 }
 
 export const fontAwesome6 = {
@@ -85,5 +90,6 @@ export const fontAwesome6 = {
   info: 'fa-solid fa-circle-question',
   close: 'fa-solid fa-xmark',
   edit: 'fa-solid fa-pencil',
-  save: 'fa-solid fa-floppy-disk'
+  save: 'fa-solid fa-floppy-disk',
+  search: 'fa-solid fa-magnifying-glass'
 }

@@ -51,7 +51,7 @@ class EditorStringInput extends EditorString {
       const searchPanelSettingsKey = getSchemaXOption(this.instance.schema, 'searchPanelSettings')
       const settings = this.instance.jedison.options.settings[searchPanelSettingsKey]
 
-      if (settings && settings.load && settings.renderResult) {
+      if (settings && settings.load && settings.renderItem) {
         // Add event listener to search input
         this.control.searchPanel.searchControl.addEventListener('change', async (event) => {
           const searchTerm = event.target.value.trim()
@@ -66,10 +66,9 @@ class EditorStringInput extends EditorString {
           try {
             // Call the load function to get data
             const results = await settings.load({ editor: this, searchTerm })
-            console.log(results)
 
             results.forEach((item) => {
-              const element = settings.renderResult({ item })
+              const element = settings.renderItem({ item })
               const value = settings.getValue({ item })
 
               // Add click handler to set the value
@@ -77,8 +76,8 @@ class EditorStringInput extends EditorString {
                 this.instance.setValue(value, true, 'user')
 
                 // Clear search and options
-                this.control.searchPanel.searchControl.value = ''
-                this.control.searchPanel.resultsContainer.innerHTML = ''
+                // this.control.searchPanel.searchControl.value = ''
+                // this.control.searchPanel.resultsContainer.innerHTML = ''
               })
 
               this.control.searchPanel.resultsContainer.appendChild(element)

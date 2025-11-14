@@ -190,6 +190,14 @@ class Theme {
     return { label, labelText, icon, dummyInput }
   }
 
+  getInputGroup () {
+    return document.createElement('div')
+  }
+
+  getInputGroupBtn () {
+    return document.createElement('div')
+  }
+
   /**
    * Returns a icon element
    */
@@ -1239,9 +1247,11 @@ class Theme {
 
     const container = document.createElement('div')
     const actions = this.getActionsSlot()
+    const inputGroup = this.getInputGroup()
+    const inputGroupBtn = this.getInputGroupBtn()
     const input = document.createElement('input')
     const info = this.getInfo(config.info)
-    const searchPanel = this.getSearchPanel()
+    const searchPanel = this.getSearchPanelDialog()
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
@@ -1260,7 +1270,7 @@ class Theme {
     input.setAttribute('type', config.type)
     input.setAttribute('id', config.id)
     input.setAttribute('name', config.id)
-    input.style.width = '100%'
+    // input.style.width = '100%'
 
     container.appendChild(label)
 
@@ -1272,13 +1282,21 @@ class Theme {
       label.appendChild(info.container)
     }
 
-    container.appendChild(input)
+    container.appendChild(inputGroup)
+
+    inputGroup.appendChild(input)
+
+    if (isObject(config.searchPanel)) {
+      inputGroup.appendChild(inputGroupBtn)
+      inputGroupBtn.appendChild(searchPanel.openBtn)
+    }
+
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
     if (isObject(config.searchPanel)) {
-      container.appendChild(searchPanel.container)
+      container.appendChild(searchPanel.dialog)
     }
 
     return { container, input, label, info, searchPanel, labelText, description, messages, actions }
@@ -1809,24 +1827,57 @@ class Theme {
   /**
    * Creates a search panel with search input and results container
    */
-  getSearchPanel () {
-    const container = document.createElement('div')
-    container.classList.add('jedi-search-container')
-
+  getSearchPanelDialog () {
+    const dialog = document.createElement('dialog')
+    const content = document.createElement('div')
     const searchControl = document.createElement('input')
-    searchControl.setAttribute('type', 'search')
-
     const resultsContainer = document.createElement('div')
+    const openBtn = this.getButton({
+      content: 'Search',
+      icon: 'search'
+    })
+    const closeBtn = this.getButton({
+      content: 'Close',
+      icon: 'close'
+    })
+
+    dialog.classList.add('jedi-modal-dialog')
+    dialog.style.maxWidth = '600px'
+
+    content.classList.add('jedi-modal-content')
+
+    closeBtn.classList.add('jedi-modal-close')
+    closeBtn.setAttribute('always-enabled', '')
+
+    searchControl.setAttribute('type', 'search')
 
     resultsContainer.style.display = 'flex'
     resultsContainer.style.flexWrap = 'wrap'
     resultsContainer.style.gap = '10px'
     resultsContainer.style.marginTop = '10px'
+    resultsContainer.style.maxHeight = '50vh'
+    resultsContainer.style.overflow = 'auto'
 
-    container.appendChild(searchControl)
-    container.appendChild(resultsContainer)
+    window.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        dialog.close()
+      }
+    })
 
-    return { container, searchControl, resultsContainer }
+    closeBtn.addEventListener('click', () => {
+      dialog.close()
+    })
+
+    openBtn.addEventListener('click', () => {
+      dialog.showModal()
+    })
+
+    dialog.appendChild(closeBtn)
+    content.appendChild(searchControl)
+    content.appendChild(resultsContainer)
+    dialog.appendChild(content)
+
+    return { dialog, content, searchControl, resultsContainer, openBtn, closeBtn }
   }
 
   /**

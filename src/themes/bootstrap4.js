@@ -10,6 +10,25 @@ class ThemeBootstrap4 extends Theme {
     this.useToggleEvents = false
   }
 
+  getSearchPanelDialog () {
+    const getSearchPanelDialog = super.getSearchPanelDialog()
+    getSearchPanelDialog.openBtn.classList.remove('btn-sm')
+    getSearchPanelDialog.openBtn.classList.add('btn-primary')
+    return getSearchPanelDialog
+  }
+
+  getInputGroup () {
+    const inputGroup = super.getInputGroup()
+    inputGroup.classList.add('input-group')
+    return inputGroup
+  }
+
+  getInputGroupBtn () {
+    const inputGroupBtn = super.getInputGroupBtn()
+    inputGroupBtn.classList.add('input-group-append')
+    return inputGroupBtn
+  }
+
   getAddPropertyButton (config) {
     const btn = super.getAddPropertyButton(config)
     btn.classList.add('btn-primary')
