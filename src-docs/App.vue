@@ -717,6 +717,36 @@ export default {
             min: new Date(1990, 0, 1),
             max: new Date(2020, 0, 1),
             lazy: false
+          },
+          mySearchPanelSettings: {
+            load: async ({ editor, searchTerm }) => {
+              const response = await fetch(`https://rickandmortyapi.com/api/character/?name=${searchTerm}`)
+              const data = await response.json()
+              return data.results || []
+            },
+            renderResult: ({ item }) => {
+              const element = document.createElement('div')
+              element.style.cursor = 'pointer'
+              element.style.textAlign = 'center'
+              element.style.width = '150px'
+
+              const img = document.createElement('img')
+              img.src = item.image
+              img.alt = item.name
+              img.style.width = '100%'
+
+              const name = document.createElement('div')
+              name.textContent = item.name
+              name.style.marginTop = '8px'
+
+              element.appendChild(img)
+              element.appendChild(name)
+
+              return element
+            },
+            getValue: ({ item }) => {
+              return item.image
+            }
           }
         },
         constraints: {

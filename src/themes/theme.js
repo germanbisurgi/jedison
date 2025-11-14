@@ -1241,6 +1241,7 @@ class Theme {
     const actions = this.getActionsSlot()
     const input = document.createElement('input')
     const info = this.getInfo(config.info)
+    const searchPanel = this.getSearchPanel()
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
@@ -1276,7 +1277,11 @@ class Theme {
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, input, label, info, labelText, description, messages, actions }
+    if (isObject(config.searchPanel)) {
+      container.appendChild(searchPanel.container)
+    }
+
+    return { container, input, label, info, searchPanel, labelText, description, messages, actions }
   }
 
   getInputRangeControl (config) {
@@ -1799,6 +1804,29 @@ class Theme {
   setTabPaneAttributes (element, active, id) {
     element.setAttribute('id', 'tab-pane-' + id)
     element.classList.add('jedi-tab-pane')
+  }
+
+  /**
+   * Creates a search panel with search input and results container
+   */
+  getSearchPanel () {
+    const container = document.createElement('div')
+    container.classList.add('jedi-search-container')
+
+    const searchControl = document.createElement('input')
+    searchControl.setAttribute('type', 'search')
+
+    const resultsContainer = document.createElement('div')
+
+    resultsContainer.style.display = 'flex'
+    resultsContainer.style.flexWrap = 'wrap'
+    resultsContainer.style.gap = '10px'
+    resultsContainer.style.marginTop = '10px'
+
+    container.appendChild(searchControl)
+    container.appendChild(resultsContainer)
+
+    return { container, searchControl, resultsContainer }
   }
 
   /**

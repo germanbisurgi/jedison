@@ -8,5 +8,7 @@
     "variant": "modal",
     "title": "### Info Button title",
     "content": "Info button content"
-  }
+  },
+  "x-searchPanelSettings": "mySearchPanelSettings",
+  "x-searchPanel": {}
 }
