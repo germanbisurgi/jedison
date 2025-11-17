@@ -1,12 +1,54 @@
 {
-  "type": "number",
-  "minimum": 0,
-  "maximum": 99999.99,
-  "default": 0,
-  "description": "Flächengröße in Hektar",
-  "x-options": {
-    "inputAttributes": {
-      "step": 0.01
+  "type": "array",
+  "title": "Companies",
+  "x-format": "nav-vertical",
+  "minItems": 1,
+  "default": [
+    {
+      "name": "Tech Corp",
+      "departments": [
+        {
+          "name": "Engineering"
+        },
+        {
+          "name": "Marketing"
+        }
+      ]
+    }
+  ],
+  "x-titleTemplate": "{{ value.name }}",
+  "items": {
+    "title": "Company",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Company Name",
+        "default": "New Company"
+      },
+      "departments": {
+        "type": "array",
+        "title": "Departments",
+        "x-format": "nav-vertical",
+        "minItems": 1,
+        "default": [
+          {
+            "name": "General"
+          }
+        ],
+        "x-titleTemplate": "{{ parent.parent.value.name }} - {{ value.name }}",
+        "items": {
+          "title": "Department",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Department Name",
+              "default": "New Department"
+            }
+          }
+        }
+      }
     }
   }
 }
