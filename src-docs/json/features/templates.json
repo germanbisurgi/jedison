@@ -1,17 +1,52 @@
 {
   "title": "Templates",
   "type": "array",
-  "description": "Titles and descriptions can include placeholders such as `i0`, `i1` that are dynamically replaced when rendering the data.\n\nAvailable placeholders:\n\n- `value` — the current value (from `getValue`); **always available**\n- `settings` — configuration options (from `jedison.options.settings`); **always available**\n- `i0` — the zero-based index of the array item; available **only if the editor is an array item editor**\n- `i1` — the one-based index of the array item; available **only if the editor is an array item editor**\n",
+  "description": "Titles and descriptions can include placeholders such as `i0`, `i1` that are dynamically replaced when rendering the data.\n\nAvailable placeholders:\n\n- `value` — the current value (from `getValue`); **always available**\n- `settings` — configuration options (from `jedison.options.settings`); **always available**\n- `i0` — the zero-based index of the array item; available **only if the editor is an array item editor**\n- `i1` — the one-based index of the array item; available **only if the editor is an array item editor**\n- `parent` — parent instance template data; **available when parent exists**\n",
+  "x-format": "nav-vertical",
   "minItems": 1,
+  "default": [
+    {
+      "name": "Tech Corp",
+      "departments": [
+        {
+          "name": "Engineering"
+        }
+      ]
+    }
+  ],
+  "x-titleTemplate": "{{ value.name }}",
   "items": {
-    "title": "My object {{ i1 }} has title: {{ value.title }}",
-    "description": "My object {{ i1 }} has title: {{ value.title }}",
+    "title": "Company {{ i1 }} - {{ value.name }}",
+    "description": "Company {{ i1 }} has name: {{ value.name }}",
     "type": "object",
     "properties": {
-      "title": {
-        "title": "title",
+      "name": {
         "type": "string",
-        "default": "default"
+        "title": "Company Name",
+        "default": "New Company"
+      },
+      "departments": {
+        "type": "array",
+        "title": "Departments",
+        "x-format": "nav-vertical",
+        "minItems": 1,
+        "default": [
+          {
+            "name": "General"
+          }
+        ],
+        "x-titleTemplate": "{{ parent.parent.value.name }} - {{ value.name }}",
+        "items": {
+          "title": "{{ parent.parent.value.name }} - {{ value.name }}",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Department Name",
+              "default": "New Department"
+            }
+          }
+        }
       }
     }
   }

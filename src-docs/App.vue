@@ -20,7 +20,7 @@
     </div>
 
     <div class="row">
-      <div class="col-xs-12 col-md-4">
+      <div class="col-xs-12 col-md-3">
         <aside>
           <div class="form-group mb-0">
             <label for="schema"><code>schema</code></label>
@@ -154,7 +154,7 @@
         </aside>
       </div>
 
-      <div class="col-xs-12 col-md-5">
+      <div class="col-xs-12 col-md-6">
         <main>
           <div class="btn-group">
             <button class="btn btn-primary" id="disable-editor" @click="disableEditor()">Disable</button>

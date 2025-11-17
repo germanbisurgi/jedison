@@ -1810,11 +1810,15 @@ class Instance extends EventEmitter {
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
   getTemplateData() {
-    return {
+    const templateData = {
       ...this.arrayTemplateData,
       value: this.getValue(),
       settings: this.jedison.options.settings
     };
+    if (this.parent) {
+      templateData.parent = this.parent.getTemplateData();
+    }
+    return templateData;
   }
   /**
    * Sets the instance value
@@ -4342,12 +4346,7 @@ class EditorArrayNav extends EditorArray {
       const schemaOptionTitleTemplate = getSchemaXOption(this.instance.schema, "titleTemplate");
       if (schemaOptionTitleTemplate) {
         const template = schemaOptionTitleTemplate;
-        const data = {
-          i0: index2,
-          i1: index2 + 1,
-          value: child.getValue(),
-          settings: this.instance.jedison.options.settings
-        };
+        const data = child.getTemplateData();
         titleTemplate = compileTemplate(template, data) ?? childTitle;
       }
       const active = index2 === this.activeItemIndex;

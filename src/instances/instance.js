@@ -274,11 +274,18 @@ class Instance extends EventEmitter {
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
   getTemplateData () {
-    return {
+    const templateData = {
       ...this.arrayTemplateData,
       value: this.getValue(),
       settings: this.jedison.options.settings
     }
+
+    // Add parent data if parent exists
+    if (this.parent) {
+      templateData.parent = this.parent.getTemplateData()
+    }
+
+    return templateData
   }
 
   /**

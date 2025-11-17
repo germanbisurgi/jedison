@@ -73,12 +73,7 @@ class EditorArrayNav extends EditorArray {
 
       if (schemaOptionTitleTemplate) {
         const template = schemaOptionTitleTemplate
-        const data = {
-          i0: index,
-          i1: (index + 1),
-          value: child.getValue(),
-          settings: this.instance.jedison.options.settings
-        }
+        const data = child.getTemplateData()
 
         titleTemplate = compileTemplate(template, data) ?? childTitle
       }
