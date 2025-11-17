@@ -31,10 +31,12 @@ import EditorArray from './editors/array.js'
 import EditorMultiple from './editors/multiple.js'
 import EditorIfThenElse from './editors/if-then-else.js'
 import EditorNull from './editors/null.js'
+import Editor from './editors/editor.js'
 
 export default {
   Schema,
   Utils,
+  Editor,
   EditorBoolean,
   EditorBooleanRadios,
   EditorBooleanSelect,

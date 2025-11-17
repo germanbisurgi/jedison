@@ -8460,6 +8460,7 @@ class ThemeBootstrap5 extends Theme {
 const index = {
   Schema,
   Utils,
+  Editor,
   EditorBoolean,
   EditorBooleanRadios: EditorRadios,
   EditorBooleanSelect,
