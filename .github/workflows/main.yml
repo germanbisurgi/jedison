@@ -20,7 +20,7 @@ jobs:
       - name: Install
         run: yarn install
       - name: Test
-        run: yarn serve & sleep 5 && yarn e2e
+        run: yarn e2e
   e2e-bootstrap3:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +30,7 @@ jobs:
       - name: Install
         run: yarn install
       - name: Test
-        run: yarn serve & sleep 5 && yarn e2e:b3
+        run: yarn e2e:b3
   e2e-bootstrap4:
     runs-on: ubuntu-latest
     steps:
@@ -40,7 +40,7 @@ jobs:
       - name: Install
         run: yarn install
       - name: Test
-        run: yarn serve & sleep 5 && yarn e2e:b4
+        run: yarn e2e:b4
   e2e-bootstrap5:
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +50,7 @@ jobs:
       - name: Install
         run: yarn install
       - name: Test
-        run: yarn serve & sleep 5 && yarn e2e:b5
+        run: yarn e2e:b5
       - name: Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4

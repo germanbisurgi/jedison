@@ -12,7 +12,50 @@ Learn how to use Jedison with detailed guides and interactive examples.
 
 ## What is Jedison
 
+Jedison generates forms from JSON schemas. Simply provide a JSON schema and Jedison automatically creates a complete, interactive form with built-in validation.
+
+Here's a simple example:
+
+```json
+{
+  "title": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string",
+      "minLength": 1
+    },
+    "email": {
+      "title": "E-Mail",
+      "type": "string",
+      "format": "email",
+      "minLength": 3
+    },
+    "message": {
+      "title": "Message",
+      "type": "string",
+      "minLength": 1,
+      "x-format": "textarea"
+    },
+    "gdpr": {
+      "title": "I have read and accept the privacy policy",
+      "type": "boolean",
+      "default": false,
+      "const": true,
+      "x-format": "checkbox"
+    }
+  }
+}
+```
+
+This schema automatically generates a complete contact form:
+
+![Jedison Form Example](jedison-form.png)
+
 Jedison helps you validate JSON data on the backend and generate interactive forms from JSON Schemas on the frontend.
+
+**Backend Validation**: Jedison can also be used in headless mode for backend validation in Node.js environments. This is optional - you can use any other JSON schema validator you prefer for server-side validation.
 
 One common workflow looks like this:
 
@@ -20,14 +63,14 @@ One common workflow looks like this:
 2. Jedison automatically renders a complete form based on the schema
 3. Users interact with the form while getting instant client-side validation
 4. Validated data gets submitted back to your server
-5. The same schema validates the data again server-side for security
+5. The same schema validates the data again server-side for security (using Jedison in headless mode or any other validator)
 
 ![Jedison use diagram](/mermaid-flow-transparent.svg)
 
 But Jedison is flexible enough to support other patterns too - you might use it for:
 
 - Standalone client-side forms without server validation
-- Pure server-side JSON validation in your backend services
+- Pure server-side JSON validation in your backend services (headless mode)
 - Hybrid approaches where different parts of the schema are used in different contexts
 
 ## Install
