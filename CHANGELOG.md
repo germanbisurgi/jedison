@@ -1,3 +1,7 @@
+### 0.3.23
+
+- Fixed array nav-vertical readonly buttons not being properly disabled
+
 ### 0.3.22
 
 - Exposed Editor.js

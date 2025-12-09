@@ -24,7 +24,6 @@ class EditorArrayNav extends EditorArray {
   }
 
   refreshUI () {
-    this.refreshDisabledState()
     this.control.childrenSlot.innerHTML = ''
 
     this.clearStoredEventListeners()
@@ -122,6 +121,7 @@ class EditorArrayNav extends EditorArray {
       }
     })
 
+    this.refreshDisabledState()
     this.refreshAddBtn()
     this.refreshJsonData()
   }

@@ -1,52 +1,112 @@
 {
+  "title": "Pages",
   "type": "array",
-  "title": "Companies",
   "x-format": "nav-vertical",
+  "x-titleTemplate": "{{ value.slug }}",
   "minItems": 1,
-  "default": [
-    {
-      "name": "Tech Corp",
-      "departments": [
-        {
-          "name": "Engineering"
-        },
-        {
-          "name": "Marketing"
-        }
-      ]
-    }
-  ],
-  "x-titleTemplate": "{{ value.name }}",
   "items": {
-    "title": "Company",
+    "title": "Page {{ value.slug }}",
     "type": "object",
     "properties": {
-      "name": {
-        "type": "string",
-        "title": "Company Name",
-        "default": "New Company"
+      "title": {
+        "type": "string"
       },
-      "departments": {
+      "slug": {
+        "type": "string"
+      },
+      "sections": {
         "type": "array",
-        "title": "Departments",
-        "x-format": "nav-vertical",
         "minItems": 1,
-        "default": [
-          {
-            "name": "General"
-          }
-        ],
-        "x-titleTemplate": "{{ parent.parent.value.name }} - {{ value.name }}",
+        "x-format": "nav-vertical",
+        "x-titleTemplate": "{{ value.type }}",
         "items": {
-          "title": "Department",
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string",
-              "title": "Department Name",
-              "default": "New Department"
+          "anyOf": [
+            {
+              "title": "Hero",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "hero",
+                  "readOnly": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                },
+                "button": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "title": "Cards",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "cards",
+                  "readOnly": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "image": {
+                        "type": "string"
+                      },
+                      "link": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "title": "Content",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "content",
+                  "readOnly": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

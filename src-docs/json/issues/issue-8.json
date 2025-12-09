@@ -1,0 +1,9 @@
+{
+  "type": "array",
+  "minItems": 2,
+  "readOnly": true,
+  "x-format": "nav-vertical",
+  "items": {
+    "type": "string"
+  }
+}

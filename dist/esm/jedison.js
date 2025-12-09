@@ -4308,7 +4308,6 @@ class EditorArrayNav extends EditorArray {
     this.addJsonDataEventListeners();
   }
   refreshUI() {
-    this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
     this.clearStoredEventListeners();
     const format2 = getSchemaXOption(this.instance.schema, "format");
@@ -4382,6 +4381,7 @@ class EditorArrayNav extends EditorArray {
         moveDownBtn.setAttribute("disabled", "");
       }
     });
+    this.refreshDisabledState();
     this.refreshAddBtn();
     this.refreshJsonData();
   }
