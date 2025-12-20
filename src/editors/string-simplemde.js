@@ -63,6 +63,15 @@ class EditorStringSimpleMDE extends EditorString {
     super.refreshUI()
     this.simplemde.value(this.instance.getValue())
   }
+
+  destroy () {
+    if (this.aceEditor) {
+      this.aceEditor.destroy()
+      this.aceEditor.container.remove()
+    }
+
+    super.destroy()
+  }
 }
 
 export default EditorStringSimpleMDE

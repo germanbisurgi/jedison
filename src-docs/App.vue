@@ -304,6 +304,7 @@ import numberImask from './json/plugins/number-imask.json'
 import imask from './json/plugins/string-imask.json'
 import imaskSettings from './json/plugins/string-imask-settings.json'
 import raty from './json/plugins/number-raty.json'
+import stringAce from './json/plugins/string-ace.json'
 import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
@@ -410,6 +411,7 @@ export default {
           'plugins/quill': quill,
           'plugins/simplemde': simplemde,
           'plugins/raty': raty,
+          'plugins/ace': stringAce,
         },
         'Features': {
           'features/templates': templates,

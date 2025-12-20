@@ -31,6 +31,7 @@ import EditorNumberRaty from './editors/number-raty.js'
 import EditorIfThenElse from './editors/if-then-else.js'
 import EditorArrayCheckboxes from './editors/array-checkboxes.js'
 import EditorNumberRange from './editors/number-range.js'
+import EditorStringAce from './editors/string-ace.js'
 
 class UiResolver {
   constructor (options) {
@@ -54,6 +55,7 @@ class UiResolver {
       EditorStringJodit,
       EditorStringFlatpickr,
       EditorStringIMask,
+      EditorStringAce,
       EditorStringInput,
       EditorNumberImask,
       EditorNumberRaty,

@@ -1,0 +1,18 @@
+{
+  "title": "Ace",
+  "type": "string",
+  "x-format": "ace",
+  "minLength": 3,
+  "x-ace": {
+    "mode": "json",
+    "height": "400px",
+    "width": "100%",
+    "minHeight": "200px",
+    "maxHeight": "600px"
+  },
+  "x-info": {
+    "variant": "modal",
+    "title": "### Info Button title",
+    "content": "Info button content"
+  }
+}
