@@ -72,7 +72,7 @@ class EditorArrayNav extends EditorArray {
 
       if (schemaOptionTitleTemplate) {
         const template = schemaOptionTitleTemplate
-        const data = child.getTemplateData()
+        const data = child.getTemplateData(template)
 
         titleTemplate = compileTemplate(template, data) ?? childTitle
       }

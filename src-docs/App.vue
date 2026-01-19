@@ -335,6 +335,7 @@ import childrenDisableState from './json/issues/children-disable-state.json'
 import issue8 from './json/issues/issue-8.json'
 import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
+import templateFunctions from './json/features/template-functions.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -415,6 +416,7 @@ export default {
         },
         'Features': {
           'features/templates': templates,
+          'features/template-functions': templateFunctions,
           'features/edit-json-data': editJsonData,
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
@@ -721,6 +723,22 @@ export default {
             min: new Date(1990, 0, 1),
             max: new Date(2020, 0, 1),
             lazy: false
+          }
+        },
+        functions: {
+          calc: (context) => {
+            const segments = context.instance.value.segments
+            const route_length = context.instance.value.route_length
+
+            if (!context) {
+              return
+            }
+
+            if (segments) {
+              return segments.reduce((sum, t) => sum + (t.segment_length || 0), 0) ?? 0;
+            } else {
+              return route_length
+            }
           }
         },
         constraints: {

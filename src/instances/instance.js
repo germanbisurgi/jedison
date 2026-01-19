@@ -273,11 +273,17 @@ class Instance extends EventEmitter {
   /**
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
-  getTemplateData () {
+  getTemplateData (template) {
     const templateData = {
       ...this.arrayTemplateData,
       value: this.getValue(),
       settings: this.jedison.options.settings
+    }
+
+    if (template?.includes('{{ functions.')) {
+      templateData.functions = this.resolveTemplateFunctions(
+        this.jedison.options.functions
+      )
     }
 
     // Add parent data if parent exists
@@ -286,6 +292,14 @@ class Instance extends EventEmitter {
     }
 
     return templateData
+  }
+
+  resolveTemplateFunctions (functionsObject = {}) {
+    const context = {
+      instance: this
+    }
+
+    return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]))
   }
 
   /**

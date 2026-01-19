@@ -1809,16 +1809,27 @@ class Instance extends EventEmitter {
   /**
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
-  getTemplateData() {
+  getTemplateData(template) {
     const templateData = {
       ...this.arrayTemplateData,
       value: this.getValue(),
       settings: this.jedison.options.settings
     };
+    if (template == null ? void 0 : template.includes("{{ functions.")) {
+      templateData.functions = this.resolveTemplateFunctions(
+        this.jedison.options.functions
+      );
+    }
     if (this.parent) {
       templateData.parent = this.parent.getTemplateData();
     }
     return templateData;
+  }
+  resolveTemplateFunctions(functionsObject = {}) {
+    const context = {
+      instance: this
+    };
+    return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]));
   }
   /**
    * Sets the instance value
@@ -2137,7 +2148,7 @@ class Editor {
       titleFromSchema = true;
     }
     if (titleFromSchema) {
-      this.title = compileTemplate(this.title, this.instance.getTemplateData());
+      this.title = compileTemplate(this.title, this.instance.getTemplateData(this.title));
       this.title = this.markdownEnabled ? this.getHtmlFromMarkdown(this.title) : this.title;
       const domPurifyOptions = combineDeep({}, this.instance.jedison.options.domPurifyOptions, {
         FORBID_TAGS: ["p"]
@@ -2149,7 +2160,7 @@ class Editor {
   getDescription() {
     const schemaDescription = getSchemaDescription(this.instance.schema);
     if (isSet(schemaDescription)) {
-      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData());
+      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description));
       this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description;
       const domPurifyOptions = this.instance.jedison.options.domPurifyOptions;
       this.description = this.purifyEnabled ? this.purifyContent(this.description, domPurifyOptions) : this.description;
@@ -4345,7 +4356,7 @@ class EditorArrayNav extends EditorArray {
       const schemaOptionTitleTemplate = getSchemaXOption(this.instance.schema, "titleTemplate");
       if (schemaOptionTitleTemplate) {
         const template = schemaOptionTitleTemplate;
-        const data = child.getTemplateData();
+        const data = child.getTemplateData(template);
         titleTemplate = compileTemplate(template, data) ?? childTitle;
       }
       const active = index2 === this.activeItemIndex;

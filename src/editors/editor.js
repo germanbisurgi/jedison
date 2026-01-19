@@ -295,7 +295,7 @@ class Editor {
     }
 
     if (titleFromSchema) {
-      this.title = compileTemplate(this.title, this.instance.getTemplateData())
+      this.title = compileTemplate(this.title, this.instance.getTemplateData(this.title))
       this.title = this.markdownEnabled ? this.getHtmlFromMarkdown(this.title) : this.title
 
       const domPurifyOptions = combineDeep({}, this.instance.jedison.options.domPurifyOptions, {
@@ -312,7 +312,7 @@ class Editor {
     const schemaDescription = getSchemaDescription(this.instance.schema)
 
     if (isSet(schemaDescription)) {
-      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData())
+      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description))
       this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description
 
       const domPurifyOptions = this.instance.jedison.options.domPurifyOptions

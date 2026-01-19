@@ -1,0 +1,57 @@
+{
+  "title": "Create Route",
+  "type": "array",
+  "x-format": "nav-vertical",
+  "x-titleTemplate": "{{ i1 }} – Route {{ functions.calc }} km",
+  "x-arrayMove": false,
+  "items": {
+    "type": "object",
+    "anyOf": [
+      {
+        "title": "Total Length",
+        "properties": {
+          "route_length": {
+            "type": "number",
+            "title": "Length",
+            "description": "in km",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 99999.99,
+            "x-inputAttributes": {
+              "step": 0.01
+            }
+          }
+        }
+      },
+      {
+        "title": "Create Segment",
+        "properties": {
+          "segments": {
+            "type": "array",
+            "title": "Create Segment",
+            "x-format": "nav-vertical",
+            "x-titleTemplate": "Segment",
+            "x-arrayMove": false,
+            "items": {
+              "title": "Segment",
+              "type": "object",
+              "properties": {
+                "segment_length": {
+                  "type": "number",
+                  "title": "Length",
+                  "description": "in km",
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 99999.99,
+                  "x-inputAttributes": {
+                    "step": 0.1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
