@@ -1,3 +1,7 @@
+### 0.3.25
+
+- Added template functions
+
 ### 0.3.24
 
 - Added ace editor
