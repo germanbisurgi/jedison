@@ -47,6 +47,10 @@ module.exports = function () {
       this.fillField(locator, value)
       this.pressKey('Tab')
     },
+    _pressKey: function (key) {
+      this.pressKey(key)
+      this.wait(0.1)
+    },
     _fillRangeField: function (locator, value) {
       this.executeScript(function (locator, value) {
         document.querySelector(locator).value = value

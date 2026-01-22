@@ -23,14 +23,12 @@ Scenario('@plugin @jodit-as-prop should @setValue', ({ I }) => {
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify(value))
 
   I.click('.jodit-wysiwyg')
-  I.pressKey('Space')
-  I.pressKey('H')
-  I.pressKey('e')
-  I.pressKey('l')
-  I.pressKey('l')
-  I.pressKey('o')
-
-  I.wait(2)
+  I._pressKey('Space')
+  I._pressKey('H')
+  I._pressKey('e')
+  I._pressKey('l')
+  I._pressKey('l')
+  I._pressKey('o')
 
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify({
     value: '<p>Some Value Hello</p>'
