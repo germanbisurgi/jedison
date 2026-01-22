@@ -29,7 +29,8 @@ Scenario('@plugin @jodit-as-prop should @setValue', ({ I }) => {
   I.pressKey('l')
   I.pressKey('l')
   I.pressKey('o')
-  I.pressKey('Tab')
+
+  I.wait(1)
 
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify({
     value: '<p>Some Value Hello</p>'
