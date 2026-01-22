@@ -1,3 +1,7 @@
+### dev
+
+- Bugfix for Jodit plugin
+
 ### 0.3.25
 
 - Added template functions

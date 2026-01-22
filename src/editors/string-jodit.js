@@ -64,7 +64,11 @@ class EditorStringJodit extends EditorString {
       const joditValue = this.jodit.value
 
       if (joditValue !== this.instance.getValue()) {
+        // Save selection before triggering parent refresh which may remove or re adding DOM
+        const savedSelection = this.jodit.selection.save()
         this.instance.setValue(joditValue, true, 'user')
+        // Restore focus after DOM manipulation completes
+        this.jodit.selection.restore(savedSelection)
       }
     })
   }
@@ -79,7 +83,10 @@ class EditorStringJodit extends EditorString {
 
   refreshUI () {
     super.refreshUI()
-    this.jodit.value = this.instance.getValue()
+    const joditInstanceValue = this.instance.getValue()
+    if (this.jodit.value !== joditInstanceValue) {
+      this.jodit.value = joditInstanceValue
+    }
   }
 
   destroy () {
