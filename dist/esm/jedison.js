@@ -4618,7 +4618,9 @@ class EditorStringJodit extends EditorString {
     this.jodit.events.on("change", () => {
       const joditValue = this.jodit.value;
       if (joditValue !== this.instance.getValue()) {
+        const savedSelection = this.jodit.selection.save();
         this.instance.setValue(joditValue, true, "user");
+        this.jodit.selection.restore(savedSelection);
       }
     });
   }
@@ -4631,7 +4633,10 @@ class EditorStringJodit extends EditorString {
   }
   refreshUI() {
     super.refreshUI();
-    this.jodit.value = this.instance.getValue();
+    const joditInstanceValue = this.instance.getValue();
+    if (this.jodit.value !== joditInstanceValue) {
+      this.jodit.value = joditInstanceValue;
+    }
   }
   destroy() {
     this.jodit.destruct();

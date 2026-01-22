@@ -333,6 +333,7 @@ import ifThenElseNullableInitialValue2 from './json/issues/if-then-else-nullable
 import multipleRegister from './json/issues/multiple-register.json'
 import childrenDisableState from './json/issues/children-disable-state.json'
 import issue8 from './json/issues/issue-8.json'
+import joditAsProp from './json/issues/jodit-as-prop.json'
 import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
@@ -482,7 +483,8 @@ export default {
           'issue/if-then-else-nullable-initial-value-2': ifThenElseNullableInitialValue2,
           'issue/multiple-register': multipleRegister,
           'issue/children-disable-state': childrenDisableState,
-          'issue/issue-8': issue8
+          'issue/issue-8': issue8,
+          'issue/jodit-as-prop': joditAsProp,
         }
       },
       example: 'editors/all',

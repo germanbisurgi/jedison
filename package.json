@@ -33,7 +33,7 @@
     "e2e:b4": "THEME='bootstrap4' yarn e2e",
     "e2e:b5": "THEME='bootstrap5' yarn e2e",
     "e2e:*": "yarn e2e && yarn e2e:b3 && yarn e2e:b4 && yarn e2e:b5",
-    "e2e:grep": "SHOW=true THEME='bootstrap5' start-server-and-test serve http://localhost:8181 'codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep @template-functions'",
+    "e2e:grep": "SHOW=true THEME='bootstrap5' start-server-and-test serve http://localhost:8181 'codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep @jodit-as-prop'",
     "lint": "eslint -c ./.eslintrc.json ./src ./tests",
     "lint:fix": "eslint --fix -c ./.eslintrc.json ./src ./tests",
     "test:full": "yarn e2e && yarn unit",
@@ -86,6 +86,7 @@
     "tar-fs": ">=3.1.1",
     "tmp": "^0.2.4",
     "glob": ">=11.1.0",
-    "diff": ">=8.0.3 "
+    "diff": ">=8.0.3",
+    "lodash": ">=4.17.23"
   }
 }

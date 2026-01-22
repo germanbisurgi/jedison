@@ -1,0 +1,18 @@
+{
+  "title": "Jodit",
+  "type": "object",
+  "description": "Jodit - Best WYSIWYG Editor for You.",
+  "properties": {
+    "value": {
+      "type": "string",
+      "title": "Value",
+      "default": "Jodit default",
+      "minLength": 20,
+      "x-format": "jodit",
+      "x-jodit": {}
+    }
+  },
+  "required": [
+    "value"
+  ]
+}

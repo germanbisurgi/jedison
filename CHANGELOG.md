@@ -1,5 +1,7 @@
 ### dev
 
+### 0.3.26
+
 - Bugfix for Jodit plugin
 
 ### 0.3.25
