@@ -1,6 +1,6 @@
 {
   "name": "jedison",
-  "version": "0.3.25",
+  "version": "0.3.26",
   "description": "A JavaScript Library that generates forms from JSON Schemas, to editing and validate JSON.",
   "main": "./dist/cjs/jedison.cjs",
   "module": "./dist/esm/jedison.js",
