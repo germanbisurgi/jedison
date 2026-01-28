@@ -41,6 +41,12 @@ class Instance extends EventEmitter {
     this.schema = config.schema
 
     /**
+     * Original unmodified schema clone for validation.
+     * @type {boolean|object}
+     */
+    this.originalSchema = config.originalSchema ?? clone(config.schema)
+
+    /**
      * The json value of this instance.
      * @type {*}
      */
@@ -362,7 +368,7 @@ class Instance extends EventEmitter {
       return []
     }
 
-    const errors = this.jedison.validator.getErrors(this.getValue(), this.schema, this.getKey(), this.path)
+    const errors = this.jedison.validator.getErrors(this.getValue(), this.originalSchema, this.getKey(), this.path)
     return removeDuplicatesFromArray(errors)
   }
 

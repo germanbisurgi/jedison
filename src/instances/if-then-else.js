@@ -33,7 +33,7 @@ class InstanceIfThenElse extends Instance {
     this.activeInstance = null
     this.index = 0
     this.schemas = []
-    this.ifThenElseShemas = []
+    this.ifThenElseSchemas = []
 
     this.traverseSchema(this.schema)
 
@@ -41,7 +41,7 @@ class InstanceIfThenElse extends Instance {
     delete this.schema.then
     delete this.schema.else
 
-    this.ifThenElseShemas.forEach((item) => {
+    this.ifThenElseSchemas.forEach((item) => {
       if (isSet(item.then)) {
         this.schemas.push(mergeDeep({}, clone(this.schema), item.then))
       }
@@ -59,6 +59,7 @@ class InstanceIfThenElse extends Instance {
     this.instanceWithoutIf = this.jedison.createInstance({
       jedison: this.jedison,
       schema: schemaClone,
+      originalSchema: this.originalSchema,
       path: this.path,
       parent: this.parent
     })
@@ -67,13 +68,12 @@ class InstanceIfThenElse extends Instance {
       const instance = this.jedison.createInstance({
         jedison: this.jedison,
         schema: schema,
+        originalSchema: this.originalSchema,
         path: this.path,
         parent: this.parent
       })
 
       this.instanceStartingValues.push(instance.getValue())
-
-      // instance.off('notifyParent')
 
       this.instances.push(instance)
     })
@@ -154,11 +154,6 @@ class InstanceIfThenElse extends Instance {
     return value
   }
 
-  switchInstance (index) {
-    this.index = index
-    this.activeInstance = this.instances[this.index]
-  }
-
   traverseSchema (schema) {
     const schemaIf = getSchemaIf(schema)
 
@@ -166,12 +161,12 @@ class InstanceIfThenElse extends Instance {
       const schemaThen = getSchemaThen(schema)
       const schemaElse = getSchemaElse(schema)
 
-      this.ifThenElseShemas.push({
+      this.ifThenElseSchemas.push({
         if: schemaIf,
         then: isSet(schemaThen) ? schemaThen : {}
       })
 
-      this.ifThenElseShemas.push({
+      this.ifThenElseSchemas.push({
         if: schemaIf,
         else: isSet(schemaElse) ? schemaElse : {}
       })
@@ -227,7 +222,7 @@ class InstanceIfThenElse extends Instance {
   getFittestIndex (value) {
     let fittestIndex = this.index
 
-    this.ifThenElseShemas.forEach((schema, index) => {
+    this.ifThenElseSchemas.forEach((schema, index) => {
       if (schema.if === true) {
         fittestIndex = 0
       } else if (schema.if === false) {

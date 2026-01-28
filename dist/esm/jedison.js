@@ -1651,6 +1651,7 @@ class Instance extends EventEmitter {
     this.jedison = config.jedison;
     this.path = config.path || this.jedison.rootName;
     this.schema = config.schema;
+    this.originalSchema = config.originalSchema ?? clone(config.schema);
     this.value = isSet(config.value) ? config.value : void 0;
     this.isActive = true;
     this.parent = config.parent || null;
@@ -1875,7 +1876,7 @@ class Instance extends EventEmitter {
     if (!this.isActive) {
       return [];
     }
-    const errors = this.jedison.validator.getErrors(this.getValue(), this.schema, this.getKey(), this.path);
+    const errors = this.jedison.validator.getErrors(this.getValue(), this.originalSchema, this.getKey(), this.path);
     return removeDuplicatesFromArray(errors);
   }
   /**
@@ -2294,12 +2295,12 @@ class InstanceIfThenElse extends Instance {
     this.activeInstance = null;
     this.index = 0;
     this.schemas = [];
-    this.ifThenElseShemas = [];
+    this.ifThenElseSchemas = [];
     this.traverseSchema(this.schema);
     delete this.schema.if;
     delete this.schema.then;
     delete this.schema.else;
-    this.ifThenElseShemas.forEach((item) => {
+    this.ifThenElseSchemas.forEach((item) => {
       if (isSet(item.then)) {
         this.schemas.push(mergeDeep({}, clone(this.schema), item.then));
       }
@@ -2314,6 +2315,7 @@ class InstanceIfThenElse extends Instance {
     this.instanceWithoutIf = this.jedison.createInstance({
       jedison: this.jedison,
       schema: schemaClone,
+      originalSchema: this.originalSchema,
       path: this.path,
       parent: this.parent
     });
@@ -2321,6 +2323,7 @@ class InstanceIfThenElse extends Instance {
       const instance = this.jedison.createInstance({
         jedison: this.jedison,
         schema,
+        originalSchema: this.originalSchema,
         path: this.path,
         parent: this.parent
       });
@@ -2385,20 +2388,16 @@ class InstanceIfThenElse extends Instance {
     }
     return value;
   }
-  switchInstance(index2) {
-    this.index = index2;
-    this.activeInstance = this.instances[this.index];
-  }
   traverseSchema(schema) {
     const schemaIf = getSchemaIf(schema);
     if (isSet(schemaIf)) {
       const schemaThen = getSchemaThen(schema);
       const schemaElse = getSchemaElse(schema);
-      this.ifThenElseShemas.push({
+      this.ifThenElseSchemas.push({
         if: schemaIf,
         then: isSet(schemaThen) ? schemaThen : {}
       });
-      this.ifThenElseShemas.push({
+      this.ifThenElseSchemas.push({
         if: schemaIf,
         else: isSet(schemaElse) ? schemaElse : {}
       });
@@ -2438,7 +2437,7 @@ class InstanceIfThenElse extends Instance {
    */
   getFittestIndex(value) {
     let fittestIndex = this.index;
-    this.ifThenElseShemas.forEach((schema, index2) => {
+    this.ifThenElseSchemas.forEach((schema, index2) => {
       if (schema.if === true) {
         fittestIndex = 0;
       } else if (schema.if === false) {
@@ -4608,7 +4607,6 @@ class EditorStringJodit extends EditorString {
       };
       const joditSchemaOptions = getSchemaXOption(this.instance.schema, "jodit") ?? {};
       const joditOptions = Object.assign({}, joditDefaultOptions, joditSchemaOptions);
-      console.log("joditOptions", joditOptions, getSchemaXOption(this.instance.schema, "jodit"));
       this.jodit = window.Jodit.make(this.control.input, joditOptions);
     } catch (e) {
       console.error("Jodit is not available or not loaded correctly.", e);
@@ -5584,16 +5582,6 @@ class Jedison extends EventEmitter {
    */
   unregister(instance) {
     this.instances.delete(instance.path);
-  }
-  logIfEditor(...params) {
-    if (this.isEditor) {
-      console.log(...params);
-    }
-  }
-  warnIfEditor(...params) {
-    if (this.isEditor) {
-      console.warn(...params);
-    }
   }
   /**
    * Creates a json instance and dereference schema on the fly if needed.

@@ -52,7 +52,6 @@ class EditorStringJodit extends EditorString {
 
       const joditOptions = Object.assign({}, joditDefaultOptions, joditSchemaOptions)
 
-      console.log('joditOptions', joditOptions, getSchemaXOption(this.instance.schema, 'jodit'))
       this.jodit = window.Jodit.make(this.control.input, joditOptions)
     } catch (e) {
       console.error('Jodit is not available or not loaded correctly.', e)

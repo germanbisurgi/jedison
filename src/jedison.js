@@ -354,18 +354,6 @@ class Jedison extends EventEmitter {
     this.instances.delete(instance.path)
   }
 
-  logIfEditor (...params) {
-    if (this.isEditor) {
-      console.log(...params)
-    }
-  }
-
-  warnIfEditor (...params) {
-    if (this.isEditor) {
-      console.warn(...params)
-    }
-  }
-
   /**
    * Creates a json instance and dereference schema on the fly if needed.
    */

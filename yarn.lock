@@ -5065,7 +5065,7 @@ json-parse-even-better-errors@^2.3.0:
 
 "json-schema-test-suite@https://github.com/json-schema-org/JSON-Schema-Test-Suite.git":
   version "0.1.0"
-  resolved "https://github.com/json-schema-org/JSON-Schema-Test-Suite.git#15e4505bf689de5d30c29d50782bb48fa465c93f"
+  resolved "https://github.com/json-schema-org/JSON-Schema-Test-Suite.git#75995a1c8112322024d5c04a5eac27813aeb46f0"
 
 json-schema-traverse@^0.4.1:
   version "0.4.1"

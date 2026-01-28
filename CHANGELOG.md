@@ -1,5 +1,7 @@
 ### dev
 
+- Compliance with new official JSON-Schema-Test-Suite
+
 ### 0.3.26
 
 - Bugfix for Jodit plugin
