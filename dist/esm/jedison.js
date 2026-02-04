@@ -5820,7 +5820,10 @@ class Jedison extends EventEmitter {
   }
 }
 class RefParser {
-  constructor() {
+  constructor(options = {}) {
+    this.options = Object.assign({
+      detectRecursion: true
+    }, options);
     this.refs = {};
     this.data = {};
     this.iterations = 0;
@@ -5841,8 +5844,10 @@ class RefParser {
     if (missingRefs.length) {
       console.warn("Missing refs:", JSON.stringify(missingRefs));
     }
-    this.cycles = this.findRecursiveRefs(this.refs);
-    this.markRecursiveSchemas();
+    if (this.options.detectRecursion) {
+      this.cycles = this.findRecursiveRefs(this.refs);
+      this.markRecursiveSchemas();
+    }
   }
   refsResolved() {
     return Object.values(this.refs).every((value) => {
@@ -5922,14 +5927,14 @@ class RefParser {
     return [...cycles];
   }
   hasRefCycles() {
-    return this.cycles.length > 0;
+    return this.options.detectRecursion && this.cycles.length > 0;
   }
   markRecursiveSchemas() {
     const cycleRefs = /* @__PURE__ */ new Set();
     this.cycles.forEach((cycle) => {
       cycle.split(" → ").forEach((ref) => cycleRefs.add(ref));
     });
-    for (const [path, schema] of Object.entries(this.data)) {
+    for (const schema of Object.values(this.data)) {
       if (schema && schema.$ref && cycleRefs.has(schema.$ref)) {
         schema["x-recursive"] = true;
       }

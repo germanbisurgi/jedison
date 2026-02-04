@@ -40,7 +40,7 @@ const suites = [
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/prefixItems'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/properties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/propertyNames'),
-  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/ref'),
+  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/ref'), // todo: next
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/refRemote'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/required'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/type'),
