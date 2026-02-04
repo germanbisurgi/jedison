@@ -30,6 +30,7 @@ class RefParser {
     }
 
     this.cycles = this.findRecursiveRefs(this.refs)
+    this.markRecursiveSchemas()
   }
 
   refsResolved () {
@@ -134,6 +135,22 @@ class RefParser {
 
   hasRefCycles () {
     return this.cycles.length > 0
+  }
+
+  markRecursiveSchemas () {
+    const cycleRefs = new Set()
+
+    // Extract all refs that are part of cycles
+    this.cycles.forEach(cycle => {
+      cycle.split(' → ').forEach(ref => cycleRefs.add(ref))
+    })
+
+    // Mark schemas with $refs pointing to cycle members
+    for (const [path, schema] of Object.entries(this.data)) {
+      if (schema && schema.$ref && cycleRefs.has(schema.$ref)) {
+        schema['x-recursive'] = true
+      }
+    }
   }
 
   expand (schema) {

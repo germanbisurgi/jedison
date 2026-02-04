@@ -1,7 +1,10 @@
 {
-  "type": "number",
-  "if": {
-    "const": 1
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "foo": {
+      "$ref": "#"
+    }
   },
-  "then": false
+  "additionalProperties": false
 }

@@ -2625,6 +2625,7 @@ class InstanceObject extends Instance {
         const schema = schemaProperties[key];
         this.properties[key] = { schema };
         let musstCreateChild = true;
+        const isRecursive = isSet(schema["x-recursive"]);
         const optionsDeactivateNonRequired = this.jedison.options.deactivateNonRequired;
         const deactivateNonRequired = getSchemaXOption(this.schema, "deactivateNonRequired");
         const schemaDeactivateNonRequired = getSchemaXOption(schema, "deactivateNonRequired");
@@ -2635,6 +2636,9 @@ class InstanceObject extends Instance {
           musstCreateChild = false;
         }
         if (!this.isRequired(key) && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
+          musstCreateChild = false;
+        }
+        if (!this.isRequired(key) && isRecursive) {
           musstCreateChild = false;
         }
         if (musstCreateChild) {
@@ -5838,6 +5842,7 @@ class RefParser {
       console.warn("Missing refs:", JSON.stringify(missingRefs));
     }
     this.cycles = this.findRecursiveRefs(this.refs);
+    this.markRecursiveSchemas();
   }
   refsResolved() {
     return Object.values(this.refs).every((value) => {
@@ -5918,6 +5923,17 @@ class RefParser {
   }
   hasRefCycles() {
     return this.cycles.length > 0;
+  }
+  markRecursiveSchemas() {
+    const cycleRefs = /* @__PURE__ */ new Set();
+    this.cycles.forEach((cycle) => {
+      cycle.split(" → ").forEach((ref) => cycleRefs.add(ref));
+    });
+    for (const [path, schema] of Object.entries(this.data)) {
+      if (schema && schema.$ref && cycleRefs.has(schema.$ref)) {
+        schema["x-recursive"] = true;
+      }
+    }
   }
   expand(schema) {
     const cloneSchema = JSON.parse(JSON.stringify(schema));

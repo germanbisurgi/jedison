@@ -28,6 +28,7 @@ class InstanceObject extends Instance {
 
         let musstCreateChild = true
 
+        const isRecursive = isSet(schema['x-recursive'])
         const optionsDeactivateNonRequired = this.jedison.options.deactivateNonRequired
         const deactivateNonRequired = getSchemaXOption(this.schema, 'deactivateNonRequired')
         const schemaDeactivateNonRequired = getSchemaXOption(schema, 'deactivateNonRequired')
@@ -41,6 +42,10 @@ class InstanceObject extends Instance {
         }
 
         if (!this.isRequired(key) && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
+          musstCreateChild = false
+        }
+
+        if (!this.isRequired(key) && isRecursive) {
           musstCreateChild = false
         }
 
