@@ -22,12 +22,6 @@
 - refactor setInitialValue
 - use super.refreshUI() in all editors
 
-#### Breaking Changes (do before stable release)
-- rename:
-  - x-sortable to x-arrayDrag
-  - x-enableCollapseToggle to x-collapseToggle
-  - x-startCollapsed to x-collapsed
-
 #### Core Functionality
 - "properties" button + and additionalProperties
 - error messages subcategories by data type?
