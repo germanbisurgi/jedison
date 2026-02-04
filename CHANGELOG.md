@@ -1,4 +1,4 @@
-### dev
+### 1.0.0
 
 - Detect and flag recursive schemas when dereferencing refs
 - Compliance with new official JSON-Schema-Test-Suite
