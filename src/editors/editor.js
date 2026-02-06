@@ -270,7 +270,7 @@ class Editor {
    * Clean out HTML tags from txt
    */
   purifyContent (content, domPurifyOptions) {
-    if (this.instance.jedison.options.purifyHtml && window.DOMPurify) {
+    if (this.instance.jedison.options.purifyHtml && typeof window !== 'undefined' && window.DOMPurify) {
       return window.DOMPurify.sanitize(content, domPurifyOptions)
     } else {
       const tmp = document.createElement('div')

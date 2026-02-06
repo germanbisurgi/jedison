@@ -143,6 +143,11 @@
           </div>
 
           <div class="form-group mb-3">
+            <input type="checkbox" id="purifyData" v-model="purifyData" @change="initEditor()">
+            <label for="purifyData"><code>purifyData</code></label>
+          </div>
+
+          <div class="form-group mb-3">
             <input type="checkbox" id="mergeAllOf" v-model="mergeAllOf" @change="initEditor()">
             <label for="mergeAllOf"><code>mergeAllOf</code></label>
           </div>
@@ -337,6 +342,7 @@ import joditAsProp from './json/issues/jodit-as-prop.json'
 import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
+import purifyValue from './json/features/purify-value.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -418,6 +424,7 @@ export default {
         'Features': {
           'features/templates': templates,
           'features/template-functions': templateFunctions,
+          'features/purify-value': purifyValue,
           'features/edit-json-data': editJsonData,
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
@@ -535,6 +542,7 @@ export default {
       assertFormat: false,
       parseMarkdown: true,
       purifyHtml: true,
+      purifyData: true,
       mergeAllOf: false,
       enforceEnum: true,
       enforceRequired: true,
@@ -554,6 +562,7 @@ export default {
     this.assertFormat = this.getQueryParam('assertFormat') ? this.parseBooleanString(this.getQueryParam('assertFormat')) : false
     this.parseMarkdown = this.getQueryParam('parseMarkdown') ? this.parseBooleanString(this.getQueryParam('parseMarkdown')) : true
     this.purifyHtml = this.getQueryParam('purifyHtml') ? this.parseBooleanString(this.getQueryParam('purifyHtml')) : true
+    this.purifyData = this.getQueryParam('purifyData') ? this.parseBooleanString(this.getQueryParam('purifyData')) : true
     this.mergeAllOf = this.getQueryParam('mergeAllOf') ? this.parseBooleanString(this.getQueryParam('mergeAllOf')) : false
     this.enforceEnum = this.getQueryParam('enforceEnum') ? this.parseBooleanString(this.getQueryParam('enforceEnum')) : true
     this.enforceRequired = this.getQueryParam('enforceRequired') ? this.parseBooleanString(this.getQueryParam('enforceRequired')) : true
@@ -705,6 +714,7 @@ export default {
         assertFormat: this.assertFormat,
         parseMarkdown: this.parseMarkdown,
         purifyHtml: this.purifyHtml,
+        purifyData: this.purifyData,
         mergeAllOf: this.mergeAllOf,
         enforceEnum: this.enforceEnum,
         enforceRequired: this.enforceRequired,
@@ -772,7 +782,6 @@ export default {
       this.editor = new Jedison.Create(options)
       const t2 = window.performance.now()
       console.log('init time', t2 - t1)
-      console.log(this.editor.instances)
       window.editor = this.editor
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
@@ -828,6 +837,7 @@ export default {
       newUrl += "&assertFormat=" + this.assertFormat
       newUrl += "&parseMarkdown=" + this.parseMarkdown
       newUrl += "&purifyHtml=" + this.purifyHtml
+      newUrl += "&purifyData=" + this.purifyData
       newUrl += "&mergeAllOf=" + this.mergeAllOf
       newUrl += "&enforceEnum=" + this.enforceEnum
       newUrl += "&enforceRequired=" + this.enforceRequired
@@ -854,6 +864,7 @@ export default {
       newUrl += "&assertFormat=" + this.assertFormat
       newUrl += "&parseMarkdown=" + this.parseMarkdown
       newUrl += "&purifyHtml=" + this.purifyHtml
+      newUrl += "&purifyData=" + this.purifyData
       newUrl += "&mergeAllOf=" + this.mergeAllOf
       newUrl += "&enforceEnum=" + this.enforceEnum
       newUrl += "&enforceRequired=" + this.enforceRequired

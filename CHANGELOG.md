@@ -1,3 +1,7 @@
+### 1.1.0
+
+- Added "purifyData" option
+
 ### 1.0.0
 
 - Detect and flag recursive schemas when dereferencing refs

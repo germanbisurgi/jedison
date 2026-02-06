@@ -23,6 +23,7 @@ function sortObject(obj) {
   }, {});
 }
 function equal(a, b) {
+  if (a === b) return true;
   if (isObject(a) && isObject(b)) {
     a = sortObject(a);
     b = sortObject(b);
@@ -1832,6 +1833,12 @@ class Instance extends EventEmitter {
     };
     return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]));
   }
+  purify(value) {
+    if (typeof value === "string" && this.jedison.options.purifyData && typeof window !== "undefined" && window.DOMPurify) {
+      value = window.DOMPurify.sanitize(value);
+    }
+    return value;
+  }
   /**
    * Sets the instance value
    * @returns {*} The final value after constraint enforcement
@@ -1840,9 +1847,9 @@ class Instance extends EventEmitter {
     if (this.value === newValue) {
       return this.value;
     }
-    if (typeof this.value !== "object" && typeof newValue !== "object" && this.value === newValue) {
-      return this.value;
-    }
+    const purifiedValue = this.purify(newValue);
+    const wasPurified = newValue !== purifiedValue;
+    newValue = purifiedValue;
     const enforceConst = getSchemaXOption(this.schema, "enforceConst") ?? this.jedison.options.enforceConst;
     if (isSet(enforceConst) && equal(enforceConst, true)) {
       const schemaConst = getSchemaConst(this.schema);
@@ -1850,8 +1857,7 @@ class Instance extends EventEmitter {
         newValue = schemaConst;
       }
     }
-    const valueChanged = different(this.value, newValue);
-    if (!valueChanged) {
+    if (!wasPurified && !different(this.value, newValue)) {
       return this.value;
     }
     this.value = newValue;
@@ -2129,7 +2135,7 @@ class Editor {
    * Clean out HTML tags from txt
    */
   purifyContent(content, domPurifyOptions) {
-    if (this.instance.jedison.options.purifyHtml && window.DOMPurify) {
+    if (this.instance.jedison.options.purifyHtml && typeof window !== "undefined" && window.DOMPurify) {
       return window.DOMPurify.sanitize(content, domPurifyOptions);
     } else {
       const tmp = document.createElement("div");
@@ -5388,6 +5394,7 @@ class Jedison extends EventEmitter {
       useConstraintAttributes: true,
       parseMarkdown: false,
       purifyHtml: true,
+      purifyData: true,
       domPurifyOptions: {},
       mergeAllOf: false,
       enforceConst: false,

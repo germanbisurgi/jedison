@@ -308,20 +308,27 @@ class Instance extends EventEmitter {
     return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]))
   }
 
+  purify (value) {
+    if (typeof value === 'string' && this.jedison.options.purifyData && typeof window !== 'undefined' && window.DOMPurify) {
+      value = window.DOMPurify.sanitize(value)
+    }
+
+    return value
+  }
+
   /**
    * Sets the instance value
    * @returns {*} The final value after constraint enforcement
    */
   setValue (newValue, notifyParent = true, initiator = 'api') {
-    // EARLY RETURN: Skip if value is identical (70% of cases)
+    // zero-cost bail-out
     if (this.value === newValue) {
       return this.value
     }
 
-    // EARLY RETURN: Skip if both values are primitives and equal
-    if (typeof this.value !== 'object' && typeof newValue !== 'object' && this.value === newValue) {
-      return this.value
-    }
+    const purifiedValue = this.purify(newValue)
+    const wasPurified = newValue !== purifiedValue
+    newValue = purifiedValue
 
     // Only check const enforcement if necessary
     const enforceConst = getSchemaXOption(this.schema, 'enforceConst') ?? this.jedison.options.enforceConst
@@ -333,10 +340,8 @@ class Instance extends EventEmitter {
     }
 
     // Only do expensive comparison if values might be different
-    const valueChanged = different(this.value, newValue)
-
-    if (!valueChanged) {
-      return this.value // EARLY RETURN: No change needed
+    if (!wasPurified && !different(this.value, newValue)) {
+      return this.value
     }
 
     this.value = newValue
