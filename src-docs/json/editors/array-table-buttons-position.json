@@ -1,0 +1,44 @@
+{
+  "title": "Array Table Button Positioning",
+  "description": "Demonstrates left vs right positioning of action buttons in table arrays",
+  "type": "object",
+  "properties": {
+    "buttonsLeft": {
+      "title": "Buttons on Left (default)",
+      "type": "array",
+      "x-format": "table-object",
+      "default": [
+        { "name": "Alice" },
+        { "name": "Bob" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        }
+      }
+    },
+    "buttonsRight": {
+      "title": "Buttons on Right", 
+      "type": "array",
+      "x-format": "table-object",
+      "x-arrayButtonsPosition": "right",
+      "default": [
+        { "name": "Charlie" },
+        { "name": "Diana" }
+      ],
+      "items": {
+        "type": "object", 
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,3 +1,8 @@
+### 1.2.0
+
+- Added "arrayButtonsPosition" option
+- Improved array editor with adaptive td for buttons
+
 ### 1.1.0
 
 - Added "purifyData" option

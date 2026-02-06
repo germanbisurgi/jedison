@@ -221,6 +221,7 @@ import arrayCheckboxes from './json/editors/array-checkboxes.json'
 import arrayCheckboxesInline from './json/editors/array-checkboxes-inline.json'
 import arrayTable from './json/editors/array-table.json'
 import arrayTableObject from './json/editors/array-table-object.json'
+import arrayTableButtonsPosition from './json/editors/array-table-buttons-position.json'
 import arrayNavVertical from './json/editors/array-nav-vertical.json'
 import arrayNavHorizontal from './json/editors/array-nav-horizontal.json'
 import arrayEnforceMinItems from './json/editors/array-enforceMinItems.json'
@@ -375,6 +376,7 @@ export default {
           'editors/array-nav-horizontal': arrayNavHorizontal,
           'editors/array-table': arrayTable,
           'editors/array-table-object': arrayTableObject,
+          'editors/array-table-buttons-position': arrayTableButtonsPosition,
           'editors/array-enforceMinItems': arrayEnforceMinItems,
           'editors/boolean-checkbox': booleanCheckbox,
           'editors/boolean-radios': booleanRadios,

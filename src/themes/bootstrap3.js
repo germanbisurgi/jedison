@@ -109,6 +109,7 @@ class ThemeBootstrap3 extends Theme {
   getBtnGroup () {
     const html = super.getBtnGroup()
     html.classList.add('btn-group')
+    html.style.display = 'inline-flex'
     return html
   }
 

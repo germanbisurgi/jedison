@@ -31,6 +31,10 @@ class EditorArrayTable extends EditorArray {
 
     this.control.childrenSlot.appendChild(table.container)
 
+    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
+    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, 'arrayButtonsPosition') ?? this.instance.jedison.options.arrayButtonsPosition
+
     // thead labels
     const th = this.theme.getTableHeader()
     const { label } = this.theme.getFakeLabel({
@@ -40,7 +44,10 @@ class EditorArrayTable extends EditorArray {
 
     th.appendChild(label)
 
-    table.thead.appendChild(th)
+    // Add controls header at the beginning (left) or end (right)
+    if (arrayButtonsPosition === 'left') {
+      table.thead.appendChild(th)
+    }
 
     // table header
 
@@ -73,15 +80,17 @@ class EditorArrayTable extends EditorArray {
       table.thead.appendChild(thTitle)
     }
 
-    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
-    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
+    // Add controls header at the end if position is right
+    if (arrayButtonsPosition === 'right') {
+      table.thead.appendChild(th)
+    }
 
     // tbody rows
     this.instance.children.forEach((child, index) => {
       const tbodyRow = document.createElement('tr')
 
       // buttons
-      const buttonsTd = this.theme.getTableDefinition()
+      const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true })
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index)
 
       if (this.isSortable()) {
@@ -98,13 +107,22 @@ class EditorArrayTable extends EditorArray {
       }
 
       buttonsTd.appendChild(btnGroup)
-      tbodyRow.appendChild(buttonsTd)
+
+      // Add buttons column at the beginning (left) or end (right)
+      if (arrayButtonsPosition === 'left') {
+        tbodyRow.appendChild(buttonsTd)
+      }
 
       // child
       const td = this.theme.getTableDefinition()
       child.ui.adaptForTable(child, td)
       td.appendChild(child.ui.control.container)
       tbodyRow.appendChild(td)
+
+      // Add buttons column at the end if position is right
+      if (arrayButtonsPosition === 'right') {
+        tbodyRow.appendChild(buttonsTd)
+      }
 
       table.tbody.appendChild(tbodyRow)
     })

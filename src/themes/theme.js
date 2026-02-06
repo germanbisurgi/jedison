@@ -1770,9 +1770,15 @@ class Theme {
   /**
    * Returns a <td> element
    */
-  getTableDefinition () {
+  getTableDefinition (config = {}) {
     const td = document.createElement('td')
-    td.style.whiteSpace = 'nowrap'
+
+    if (config.isButtonColumn) {
+      // For button columns, make them shrink to fit content
+      td.style.width = '1%'
+      td.style.whiteSpace = 'nowrap'
+    }
+
     return td
   }
 

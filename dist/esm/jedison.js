@@ -4023,13 +4023,18 @@ class EditorArrayTable extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
       visuallyHidden: true
     });
     th.appendChild(label);
-    table.thead.appendChild(th);
+    if (arrayButtonsPosition === "left") {
+      table.thead.appendChild(th);
+    }
     if (this.instance.children.length) {
       const schemaItems = getSchemaItems(this.instance.schema);
       const thTitle = this.theme.getTableHeader();
@@ -4050,11 +4055,12 @@ class EditorArrayTable extends EditorArray {
       }
       table.thead.appendChild(thTitle);
     }
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    if (arrayButtonsPosition === "right") {
+      table.thead.appendChild(th);
+    }
     this.instance.children.forEach((child, index2) => {
       const tbodyRow = document.createElement("tr");
-      const buttonsTd = this.theme.getTableDefinition();
+      const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index2);
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn);
@@ -4067,11 +4073,16 @@ class EditorArrayTable extends EditorArray {
         btnGroup.appendChild(moveDownBtn);
       }
       buttonsTd.appendChild(btnGroup);
-      tbodyRow.appendChild(buttonsTd);
+      if (arrayButtonsPosition === "left") {
+        tbodyRow.appendChild(buttonsTd);
+      }
       const td = this.theme.getTableDefinition();
       child.ui.adaptForTable(child, td);
       td.appendChild(child.ui.control.container);
       tbodyRow.appendChild(td);
+      if (arrayButtonsPosition === "right") {
+        tbodyRow.appendChild(buttonsTd);
+      }
       table.tbody.appendChild(tbodyRow);
     });
     this.refreshSortable(table.tbody);
@@ -4135,13 +4146,18 @@ class EditorArrayTableObject extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
       visuallyHidden: true
     });
     th.appendChild(label);
-    table.thead.appendChild(th);
+    if (arrayButtonsPosition === "left") {
+      table.thead.appendChild(th);
+    }
     if (this.instance.getValue().length === 0) {
       table.table.removeChild(table.thead);
     }
@@ -4169,11 +4185,12 @@ class EditorArrayTableObject extends EditorArray {
       }
       table.thead.appendChild(th2);
     });
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    if (arrayButtonsPosition === "right") {
+      table.thead.appendChild(th);
+    }
     this.instance.children.forEach((child, index2) => {
       const tbodyRow = document.createElement("tr");
-      const buttonsTd = this.theme.getTableDefinition();
+      const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index2);
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn);
@@ -4186,7 +4203,9 @@ class EditorArrayTableObject extends EditorArray {
         btnGroup.appendChild(moveDownBtn);
       }
       buttonsTd.appendChild(btnGroup);
-      tbodyRow.appendChild(buttonsTd);
+      if (arrayButtonsPosition === "left") {
+        tbodyRow.appendChild(buttonsTd);
+      }
       if (child.children.length) {
         child.children.forEach((grandchild) => {
           const td = this.theme.getTableDefinition();
@@ -4199,6 +4218,9 @@ class EditorArrayTableObject extends EditorArray {
         child.ui.adaptForTable(td);
         td.appendChild(child.ui.control.container);
         tbodyRow.appendChild(td);
+      }
+      if (arrayButtonsPosition === "right") {
+        tbodyRow.appendChild(buttonsTd);
       }
       table.tbody.appendChild(tbodyRow);
     });
@@ -5376,6 +5398,7 @@ class Jedison extends EventEmitter {
       arrayDelete: true,
       arrayMove: true,
       arrayAdd: true,
+      arrayButtonsPosition: "left",
       startCollapsed: false,
       deactivateNonRequired: false,
       schema: {},
@@ -7454,9 +7477,12 @@ class Theme {
   /**
    * Returns a <td> element
    */
-  getTableDefinition() {
+  getTableDefinition(config = {}) {
     const td = document.createElement("td");
-    td.style.whiteSpace = "nowrap";
+    if (config.isButtonColumn) {
+      td.style.width = "1%";
+      td.style.whiteSpace = "nowrap";
+    }
     return td;
   }
   /**
@@ -7594,6 +7620,7 @@ class ThemeBootstrap3 extends Theme {
   getBtnGroup() {
     const html = super.getBtnGroup();
     html.classList.add("btn-group");
+    html.style.display = "inline-flex";
     return html;
   }
   getButton(config) {
