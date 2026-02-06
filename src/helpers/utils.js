@@ -74,6 +74,8 @@ export function sortObject (obj) {
  * @return {boolean}
  */
 export function equal (a, b) {
+  if (a === b) return true
+
   if (isObject(a) && isObject(b)) {
     a = sortObject(a)
     b = sortObject(b)
