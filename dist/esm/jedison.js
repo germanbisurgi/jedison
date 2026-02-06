@@ -7481,8 +7481,8 @@ class Theme {
     const td = document.createElement("td");
     if (config.isButtonColumn) {
       td.style.width = "1%";
-      td.style.whiteSpace = "nowrap";
     }
+    td.style.whiteSpace = "nowrap";
     return td;
   }
   /**
