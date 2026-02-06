@@ -11,6 +11,7 @@ BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I.selectOption('#examples', pathToSchema)
   I._waitForElement('.jedi-ready')
+  I._waitForElement('.jodit-container')
 });
 
 Scenario('@plugin @string-jodit should have @title and @description', ({I}) => {

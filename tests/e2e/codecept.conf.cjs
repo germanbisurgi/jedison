@@ -12,11 +12,11 @@ exports.config = {
     Puppeteer: {
       url: 'http://localhost:8181/',
       show: show,
-      waitForAction: 100,
+      waitForAction: 500,
       waitForTimeout: 5000,
       windowSize: `${width}x${height}`,
       restart: false,
-      waitForNavigation: [ 'load', 'networkidle0' ],
+      waitForNavigation: ['load', 'networkidle0', 'domcontentloaded'],
       chrome: {
         args: ['--no-sandbox', '--disable-setuid-sandbox', `--window-size=${width},${height}`]
       }
