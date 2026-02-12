@@ -68,6 +68,7 @@ class Jedison extends EventEmitter {
       translations: {},
       settings: {},
       useConstraintAttributes: true,
+      useStringConstraintAttributes: false,
       parseMarkdown: false,
       purifyHtml: true,
       purifyData: true,
