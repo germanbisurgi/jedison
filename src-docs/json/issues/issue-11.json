@@ -2,19 +2,24 @@
   "title": "[Issue #11](/index.html?example=issue/issue-11)",
   "type": "object",
   "properties": {
-    "textarea": {
-      "type": "string",
-      "x-format": "textarea",
-      "maxLength": 10,
-      "minLength": 5,
-      "description": "{{ remaining }} / 10"
-    },
     "input": {
       "type": "string",
       "maxLength": 10,
       "minLength": 5,
       "pattern": "^[a-z]*$",
-      "description": "{{ remaining }} / 10"
+      "description": "{{ length }}/10 characters ({{ remaining }} left)",
+      "x-showErrors": "input",
+      "x-messages": {
+        "pattern": "Must contain only lowercase letters"
+      }
+    },
+    "textarea": {
+      "type": "string",
+      "x-format": "textarea",
+      "maxLength": 10,
+      "minLength": 5,
+      "description": "{{ length }}/10 characters ({{ remaining }} left)",
+      "x-showErrors": "input"
     }
   }
 }

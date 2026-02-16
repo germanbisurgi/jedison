@@ -49,7 +49,7 @@ class EditorStringTextarea extends EditorString {
   }
 
   refreshUI () {
-    this.refreshDisabledState()
+    super.refreshUI()
     this.control.input.value = this.instance.getValue()
   }
 }

@@ -1817,6 +1817,12 @@ class Instance extends EventEmitter {
       value: this.getValue(),
       settings: this.jedison.options.settings
     };
+    if (typeof this.value === "string") {
+      templateData.length = this.value.length;
+      if (typeof this.schema.maxLength === "number") {
+        templateData.remaining = this.schema.maxLength - this.value.length;
+      }
+    }
     if (template == null ? void 0 : template.includes("{{ functions.")) {
       templateData.functions = this.resolveTemplateFunctions(
         this.jedison.options.functions
@@ -3247,7 +3253,7 @@ class EditorStringTextarea extends EditorString {
     });
   }
   refreshUI() {
-    this.refreshDisabledState();
+    super.refreshUI();
     this.control.input.value = this.instance.getValue();
   }
 }

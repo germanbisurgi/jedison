@@ -1,7 +1,7 @@
 {
   "title": "Templates",
   "type": "array",
-  "description": "Titles and descriptions can include placeholders such as `i0`, `i1` that are dynamically replaced when rendering the data.\n\nAvailable placeholders:\n\n- `value` — the current value (from `getValue`); **always available**\n- `settings` — configuration options (from `jedison.options.settings`); **always available**\n- `i0` — the zero-based index of the array item; available **only if the editor is an array item editor**\n- `i1` — the one-based index of the array item; available **only if the editor is an array item editor**\n- `parent` — parent instance template data; **available when parent exists**\n",
+  "description": "Titles and descriptions can include placeholders such as `i0`, `i1` that are dynamically replaced when rendering the data.\n\nAvailable placeholders:\n\n- `value` — the current value (from `getValue`); **always available**\n- `settings` — configuration options (from `jedison.options.settings`); **always available**\n- `i0` — the zero-based index of the array item; available **only if the editor is an array item editor**\n- `i1` — the one-based index of the array item; available **only if the editor is an array item editor**\n- `parent` — parent instance template data; **available when parent exists**\n- `length` — the length of the string value; **available only for string types**\n- `remaining` — characters remaining (`maxLength - length`); **available only for strings with `maxLength`**\n",
   "x-format": "nav-vertical",
   "minItems": 1,
   "default": [
