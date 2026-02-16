@@ -339,6 +339,7 @@ import ifThenElseNullableInitialValue2 from './json/issues/if-then-else-nullable
 import multipleRegister from './json/issues/multiple-register.json'
 import childrenDisableState from './json/issues/children-disable-state.json'
 import issue8 from './json/issues/issue-8.json'
+import issue11 from './json/issues/issue-11.json'
 import joditAsProp from './json/issues/jodit-as-prop.json'
 import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
@@ -493,6 +494,7 @@ export default {
           'issue/multiple-register': multipleRegister,
           'issue/children-disable-state': childrenDisableState,
           'issue/issue-8': issue8,
+          'issue/issue-11': issue11,
           'issue/jodit-as-prop': joditAsProp,
         }
       },

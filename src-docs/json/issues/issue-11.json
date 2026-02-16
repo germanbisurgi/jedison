@@ -1,0 +1,20 @@
+{
+  "title": "[Issue #11](/index.html?example=issue/issue-11)",
+  "type": "object",
+  "properties": {
+    "textarea": {
+      "type": "string",
+      "x-format": "textarea",
+      "maxLength": 10,
+      "minLength": 5,
+      "x-useStringConstraintAttributes": true
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 10,
+      "minLength": 5,
+      "pattern": "^[a-z]*$",
+      "x-useStringConstraintAttributes": true
+    }
+  }
+}

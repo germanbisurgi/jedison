@@ -33,9 +33,9 @@ class EditorStringInput extends EditorString {
       this.instance.setValue('#000000', false, 'user')
     }
 
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useStringConstraintAttributes
+    const useStringConstraintAttributes = getSchemaXOption(this.instance.schema, 'useStringConstraintAttributes') ?? this.instance.jedison.options.useStringConstraintAttributes
 
-    if (useConstraintAttributes === true) {
+    if (useStringConstraintAttributes === true) {
       const schemaMinLength = getSchemaMinLength(this.instance.schema)
       const schemaMaxLength = getSchemaMaxLength(this.instance.schema)
       const schemaPattern = getSchemaPattern(this.instance.schema)
