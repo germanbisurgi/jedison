@@ -286,6 +286,14 @@ class Instance extends EventEmitter {
       settings: this.jedison.options.settings
     }
 
+    // Add string length and remaining to template data
+    if (typeof this.value === 'string') {
+      templateData.length = this.value.length
+      if (typeof this.schema.maxLength === 'number') {
+        templateData.remaining = this.schema.maxLength - this.value.length
+      }
+    }
+
     if (template?.includes('{{ functions.')) {
       templateData.functions = this.resolveTemplateFunctions(
         this.jedison.options.functions

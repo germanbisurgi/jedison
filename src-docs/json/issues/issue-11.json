@@ -6,14 +6,15 @@
       "type": "string",
       "x-format": "textarea",
       "maxLength": 10,
-      "minLength": 5
+      "minLength": 5,
+      "description": "{{ remaining }} / 10"
     },
     "input": {
       "type": "string",
       "maxLength": 10,
       "minLength": 5,
       "pattern": "^[a-z]*$",
-      "x-useConstraintAttributes": true
+      "description": "{{ remaining }} / 10"
     }
   }
 }
