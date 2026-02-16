@@ -1,6 +1,9 @@
 ### dev
 
+### 1.3.0
+
 - Added `useConstraintAttributes` option
+- Added `length` and `remaining` template data
 
 ### 1.2.0
 
