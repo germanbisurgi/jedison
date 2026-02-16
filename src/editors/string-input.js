@@ -1,5 +1,6 @@
 import EditorString from './string.js'
-import { getSchemaXOption, getSchemaType } from '../helpers/schema.js'
+import { isSet } from '../helpers/utils.js'
+import { getSchemaXOption, getSchemaType, getSchemaMinLength, getSchemaMaxLength, getSchemaPattern } from '../helpers/schema.js'
 
 /**
  * Represents a EditorString instance.
@@ -30,6 +31,26 @@ class EditorStringInput extends EditorString {
     // fix color picker bug
     if (optionFormat === 'color' && this.instance.value.length === 0) {
       this.instance.setValue('#000000', false, 'user')
+    }
+
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useStringConstraintAttributes
+
+    if (useConstraintAttributes === true) {
+      const schemaMinLength = getSchemaMinLength(this.instance.schema)
+      const schemaMaxLength = getSchemaMaxLength(this.instance.schema)
+      const schemaPattern = getSchemaPattern(this.instance.schema)
+
+      if (isSet(schemaMinLength)) {
+        this.control.input.setAttribute('minlength', schemaMinLength)
+      }
+
+      if (isSet(schemaMaxLength)) {
+        this.control.input.setAttribute('maxlength', schemaMaxLength)
+      }
+
+      if (isSet(schemaPattern)) {
+        this.control.input.setAttribute('pattern', schemaPattern)
+      }
     }
   }
 

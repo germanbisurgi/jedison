@@ -1,3 +1,7 @@
+### dev
+
+- Added "useStringConstraintAttributes" option for string and textarea editors (minlength, maxlength, pattern)
+
 ### 1.2.0
 
 - Added "arrayButtonsPosition" option

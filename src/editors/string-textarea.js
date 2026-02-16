@@ -1,5 +1,6 @@
 import EditorString from './string.js'
-import { getSchemaXOption, getSchemaType } from '../helpers/schema.js'
+import { isSet } from '../helpers/utils.js'
+import { getSchemaXOption, getSchemaType, getSchemaMinLength, getSchemaMaxLength } from '../helpers/schema.js'
 
 /**
  * Represents a EditorStringTextarea instance.
@@ -19,6 +20,21 @@ class EditorStringTextarea extends EditorString {
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
       info: this.getInfo()
     })
+
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useStringConstraintAttributes
+
+    if (useConstraintAttributes === true) {
+      const schemaMinLength = getSchemaMinLength(this.instance.schema)
+      const schemaMaxLength = getSchemaMaxLength(this.instance.schema)
+
+      if (isSet(schemaMinLength)) {
+        this.control.input.setAttribute('minlength', schemaMinLength)
+      }
+
+      if (isSet(schemaMaxLength)) {
+        this.control.input.setAttribute('maxlength', schemaMaxLength)
+      }
+    }
   }
 
   adaptForTable () {
