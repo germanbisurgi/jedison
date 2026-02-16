@@ -5,7 +5,8 @@
   "properties": {
     "string": {
       "type": "string",
-      "maxLength": 5
+      "maxLength": 5,
+      "x-useConstraintAttributes": false
     }
   }
 }

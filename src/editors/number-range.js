@@ -62,8 +62,12 @@ class EditorNumberRange extends EditorNumber {
     })
 
     // Set range-specific attributes
-    this.control.input.setAttribute('min', optionMin)
-    this.control.input.setAttribute('max', optionMax)
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useConstraintAttributes
+
+    if (useConstraintAttributes === true) {
+      this.control.input.setAttribute('min', optionMin)
+      this.control.input.setAttribute('max', optionMax)
+    }
     this.control.input.setAttribute('step', optionStep)
 
     // Apply x-inputAttributes if provided

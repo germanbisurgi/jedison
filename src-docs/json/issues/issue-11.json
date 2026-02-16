@@ -6,15 +6,14 @@
       "type": "string",
       "x-format": "textarea",
       "maxLength": 10,
-      "minLength": 5,
-      "x-useStringConstraintAttributes": true
+      "minLength": 5
     },
     "input": {
       "type": "string",
       "maxLength": 10,
       "minLength": 5,
       "pattern": "^[a-z]*$",
-      "x-useStringConstraintAttributes": true
+      "x-useConstraintAttributes": true
     }
   }
 }

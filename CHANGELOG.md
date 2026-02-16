@@ -1,6 +1,6 @@
 ### dev
 
-- Added "useStringConstraintAttributes" option for string and textarea editors (minlength, maxlength, pattern)
+- Added `useConstraintAttributes` option
 
 ### 1.2.0
 

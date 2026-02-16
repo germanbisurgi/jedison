@@ -156,6 +156,11 @@
             <input type="checkbox" id="editJsonData" v-model="editJsonData" @change="initEditor()">
             <label for="editJsonData"><code>editJsonData</code></label>
           </div>
+
+          <div class="form-group mb-3">
+            <input type="checkbox" id="useConstraintAttributes" v-model="useConstraintAttributes" @change="initEditor()">
+            <label for="useConstraintAttributes"><code>useConstraintAttributes</code></label>
+          </div>
         </aside>
       </div>
 
@@ -553,7 +558,8 @@ export default {
       enforceMinItems: true,
       enforceMaxItems: true,
       enforceAdditionalProperties: true,
-      editJsonData: false
+      editJsonData: false,
+      useConstraintAttributes: true
     }
   },
   created() {
@@ -579,6 +585,7 @@ export default {
     this.enableCollapseToggle = this.getQueryParam('enableCollapseToggle') ? this.parseBooleanString(this.getQueryParam('enableCollapseToggle')) : true
     this.startCollapsed = this.getQueryParam('startCollapsed') ? this.parseBooleanString(this.getQueryParam('startCollapsed')) : false
     this.editJsonData = this.getQueryParam('editJsonData') ? this.parseBooleanString(this.getQueryParam('editJsonData')) : false
+    this.useConstraintAttributes = this.getQueryParam('useConstraintAttributes') ? this.parseBooleanString(this.getQueryParam('useConstraintAttributes')) : true
   },
   mounted() {
     switch (this.theme) {
@@ -726,6 +733,7 @@ export default {
         enforceMaxItems: this.enforceMaxItems,
         enforceAdditionalProperties: this.enforceAdditionalProperties,
         editJsonData: this.editJsonData,
+        useConstraintAttributes: this.useConstraintAttributes,
         schema: this.schema,
         data: this.data,
         theme: this.getThemeInstance(this.theme),
@@ -854,6 +862,7 @@ export default {
       newUrl += "&enableCollapseToggle=" + this.enableCollapseToggle
       newUrl += "&startCollapsed=" + this.startCollapsed
       newUrl += "&editJsonData=" + this.editJsonData
+      newUrl += "&useConstraintAttributes=" + this.useConstraintAttributes
 
       window.open(newUrl, '_self')
     },
@@ -881,6 +890,7 @@ export default {
       newUrl += "&enableCollapseToggle=" + this.enableCollapseToggle
       newUrl += "&startCollapsed=" + this.startCollapsed
       newUrl += "&editJsonData=" + this.editJsonData
+      newUrl += "&useConstraintAttributes=" + this.useConstraintAttributes
       newUrl += "&schema=" + this.compress(JSON.stringify(this.schema))
       newUrl += "&data=" + this.compress(JSON.stringify(this.editor.getValue()))
 

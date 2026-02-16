@@ -4958,8 +4958,11 @@ class EditorNumberRange extends EditorNumber {
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       info: this.getInfo()
     });
-    this.control.input.setAttribute("min", optionMin);
-    this.control.input.setAttribute("max", optionMax);
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.options.useConstraintAttributes;
+    if (useConstraintAttributes === true) {
+      this.control.input.setAttribute("min", optionMin);
+      this.control.input.setAttribute("max", optionMax);
+    }
     this.control.input.setAttribute("step", optionStep);
     const inputAttributes = getSchemaXOption(this.instance.schema, "inputAttributes");
     if (inputAttributes && typeof inputAttributes === "object") {
