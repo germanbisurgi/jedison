@@ -1,5 +1,5 @@
 import EditorArray from './array.js'
-import { isSet } from '../helpers/utils.js'
+import { isArray, isSet } from '../helpers/utils.js'
 import { getSchemaItems, getSchemaProperties, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -65,7 +65,8 @@ class EditorArrayTableObject extends EditorArray {
       table.thead.appendChild(th)
     }
 
-    if (this.instance.getValue().length === 0) {
+    const value = this.instance.getValue()
+    if (!isArray(value) || value.length === 0) {
       table.table.removeChild(table.thead)
     }
 

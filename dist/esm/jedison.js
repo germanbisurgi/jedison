@@ -2091,12 +2091,10 @@ class Editor {
     if (neverShowErrors && !force || errors.length === 0) {
       return;
     }
-    let counter = 0;
     errors.forEach((error) => {
       if (error.constraint === "properties") {
         return;
       }
-      counter += 1;
       error.messages.forEach((message) => {
         let invalidFeedback;
         if (error.type === "error") {
@@ -2111,7 +2109,7 @@ class Editor {
         this.control.messages.appendChild(invalidFeedback);
       });
     });
-    this.showingValidationErrors = counter > 0;
+    this.showingValidationErrors = true;
   }
   /**
    * Get an error message container
@@ -4204,7 +4202,8 @@ class EditorArrayTableObject extends EditorArray {
     if (arrayButtonsPosition === "left") {
       table.thead.appendChild(th);
     }
-    if (this.instance.getValue().length === 0) {
+    const value = this.instance.getValue();
+    if (!isArray(value) || value.length === 0) {
       table.table.removeChild(table.thead);
     }
     let schemaItems = getSchemaItems(this.instance.schema);
@@ -4339,7 +4338,7 @@ class EditorArrayChoices extends Editor {
       this.choices = itemEnum.map((item, index2) => ({
         value: item,
         label: itemEnumTitles[index2] || item,
-        selected: value.includes(item)
+        selected: isArray(value) && value.includes(item)
       }));
       this.choicesInstance = new window.Choices(this.control.input, {
         duplicateItemsAllowed: false,
@@ -4918,7 +4917,10 @@ class EditorArrayCheckboxes extends Editor {
   addEventListeners() {
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
-        const value = this.instance.getValue();
+        let value = this.instance.getValue();
+        if (!isArray(value)) {
+          value = [];
+        }
         if (checkbox.checked) {
           value.push(checkbox.value);
         } else {
@@ -4934,6 +4936,9 @@ class EditorArrayCheckboxes extends Editor {
   refreshUI() {
     this.refreshDisabledState();
     const value = this.instance.getValue();
+    if (!isArray(value)) {
+      return;
+    }
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.checked = value.includes(checkbox.value);
     });

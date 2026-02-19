@@ -57,7 +57,12 @@ class EditorArrayCheckboxes extends Editor {
   addEventListeners () {
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.addEventListener('change', () => {
-        const value = this.instance.getValue()
+        let value = this.instance.getValue()
+
+        if (!isArray(value)) {
+          value = []
+        }
+
         if (checkbox.checked) {
           value.push(checkbox.value)
         } else {
@@ -76,6 +81,10 @@ class EditorArrayCheckboxes extends Editor {
     this.refreshDisabledState()
 
     const value = this.instance.getValue()
+
+    if (!isArray(value)) {
+      return
+    }
 
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.checked = value.includes(checkbox.value)

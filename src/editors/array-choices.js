@@ -54,7 +54,7 @@ class EditorArrayChoices extends Editor {
       this.choices = itemEnum.map((item, index) => ({
         value: item,
         label: itemEnumTitles[index] || item,
-        selected: value.includes(item)
+        selected: isArray(value) && value.includes(item)
       }))
 
       this.choicesInstance = new window.Choices(this.control.input, {

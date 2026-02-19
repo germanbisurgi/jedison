@@ -1,5 +1,9 @@
 ### dev
 
+### 1.3.3
+
+- Fixed crash in array editors when value is not an array
+
 ### 1.3.2
 
 - Security updates
