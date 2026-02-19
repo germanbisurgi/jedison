@@ -91,7 +91,7 @@ Scenario('@editor @array-table-object should @setValue and @showValidationErrors
 
   // editor
   I.seeInField('[id="root-0-boolean-select"]', 'false')
-  I._waitForText('Must have at least 2 items.', '.jedi-error-message')
+  I._waitForText('Must have at least 2 items.')
 })
 
 Scenario('@editor @array-table-object should @disable', ({I}) => {

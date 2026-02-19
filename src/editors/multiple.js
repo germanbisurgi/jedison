@@ -16,7 +16,6 @@ class EditorMultiple extends Editor {
 
   build () {
     this.switcherInput = getSchemaXOption(this.instance.schema, 'switcherInput') ?? this.instance.jedison.options.switcherInput
-
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
       id: this.getIdFromPath(this.instance.path),

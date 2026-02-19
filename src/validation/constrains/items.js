@@ -1,4 +1,5 @@
-import { isArray, isSet } from '../../helpers/utils.js'
+import { compileTemplate, isArray, isObject, isSet } from '../../helpers/utils.js'
+import Jedison from '../../jedison.js'
 import { getSchemaItems, getSchemaPrefixItems } from '../../helpers/schema.js'
 
 export function items (context) {
@@ -15,6 +16,28 @@ export function items (context) {
         path: context.path,
         constraint: 'items',
         messages: [context.translator.translate('errorItems')]
+      })
+    } else if (isObject(items)) {
+      context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
+        const index = prefixItemsSchemasCount + i
+        const tmpEditor = new Jedison({
+          refParser: context.validator.refParser,
+          schema: items,
+          data: itemValue
+        })
+        const tmpErrors = tmpEditor.getErrors()
+        tmpEditor.destroy()
+
+        if (tmpErrors.length > 0) {
+          errors.push({
+            type: 'error',
+            path: context.path,
+            constraint: 'items',
+            messages: [
+              compileTemplate(context.translator.translate('errorItems'), { index })
+            ]
+          })
+        }
       })
     }
   }

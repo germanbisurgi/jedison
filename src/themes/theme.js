@@ -1648,7 +1648,6 @@ class Theme {
 
     invalidFeedbackText.textContent = config.message
     invalidFeedbackIcon.textContent = '⚠ '
-    invalidFeedbackIcon.classList.add('jedi-error-message')
     invalidFeedbackIcon.setAttribute('aria-hidden', 'true')
 
     html.classList.add('jedi-error-message')

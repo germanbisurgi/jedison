@@ -46,7 +46,6 @@
         "if": {
           "properties": {
             "propA": {
-              "const": "yes",
               "anyOf": [
                 {
                   "const": "yes"

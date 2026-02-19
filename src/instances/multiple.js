@@ -13,6 +13,7 @@ import {
   getSchemaType,
   getSchemaXOption
 } from '../helpers/schema.js'
+import Jedison from '../jedison.js'
 
 /**
  * Represents a InstanceMultiple instance.
@@ -164,7 +165,9 @@ class InstanceMultiple extends Instance {
 
     for (let index = 0; index < this.instances.length; index++) {
       const instance = this.instances[index]
-      const instanceErrors = this.jedison.validator.getErrors(value, instance.schema, instance.getKey(), instance.path)
+      const tmpEditor = new Jedison({ refParser: this.jedison.refParser, schema: instance.schema, data: value })
+      const instanceErrors = tmpEditor.getErrors()
+      tmpEditor.destroy()
 
       // If an instance has no errors, return its index immediately
       if (instanceErrors.length === 0) {

@@ -448,10 +448,6 @@ class Jedison extends EventEmitter {
           node.oneOf = node.oneOf.map((subschema) => {
             return combineDeep({}, nodeClone, subschema)
           })
-
-          return {
-            oneOf: node.oneOf
-          }
         }
       })
 
@@ -464,10 +460,6 @@ class Jedison extends EventEmitter {
           node.anyOf = node.anyOf.map((subschema) => {
             return combineDeep({}, nodeClone, subschema)
           })
-
-          return {
-            anyOf: node.anyOf
-          }
         }
       })
 

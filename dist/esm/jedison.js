@@ -636,6 +636,27 @@ function items(context) {
         constraint: "items",
         messages: [context.translator.translate("errorItems")]
       });
+    } else if (isObject(items2)) {
+      context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
+        const index2 = prefixItemsSchemasCount + i;
+        const tmpEditor = new Jedison({
+          refParser: context.validator.refParser,
+          schema: items2,
+          data: itemValue
+        });
+        const tmpErrors = tmpEditor.getErrors();
+        tmpEditor.destroy();
+        if (tmpErrors.length > 0) {
+          errors.push({
+            type: "error",
+            path: context.path,
+            constraint: "items",
+            messages: [
+              compileTemplate(context.translator.translate("errorItems"), { index: index2 })
+            ]
+          });
+        }
+      });
     }
   }
   return errors;
@@ -2605,7 +2626,9 @@ class InstanceMultiple extends Instance {
     let championErrors;
     for (let index2 = 0; index2 < this.instances.length; index2++) {
       const instance = this.instances[index2];
-      const instanceErrors = this.jedison.validator.getErrors(value, instance.schema, instance.getKey(), instance.path);
+      const tmpEditor = new Jedison({ refParser: this.jedison.refParser, schema: instance.schema, data: value });
+      const instanceErrors = tmpEditor.getErrors();
+      tmpEditor.destroy();
       if (instanceErrors.length === 0) {
         fittestIndex = index2;
         break;
@@ -5744,9 +5767,6 @@ class Jedison extends EventEmitter {
           node.oneOf = node.oneOf.map((subschema) => {
             return combineDeep({}, nodeClone, subschema);
           });
-          return {
-            oneOf: node.oneOf
-          };
         }
       });
       this.walker.traverse(config.schema, (node) => {
@@ -5756,9 +5776,6 @@ class Jedison extends EventEmitter {
           node.anyOf = node.anyOf.map((subschema) => {
             return combineDeep({}, nodeClone, subschema);
           });
-          return {
-            anyOf: node.anyOf
-          };
         }
       });
       this.walker.traverse(config.schema, (node) => {
@@ -7430,7 +7447,6 @@ class Theme {
     const invalidFeedbackIcon = document.createElement("span");
     invalidFeedbackText.textContent = config.message;
     invalidFeedbackIcon.textContent = "⚠ ";
-    invalidFeedbackIcon.classList.add("jedi-error-message");
     invalidFeedbackIcon.setAttribute("aria-hidden", "true");
     html.classList.add("jedi-error-message");
     html.appendChild(invalidFeedbackIcon);

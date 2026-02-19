@@ -2,7 +2,7 @@
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'issue/if-then-else-value-overrides'
 
-Feature('array-checkboxes')
+Feature('if-then-else-value-overrides')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
