@@ -80,8 +80,12 @@ class EditorArrayNav extends EditorArray {
       const active = index === this.activeItemIndex
       const id = pathToAttribute(child.path)
 
+      const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+      const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+
       const { list, arrayActions } = this.theme.getTab({
-        hasErrors: child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+        hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+        navWarningMessage: navWarningMessage,
         title: titleTemplate?.length ? titleTemplate : childTitle,
         id: id,
         active: active

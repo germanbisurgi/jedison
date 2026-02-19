@@ -69,6 +69,11 @@ class InstanceArray extends Instance {
 
   move (fromIndex, toIndex, initiator) {
     const value = clone(this.getValue())
+
+    if (!isArray(value)) {
+      return
+    }
+
     const item = value[fromIndex]
     value.splice(fromIndex, 1)
     value.splice(toIndex, 0, item)
@@ -79,7 +84,12 @@ class InstanceArray extends Instance {
 
   addItem (initiator) {
     const tempEditor = this.createItemInstance()
-    const value = clone(this.getValue())
+    let value = clone(this.getValue())
+
+    if (!isArray(value)) {
+      value = []
+    }
+
     value.push(tempEditor.getValue())
     tempEditor.destroy()
     this.setValue(value, true, initiator)
@@ -90,6 +100,11 @@ class InstanceArray extends Instance {
 
   deleteItem (itemIndex, initiator) {
     const currentValue = clone(this.getValue())
+
+    if (!isArray(currentValue)) {
+      return
+    }
+
     const newValue = currentValue.filter((item, index) => index !== itemIndex)
     this.setValue(newValue, true, initiator)
     this.emit('item-delete', initiator)

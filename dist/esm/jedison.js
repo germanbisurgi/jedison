@@ -2091,10 +2091,12 @@ class Editor {
     if (neverShowErrors && !force || errors.length === 0) {
       return;
     }
+    let counter = 0;
     errors.forEach((error) => {
       if (error.constraint === "properties") {
         return;
       }
+      counter += 1;
       error.messages.forEach((message) => {
         let invalidFeedback;
         if (error.type === "error") {
@@ -2109,7 +2111,7 @@ class Editor {
         this.control.messages.appendChild(invalidFeedback);
       });
     });
-    this.showingValidationErrors = true;
+    this.showingValidationErrors = counter > 0;
   }
   /**
    * Get an error message container
@@ -2911,6 +2913,9 @@ class InstanceArray extends Instance {
   }
   move(fromIndex, toIndex, initiator) {
     const value = clone(this.getValue());
+    if (!isArray(value)) {
+      return;
+    }
     const item = value[fromIndex];
     value.splice(fromIndex, 1);
     value.splice(toIndex, 0, item);
@@ -2920,7 +2925,10 @@ class InstanceArray extends Instance {
   }
   addItem(initiator) {
     const tempEditor = this.createItemInstance();
-    const value = clone(this.getValue());
+    let value = clone(this.getValue());
+    if (!isArray(value)) {
+      value = [];
+    }
     value.push(tempEditor.getValue());
     tempEditor.destroy();
     this.setValue(value, true, initiator);
@@ -2930,6 +2938,9 @@ class InstanceArray extends Instance {
   }
   deleteItem(itemIndex, initiator) {
     const currentValue = clone(this.getValue());
+    if (!isArray(currentValue)) {
+      return;
+    }
     const newValue = currentValue.filter((item, index2) => index2 !== itemIndex);
     this.setValue(newValue, true, initiator);
     this.emit("item-delete", initiator);
@@ -3845,8 +3856,11 @@ class EditorObjectNav extends EditorObject {
         const active = index2 === this.activeTabIndex;
         const id = pathToAttribute(child.path);
         const schemaTitle = getSchemaTitle(child.schema);
+        const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+        const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
         const tab = this.theme.getTab({
-          hasErrors: child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+          hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+          navWarningMessage,
           title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
           id,
           active
@@ -4424,8 +4438,11 @@ class EditorArrayNav extends EditorArray {
       }
       const active = index2 === this.activeItemIndex;
       const id = pathToAttribute(child.path);
+      const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+      const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
       const { list, arrayActions } = this.theme.getTab({
-        hasErrors: child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+        hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+        navWarningMessage,
         title: (titleTemplate == null ? void 0 : titleTemplate.length) ? titleTemplate : childTitle,
         id,
         active
@@ -7482,7 +7499,16 @@ class Theme {
     link.classList.add("jedi-nav-link");
     link.setAttribute("href", "#tab-pane-" + config.id);
     text.classList.add("jedi-nav-text");
-    text.textContent = config.hasErrors ? "⚠ " + config.title : config.title;
+    text.textContent = config.title;
+    if (config.hasErrors) {
+      const warning = document.createElement("span");
+      warning.classList.add("jedi-nav-warning");
+      warning.textContent = "⚠ ";
+      if (config.navWarningMessage) {
+        warning.setAttribute("title", config.navWarningMessage);
+      }
+      text.insertBefore(warning, text.firstChild);
+    }
     link.appendChild(arrayActions);
     link.appendChild(text);
     list.appendChild(link);

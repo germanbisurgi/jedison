@@ -49,8 +49,12 @@ class EditorObjectNav extends EditorObject {
         const id = pathToAttribute(child.path)
         const schemaTitle = getSchemaTitle(child.schema)
 
+        const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+        const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+
         const tab = this.theme.getTab({
-          hasErrors: child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+          hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+          navWarningMessage: navWarningMessage,
           title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
           id: id,
           active: active

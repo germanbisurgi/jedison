@@ -1735,7 +1735,20 @@ class Theme {
     link.classList.add('jedi-nav-link')
     link.setAttribute('href', '#' + 'tab-pane-' + config.id)
     text.classList.add('jedi-nav-text')
-    text.textContent = config.hasErrors ? '⚠ ' + config.title : config.title
+    text.textContent = config.title
+
+    if (config.hasErrors) {
+      const warning = document.createElement('span')
+      warning.classList.add('jedi-nav-warning')
+      warning.textContent = '⚠ '
+
+      if (config.navWarningMessage) {
+        warning.setAttribute('title', config.navWarningMessage)
+      }
+
+      text.insertBefore(warning, text.firstChild)
+    }
+
     link.appendChild(arrayActions)
     link.appendChild(text)
     list.appendChild(link)

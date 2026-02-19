@@ -211,10 +211,14 @@ class Editor {
       return
     }
 
+    let counter = 0
+
     errors.forEach((error) => {
       if (error.constraint === 'properties') {
         return
       }
+
+      counter += 1
 
       error.messages.forEach((message) => {
         let invalidFeedback
@@ -233,7 +237,7 @@ class Editor {
       })
     })
 
-    this.showingValidationErrors = true
+    this.showingValidationErrors = counter > 0
   }
 
   /**

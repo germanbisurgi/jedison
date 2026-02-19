@@ -1,0 +1,42 @@
+{
+  "type": "array",
+  "title": "Tab warning",
+  "x-titleTemplate": "Item-{{ i1 }}  {{ value.name }}",
+  "x-format": "nav-vertical",
+  "x-navWarning": true,
+  "x-navWarningMessage": "has errors",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "title": "Person  {{ i1 }}",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "minLength": 2
+      },
+      "wind": {
+        "title": "Wind",
+        "type": "string",
+        "enum": [
+          "still_bis_gering",
+          "leicht_bis_schwach",
+          "maessig_bis_frisch",
+          "stark_bis_stuermisch",
+          "keine_angabe"
+        ],
+        "x-options": {
+          "enumTitles": [
+            "still bis gering",
+            "leicht bis schwach",
+            "mäßig bis frisch",
+            "stark bis stürmisch",
+            "keine Angabe"
+          ],
+          "enforceEnumDefault": false,
+          "format": "radios-inline"
+        }
+      }
+    }
+  }
+}

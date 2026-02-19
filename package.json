@@ -34,7 +34,7 @@
     "e2e:b4": "yarn e2e:clean && THEME='bootstrap4' start-server-and-test serve http://localhost:8181 'codeceptjs run-workers 10 -c tests/e2e/codecept.conf.cjs'",
     "e2e:b5": "yarn e2e:clean && THEME='bootstrap5' start-server-and-test serve http://localhost:8181 'codeceptjs run-workers 10 -c tests/e2e/codecept.conf.cjs'",
     "e2e:*": "yarn e2e && yarn e2e:b3 && yarn e2e:b4 && yarn e2e:b5",
-    "e2e:grep": "yarn e2e:clean && SHOW=true THEME='bootstrap5' start-server-and-test serve http://localhost:8181 'codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep @constraint-attributes'",
+    "e2e:grep": "yarn e2e:clean && SHOW=true THEME='bootstrap5' start-server-and-test serve http://localhost:8181 'codeceptjs run -c tests/e2e/codecept.conf.cjs --steps --debug --grep @nav-warning'",
     "lint": "eslint -c ./.eslintrc.json ./src ./tests",
     "lint:fix": "eslint --fix -c ./.eslintrc.json ./src ./tests",
     "test:full": "yarn e2e:clean && yarn e2e && yarn unit",
@@ -90,6 +90,8 @@
     "tmp": "^0.2.4",
     "glob": ">=11.1.0",
     "diff": ">=8.0.3",
-    "lodash": ">=4.17.23"
+    "lodash": ">=4.17.23",
+    "minimatch": ">=10.2.1",
+    "ajv": ">=8.18.0"
   }
 }

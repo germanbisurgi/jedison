@@ -1,5 +1,10 @@
 ### dev
 
+### 1.3.1
+
+- Fixed bug with arrays when setting non-array values
+- Configurable nav warning messages
+
 ### 1.3.0
 
 - Added `useConstraintAttributes` option

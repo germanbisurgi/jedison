@@ -6,7 +6,7 @@
       "x-deactivateNonRequired": true,
       "additionalProperties": {
         "$ref": "#/$defs/schema",
-        "x-propGroup": "Object validation"
+        "x-propGroup": "Object"
       },
       "type": "object",
       "properties": {
@@ -21,7 +21,7 @@
             "array",
             "null"
           ],
-          "x-propGroup": "Type validation"
+          "x-propGroup": "Type"
         },
         "const": {
           "type": [
@@ -33,13 +33,13 @@
             "boolean",
             "null"
           ],
-          "x-propGroup": "Type validation"
+          "x-propGroup": "Type"
         },
         "enum": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "x-propGroup": "Type validation"
+          "x-propGroup": "Type"
         },
 
         "title": {
@@ -76,84 +76,84 @@
         "maxLength": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "String validation"
+          "x-propGroup": "String"
         },
         "minLength": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "String validation"
+          "x-propGroup": "String"
         },
         "pattern": {
           "type": "string",
           "format": "regex",
-          "x-propGroup": "String validation"
+          "x-propGroup": "String"
         },
 
         "exclusiveMaximum": {
           "type": "number",
-          "x-propGroup": "Numeric validation"
+          "x-propGroup": "Numeric"
         },
         "exclusiveMinimum": {
           "type": "number",
-          "x-propGroup": "Numeric validation"
+          "x-propGroup": "Numeric"
         },
         "maximum": {
           "type": "number",
-          "x-propGroup": "Numeric validation"
+          "x-propGroup": "Numeric"
         },
         "minimum": {
           "type": "number",
-          "x-propGroup": "Numeric validation"
+          "x-propGroup": "Numeric"
         },
         "multipleOf": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "x-propGroup": "Numeric validation"
+          "x-propGroup": "Numeric"
         },
 
         "contains": {
           "$ref": "#/$defs/schema",
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "items": {
           "$ref": "#/$defs/schema",
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "maxContains": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "maxItems": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "minContains": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "minItems": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "prefixItems": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
         "uniqueItems": {
           "type": "boolean",
-          "x-propGroup": "Array validation"
+          "x-propGroup": "Array"
         },
 
         "additionalProperties": {
           "$ref": "#/$defs/schema",
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "dependentRequired": {
           "type": "object",
@@ -169,42 +169,42 @@
               "addChoices": true
             }
           },
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "dependentSchemas": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "maxProperties": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "minProperties": {
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "patternProperties": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "properties": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Object validation"
+          "x-propGroup": "Object"
         },
         "required": {
           "x-format": "table",
-          "x-propGroup": "Object validation",
+          "x-propGroup": "Object",
           "type": "array",
           "uniqueItems": true,
           "items": {
