@@ -2822,8 +2822,8 @@ class InstanceObject extends Instance {
     });
     this.value = value;
     this.jedison.emit("instance-change", this, initiator);
-    this.emit("notifyParent", initiator);
     this.emit("change", initiator);
+    this.emit("notifyParent", initiator);
   }
   /**
    * Sorts the children of the current instance based on their `propertyOrder` value in ascending order.
@@ -2974,8 +2974,8 @@ class InstanceArray extends Instance {
     });
     this.value = value;
     this.jedison.emit("instance-change", this, initiator);
-    this.emit("notifyParent", initiator);
     this.emit("change", initiator);
+    this.emit("notifyParent", initiator);
   }
   refreshChildren() {
     this.children = [];
