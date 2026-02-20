@@ -96,7 +96,7 @@ Scenario('@editor @setValue() should set value', async ({ I }) => {
   I.seeInField('[id="root-integers-integer-radios-2"]', '3')
 })
 
-Scenario('@editor @showErrors should determine if and when validation errors are displayed', async ({ I }) => {
+Scenario('@editor @editor-showErrors @showErrors should determine if and when validation errors are displayed', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I.selectOption('#examples', 'editors/all')
   I._waitForElement('.jedi-ready')

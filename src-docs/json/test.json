@@ -1,10 +1,432 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "foo": {
-      "$ref": "#"
+  "type": "array",
+  "x-format": "nav-horizontal",
+  "minItems": 1,
+  "maxItems": 5,
+  "x-arrayMove": false,
+  "x-navWarningMessage": "Die Zählung ist noch nicht vollständig.",
+  "items": {
+    "type": "object",
+    "x-format": "nav-horizontal",
+    "properties": {
+      "zeit": {
+        "type": "object",
+        "x-format": "nav-horizontal",
+        "x-options": {
+          "titleHidden": true,
+          "format": "grid"
+        },
+        "properties": {
+          "datum": {
+            "type": "string",
+            "x-format": "date",
+            "x-grid": {
+              "columns": 4
+            }
+          },
+          "start": {
+            "type": "string",
+            "x-format": "time",
+            "x-grid": {
+              "columns": 4
+            }
+          },
+          "ende": {
+            "type": "string",
+            "x-format": "time",
+            "x-grid": {
+              "columns": 4
+            }
+          }
+        }
+      },
+      "verhaeltnisse": {
+        "type": "object",
+        "x-format": "nav-horizontal",
+        "properties": {
+          "wind": {
+            "type": "string",
+            "enum": [
+              "still_bis_gering",
+              "leicht_bis_schwach",
+              "maessig_bis_frisch",
+              "stark_bis_stuermisch",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "still bis gering",
+                "leicht bis schwach",
+                "mäßig bis frisch",
+                "stark bis stürmisch",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "boden": {
+            "type": "string",
+            "enum": [
+              "torcken",
+              "feucht",
+              "nass",
+              "staunass",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "trocken",
+                "feucht",
+                "nass",
+                "staunass",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "niederschlag": {
+            "type": "string",
+            "enum": [
+              "torcken",
+              "sprueh_niesel_schauer",
+              "starker_regen",
+              "schnee_hagel",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "trocken",
+                "Sprüh\/Niesel, Schauer",
+                "starker Regen",
+                "Schnee\/Hagel",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "sicht": {
+            "type": "string",
+            "enum": [
+              "sehr_klar",
+              "relativ_klar",
+              "diesig",
+              "bedeutende-einschraenkungen",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "sehr klar",
+                "relativ klar",
+                "diesig",
+                "bedeutende Einschränkungen",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "mond": {
+            "type": "object",
+            "x-format": "nav-horizontal",
+            "properties": {
+              "mond_sichtbarkeit": {
+                "type": "string",
+                "enum": [
+                  "sichtbar",
+                  "zeitweilig_sichtbar",
+                  "nicht_sichtbar",
+                  "keine_angabe"
+                ],
+                "x-options": {
+                  "enumTitles": [
+                    "sichtbar",
+                    "zeitweilig sichtbar",
+                    "nicht sichtbar",
+                    "keine Angabe"
+                  ],
+                  "enforceEnumDefault": false,
+                  "format": "radios-inline"
+                }
+              },
+              "mond_phase": {
+                "type": "string",
+                "enum": [
+                  "vollmond",
+                  "3_4_mond",
+                  "1_2_mond",
+                  "1_4_mond",
+                  "neumond",
+                  "keine_angabe"
+                ],
+                "x-options": {
+                  "enumTitles": [
+                    "Vollmond",
+                    "3\/4 Mond",
+                    "1\/2 Mond",
+                    "1\/4 Mond",
+                    "Neumond",
+                    "keine Angabe"
+                  ],
+                  "enforceEnumDefault": false,
+                  "format": "radios-inline"
+                }
+              }
+            }
+          },
+          "temperatur": {
+            "type": "object",
+            "x-format": "nav-horizontal",
+            "x-options": {
+              "titleHidden": true
+            },
+            "properties": {
+              "temperatur": {
+                "type": "array",
+                "uniqueItems": true,
+                "x-format": "checkboxes-inline",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "bodenfrost",
+                    "raureif"
+                  ],
+                  "x-options": {
+                    "enumTitles": [
+                      "Bodenfrost",
+                      "Raureif"
+                    ]
+                  }
+                }
+              },
+              "temp2": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "zaehlung": {
+        "type": "object",
+        "x-format": "nav-horizontal",
+        "x-options": {
+          "titleHidden": true
+        },
+        "required": [
+          "anmerkungen"
+        ],
+        "properties": {
+          "zaehlung": {
+            "type": "array",
+            "uniqueItems": true,
+            "x-format": "checkboxes-inline",
+            "items": {
+              "type": "string",
+              "enforceEnumDefault": false,
+              "enum": [
+                "scheinwerfer",
+                "wbk",
+                "wbk_kontrolle"
+              ],
+              "x-options": {
+                "enumTitles": [
+                  "Scheinwerfer",
+                  "WBK",
+                  "WBK zur Kontrolle"
+                ]
+              }
+            }
+          },
+          "modell": {
+            "type": "string"
+          },
+          "anmerkungen": {
+            "type": "string",
+            "x-format": "textarea"
+          }
+        }
+      },
+      "feldhasen": {
+        "type": "object",
+        "x-format": "nav-horizontal",
+        "x-options": {
+          "titleHidden": true
+        },
+        "properties": {
+          "zaehlung": {
+            "type": "string",
+            "enum": [
+              "ja",
+              "nein"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "Ja",
+                "Nein"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "gesamtstrecke": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fallwild": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "niederwild": {
+            "type": "object",
+            "x-format": "nav-horizontal",
+            "x-titleHidden": true,
+            "required": [
+              "massnahme"
+            ],
+            "properties": {
+              "massnahme": {
+                "type": "string",
+                "x-format": "textarea",
+                "maxLength": 300
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "zaehlung": {
+              "const": "nein"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "gesamtstrecke": {
+              "readOnly": true
+            }
+          }
+        }
+      },
+      "referenzobjekt_daten": {
+        "type": "object",
+        "x-format": "nav-horizontal",
+        "x-options": {
+          "titleHidden": true
+        },
+        "properties": {
+          "laenge": {
+            "type": "array",
+            "minItems": 1,
+            "x-arrayMove": false,
+            "items": {
+              "type": "object",
+              "x-format": "nav-horizontal",
+              "x-format": "grid",
+              "properties": {
+                "zaehlbar": {
+                  "type": "boolean",
+                  "x-format": "checkbox",
+                  "x-grid": {
+                    "columns": 6
+                  },
+                  "x-options": {
+                    "inputAttributes": {
+                      "readonly": true
+                    }
+                  }
+                },
+                "flaeche": {
+                  "type": "number",
+                  "description": "in ha",
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 99999.99,
+                  "x-grid": {
+                    "columns": 6
+                  },
+                  "x-inputAttributes": {
+                    "step": 0.01
+                  },
+                  "x-options": {
+                    "inputAttributes": {
+                      "readonly": true
+                    }
+                  }
+                },
+                "beobachtungen": {
+                  "type": "object",
+                  "x-format": "nav-horizontal",
+                  "x-format": "grid",
+                  "properties": {
+                    "hase": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "reh": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "fuchs": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "dachs": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "kaninchen": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "katze": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 99,
+                      "x-grid": {
+                        "columns": 4
+                      }
+                    },
+                    "sonstiges": {
+                      "type": "string",
+                      "x-format": "textarea",
+                      "maxLength": 255
+                    }
+                  },
+                  "x-options": {
+                    "inputAttributes": {
+                      "readonly": true
+                    }
+                  }
+                }
+              }
+            },
+            "default": []
+          }
+        }
+      }
     }
   },
-  "additionalProperties": false
+  "$defs": []
 }

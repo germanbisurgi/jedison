@@ -1,5 +1,11 @@
 ### dev
 
+- Added configurable `muteValidationMessages` option to control which constraint errors are hidden in the UI
+
+### 1.3.6
+
+- Fixed tab warning indicators updating with a 1-step delay
+
 ### 1.3.5
 
 - Better Tabs layout

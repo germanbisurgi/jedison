@@ -234,8 +234,8 @@ class InstanceObject extends Instance {
 
     this.value = value
     this.jedison.emit('instance-change', this, initiator)
-    this.emit('notifyParent', initiator)
     this.emit('change', initiator)
+    this.emit('notifyParent', initiator)
   }
 
   /**
