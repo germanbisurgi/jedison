@@ -320,6 +320,7 @@ import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
 import europass from './json/europass.json'
+import characterCreator from './json/examples/character-creator.json'
 import blackParade from './json/examples/black-parade.json'
 import geojson from './json/examples/geojson.json'
 import johnFrusciante from './json/examples/john-frusciante.json'
@@ -360,6 +361,7 @@ export default {
       errorCount: 0,
       examples: {
         'Examples': {
+          'examples/character-creator': characterCreator,
           'examples/geojson': geojson,
           'examples/john-frusciante': johnFrusciante,
           'examples/resume-schema': resumeSchema,
@@ -505,7 +507,7 @@ export default {
           'issue/jodit-as-prop': joditAsProp,
         }
       },
-      example: 'editors/all',
+      example: 'examples/character-creator',
       themes: [
         'bootstrap5',
         'bootstrap4',
@@ -543,7 +545,7 @@ export default {
       enablePropertiesToggle: true,
       enableCollapseToggle: true,
       startCollapsed: false,
-      schema: all,
+      schema: characterCreator,
       editor: null,
       theme: 'barebones',
       iconLib: 'bootstrap-icons',
@@ -567,7 +569,7 @@ export default {
   created() {
     this.theme = this.getQueryParam('theme') || 'bootstrap5'
     this.iconLib = this.getQueryParam('iconLib') || 'fontawesome5'
-    this.example = this.getQueryParam('example') || 'editors/all'
+    this.example = this.getQueryParam('example') || 'examples/character-creator'
     this.showErrors = this.getQueryParam('showErrors') || 'change'
     this.switcherInput = this.getQueryParam('switcherInput') || 'select'
     this.language = this.getQueryParam('language') || 'en'
