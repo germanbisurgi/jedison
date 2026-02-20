@@ -1741,11 +1741,11 @@ class Theme {
       warning.classList.add('jedi-nav-warning')
       warning.textContent = '⚠ '
 
-      if (config.navWarningMessage) {
-        warning.setAttribute('title', config.navWarningMessage)
-      }
-
       text.insertBefore(warning, text.firstChild)
+
+      if (config.navWarningMessage) {
+        list.setAttribute('title', config.navWarningMessage)
+      }
     }
 
     link.appendChild(arrayActions)
