@@ -51,16 +51,16 @@
         "level": {
           "title": "Level",
           "type": "integer",
-          "description": "Character level (1-20)",
+          "description": "Character level (1-69) noice",
           "minimum": 1,
-          "maximum": 20,
+          "maximum": 69,
           "x-format": "range",
           "x-grid": { "columns": 6 },
           "x-messages": {
             "minimum": "Even the greenest adventurer starts at level 1.",
             "maximum": "The gods cap mortal power at level 20."
           },
-          "default": 7
+          "default": 69
         },
         "alignment": {
           "title": "Alignment",
