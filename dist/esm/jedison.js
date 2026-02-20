@@ -7525,10 +7525,10 @@ class Theme {
       const warning = document.createElement("span");
       warning.classList.add("jedi-nav-warning");
       warning.textContent = "⚠ ";
-      if (config.navWarningMessage) {
-        warning.setAttribute("title", config.navWarningMessage);
-      }
       text.insertBefore(warning, text.firstChild);
+      if (config.navWarningMessage) {
+        list.setAttribute("title", config.navWarningMessage);
+      }
     }
     link.appendChild(arrayActions);
     link.appendChild(text);
@@ -7869,6 +7869,7 @@ class ThemeBootstrap3 extends Theme {
   getTabList(config) {
     const tabList = super.getTabList(config);
     tabList.classList.add("nav");
+    tabList.style.marginBottom = "1rem";
     if (config.variant === "horizontal") {
       tabList.classList.add("nav-tabs");
     } else {
@@ -7879,7 +7880,22 @@ class ThemeBootstrap3 extends Theme {
   }
   getTab(config) {
     const tab = super.getTab(config);
-    tab.text.style.marginLeft = "15px";
+    tab.link.style.display = "flex";
+    tab.link.style.alignItems = "center";
+    tab.arrayActions.style.flexShrink = "0";
+    tab.arrayActions.style.whiteSpace = "nowrap";
+    tab.text.style.flex = "1";
+    tab.text.style.marginLeft = "5px";
+    tab.text.style.marginRight = "5px";
+    if (config.hasErrors) {
+      const warning = tab.text.querySelector(".jedi-nav-warning");
+      if (warning) {
+        tab.text.removeChild(warning);
+        warning.style.flexShrink = "0";
+        warning.style.whiteSpace = "nowrap";
+        tab.link.appendChild(warning);
+      }
+    }
     if (config.active) {
       tab.list.classList.add("active");
     }
@@ -8230,6 +8246,7 @@ class ThemeBootstrap4 extends Theme {
   getTabList(config) {
     const tabList = super.getTabList();
     tabList.classList.add("nav");
+    tabList.classList.add("mb-3");
     if (config.variant === "horizontal") {
       tabList.classList.add("nav-tabs");
     } else {
@@ -8241,9 +8258,18 @@ class ThemeBootstrap4 extends Theme {
   getTab(config) {
     const tab = super.getTab(config);
     tab.list.classList.add("nav-item");
-    tab.list.classList.add("mb-3");
-    tab.text.classList.add("ml-3");
     tab.link.classList.add("nav-link");
+    tab.link.classList.add("d-flex", "align-items-center");
+    tab.arrayActions.classList.add("flex-shrink-0", "text-nowrap");
+    tab.text.classList.add("flex-grow-1", "mx-2");
+    if (config.hasErrors) {
+      const warning = tab.text.querySelector(".jedi-nav-warning");
+      if (warning) {
+        tab.text.removeChild(warning);
+        warning.classList.add("flex-shrink-0", "text-nowrap");
+        tab.link.appendChild(warning);
+      }
+    }
     tab.link.setAttribute("data-toggle", "tab");
     if (config.active) {
       tab.link.classList.add("active");
@@ -8589,6 +8615,7 @@ class ThemeBootstrap5 extends Theme {
   getTabList(config) {
     const tabList = super.getTabList(config);
     tabList.classList.add("nav");
+    tabList.classList.add("mb-3");
     if (config.variant === "horizontal") {
       tabList.classList.add("nav-tabs");
     } else {
@@ -8600,9 +8627,18 @@ class ThemeBootstrap5 extends Theme {
   getTab(config) {
     const tab = super.getTab(config);
     tab.list.classList.add("nav-item");
-    tab.list.classList.add("mb-3");
-    tab.text.classList.add("ms-3");
     tab.link.classList.add("nav-link");
+    tab.link.classList.add("d-flex", "align-items-center");
+    tab.arrayActions.classList.add("flex-shrink-0", "text-nowrap");
+    tab.text.classList.add("flex-grow-1", "mx-2");
+    if (config.hasErrors) {
+      const warning = tab.text.querySelector(".jedi-nav-warning");
+      if (warning) {
+        tab.text.removeChild(warning);
+        warning.classList.add("flex-shrink-0", "text-nowrap");
+        tab.link.appendChild(warning);
+      }
+    }
     tab.link.setAttribute("data-bs-toggle", "tab");
     if (config.active) {
       tab.link.classList.add("active");

@@ -338,6 +338,7 @@ class ThemeBootstrap4 extends Theme {
   getTabList (config) {
     const tabList = super.getTabList()
     tabList.classList.add('nav')
+    tabList.classList.add('mb-3')
 
     if (config.variant === 'horizontal') {
       tabList.classList.add('nav-tabs')
@@ -352,9 +353,27 @@ class ThemeBootstrap4 extends Theme {
   getTab (config) {
     const tab = super.getTab(config)
     tab.list.classList.add('nav-item')
-    tab.list.classList.add('mb-3')
-    tab.text.classList.add('ml-3')
     tab.link.classList.add('nav-link')
+
+    // Flex layout on <a>: [arrayActions] [text] [warning]
+    tab.link.classList.add('d-flex', 'align-items-center')
+
+    // Left: action buttons — don't shrink or wrap
+    tab.arrayActions.classList.add('flex-shrink-0', 'text-nowrap')
+
+    // Middle: text fills remaining space, can wrap
+    tab.text.classList.add('flex-grow-1', 'mx-2')
+
+    // Right: move warning from inside text to end of link
+    if (config.hasErrors) {
+      const warning = tab.text.querySelector('.jedi-nav-warning')
+      if (warning) {
+        tab.text.removeChild(warning)
+        warning.classList.add('flex-shrink-0', 'text-nowrap')
+        tab.link.appendChild(warning)
+      }
+    }
+
     tab.link.setAttribute('data-toggle', 'tab')
 
     if (config.active) {

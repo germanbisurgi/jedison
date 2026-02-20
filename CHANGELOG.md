@@ -1,5 +1,9 @@
 ### dev
 
+### 1.3.5
+
+- Better Tabs layout
+
 ### 1.3.4
 
 - Fixed oneOf fit test

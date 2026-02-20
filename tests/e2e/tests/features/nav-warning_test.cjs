@@ -12,5 +12,6 @@ BeforeSuite(({ I }) => {
 
 Scenario('Should show nav warning with title attribute @nav-warning', ({ I }) => {
   I._fillField('#root-0-name', 'a')
-  I._waitForElement('.jedi-nav-warning[title="has errors"]')
+  I._waitForElement('[title="has errors"]')
+  I._waitForElement('.jedi-nav-warning')
 })

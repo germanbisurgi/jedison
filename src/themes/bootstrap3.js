@@ -317,6 +317,7 @@ class ThemeBootstrap3 extends Theme {
   getTabList (config) {
     const tabList = super.getTabList(config)
     tabList.classList.add('nav')
+    tabList.style.marginBottom = '1rem'
 
     if (config.variant === 'horizontal') {
       tabList.classList.add('nav-tabs')
@@ -330,7 +331,30 @@ class ThemeBootstrap3 extends Theme {
 
   getTab (config) {
     const tab = super.getTab(config)
-    tab.text.style.marginLeft = '15px'
+
+    // Flex layout on <a>: [arrayActions] [text] [warning]
+    tab.link.style.display = 'flex'
+    tab.link.style.alignItems = 'center'
+
+    // Left: action buttons — don't shrink or wrap
+    tab.arrayActions.style.flexShrink = '0'
+    tab.arrayActions.style.whiteSpace = 'nowrap'
+
+    // Middle: text fills remaining space, can wrap
+    tab.text.style.flex = '1'
+    tab.text.style.marginLeft = '5px'
+    tab.text.style.marginRight = '5px'
+
+    // Right: move warning from inside text to end of link
+    if (config.hasErrors) {
+      const warning = tab.text.querySelector('.jedi-nav-warning')
+      if (warning) {
+        tab.text.removeChild(warning)
+        warning.style.flexShrink = '0'
+        warning.style.whiteSpace = 'nowrap'
+        tab.link.appendChild(warning)
+      }
+    }
 
     if (config.active) {
       tab.list.classList.add('active')
