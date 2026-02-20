@@ -184,6 +184,10 @@ class InstanceMultiple extends Instance {
     return fittestIndex
   }
 
+  hasNestedValidationErrors () {
+    return this.activeInstance ? this.activeInstance.hasNestedValidationErrors() : false
+  }
+
   destroy () {
     this.instances.forEach((instance) => {
       instance.destroy()

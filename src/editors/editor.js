@@ -211,8 +211,10 @@ class Editor {
       return
     }
 
+    const muteValidationMessages = getSchemaXOption(this.instance.schema, 'muteValidationMessages') ?? this.instance.jedison.options.muteValidationMessages ?? []
+
     errors.forEach((error) => {
-      if (error.constraint === 'properties') {
+      if (muteValidationMessages.includes(error.constraint)) {
         return
       }
 

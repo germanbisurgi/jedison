@@ -1913,6 +1913,16 @@ class Instance extends EventEmitter {
     return removeDuplicatesFromArray(errors);
   }
   /**
+   * Returns true if any leaf descendant is showing validation errors.
+   * Only checks leaves to avoid stale container-level constraint flags.
+   */
+  hasNestedValidationErrors() {
+    if (this.children.length === 0) {
+      return !!(this.ui && this.ui.showingValidationErrors);
+    }
+    return this.children.some((child) => child.hasNestedValidationErrors());
+  }
+  /**
    * Prepare data before building the editor
    */
   prepare() {
@@ -2112,8 +2122,9 @@ class Editor {
     if (neverShowErrors && !force || errors.length === 0) {
       return;
     }
+    const muteValidationMessages = getSchemaXOption(this.instance.schema, "muteValidationMessages") ?? this.instance.jedison.options.muteValidationMessages ?? [];
     errors.forEach((error) => {
-      if (error.constraint === "properties") {
+      if (muteValidationMessages.includes(error.constraint)) {
         return;
       }
       error.messages.forEach((message) => {
@@ -2497,6 +2508,9 @@ class InstanceIfThenElse extends Instance {
     });
     return fittestIndex;
   }
+  hasNestedValidationErrors() {
+    return this.activeInstance ? this.activeInstance.hasNestedValidationErrors() : false;
+  }
   destroy() {
     this.instances.forEach((instance) => {
       instance.destroy();
@@ -2639,6 +2653,9 @@ class InstanceMultiple extends Instance {
       }
     }
     return fittestIndex;
+  }
+  hasNestedValidationErrors() {
+    return this.activeInstance ? this.activeInstance.hasNestedValidationErrors() : false;
   }
   destroy() {
     this.instances.forEach((instance) => {
@@ -3880,7 +3897,7 @@ class EditorObjectNav extends EditorObject {
         const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
         const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
         const tab = this.theme.getTab({
-          hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+          hasErrors: navWarning && child.hasNestedValidationErrors(),
           navWarningMessage,
           title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
           id,
@@ -4463,7 +4480,7 @@ class EditorArrayNav extends EditorArray {
       const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
       const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
       const { list, arrayActions } = this.theme.getTab({
-        hasErrors: navWarning && child.children.some((grandChild) => grandChild.ui.showingValidationErrors),
+        hasErrors: navWarning && child.hasNestedValidationErrors(),
         navWarningMessage,
         title: (titleTemplate == null ? void 0 : titleTemplate.length) ? titleTemplate : childTitle,
         id,

@@ -736,6 +736,7 @@ export default {
         enforceAdditionalProperties: this.enforceAdditionalProperties,
         editJsonData: this.editJsonData,
         useConstraintAttributes: this.useConstraintAttributes,
+        muteValidationMessages: ['properties'],
         schema: this.schema,
         data: this.data,
         theme: this.getThemeInstance(this.theme),

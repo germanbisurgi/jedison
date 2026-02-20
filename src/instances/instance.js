@@ -386,6 +386,17 @@ class Instance extends EventEmitter {
   }
 
   /**
+   * Returns true if any leaf descendant is showing validation errors.
+   * Only checks leaves to avoid stale container-level constraint flags.
+   */
+  hasNestedValidationErrors () {
+    if (this.children.length === 0) {
+      return !!(this.ui && this.ui.showingValidationErrors)
+    }
+    return this.children.some(child => child.hasNestedValidationErrors())
+  }
+
+  /**
    * Prepare data before building the editor
    */
   prepare () {
