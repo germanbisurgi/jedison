@@ -14,37 +14,79 @@
   "definitions": {
     "position": {
       "title": "Position",
-      "type": "array",
-      "x-format": "tuple",
-      "minItems": 2,
-      "maxItems": 2,
-      "prefixItems": [
-        { "title": "Longitude", "type": "number" },
-        { "title": "Latitude", "type": "number" }
+      "x-switcherInput": "radios-inline",
+      "oneOf": [
+        {
+          "title": "2D Position",
+          "type": "array",
+          "x-format": "tuple",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            { "title": "Longitude", "type": "number" },
+            { "title": "Latitude", "type": "number" }
+          ]
+        },
+        {
+          "title": "3D Position",
+          "type": "array",
+          "x-format": "tuple",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "title": "Longitude", "type": "number" },
+            { "title": "Latitude", "type": "number" },
+            { "title": "Altitude", "type": "number" }
+          ]
+        }
       ]
     },
     "bbox": {
       "title": "Bounding Box",
-      "type": "array",
-      "x-format": "tuple",
-      "minItems": 4,
-      "maxItems": 4,
-      "prefixItems": [
-        { "title": "Min Longitude", "type": "number" },
-        { "title": "Min Latitude", "type": "number" },
-        { "title": "Max Longitude", "type": "number" },
-        { "title": "Max Latitude", "type": "number" }
+      "x-switcherInput": "radios-inline",
+      "oneOf": [
+        {
+          "title": "2D BBox",
+          "type": "array",
+          "x-format": "tuple",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            { "title": "West Longitude", "type": "number" },
+            { "title": "South Latitude", "type": "number" },
+            { "title": "East Longitude", "type": "number" },
+            { "title": "North Latitude", "type": "number" }
+          ]
+        },
+        {
+          "title": "3D BBox",
+          "type": "array",
+          "x-format": "tuple",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            { "title": "West Longitude", "type": "number" },
+            { "title": "South Latitude", "type": "number" },
+            { "title": "Min Altitude", "type": "number" },
+            { "title": "East Longitude", "type": "number" },
+            { "title": "North Latitude", "type": "number" },
+            { "title": "Max Altitude", "type": "number" }
+          ]
+        }
       ]
     },
     "point": {
       "title": "GeoJSON Point",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["Point"]
+          "const": "Point",
+          "default": "Point",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -59,12 +101,15 @@
     "lineString": {
       "title": "GeoJSON LineString",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["LineString"]
+          "const": "LineString",
+          "default": "LineString",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -81,12 +126,15 @@
     "polygon": {
       "title": "GeoJSON Polygon",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["Polygon"]
+          "const": "Polygon",
+          "default": "Polygon",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -107,12 +155,15 @@
     "multiPoint": {
       "title": "GeoJSON MultiPoint",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["MultiPoint"]
+          "const": "MultiPoint",
+          "default": "MultiPoint",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -128,12 +179,15 @@
     "multiLineString": {
       "title": "GeoJSON MultiLineString",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["MultiLineString"]
+          "const": "MultiLineString",
+          "default": "MultiLineString",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -154,12 +208,15 @@
     "multiPolygon": {
       "title": "GeoJSON MultiPolygon",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "coordinates"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["MultiPolygon"]
+          "const": "MultiPolygon",
+          "default": "MultiPolygon",
+          "readOnly": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -195,12 +252,15 @@
     "geometryCollection": {
       "title": "GeoJSON GeometryCollection",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "geometries"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["GeometryCollection"]
+          "const": "GeometryCollection",
+          "default": "GeometryCollection",
+          "readOnly": true
         },
         "geometries": {
           "title": "Geometries",
@@ -216,15 +276,19 @@
     "feature": {
       "title": "GeoJSON Feature",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "properties", "geometry"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["Feature"]
+          "const": "Feature",
+          "default": "Feature",
+          "readOnly": true
         },
         "id": {
           "title": "ID",
+          "x-switcherInput": "radios-inline",
           "oneOf": [
             { "title": "Numeric ID", "type": "number" },
             { "title": "String ID", "type": "string" }
@@ -232,10 +296,8 @@
         },
         "properties": {
           "title": "Properties",
-          "oneOf": [
-            { "title": "Null", "type": "null" },
-            { "title": "Object", "type": "object" }
-          ]
+          "type": ["object", "null"],
+          "x-switcherInput": "radios-inline"
         },
         "geometry": {
           "title": "Geometry",
@@ -259,12 +321,15 @@
     "featureCollection": {
       "title": "GeoJSON FeatureCollection",
       "type": "object",
+      "additionalProperties": true,
       "required": ["type", "features"],
       "properties": {
         "type": {
           "title": "Type",
           "type": "string",
-          "enum": ["FeatureCollection"]
+          "const": "FeatureCollection",
+          "default": "FeatureCollection",
+          "readOnly": true
         },
         "features": {
           "title": "Features",

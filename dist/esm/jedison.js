@@ -4089,6 +4089,45 @@ class EditorArray extends Editor {
     this.refreshJsonData();
   }
 }
+class EditorArrayTuple extends EditorArray {
+  static resolves(schema) {
+    const type2 = getSchemaType(schema);
+    const format2 = getSchemaX(schema, "format");
+    const prefixItems2 = getSchemaPrefixItems(schema);
+    return type2 === "array" && format2 === "tuple" && isSet(prefixItems2);
+  }
+  build() {
+    super.build();
+    this.control.addBtn.style.display = "none";
+  }
+  addEventListeners() {
+    this.addJsonDataEventListeners();
+  }
+  refreshUI() {
+    this.control.childrenSlot.innerHTML = "";
+    const table = this.theme.getTable();
+    this.control.childrenSlot.appendChild(table.container);
+    const schemaPrefixItems = getSchemaPrefixItems(this.instance.schema);
+    schemaPrefixItems.forEach((prefixItemSchema) => {
+      const th = this.theme.getTableHeader();
+      const { label } = this.theme.getFakeLabel({
+        content: getSchemaTitle(prefixItemSchema) ?? ""
+      });
+      th.appendChild(label);
+      table.thead.appendChild(th);
+    });
+    const tbodyRow = document.createElement("tr");
+    this.instance.children.forEach((child) => {
+      const td = this.theme.getTableDefinition();
+      child.ui.adaptForTable(child, td);
+      td.appendChild(child.ui.control.container);
+      tbodyRow.appendChild(td);
+    });
+    table.tbody.appendChild(tbodyRow);
+    this.refreshJsonData();
+    this.refreshDisabledState();
+  }
+}
 class EditorArrayTable extends EditorArray {
   static resolves(schema, refParser) {
     return getSchemaType(schema) === "array" && getSchemaXOption(schema, "format") === "table";
@@ -5183,6 +5222,7 @@ class UiResolver {
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
+      EditorArrayTuple,
       EditorArrayTableObject,
       EditorArrayTable,
       EditorArrayNav,

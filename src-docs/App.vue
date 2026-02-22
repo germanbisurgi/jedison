@@ -309,10 +309,8 @@ import stringAce from './json/plugins/string-ace.json'
 import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
-import europass from './json/europass.json'
 import characterCreator from './json/examples/character-creator.json'
 import geojson from './json/examples/geojson.json'
-import resumeSchema from './json/examples/resume-schema.json'
 import loginExample from './json/examples/login.json'
 import contactExample from './json/examples/contact.json'
 import userProfile from './json/examples/user-profile.json'
@@ -355,13 +353,11 @@ export default {
         'Examples': {
           'examples/character-creator': characterCreator,
           'examples/geojson': geojson,
-          'examples/resume-schema': resumeSchema,
           'examples/login': loginExample,
           'examples/contact': contactExample,
           'custom/custom': custom,
           'custom/custom-constraint': customConstraint,
           'meta-schema': metaSchema,
-          'europass-xml-3.3.0': europass,
           'examples/user-profile': userProfile,
           'examples/product-listing': productListing,
           'examples/event-booking': eventBooking,
