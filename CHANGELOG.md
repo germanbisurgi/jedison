@@ -1,5 +1,8 @@
 ### dev
 
+### 1.4.0
+
+- Added array tuple editor
 - Added configurable `muteValidationMessages` option to control which constraint errors are hidden in the UI
 
 ### 1.3.6
