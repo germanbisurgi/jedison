@@ -316,6 +316,10 @@ import johnFrusciante from './json/examples/john-frusciante.json'
 import resumeSchema from './json/examples/resume-schema.json'
 import loginExample from './json/examples/login.json'
 import contactExample from './json/examples/contact.json'
+import userProfile from './json/examples/user-profile.json'
+import productListing from './json/examples/product-listing.json'
+import eventBooking from './json/examples/event-booking.json'
+import surveyBuilder from './json/examples/survey-builder.json'
 import testJson from './json/test.json'
 import markdownAnnotations from './json/experimental/markdon-annotations.json'
 import jsonPatch from './json/parsing/json-patch.json'
@@ -361,6 +365,10 @@ export default {
           'meta-schema': metaSchema,
           'europass-xml-3.3.0': europass,
           'examples/black-parade': blackParade,
+          'examples/user-profile': userProfile,
+          'examples/product-listing': productListing,
+          'examples/event-booking': eventBooking,
+          'examples/survey-builder': surveyBuilder,
           'test': testJson,
         },
         'Editors': {

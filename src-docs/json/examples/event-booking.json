@@ -1,0 +1,143 @@
+{
+  "title": "Event Booking",
+  "description": "Create and configure an event",
+  "type": "object",
+  "x-format": "grid",
+  "properties": {
+    "name": {
+      "title": "Event Name",
+      "type": "string",
+      "minLength": 1,
+      "x-grid": { "columns": 8 },
+      "x-titleIconClass": "fas fa-calendar-alt",
+      "default": "Frontend Developer Summit 2025"
+    },
+    "eventType": {
+      "title": "Event Type",
+      "type": "string",
+      "enum": ["conference", "workshop", "meetup", "webinar"],
+      "x-enumTitles": ["Conference", "Workshop", "Meetup", "Webinar"],
+      "x-grid": { "columns": 4 },
+      "default": "conference"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string",
+      "x-format": "textarea",
+      "x-grid": { "columns": 12 },
+      "default": "A two-day event covering the latest in frontend development."
+    },
+    "startDate": {
+      "title": "Start Date",
+      "type": "string",
+      "format": "date",
+      "x-grid": { "columns": 4 },
+      "x-titleIconClass": "fas fa-clock",
+      "default": "2025-09-15"
+    },
+    "endDate": {
+      "title": "End Date",
+      "type": "string",
+      "format": "date",
+      "x-grid": { "columns": 4 },
+      "default": "2025-09-16"
+    },
+    "capacity": {
+      "title": "Capacity",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "x-grid": { "columns": 4 },
+      "x-titleIconClass": "fas fa-users",
+      "default": 500
+    },
+    "organizer": {
+      "title": "Organizer",
+      "type": "object",
+      "x-format": "grid",
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-id-badge",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-grid": { "columns": 4 },
+          "default": "DevEvents Inc."
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "x-grid": { "columns": 4 },
+          "default": "info@devevents.io"
+        },
+        "website": {
+          "title": "Website",
+          "type": "string",
+          "format": "uri",
+          "x-grid": { "columns": 4 },
+          "default": "https://devevents.io"
+        }
+      }
+    },
+    "venue": {
+      "title": "Venue",
+      "type": "object",
+      "x-format": "grid",
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-building",
+      "properties": {
+        "name": {
+          "title": "Venue Name",
+          "type": "string",
+          "x-grid": { "columns": 6 },
+          "default": "Convention Center"
+        },
+        "address": {
+          "title": "Address",
+          "type": "string",
+          "x-grid": { "columns": 6 },
+          "default": "100 Conference Blvd, San Francisco, CA"
+        }
+      }
+    },
+    "tickets": {
+      "title": "Ticket Types",
+      "type": "array",
+      "x-format": "nav-horizontal",
+      "x-grid": { "columns": 12 },
+      "x-titleTemplate": "{{ value.name }}",
+      "items": {
+        "type": "object",
+        "x-format": "grid",
+        "properties": {
+          "name": {
+            "title": "Ticket Name",
+            "type": "string",
+            "x-grid": { "columns": 6 },
+            "default": "General Admission"
+          },
+          "price": {
+            "title": "Price ($)",
+            "type": "number",
+            "minimum": 0,
+            "x-grid": { "columns": 3 },
+            "default": 0
+          },
+          "quantity": {
+            "title": "Available",
+            "type": "integer",
+            "minimum": 0,
+            "x-grid": { "columns": 3 },
+            "default": 100
+          }
+        }
+      },
+      "default": [
+        { "name": "Early Bird", "price": 99, "quantity": 100 },
+        { "name": "General Admission", "price": 199, "quantity": 300 },
+        { "name": "VIP", "price": 499, "quantity": 50 }
+      ]
+    }
+  }
+}

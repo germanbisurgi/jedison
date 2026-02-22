@@ -1,0 +1,144 @@
+{
+  "title": "User Profile",
+  "description": "Registration and profile settings",
+  "type": "object",
+  "x-format": "grid",
+  "properties": {
+    "firstName": {
+      "title": "First Name",
+      "type": "string",
+      "minLength": 1,
+      "x-grid": { "columns": 6 },
+      "x-titleIconClass": "fas fa-user",
+      "x-messages": {
+        "minLength": "First name is required"
+      },
+      "default": "Jane"
+    },
+    "lastName": {
+      "title": "Last Name",
+      "type": "string",
+      "minLength": 1,
+      "x-grid": { "columns": 6 },
+      "x-messages": {
+        "minLength": "Last name is required"
+      },
+      "default": "Doe"
+    },
+    "email": {
+      "title": "Email",
+      "type": "string",
+      "format": "email",
+      "x-grid": { "columns": 6 },
+      "x-titleIconClass": "fas fa-envelope",
+      "default": "jane.doe@example.com"
+    },
+    "password": {
+      "title": "Password",
+      "type": "string",
+      "x-format": "password",
+      "minLength": 8,
+      "x-grid": { "columns": 6 },
+      "x-titleIconClass": "fas fa-lock",
+      "x-messages": {
+        "minLength": "Password must be at least 8 characters"
+      }
+    },
+    "avatarUrl": {
+      "title": "Avatar URL",
+      "type": "string",
+      "format": "uri",
+      "x-grid": { "columns": 12 },
+      "x-info": "Direct link to your profile picture"
+    },
+    "bio": {
+      "title": "Bio",
+      "type": "string",
+      "x-format": "textarea",
+      "maxLength": 300,
+      "x-grid": { "columns": 12 },
+      "default": "Software developer and open source enthusiast."
+    },
+    "address": {
+      "title": "Address",
+      "type": "object",
+      "x-format": "grid",
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-map-marker-alt",
+      "properties": {
+        "street": {
+          "title": "Street",
+          "type": "string",
+          "x-grid": { "columns": 12 },
+          "default": "123 Main St"
+        },
+        "city": {
+          "title": "City",
+          "type": "string",
+          "x-grid": { "columns": 6 },
+          "default": "Springfield"
+        },
+        "zip": {
+          "title": "ZIP Code",
+          "type": "string",
+          "pattern": "^[0-9]{5}$",
+          "x-grid": { "columns": 3 },
+          "x-messages": {
+            "pattern": "Must be a 5-digit ZIP code"
+          },
+          "default": "62704"
+        },
+        "country": {
+          "title": "Country",
+          "type": "string",
+          "enum": ["US", "CA", "GB", "DE", "FR", "AU"],
+          "x-enumTitles": ["United States", "Canada", "United Kingdom", "Germany", "France", "Australia"],
+          "x-grid": { "columns": 3 },
+          "default": "US"
+        }
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "type": "object",
+      "x-format": "grid",
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-cog",
+      "properties": {
+        "language": {
+          "title": "Language",
+          "type": "string",
+          "enum": ["en", "es", "fr", "de", "pt"],
+          "x-enumTitles": ["English", "Spanish", "French", "German", "Portuguese"],
+          "x-grid": { "columns": 6 },
+          "default": "en"
+        },
+        "theme": {
+          "title": "Theme",
+          "type": "string",
+          "enum": ["light", "dark", "auto"],
+          "x-enumTitles": ["Light", "Dark", "Auto"],
+          "x-format": "radios-inline",
+          "x-grid": { "columns": 6 },
+          "default": "auto"
+        },
+        "newsletter": {
+          "title": "Subscribe to newsletter",
+          "type": "boolean",
+          "x-format": "checkbox",
+          "x-grid": { "columns": 6 },
+          "default": true
+        },
+        "visibility": {
+          "title": "Profile Visibility",
+          "type": "string",
+          "enum": ["public", "friends", "private"],
+          "x-enumTitles": ["Public", "Friends Only", "Private"],
+          "x-format": "radios-inline",
+          "x-grid": { "columns": 6 },
+          "default": "public"
+        }
+      }
+    }
+  }
+}

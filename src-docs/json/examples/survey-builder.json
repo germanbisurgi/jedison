@@ -1,0 +1,108 @@
+{
+  "title": "Survey Builder",
+  "description": "Build a survey with different question types",
+  "type": "object",
+  "x-format": "grid",
+  "properties": {
+    "surveyTitle": {
+      "title": "Survey Title",
+      "type": "string",
+      "minLength": 1,
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-poll",
+      "default": "Customer Satisfaction Survey"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string",
+      "x-format": "textarea",
+      "x-grid": { "columns": 12 },
+      "default": "Help us improve our product by answering a few questions."
+    },
+    "questions": {
+      "title": "Questions",
+      "type": "array",
+      "x-format": "nav-vertical",
+      "x-grid": { "columns": 12 },
+      "x-titleTemplate": "Q{{ i1 }}: {{ value.label }}",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "x-format": "grid",
+        "properties": {
+          "label": {
+            "title": "Question Text",
+            "type": "string",
+            "minLength": 1,
+            "x-grid": { "columns": 8 },
+            "default": "New question"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "enum": ["text", "multiple-choice", "rating", "yes-no"],
+            "x-enumTitles": ["Text", "Multiple Choice", "Rating", "Yes / No"],
+            "x-grid": { "columns": 4 },
+            "default": "text"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean",
+            "x-format": "checkbox",
+            "x-grid": { "columns": 6 },
+            "default": false
+          },
+          "allowMultiple": {
+            "title": "Allow multiple answers",
+            "type": "boolean",
+            "x-format": "checkbox",
+            "x-grid": { "columns": 6 },
+            "default": false
+          },
+          "placeholder": {
+            "title": "Placeholder",
+            "type": "string",
+            "x-grid": { "columns": 12 }
+          },
+          "options": {
+            "title": "Options",
+            "type": "array",
+            "x-format": "table",
+            "x-sortable": true,
+            "x-grid": { "columns": 12 },
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default": [
+        {
+          "label": "How did you hear about us?",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. Social media, friend, search engine..."
+        },
+        {
+          "label": "Which features do you use most?",
+          "type": "multiple-choice",
+          "required": true,
+          "allowMultiple": true,
+          "options": ["Dashboard", "Reports", "API", "Integrations"]
+        },
+        {
+          "label": "Rate your overall experience",
+          "type": "rating",
+          "required": true,
+          "options": ["1", "2", "3", "4", "5"]
+        },
+        {
+          "label": "Would you recommend us?",
+          "type": "yes-no",
+          "required": false,
+          "options": ["Yes", "No"]
+        }
+      ]
+    }
+  }
+}

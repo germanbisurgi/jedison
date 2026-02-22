@@ -1,0 +1,131 @@
+{
+  "title": "Product Listing",
+  "description": "E-commerce product entry",
+  "type": "object",
+  "x-format": "grid",
+  "properties": {
+    "title": {
+      "title": "Product Title",
+      "type": "string",
+      "minLength": 1,
+      "x-grid": { "columns": 12 },
+      "x-titleIconClass": "fas fa-box",
+      "default": "Wireless Bluetooth Headphones"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string",
+      "x-format": "textarea",
+      "x-grid": { "columns": 12 },
+      "default": "Premium noise-cancelling headphones with 30-hour battery life."
+    },
+    "price": {
+      "title": "Price ($)",
+      "type": "number",
+      "minimum": 0.01,
+      "x-grid": { "columns": 4 },
+      "x-titleIconClass": "fas fa-dollar-sign",
+      "default": 79.99
+    },
+    "compareAtPrice": {
+      "title": "Compare-at Price ($)",
+      "type": "number",
+      "minimum": 0,
+      "x-grid": { "columns": 4 },
+      "x-info": "Original price before discount",
+      "default": 129.99
+    },
+    "sku": {
+      "title": "SKU",
+      "type": "string",
+      "pattern": "^[A-Z]{2,4}-[0-9]{4,6}$",
+      "x-grid": { "columns": 4 },
+      "x-messages": {
+        "pattern": "Format: XX-0000 (e.g. WBH-10042)"
+      },
+      "default": "WBH-10042"
+    },
+    "category": {
+      "title": "Category",
+      "type": "string",
+      "enum": ["electronics", "clothing", "home", "sports", "toys", "books"],
+      "x-enumTitles": ["Electronics", "Clothing & Apparel", "Home & Garden", "Sports & Outdoors", "Toys & Games", "Books"],
+      "x-grid": { "columns": 6 },
+      "default": "electronics"
+    },
+    "availability": {
+      "title": "Availability",
+      "type": "string",
+      "enum": ["in_stock", "out_of_stock", "preorder", "discontinued"],
+      "x-enumTitles": ["In Stock", "Out of Stock", "Pre-order", "Discontinued"],
+      "x-grid": { "columns": 6 },
+      "default": "in_stock"
+    },
+    "tags": {
+      "title": "Tags",
+      "type": "array",
+      "x-format": "table",
+      "x-sortable": true,
+      "x-grid": { "columns": 12 },
+      "items": {
+        "type": "string"
+      },
+      "default": ["wireless", "bluetooth", "noise-cancelling"]
+    },
+    "images": {
+      "title": "Image URLs",
+      "type": "array",
+      "x-format": "table",
+      "x-grid": { "columns": 12 },
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "default": [
+        "https://example.com/images/headphones-front.jpg",
+        "https://example.com/images/headphones-side.jpg"
+      ]
+    },
+    "variants": {
+      "title": "Variants",
+      "type": "array",
+      "x-format": "table-object",
+      "x-sortable": true,
+      "x-grid": { "columns": 12 },
+      "items": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "title": "Size",
+            "type": "string",
+            "enum": ["XS", "S", "M", "L", "XL"],
+            "x-enumTitles": ["Extra Small", "Small", "Medium", "Large", "Extra Large"],
+            "default": "M"
+          },
+          "color": {
+            "title": "Color",
+            "type": "string",
+            "default": "Black"
+          },
+          "stock": {
+            "title": "Stock",
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "priceAdjustment": {
+            "title": "Price Adj. ($)",
+            "type": "number",
+            "default": 0
+          }
+        }
+      },
+      "default": [
+        { "size": "M", "color": "Black", "stock": 150, "priceAdjustment": 0 },
+        { "size": "M", "color": "White", "stock": 85, "priceAdjustment": 0 },
+        { "size": "L", "color": "Black", "stock": 42, "priceAdjustment": 10 }
+      ]
+    }
+  }
+}
