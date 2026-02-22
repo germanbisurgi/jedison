@@ -1,0 +1,14 @@
+{
+  "title": "Bounding Box",
+  "type": "array",
+  "x-format": "tuple",
+  "minItems": 4,
+  "maxItems": 4,
+  "prefixItems": [
+    { "title": "Min Longitude", "type": "number" },
+    { "title": "Min Latitude", "type": "number" },
+    { "title": "Max Longitude", "type": "number" },
+    { "title": "Max Latitude", "type": "number" }
+  ],
+  "default": [-73.9857, 40.7484, -73.9654, 40.7829]
+}

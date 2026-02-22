@@ -248,6 +248,7 @@ import stringInput from './json/editors/string-input.json'
 import stringTextarea from './json/editors/string-textarea.json'
 import showErrorsInputMixed from './json/editors/show-errors-input-mixed.json'
 import containerAttributes from './json/editors/editor-containerAttributes.json'
+import arrayTuple from './json/editors/array-tuple.json'
 import editorHidden from './json/editors/editor-hidden.json'
 import additionalProperties from './json/validator/additionalProperties.json'
 import allOf from './json/validator/allOf.json'
@@ -310,9 +311,7 @@ import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
 import europass from './json/europass.json'
 import characterCreator from './json/examples/character-creator.json'
-import blackParade from './json/examples/black-parade.json'
 import geojson from './json/examples/geojson.json'
-import johnFrusciante from './json/examples/john-frusciante.json'
 import resumeSchema from './json/examples/resume-schema.json'
 import loginExample from './json/examples/login.json'
 import contactExample from './json/examples/contact.json'
@@ -356,7 +355,6 @@ export default {
         'Examples': {
           'examples/character-creator': characterCreator,
           'examples/geojson': geojson,
-          'examples/john-frusciante': johnFrusciante,
           'examples/resume-schema': resumeSchema,
           'examples/login': loginExample,
           'examples/contact': contactExample,
@@ -364,7 +362,6 @@ export default {
           'custom/custom-constraint': customConstraint,
           'meta-schema': metaSchema,
           'europass-xml-3.3.0': europass,
-          'examples/black-parade': blackParade,
           'examples/user-profile': userProfile,
           'examples/product-listing': productListing,
           'examples/event-booking': eventBooking,
@@ -383,6 +380,7 @@ export default {
           'editors/array-table': arrayTable,
           'editors/array-table-object': arrayTableObject,
           'editors/array-table-buttons-position': arrayTableButtonsPosition,
+          'editors/array-tuple': arrayTuple,
           'editors/array-enforceMinItems': arrayEnforceMinItems,
           'editors/boolean-checkbox': booleanCheckbox,
           'editors/boolean-radios': booleanRadios,

@@ -14,6 +14,7 @@ import EditorNumberInput from './editors/number-input.js'
 import EditorObjectGrid from './editors/object-grid.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObject from './editors/object.js'
+import EditorArrayTuple from './editors/array-tuple.js'
 import EditorArrayTable from './editors/array-table.js'
 import EditorArrayTableObject from './editors/array-table-object.js'
 import EditorArrayChoices from './editors/array-choices.js'
@@ -68,6 +69,7 @@ class UiResolver {
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
+      EditorArrayTuple,
       EditorArrayTableObject,
       EditorArrayTable,
       EditorArrayNav,
