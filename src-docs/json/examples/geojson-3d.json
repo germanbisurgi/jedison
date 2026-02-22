@@ -1,5 +1,5 @@
 {
-  "title": "GeoJSON",
+  "title": "GeoJSON 3D",
   "oneOf": [
     { "$ref": "#/definitions/point" },
     { "$ref": "#/definitions/lineString" },
@@ -14,65 +14,29 @@
   "definitions": {
     "position": {
       "title": "Position",
-      "x-switcherInput": "radios-inline",
-      "oneOf": [
-        {
-          "title": "2D Position",
-          "type": "array",
-          "x-format": "tuple",
-          "minItems": 2,
-          "maxItems": 2,
-          "prefixItems": [
-            { "title": "Longitude", "type": "number" },
-            { "title": "Latitude", "type": "number" }
-          ]
-        },
-        {
-          "title": "3D Position",
-          "type": "array",
-          "x-format": "tuple",
-          "minItems": 3,
-          "maxItems": 3,
-          "prefixItems": [
-            { "title": "Longitude", "type": "number" },
-            { "title": "Latitude", "type": "number" },
-            { "title": "Altitude", "type": "number" }
-          ]
-        }
+      "type": "array",
+      "x-format": "tuple",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "title": "Longitude", "type": "number" },
+        { "title": "Latitude", "type": "number" },
+        { "title": "Altitude", "type": "number" }
       ]
     },
     "bbox": {
       "title": "Bounding Box",
-      "x-switcherInput": "radios-inline",
-      "oneOf": [
-        {
-          "title": "2D BBox",
-          "type": "array",
-          "x-format": "tuple",
-          "minItems": 4,
-          "maxItems": 4,
-          "prefixItems": [
-            { "title": "West Longitude", "type": "number" },
-            { "title": "South Latitude", "type": "number" },
-            { "title": "East Longitude", "type": "number" },
-            { "title": "North Latitude", "type": "number" }
-          ]
-        },
-        {
-          "title": "3D BBox",
-          "type": "array",
-          "x-format": "tuple",
-          "minItems": 6,
-          "maxItems": 6,
-          "prefixItems": [
-            { "title": "West Longitude", "type": "number" },
-            { "title": "South Latitude", "type": "number" },
-            { "title": "Min Altitude", "type": "number" },
-            { "title": "East Longitude", "type": "number" },
-            { "title": "North Latitude", "type": "number" },
-            { "title": "Max Altitude", "type": "number" }
-          ]
-        }
+      "type": "array",
+      "x-format": "tuple",
+      "minItems": 6,
+      "maxItems": 6,
+      "prefixItems": [
+        { "title": "West Longitude", "type": "number" },
+        { "title": "South Latitude", "type": "number" },
+        { "title": "Min Altitude", "type": "number" },
+        { "title": "East Longitude", "type": "number" },
+        { "title": "North Latitude", "type": "number" },
+        { "title": "Max Altitude", "type": "number" }
       ]
     },
     "point": {

@@ -310,7 +310,8 @@ import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
 import characterCreator from './json/examples/character-creator.json'
-import geojson from './json/examples/geojson.json'
+import geojson2d from './json/examples/geojson-2d.json'
+import geojson3d from './json/examples/geojson-3d.json'
 import loginExample from './json/examples/login.json'
 import contactExample from './json/examples/contact.json'
 import userProfile from './json/examples/user-profile.json'
@@ -352,7 +353,8 @@ export default {
       examples: {
         'Examples': {
           'examples/character-creator': characterCreator,
-          'examples/geojson': geojson,
+          'examples/geojson-2d': geojson2d,
+          'examples/geojson-3d': geojson3d,
           'examples/login': loginExample,
           'examples/contact': contactExample,
           'custom/custom': custom,
