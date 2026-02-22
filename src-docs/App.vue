@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row layout-row">
       <div class="col-xs-12 col-md-8">
         <main>
           <div class="btn-group mb-3">
@@ -40,44 +40,39 @@
         <aside>
           <div class="form-group mb-0">
             <label for="schema"><code>schema</code></label>
-            <textarea ref="schema" class="form-control" id="schema" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
+            <textarea ref="schema" class="form-control" id="schema" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 300px;"></textarea>
           </div>
 
-          <button class="btn btn-primary btn-block w-100 mb-3" id="set-schema" @click="setSchema()">Set schema</button>
-
-          <br><br>
-
-          <div class="form-group mb-0">
-            <label for="data"><code>data</code></label>
-            <textarea ref="data" class="form-control" id="data" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
-          </div>
-
-          <button class="btn btn-primary btn-block w-100 mb-3" id="set-data" @click="setData()">Set data</button>
-
-          <br><br>
+          <button class="btn btn-primary btn-block w-100 mb-4" id="set-schema" @click="setSchema()">Set schema</button>
 
           <div class="form-group mb-0">
             <label for="editor-value">Value</label>
-            <textarea ref="editorValue" class="form-control" id="editor-value" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
+            <textarea ref="editorValue" class="form-control" id="editor-value" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 200px;"></textarea>
           </div>
 
-          <button class="btn btn-primary btn-block w-100 mb-3" id="set-value" @click="setEditorValue()">Set value</button>
-
-          <br><br>
+          <button class="btn btn-primary btn-block w-100 mb-4" id="set-value" @click="setEditorValue()">Set value</button>
 
           <div class="form-group mb-3">
             <label for="editor-errors">
               <span>Errors: </span>
               <span>{{ errorCount }}</span>
             </label>
-            <textarea ref="editorErrors" class="form-control" id="editor-errors" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
+            <textarea ref="editorErrors" class="form-control" id="editor-errors" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 150px;"></textarea>
           </div>
 
-          <div class="btn-group btn-block w-100 mb-3">
+          <div class="form-group mb-0">
+            <label for="data"><code>data</code></label>
+            <textarea ref="data" class="form-control" id="data" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 300px;"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-block w-100 mb-4" id="set-data" @click="setData()">Set data</button>
+
+          <div class="btn-group btn-block w-100 mb-4">
             <button class="btn btn-primary" @click="shareLink()">Share Link</button>
           </div>
 
-          <br>
+          <hr>
+          <h6>Options</h6>
 
           <div class="form-group mb-3">
             <label for="theme"><code>theme</code></label>
@@ -114,7 +109,8 @@
             </select>
           </div>
 
-          <br>
+          <hr>
+          <h6>Constraints</h6>
 
           <div class="form-group mb-3">
             <input type="checkbox" id="btnContents" v-model="btnContents" @change="initEditor()">
@@ -952,3 +948,17 @@ export default {
   }
 }
 </script>
+
+<style>
+.layout-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+aside {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+</style>
