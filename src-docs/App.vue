@@ -20,7 +20,23 @@
     </div>
 
     <div class="row">
-      <div class="col-xs-12 col-md-3">
+      <div class="col-xs-12 col-md-8">
+        <main>
+          <div class="btn-group mb-3">
+            <button class="btn btn-primary" id="disable-editor" @click="disableEditor()">Disable</button>
+            <button class="btn btn-primary" id="enable-editor" @click="enableEditor()">Enable</button>
+            <button class="btn btn-primary" id="show-validation-errors" @click="showValidationErrors()">Show validation errors</button>
+            <button class="btn btn-primary" id="destroy-editor" @click="destroyEditor()">Destroy</button>
+            <button class="btn btn-primary" id="init-editor" @click="initEditor()">Init</button>
+          </div>
+
+          <form action="" method="POST">
+            <div ref="jediContainer" id="jedison-container"></div>
+          </form>
+        </main>
+      </div>
+
+      <div class="col-xs-12 col-md-4">
         <aside>
           <div class="form-group mb-0">
             <label for="schema"><code>schema</code></label>
@@ -39,6 +55,29 @@
           <button class="btn btn-primary btn-block w-100 mb-3" id="set-data" @click="setData()">Set data</button>
 
           <br><br>
+
+          <div class="form-group mb-0">
+            <label for="editor-value">Value</label>
+            <textarea ref="editorValue" class="form-control" id="editor-value" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-block w-100 mb-3" id="set-value" @click="setEditorValue()">Set value</button>
+
+          <br><br>
+
+          <div class="form-group mb-3">
+            <label for="editor-errors">
+              <span>Errors: </span>
+              <span>{{ errorCount }}</span>
+            </label>
+            <textarea ref="editorErrors" class="form-control" id="editor-errors" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
+          </div>
+
+          <div class="btn-group btn-block w-100 mb-3">
+            <button class="btn btn-primary" @click="shareLink()">Share Link</button>
+          </div>
+
+          <br>
 
           <div class="form-group mb-3">
             <label for="theme"><code>theme</code></label>
@@ -75,7 +114,7 @@
             </select>
           </div>
 
-          <br><br>
+          <br>
 
           <div class="form-group mb-3">
             <input type="checkbox" id="btnContents" v-model="btnContents" @change="initEditor()">
@@ -160,52 +199,6 @@
           <div class="form-group mb-3">
             <input type="checkbox" id="useConstraintAttributes" v-model="useConstraintAttributes" @change="initEditor()">
             <label for="useConstraintAttributes"><code>useConstraintAttributes</code></label>
-          </div>
-        </aside>
-      </div>
-
-      <div class="col-xs-12 col-md-6">
-        <main>
-          <div class="btn-group">
-            <button class="btn btn-primary" id="disable-editor" @click="disableEditor()">Disable</button>
-            <button class="btn btn-primary" id="enable-editor" @click="enableEditor()">Enable</button>
-            <button class="btn btn-primary" id="show-validation-errors" @click="showValidationErrors()">Show validation errors</button>
-            <button class="btn btn-primary" id="destroy-editor" @click="destroyEditor()">Destroy</button>
-            <button class="btn btn-primary" id="init-editor" @click="initEditor()">Init</button>
-          </div>
-
-          <br>
-          <br>
-
-          <form action="" method="POST">
-            <div ref="jediContainer" id="jedison-container"></div>
-          </form>
-        </main>
-      </div>
-
-      <div class="col-xs-12 col-md-3">
-        <aside>
-          <div class="btn-group btn-block w-100">
-            <button class="btn btn-primary" id="disable-editor" @click="shareLink()">Share Link</button>
-          </div>
-
-          <br><br>
-
-          <div class="form-group mb-0">
-            <label for="editor-value">Value</label>
-            <textarea ref="editorValue" class="form-control" id="editor-value" wrap="off" style="font-size: 12px; font-family: monospace;min-height: 400px;"></textarea>
-          </div>
-
-          <button class="btn btn-primary btn-block w-100 mb-3" id="set-value" @click="setEditorValue()">Set value</button>
-
-          <br><br>
-
-          <div class="form-group mb-3">
-            <label for="editor-errors">
-              <span>Errors: </span>
-              <span>{{ errorCount }}</span>
-            </label>
-            <textarea ref="editorErrors" class="form-control" id="editor-errors" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 400px;"></textarea>
           </div>
         </aside>
       </div>
