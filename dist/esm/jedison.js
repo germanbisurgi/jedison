@@ -2361,7 +2361,8 @@ class InstanceIfThenElse extends Instance {
       schema: schemaClone,
       originalSchema: this.originalSchema,
       path: this.path,
-      parent: this.parent
+      parent: this.parent,
+      arrayTemplateData: this.arrayTemplateData
     });
     this.schemas.forEach((schema) => {
       const instance = this.jedison.createInstance({
@@ -2369,7 +2370,8 @@ class InstanceIfThenElse extends Instance {
         schema,
         originalSchema: this.originalSchema,
         path: this.path,
-        parent: this.parent
+        parent: this.parent,
+        arrayTemplateData: this.arrayTemplateData
       });
       this.instanceStartingValues.push(instance.getValue());
       this.instances.push(instance);

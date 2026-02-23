@@ -1,0 +1,26 @@
+{
+  "title": "[Issue #13](/index.html?example=issue/issue-13)",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "title": "Entry {{ i1 }}",
+    "type": "object",
+    "properties": {
+      "active": { "type": "boolean", "default": true },
+      "amount": { "type": "number" }
+    },
+    "if": {
+      "properties": { "active": { "const": true } }
+    },
+    "then": {
+      "properties": {
+        "amount": { "type": "number", "minimum": 0, "maximum": 99999 }
+      }
+    },
+    "else": {
+      "properties": {
+        "amount": { "type": "number", "readOnly": true }
+      }
+    }
+  }
+}

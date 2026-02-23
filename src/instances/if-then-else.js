@@ -61,7 +61,8 @@ class InstanceIfThenElse extends Instance {
       schema: schemaClone,
       originalSchema: this.originalSchema,
       path: this.path,
-      parent: this.parent
+      parent: this.parent,
+      arrayTemplateData: this.arrayTemplateData
     })
 
     this.schemas.forEach((schema) => {
@@ -70,7 +71,8 @@ class InstanceIfThenElse extends Instance {
         schema: schema,
         originalSchema: this.originalSchema,
         path: this.path,
-        parent: this.parent
+        parent: this.parent,
+        arrayTemplateData: this.arrayTemplateData
       })
 
       this.instanceStartingValues.push(instance.getValue())
