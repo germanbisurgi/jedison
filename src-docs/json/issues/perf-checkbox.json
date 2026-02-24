@@ -1,0 +1,533 @@
+{
+  "title": "Feldhasenzählungen",
+  "type": "array",
+  "x-format": "nav-horizontal",
+  "minItems": 1,
+  "maxItems": 5,
+  "x-arrayMove": false,
+  "x-navWarningMessage": "Die Zählung ist noch nicht vollständig.",
+  "items": {
+    "type": "object",
+    "title": "Zählung",
+    "properties": {
+      "zeit": {
+        "type": "object",
+        "x-options": {
+          "titleHidden": true,
+          "format": "grid"
+        },
+        "properties": {
+          "datum": {
+            "title": "Datum",
+            "type": "string",
+            "x-format": "date",
+            "x-grid": { "columns": 4 }
+          },
+          "start": {
+            "title": "Uhrzeit zum Start der Zählung",
+            "type": "string",
+            "x-format": "time",
+            "x-grid": { "columns": 4 }
+          },
+          "ende": {
+            "title": "Uhrzeit zum Ende der Zählung",
+            "type": "string",
+            "x-format": "time",
+            "x-grid": { "columns": 4 }
+          }
+        }
+      },
+      "verhaeltnisse": {
+        "type": "object",
+        "title": "Witterungsverhältnisse",
+        "properties": {
+          "wind": {
+            "title": "Wind",
+            "type": "string",
+            "enum": [
+              "still_bis_gering",
+              "leicht_bis_schwach",
+              "maessig_bis_frisch",
+              "stark_bis_stuermisch",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "still bis gering",
+                "leicht bis schwach",
+                "mäßig bis frisch",
+                "stark bis stürmisch",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "boden": {
+            "title": "Boden",
+            "type": "string",
+            "enum": [
+              "torcken",
+              "feucht",
+              "nass",
+              "staunass",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "trocken",
+                "feucht",
+                "nass",
+                "staunass",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "niederschlag": {
+            "title": "Niederschlag",
+            "type": "string",
+            "enum": [
+              "torcken",
+              "sprueh_niesel_schauer",
+              "starker_regen",
+              "schnee_hagel",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "trocken",
+                "Sprüh/Niesel, Schauer",
+                "starker Regen",
+                "Schnee/Hagel",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "sicht": {
+            "title": "Sicht",
+            "type": "string",
+            "enum": [
+              "sehr_klar",
+              "relativ_klar",
+              "diesig",
+              "bedeutende-einschraenkungen",
+              "keine_angabe"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "sehr klar",
+                "relativ klar",
+                "diesig",
+                "bedeutende Einschränkungen",
+                "keine Angabe"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "mond": {
+            "type": "object",
+            "title": "Mond",
+            "properties": {
+              "mond_sichtbarkeit": {
+                "type": "string",
+                "title": "Sichtbarkeit",
+                "enum": [
+                  "sichtbar",
+                  "zeitweilig_sichtbar",
+                  "nicht_sichtbar",
+                  "keine_angabe"
+                ],
+                "x-options": {
+                  "enumTitles": [
+                    "sichtbar",
+                    "zeitweilig sichtbar",
+                    "nicht sichtbar",
+                    "keine Angabe"
+                  ],
+                  "enforceEnumDefault": false,
+                  "format": "radios-inline"
+                }
+              },
+              "mond_phase": {
+                "title": "Phase",
+                "type": "string",
+                "enum": [
+                  "vollmond",
+                  "3_4_mond",
+                  "1_2_mond",
+                  "1_4_mond",
+                  "neumond",
+                  "keine_angabe"
+                ],
+                "x-options": {
+                  "enumTitles": [
+                    "Vollmond",
+                    "3/4 Mond",
+                    "1/2 Mond",
+                    "1/4 Mond",
+                    "Neumond",
+                    "keine Angabe"
+                  ],
+                  "enforceEnumDefault": false,
+                  "format": "radios-inline"
+                }
+              }
+            }
+          },
+          "temperatur": {
+            "type": "object",
+            "x-options": {
+              "titleHidden": true
+            },
+            "properties": {
+              "temperatur": {
+                "title": "Temperatur",
+                "type": "array",
+                "uniqueItems": true,
+                "x-format": "checkboxes-inline",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "bodenfrost",
+                    "raureif"
+                  ],
+                  "x-options": {
+                    "enumTitles": [
+                      "Bodenfrost",
+                      "Raureif"
+                    ]
+                  }
+                }
+              },
+              "temp2": {
+                "title": "Temperatur in Grad Celsius",
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "zaehlung": {
+        "type": "object",
+        "x-options": {
+          "titleHidden": true
+        },
+        "required": [
+          "anmerkungen"
+        ],
+        "properties": {
+          "zaehlung": {
+            "title": "Womit wurde gezählt?",
+            "type": "array",
+            "uniqueItems": true,
+            "x-format": "checkboxes-inline",
+            "items": {
+              "type": "string",
+              "enum": [
+                "scheinwerfer",
+                "wbk",
+                "wbk_kontrolle"
+              ],
+              "x-options": {
+                "enumTitles": [
+                  "Scheinwerfer",
+                  "WBK",
+                  "WBK zur Kontrolle"
+                ]
+              }
+            }
+          },
+          "modell": {
+            "title": "Mit welchem Modell?",
+            "type": "string"
+          },
+          "anmerkungen": {
+            "title": "Anmerkungen",
+            "type": "string",
+            "x-format": "textarea"
+          }
+        }
+      },
+      "feldhasen": {
+        "type": "object",
+        "x-options": {
+          "titleHidden": true
+        },
+        "properties": {
+          "zaehlung": {
+            "title": "Wurden im aktuellen Jagdjahr bereits Feldhasen erlegt?",
+            "type": "string",
+            "enum": [
+              "ja",
+              "nein"
+            ],
+            "x-options": {
+              "enumTitles": [
+                "Ja",
+                "Nein"
+              ],
+              "enforceEnumDefault": false,
+              "format": "radios-inline"
+            }
+          },
+          "gesamtstrecke": {
+            "title": "Tagesaktuelle Gesamtstrecke",
+            "type": "integer",
+            "minimum": 0
+          },
+          "fallwild": {
+            "title": "Anzahl Fall-/Unfallwild im aktuellen Jagdjahr",
+            "type": "integer",
+            "minimum": 0
+          },
+          "niederwild": {
+            "title": "Niederwild",
+            "type": "object",
+            "required": [
+              "massnahme"
+            ],
+            "properties": {
+              "massnahme": {
+                "title": "Was für niederwildfördernde Maßnahmen werden aktuell durchgeführt?",
+                "type": "string",
+                "x-format": "textarea",
+                "maxLength": 300
+              },
+              "fahrstrecke": {
+                "title": "Fahrstrecke anlegen",
+                "type": "array",
+                "minItems": 1,
+                "x-arrayMove": false,
+                "items": {
+                  "title": "Fahrstrecke {{ i1 }}",
+                  "type": "object",
+                  "x-format": "grid",
+                  "additionalProperties": false,
+                  "properties": {
+                    "teilstrecken_angebbar": {
+                      "type": "boolean",
+                      "x-format": "checkbox",
+                      "default": true,
+                      "title": "Teilstrecken angeben",
+                      "x-grid": {
+                        "columns": 2
+                      }
+                    },
+                    "zaehlbar": {
+                      "type": "boolean",
+                      "x-format": "checkbox",
+                      "default": true,
+                      "title": "Ist zählbar",
+                      "x-grid": {
+                        "columns": 2
+                      }
+                    },
+                    "fahrstrecke_laenge_automatic": {
+                      "type": "number"
+                    },
+                    "teilstrecken": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "teilstrecke_laenge": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "teilstrecken_angebbar": {
+                        "const": true
+                      },
+                      "zaehlbar": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "fahrstrecke_laenge_automatic": {
+                        "type": "number",
+                        "title": "Länge",
+                        "description": "in km",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 99999.99,
+                        "readOnly": true,
+                        "x-grid": {
+                          "columns": 2
+                        },
+                        "x-inputAttributes": {
+                          "step": 0.01
+                        }
+                      },
+                      "teilstrecken": {
+                        "type": "array",
+                        "minItems": 1,
+                        "x-grid": {
+                          "columns": 12
+                        },
+                        "title": "Teilstrecke anlegen",
+                        "x-format": "table-object",
+                        "x-arrayMove": false,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "teilstrecke_laenge": {
+                              "type": "number",
+                              "title": "Länge",
+                              "description": "in km",
+                              "default": 0,
+                              "minimum": 0,
+                              "maximum": 99999.99,
+                              "x-inputAttributes": {
+                                "step": 0.1
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "if": {
+                      "properties": {
+                        "teilstrecken_angebbar": {
+                          "const": false
+                        },
+                        "zaehlbar": {
+                          "const": true
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "fahrstrecke_laenge_automatic": {
+                          "type": "number",
+                          "title": "Länge",
+                          "description": "in km",
+                          "default": 0,
+                          "minimum": 0,
+                          "maximum": 99999.99,
+                          "readOnly": true,
+                          "x-grid": {
+                            "columns": 2
+                          },
+                          "x-inputAttributes": {
+                            "step": 0.01
+                          }
+                        },
+                        "teilstrecken": {
+                          "type": "array",
+                          "minItems": 1,
+                          "x-grid": {
+                            "columns": 12
+                          },
+                          "maxItems": 1,
+                          "title": "Teilstrecke anlegen",
+                          "x-format": "table-object",
+                          "x-arrayMove": false,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "teilstrecke_laenge": {
+                                "type": "number",
+                                "title": "Länge",
+                                "description": "in km",
+                                "default": 0,
+                                "minimum": 0,
+                                "maximum": 99999.99,
+                                "x-inputAttributes": {
+                                  "step": 0.1
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "if": {
+                        "properties": {
+                          "teilstrecken_angebbar": {
+                            "const": false
+                          },
+                          "zaehlbar": {
+                            "const": true
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "fahrstrecke_laenge_automatic": {
+                        "type": "number",
+                        "title": "Länge",
+                        "description": "in km",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 99999.99,
+                        "readOnly": true,
+                        "x-grid": {
+                          "columns": 2
+                        },
+                        "x-inputAttributes": {
+                          "step": 0.01
+                        }
+                      },
+                      "teilstrecken": {
+                        "type": "array",
+                        "x-grid": {
+                          "columns": 8
+                        },
+                        "title": "Teilstrecke anlegen",
+                        "x-format": "table-object",
+                        "x-arrayMove": false,
+                        "readOnly": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "teilstrecke_laenge": {
+                              "type": "number",
+                              "readOnly": true,
+                              "title": "Länge",
+                              "description": "in km"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "zaehlung": {
+              "const": "nein"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "gesamtstrecke": {
+              "readOnly": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
