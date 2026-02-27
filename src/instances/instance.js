@@ -277,12 +277,19 @@ class Instance extends EventEmitter {
   }
 
   /**
+   * Returns the value of the instance without cloning (internal read-only use)
+   */
+  getValueRaw () {
+    return this.value
+  }
+
+  /**
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
   getTemplateData (template) {
     const templateData = {
       ...this.arrayTemplateData,
-      value: this.getValue(),
+      value: this.getValueRaw(),
       settings: this.jedison.options.settings
     }
 
@@ -381,7 +388,7 @@ class Instance extends EventEmitter {
       return []
     }
 
-    const errors = this.jedison.validator.getErrors(this.getValue(), this.originalSchema, this.getKey(), this.path)
+    const errors = this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     return removeDuplicatesFromArray(errors)
   }
 

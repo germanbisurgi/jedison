@@ -150,7 +150,7 @@ class InstanceMultiple extends Instance {
   }
 
   onSetValue () {
-    if (different(this.activeInstance.getValue(), this.value)) {
+    if (different(this.activeInstance.getValueRaw(), this.value)) {
       const fittestIndex = this.getFittestIndex(this.value)
       this.switchInstance(fittestIndex, this.value)
     }

@@ -1875,12 +1875,18 @@ class Instance extends EventEmitter {
     return clone(this.value);
   }
   /**
+   * Returns the value of the instance without cloning (internal read-only use)
+   */
+  getValueRaw() {
+    return this.value;
+  }
+  /**
    * Returns the data that will replace placeholders in titles, descriptions (e.g. "{{ i1 }} {{ value.title }}")
    */
   getTemplateData(template) {
     const templateData = {
       ...this.arrayTemplateData,
-      value: this.getValue(),
+      value: this.getValueRaw(),
       settings: this.jedison.options.settings
     };
     if (typeof this.value === "string") {
@@ -1954,7 +1960,7 @@ class Instance extends EventEmitter {
     if (!this.isActive) {
       return [];
     }
-    const errors = this.jedison.validator.getErrors(this.getValue(), this.originalSchema, this.getKey(), this.path);
+    const errors = this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path);
     return removeDuplicatesFromArray(errors);
   }
   /**
@@ -2674,7 +2680,7 @@ class InstanceMultiple extends Instance {
     this.setValue(this.activeInstance.getValue(), true, initiator);
   }
   onSetValue() {
-    if (different(this.activeInstance.getValue(), this.value)) {
+    if (different(this.activeInstance.getValueRaw(), this.value)) {
       const fittestIndex = this.getFittestIndex(this.value);
       this.switchInstance(fittestIndex, this.value);
     }
@@ -2997,7 +3003,7 @@ class InstanceArray extends Instance {
     }
   }
   move(fromIndex, toIndex, initiator) {
-    const value = clone(this.getValue());
+    const value = clone(this.getValueRaw());
     if (!isArray(value)) {
       return;
     }
@@ -3010,7 +3016,7 @@ class InstanceArray extends Instance {
   }
   addItem(initiator) {
     const tempEditor = this.createItemInstance();
-    let value = clone(this.getValue());
+    let value = clone(this.getValueRaw());
     if (!isArray(value)) {
       value = [];
     }
@@ -3022,7 +3028,7 @@ class InstanceArray extends Instance {
     this.jedison.emit("item-add", initiator, instance);
   }
   deleteItem(itemIndex, initiator) {
-    const currentValue = clone(this.getValue());
+    const currentValue = clone(this.getValueRaw());
     if (!isArray(currentValue)) {
       return;
     }
@@ -3043,7 +3049,7 @@ class InstanceArray extends Instance {
   }
   refreshChildren() {
     this.children = [];
-    const value = this.getValue();
+    const value = this.getValueRaw();
     if (!isArray(value)) {
       return;
     }

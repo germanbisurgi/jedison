@@ -68,7 +68,7 @@ class InstanceArray extends Instance {
   }
 
   move (fromIndex, toIndex, initiator) {
-    const value = clone(this.getValue())
+    const value = clone(this.getValueRaw())
 
     if (!isArray(value)) {
       return
@@ -84,7 +84,7 @@ class InstanceArray extends Instance {
 
   addItem (initiator) {
     const tempEditor = this.createItemInstance()
-    let value = clone(this.getValue())
+    let value = clone(this.getValueRaw())
 
     if (!isArray(value)) {
       value = []
@@ -99,7 +99,7 @@ class InstanceArray extends Instance {
   }
 
   deleteItem (itemIndex, initiator) {
-    const currentValue = clone(this.getValue())
+    const currentValue = clone(this.getValueRaw())
 
     if (!isArray(currentValue)) {
       return
@@ -127,7 +127,7 @@ class InstanceArray extends Instance {
   refreshChildren () {
     this.children = []
 
-    const value = this.getValue()
+    const value = this.getValueRaw()
 
     if (!isArray(value)) {
       return
