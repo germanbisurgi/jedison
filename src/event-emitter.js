@@ -3,7 +3,7 @@
  */
 class EventEmitter {
   constructor () {
-    this.listeners = []
+    this.listeners = new Map()
   }
 
   /**
@@ -13,11 +13,16 @@ class EventEmitter {
    * @param {function} callback - A callback functions that will be executed when this event is emitted
    */
   on (name, callback) {
-    this.listeners.push({ name, callback })
+    let callbacks = this.listeners.get(name)
+    if (!callbacks) {
+      callbacks = []
+      this.listeners.set(name, callbacks)
+    }
+    callbacks.push(callback)
   }
 
   off (name) {
-    this.listeners = this.listeners.filter(listener => listener.name !== name)
+    this.listeners.delete(name)
   }
 
   /**
@@ -27,15 +32,16 @@ class EventEmitter {
    * @param {...*} args - Arguments to be passed to the callback function
    */
   emit (name, ...args) {
-    const listeners = this.listeners.filter(listener => listener.name === name)
-
-    listeners.forEach(listener => {
-      try {
-        listener.callback(...args)
-      } catch (error) {
-        console.error(`Error in listener callback for event "${name}":`, error)
+    const callbacks = this.listeners.get(name)
+    if (callbacks) {
+      for (const listener of callbacks) {
+        try {
+          listener(...args)
+        } catch (error) {
+          console.error(`Error in listener callback for event "${name}":`, error)
+        }
       }
-    })
+    }
   }
 
   /**

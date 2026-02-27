@@ -1666,7 +1666,7 @@ class Validator {
 }
 class EventEmitter {
   constructor() {
-    this.listeners = [];
+    this.listeners = /* @__PURE__ */ new Map();
   }
   /**
    * Adds a named event listener
@@ -1675,10 +1675,15 @@ class EventEmitter {
    * @param {function} callback - A callback functions that will be executed when this event is emitted
    */
   on(name, callback) {
-    this.listeners.push({ name, callback });
+    let callbacks = this.listeners.get(name);
+    if (!callbacks) {
+      callbacks = [];
+      this.listeners.set(name, callbacks);
+    }
+    callbacks.push(callback);
   }
   off(name) {
-    this.listeners = this.listeners.filter((listener) => listener.name !== name);
+    this.listeners.delete(name);
   }
   /**
    * Triggers the callback function of a named event listener
@@ -1687,14 +1692,16 @@ class EventEmitter {
    * @param {...*} args - Arguments to be passed to the callback function
    */
   emit(name, ...args) {
-    const listeners = this.listeners.filter((listener) => listener.name === name);
-    listeners.forEach((listener) => {
-      try {
-        listener.callback(...args);
-      } catch (error) {
-        console.error(`Error in listener callback for event "${name}":`, error);
+    const callbacks = this.listeners.get(name);
+    if (callbacks) {
+      for (const listener of callbacks) {
+        try {
+          listener(...args);
+        } catch (error) {
+          console.error(`Error in listener callback for event "${name}":`, error);
+        }
       }
-    });
+    }
   }
   /**
    * Deletes all properties of the class
@@ -5697,12 +5704,11 @@ class Jedison extends EventEmitter {
       });
     }
     this.on("instance-change", (instance) => {
-      for (const [path, callbacks] of Object.entries(this.watched)) {
-        if (instance.path === path) {
-          callbacks.forEach((callback) => {
-            callback();
-          });
-        }
+      const callbacks = this.watched[instance.path];
+      if (callbacks) {
+        callbacks.forEach((callback) => {
+          callback();
+        });
       }
     });
     if (this.hiddenInput) {

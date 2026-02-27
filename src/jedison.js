@@ -241,12 +241,11 @@ class Jedison extends EventEmitter {
     }
 
     this.on('instance-change', (instance) => {
-      for (const [path, callbacks] of Object.entries(this.watched)) {
-        if (instance.path === path) {
-          callbacks.forEach((callback) => {
-            callback()
-          })
-        }
+      const callbacks = this.watched[instance.path]
+      if (callbacks) {
+        callbacks.forEach((callback) => {
+          callback()
+        })
       }
     })
 
