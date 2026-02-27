@@ -4,16 +4,40 @@
  */
 
 /**
- * Returns a clone of a thing
+ * Returns a clone of a thing.
+ * Optimized for JSON-compatible types (no Date, Map, Set, functions).
+ * Primitives are returned as-is (immutable).
  * @param {*} thing - The thing to be cloned
  * @return {*} The clone of the thing
  */
 export function clone (thing) {
-  if (typeof thing === 'undefined') {
-    return undefined
+  if (thing === null || typeof thing !== 'object') {
+    return thing
   }
 
-  return JSON.parse(JSON.stringify(thing))
+  if (Array.isArray(thing)) {
+    const len = thing.length
+    const arr = new Array(len)
+    for (let i = 0; i < len; i++) {
+      const item = thing[i]
+      arr[i] = (item === null || typeof item !== 'object') ? item : clone(item)
+    }
+    return arr
+  }
+
+  const keys = Object.keys(thing)
+  const obj = {}
+  for (let i = 0, len = keys.length; i < len; i++) {
+    const key = keys[i]
+    const val = thing[key]
+    const cloned = (val === null || typeof val !== 'object') ? val : clone(val)
+    if (key === '__proto__') {
+      Object.defineProperty(obj, key, { value: cloned, writable: true, enumerable: true, configurable: true })
+    } else {
+      obj[key] = cloned
+    }
+  }
+  return obj
 }
 
 /**
@@ -76,11 +100,34 @@ export function sortObject (obj) {
 export function equal (a, b) {
   if (a === b) return true
 
-  if (isObject(a) && isObject(b)) {
-    a = sortObject(a)
-    b = sortObject(b)
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') {
+    return false
   }
-  return JSON.stringify(a) === JSON.stringify(b)
+
+  const aIsArray = Array.isArray(a)
+  const bIsArray = Array.isArray(b)
+
+  if (aIsArray !== bIsArray) return false
+
+  if (aIsArray) {
+    const len = a.length
+    if (len !== b.length) return false
+    for (let i = 0; i < len; i++) {
+      if (!equal(a[i], b[i])) return false
+    }
+    return true
+  }
+
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+  if (keysA.length !== keysB.length) return false
+
+  for (let i = 0, len = keysA.length; i < len; i++) {
+    const key = keysA[i]
+    if (!Object.prototype.hasOwnProperty.call(b, key)) return false
+    if (!equal(a[key], b[key])) return false
+  }
+  return true
 }
 
 /**
