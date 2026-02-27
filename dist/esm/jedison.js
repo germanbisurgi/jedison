@@ -1611,11 +1611,10 @@ class Validator {
    */
   getErrors(value, schema, key, path) {
     let schemaErrors = [];
-    const schemaClone = clone(schema);
-    if (isBoolean(schemaClone) && schemaClone === true) {
+    if (isBoolean(schema) && schema === true) {
       return schemaErrors;
     }
-    if (isBoolean(schemaClone) && schemaClone === false) {
+    if (isBoolean(schema) && schema === false) {
       return [{
         type: "error",
         messages: ["invalid"],
@@ -1624,11 +1623,11 @@ class Validator {
     }
     const allConstraints = { ...this.draft, ...this.constraints };
     for (const [constraintName, constraint] of Object.entries(allConstraints)) {
-      if (hasOwn(schemaClone, constraintName)) {
+      if (hasOwn(schema, constraintName)) {
         const context = {
           validator: this,
           value,
-          schema: schemaClone,
+          schema,
           key,
           path,
           translator: this.translator

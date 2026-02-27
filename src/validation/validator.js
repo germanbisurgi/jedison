@@ -3,7 +3,7 @@ import draft06 from './drafts/draft-06.js'
 import draft07 from './drafts/draft-07.js'
 import draft201909 from './drafts/draft-2019-09.js'
 import draft202012 from './drafts/draft-2020-12.js'
-import { hasOwn, isBoolean, clone, isSet, isObject, isArray } from '../helpers/utils.js'
+import { hasOwn, isBoolean, isSet, isObject, isArray } from '../helpers/utils.js'
 import { getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -32,13 +32,11 @@ class Validator {
   getErrors (value, schema, key, path) {
     let schemaErrors = []
 
-    const schemaClone = clone(schema)
-
-    if (isBoolean(schemaClone) && schemaClone === true) {
+    if (isBoolean(schema) && schema === true) {
       return schemaErrors
     }
 
-    if (isBoolean(schemaClone) && schemaClone === false) {
+    if (isBoolean(schema) && schema === false) {
       return [{
         type: 'error',
         messages: ['invalid'],
@@ -49,11 +47,11 @@ class Validator {
     const allConstraints = { ...this.draft, ...this.constraints }
 
     for (const [constraintName, constraint] of Object.entries(allConstraints)) {
-      if (hasOwn(schemaClone, constraintName)) {
+      if (hasOwn(schema, constraintName)) {
         const context = {
           validator: this,
           value,
-          schema: schemaClone,
+          schema,
           key,
           path,
           translator: this.translator
