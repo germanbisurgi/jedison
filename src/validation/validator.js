@@ -3,7 +3,7 @@ import draft06 from './drafts/draft-06.js'
 import draft07 from './drafts/draft-07.js'
 import draft201909 from './drafts/draft-2019-09.js'
 import draft202012 from './drafts/draft-2020-12.js'
-import { hasOwn, isBoolean, isSet, isObject, isArray, clone } from '../helpers/utils.js'
+import { hasOwn, isBoolean, isSet, isObject, isArray } from '../helpers/utils.js'
 import { getSchemaXOption } from '../helpers/schema.js'
 
 /**

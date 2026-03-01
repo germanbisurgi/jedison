@@ -1,6 +1,5 @@
 import Instance from './instance.js'
 import EditorIfThenElse from '../editors/if-then-else.js'
-import Jedison from '../jedison.js'
 
 import {
   isSet,
@@ -236,14 +235,7 @@ class InstanceIfThenElse extends Instance {
           testSchema.type = this.schema.type
         }
 
-        const ifValidator = new Jedison({
-          schema: testSchema,
-          data: value,
-          refParser: this.jedison.refParser
-        })
-
-        const ifErrors = ifValidator.getErrors()
-        ifValidator.destroy()
+        const ifErrors = this.jedison.validator.getErrors(value, testSchema, this.getKey(), this.path)
 
         if (ifErrors.length === 0 && schema.then) {
           fittestIndex = index

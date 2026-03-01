@@ -2487,13 +2487,7 @@ class InstanceIfThenElse extends Instance {
         if (isSet(this.schema.type)) {
           testSchema.type = this.schema.type;
         }
-        const ifValidator = new Jedison({
-          schema: testSchema,
-          data: value,
-          refParser: this.jedison.refParser
-        });
-        const ifErrors = ifValidator.getErrors();
-        ifValidator.destroy();
+        const ifErrors = this.jedison.validator.getErrors(value, testSchema, this.getKey(), this.path);
         if (ifErrors.length === 0 && schema.then) {
           fittestIndex = index2;
         }
@@ -2636,9 +2630,8 @@ class InstanceMultiple extends Instance {
     let championErrors;
     for (let index2 = 0; index2 < this.instances.length; index2++) {
       const instance = this.instances[index2];
-      const tmpEditor = new Jedison({ refParser: this.jedison.refParser, schema: instance.schema, data: value });
-      const instanceErrors = tmpEditor.getErrors();
-      tmpEditor.destroy();
+      const testValue = isSet(value) ? value : instance.getValue();
+      const instanceErrors = this.jedison.validator.getErrors(testValue, instance.schema, this.getKey(), this.path);
       if (instanceErrors.length === 0) {
         fittestIndex = index2;
         break;
