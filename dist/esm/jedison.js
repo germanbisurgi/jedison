@@ -547,12 +547,13 @@ function anyOf(context) {
   const anyOf2 = getSchemaAnyOf(context.schema);
   if (isSet(anyOf2)) {
     let valid = false;
-    anyOf2.forEach((schema) => {
+    for (const schema of anyOf2) {
       const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
       if (anyOfErrors.length === 0) {
         valid = true;
+        break;
       }
-    });
+    }
     if (!valid) {
       errors.push({
         type: "error",
@@ -1668,6 +1669,8 @@ class Instance extends EventEmitter {
     this.children = [];
     this.ui = null;
     this.isDirty = false;
+    this._cachedErrors = null;
+    this._cachedErrorsValue = void 0;
     this.watched = {};
     this.key = this.path.split(this.jedison.pathSeparator).pop();
     this.arrayTemplateData = config.arrayTemplateData || {};
@@ -1883,6 +1886,7 @@ class Instance extends EventEmitter {
     }
     this.value = newValue;
     this.isDirty = true;
+    this._cachedErrors = null;
     this.emit("set-value", newValue, initiator);
     this.emit("change", initiator);
     this.jedison.emit("instance-change", this, initiator);
@@ -1903,8 +1907,15 @@ class Instance extends EventEmitter {
     if (!this.isActive) {
       return [];
     }
-    const errors = this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path);
-    return removeDuplicatesFromArray(errors);
+    if (this._cachedErrorsValue === this.value && this._cachedErrors !== null) {
+      return this._cachedErrors;
+    }
+    const errors = removeDuplicatesFromArray(
+      this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
+    );
+    this._cachedErrorsValue = this.value;
+    this._cachedErrors = errors;
+    return errors;
   }
   /**
    * Returns true if any leaf descendant is showing validation errors.

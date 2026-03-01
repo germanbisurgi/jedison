@@ -8,13 +8,14 @@ export function anyOf (context) {
   if (isSet(anyOf)) {
     let valid = false
 
-    anyOf.forEach((schema) => {
+    for (const schema of anyOf) {
       const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path)
 
       if (anyOfErrors.length === 0) {
         valid = true
+        break
       }
-    })
+    }
 
     if (!valid) {
       errors.push({
