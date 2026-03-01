@@ -1752,7 +1752,7 @@ class Instance extends EventEmitter {
     const enforceEnum = schemaEnforceEnum ?? this.jedison.options.enforceEnum;
     const finalEnforceEnum = isSet(schemaEnforceEnum) ? enforceEnum : enforceEnumDefault;
     const schemaEnum = getSchemaEnum(this.schema);
-    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValue()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
+    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
       this.setValue(schemaEnum[0], false);
     }
     if (notSet(this.value)) {
@@ -2630,7 +2630,7 @@ class InstanceMultiple extends Instance {
     let championErrors;
     for (let index2 = 0; index2 < this.instances.length; index2++) {
       const instance = this.instances[index2];
-      const testValue = isSet(value) ? value : instance.getValue();
+      const testValue = isSet(value) ? value : instance.getValueRaw();
       const instanceErrors = this.jedison.validator.getErrors(testValue, instance.schema, this.getKey(), this.path);
       if (instanceErrors.length === 0) {
         fittestIndex = index2;
@@ -2818,11 +2818,11 @@ class InstanceObject extends Instance {
         const propertyName = child.getKey();
         if (propertyName === "__proto__") {
           Object.defineProperty(value, propertyName, {
-            value: child.getValue(),
+            value: child.getValueRaw(),
             enumerable: true
           });
         } else {
-          value[propertyName] = child.getValue();
+          value[propertyName] = child.getValueRaw();
         }
       }
     });
@@ -2867,7 +2867,7 @@ class InstanceObject extends Instance {
       const child = this.getChild(propertyName);
       if (child) {
         child.activate();
-        const oldValue = child.getValue();
+        const oldValue = child.getValueRaw();
         const newValue = value[child.getKey()];
         if (different(oldValue, newValue)) {
           const finalValue = child.setValue(newValue, false, initiator);
@@ -2976,7 +2976,7 @@ class InstanceArray extends Instance {
   onChildChange(initiator) {
     const value = [];
     this.children.forEach((child) => {
-      value.push(child.getValue());
+      value.push(child.getValueRaw());
     });
     this.value = value;
     this.jedison.emit("instance-change", this, initiator);

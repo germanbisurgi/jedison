@@ -115,7 +115,7 @@ class InstanceArray extends Instance {
     const value = []
 
     this.children.forEach((child) => {
-      value.push(child.getValue())
+      value.push(child.getValueRaw())
     })
 
     this.value = value

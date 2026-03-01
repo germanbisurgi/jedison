@@ -191,7 +191,7 @@ class Instance extends EventEmitter {
     const finalEnforceEnum = isSet(schemaEnforceEnum) ? enforceEnum : enforceEnumDefault // todo: remove this after deprecation
     const schemaEnum = getSchemaEnum(this.schema)
 
-    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValue()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
+    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
       this.setValue(schemaEnum[0], false)
     }
 

@@ -164,7 +164,7 @@ class InstanceMultiple extends Instance {
 
     for (let index = 0; index < this.instances.length; index++) {
       const instance = this.instances[index]
-      const testValue = isSet(value) ? value : instance.getValue()
+      const testValue = isSet(value) ? value : instance.getValueRaw()
       const instanceErrors = this.jedison.validator.getErrors(testValue, instance.schema, this.getKey(), this.path)
 
       if (instanceErrors.length === 0) {

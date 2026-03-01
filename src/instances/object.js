@@ -223,11 +223,11 @@ class InstanceObject extends Instance {
 
         if (propertyName === '__proto__') {
           Object.defineProperty(value, propertyName, {
-            value: child.getValue(),
+            value: child.getValueRaw(),
             enumerable: true
           })
         } else {
-          value[propertyName] = child.getValue()
+          value[propertyName] = child.getValueRaw()
         }
       }
     })
@@ -285,7 +285,7 @@ class InstanceObject extends Instance {
       // If a value has already a child instance
       if (child) {
         child.activate()
-        const oldValue = child.getValue()
+        const oldValue = child.getValueRaw()
         const newValue = value[child.getKey()]
 
         // update child value if the old value and the new value are different
