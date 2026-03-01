@@ -2373,7 +2373,7 @@ class InstanceIfThenElse extends Instance {
     this.on("set-value", (value, initiator) => {
       this.changeValue(value, initiator);
     });
-    const ifValue = this.instanceWithoutIf.getValue();
+    const ifValue = this.instanceWithoutIf.getValueRaw();
     this.changeValue(ifValue);
   }
   changeValue(value, initiator = "api") {
@@ -2409,7 +2409,7 @@ class InstanceIfThenElse extends Instance {
       }
       instance.setValue(instanceValue, false, initiator);
       instance.on("notifyParent", (initiator2) => {
-        const value2 = instance.getValue();
+        const value2 = instance.getValueRaw();
         this.changeValue(value2, initiator2);
         this.emit("notifyParent", initiator2);
         this.emit("change", initiator2);
@@ -2418,7 +2418,7 @@ class InstanceIfThenElse extends Instance {
     if (initiator === "api" && this.hasNullableFields(this.activeInstance)) {
       this.activeInstance.setValue(value, false, "secondary");
     }
-    this.value = this.activeInstance.getValue();
+    this.value = this.activeInstance.getValueRaw();
   }
   getWithoutIfValueFromValue(value) {
     let withoutIf = this.instanceWithoutIf.getValue();
@@ -2477,17 +2477,15 @@ class InstanceIfThenElse extends Instance {
    */
   getFittestIndex(value) {
     let fittestIndex = this.index;
+    const key = this.getKey();
     this.ifThenElseSchemas.forEach((schema, index2) => {
       if (schema.if === true) {
         fittestIndex = 0;
       } else if (schema.if === false) {
         fittestIndex = 1;
       } else {
-        const testSchema = clone(schema.if);
-        if (isSet(this.schema.type)) {
-          testSchema.type = this.schema.type;
-        }
-        const ifErrors = this.jedison.validator.getErrors(value, testSchema, this.getKey(), this.path);
+        const testSchema = isSet(this.schema.type) ? { ...schema.if, type: this.schema.type } : schema.if;
+        const ifErrors = this.jedison.validator.getErrors(value, testSchema, key, this.path);
         if (ifErrors.length === 0 && schema.then) {
           fittestIndex = index2;
         }
@@ -2598,7 +2596,7 @@ class InstanceMultiple extends Instance {
       instance.unregister();
       instance.off("notifyParent");
       instance.on("notifyParent", (initiator) => {
-        this.value = this.activeInstance.getValue();
+        this.value = this.activeInstance.getValueRaw();
         this.emit("notifyParent", initiator);
         this.emit("change", initiator);
       });
@@ -2614,7 +2612,7 @@ class InstanceMultiple extends Instance {
     if (isSet(value)) {
       this.activeInstance.setValue(value, false, initiator);
     }
-    this.setValue(this.activeInstance.getValue(), true, initiator);
+    this.setValue(this.activeInstance.getValueRaw(), true, initiator);
   }
   onSetValue() {
     if (different(this.activeInstance.getValueRaw(), this.value)) {
@@ -2670,16 +2668,17 @@ class InstanceObject extends Instance {
         const optionsDeactivateNonRequired = this.jedison.options.deactivateNonRequired;
         const deactivateNonRequired = getSchemaXOption(this.schema, "deactivateNonRequired");
         const schemaDeactivateNonRequired = getSchemaXOption(schema, "deactivateNonRequired");
-        if (!this.isRequired(key) && isSet(optionsDeactivateNonRequired) && optionsDeactivateNonRequired === true) {
+        const isReq = this.isRequired(key);
+        if (!isReq && isSet(optionsDeactivateNonRequired) && optionsDeactivateNonRequired === true) {
           musstCreateChild = false;
         }
-        if (!this.isRequired(key) && isSet(deactivateNonRequired) && deactivateNonRequired === true) {
+        if (!isReq && isSet(deactivateNonRequired) && deactivateNonRequired === true) {
           musstCreateChild = false;
         }
-        if (!this.isRequired(key) && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
+        if (!isReq && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
           musstCreateChild = false;
         }
-        if (!this.isRequired(key) && isRecursive) {
+        if (!isReq && isRecursive) {
           musstCreateChild = false;
         }
         if (musstCreateChild) {
@@ -2709,8 +2708,9 @@ class InstanceObject extends Instance {
     const schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema);
     const schemaPatternProperties = getSchemaPatternProperties(this.schema) || {};
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
+      const compiledPatterns = Object.keys(schemaPatternProperties).map((p) => new RegExp(p));
       Object.keys(value).forEach((propertyName) => {
-        const matchesPattern = Object.keys(schemaPatternProperties).some((pattern2) => new RegExp(pattern2).test(propertyName));
+        const matchesPattern = compiledPatterns.some((re) => re.test(propertyName));
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
           console.warn("deleting", propertyName);
           delete value[propertyName];
@@ -2796,12 +2796,12 @@ class InstanceObject extends Instance {
     if (isSet(schemaProperties) && hasOwn(schemaProperties, propertyName)) {
       schema = schemaProperties[propertyName];
     } else if (isSet(schemaPatternProperties)) {
-      Object.keys(schemaPatternProperties).forEach((pattern2) => {
-        const regexp = new RegExp(pattern2);
-        if (regexp.test(propertyName)) {
+      for (const pattern2 of Object.keys(schemaPatternProperties)) {
+        if (new RegExp(pattern2).test(propertyName)) {
           schema = schemaPatternProperties[pattern2];
+          break;
         }
-      });
+      }
     }
     if (notSet(schema) && isSet(schemaAdditionalProperties)) {
       schema = schemaAdditionalProperties;
@@ -2868,10 +2868,10 @@ class InstanceObject extends Instance {
       if (child) {
         child.activate();
         const oldValue = child.getValueRaw();
-        const newValue = value[child.getKey()];
+        const newValue = value[propertyName];
         if (different(oldValue, newValue)) {
           const finalValue = child.setValue(newValue, false, initiator);
-          value[child.getKey()] = finalValue;
+          value[propertyName] = finalValue;
         }
       } else {
         const schema = this.getPropertySchema(propertyName);
@@ -2939,10 +2939,11 @@ class InstanceArray extends Instance {
     }
   }
   move(fromIndex, toIndex, initiator) {
-    const value = clone(this.getValueRaw());
-    if (!isArray(value)) {
+    const raw = this.getValueRaw();
+    if (!isArray(raw)) {
       return;
     }
+    const value = clone(raw);
     const item = value[fromIndex];
     value.splice(fromIndex, 1);
     value.splice(toIndex, 0, item);
@@ -2952,11 +2953,9 @@ class InstanceArray extends Instance {
   }
   addItem(initiator) {
     const tempEditor = this.createItemInstance();
-    let value = clone(this.getValueRaw());
-    if (!isArray(value)) {
-      value = [];
-    }
-    value.push(tempEditor.getValue());
+    const raw = this.getValueRaw();
+    let value = isArray(raw) ? clone(raw) : [];
+    value.push(tempEditor.getValueRaw());
     tempEditor.destroy();
     this.setValue(value, true, initiator);
     const instance = this.children[this.children.length - 1];
@@ -2964,10 +2963,11 @@ class InstanceArray extends Instance {
     this.jedison.emit("item-add", initiator, instance);
   }
   deleteItem(itemIndex, initiator) {
-    const currentValue = clone(this.getValueRaw());
-    if (!isArray(currentValue)) {
+    const raw = this.getValueRaw();
+    if (!isArray(raw)) {
       return;
     }
+    const currentValue = clone(raw);
     const newValue = currentValue.filter((item, index2) => index2 !== itemIndex);
     this.setValue(newValue, true, initiator);
     this.emit("item-delete", initiator);

@@ -33,19 +33,21 @@ class InstanceObject extends Instance {
         const deactivateNonRequired = getSchemaXOption(this.schema, 'deactivateNonRequired')
         const schemaDeactivateNonRequired = getSchemaXOption(schema, 'deactivateNonRequired')
 
-        if (!this.isRequired(key) && isSet(optionsDeactivateNonRequired) && optionsDeactivateNonRequired === true) {
+        const isReq = this.isRequired(key)
+
+        if (!isReq && isSet(optionsDeactivateNonRequired) && optionsDeactivateNonRequired === true) {
           musstCreateChild = false
         }
 
-        if (!this.isRequired(key) && isSet(deactivateNonRequired) && deactivateNonRequired === true) {
+        if (!isReq && isSet(deactivateNonRequired) && deactivateNonRequired === true) {
           musstCreateChild = false
         }
 
-        if (!this.isRequired(key) && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
+        if (!isReq && isSet(schemaDeactivateNonRequired) && schemaDeactivateNonRequired === true) {
           musstCreateChild = false
         }
 
-        if (!this.isRequired(key) && isRecursive) {
+        if (!isReq && isRecursive) {
           musstCreateChild = false
         }
 
@@ -83,8 +85,9 @@ class InstanceObject extends Instance {
     const schemaPatternProperties = getSchemaPatternProperties(this.schema) || {}
 
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
+      const compiledPatterns = Object.keys(schemaPatternProperties).map(p => new RegExp(p))
       Object.keys(value).forEach((propertyName) => {
-        const matchesPattern = Object.keys(schemaPatternProperties).some(pattern => new RegExp(pattern).test(propertyName))
+        const matchesPattern = compiledPatterns.some(re => re.test(propertyName))
 
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
           console.warn('deleting', propertyName)
@@ -194,12 +197,12 @@ class InstanceObject extends Instance {
       schema = schemaProperties[propertyName]
     } else if (isSet(schemaPatternProperties)) {
       // If no exact match in `properties`, check if it matches any pattern in `patternProperties`
-      Object.keys(schemaPatternProperties).forEach((pattern) => {
-        const regexp = new RegExp(pattern)
-        if (regexp.test(propertyName)) {
+      for (const pattern of Object.keys(schemaPatternProperties)) {
+        if (new RegExp(pattern).test(propertyName)) {
           schema = schemaPatternProperties[pattern]
+          break
         }
-      })
+      }
     }
 
     if (notSet(schema) && isSet(schemaAdditionalProperties)) {
@@ -286,13 +289,12 @@ class InstanceObject extends Instance {
       if (child) {
         child.activate()
         const oldValue = child.getValueRaw()
-        const newValue = value[child.getKey()]
+        const newValue = value[propertyName]
 
         // update child value if the old value and the new value are different
         if (different(oldValue, newValue)) {
           const finalValue = child.setValue(newValue, false, initiator)
-          // Update the value with the final value after constraint enforcement
-          value[child.getKey()] = finalValue
+          value[propertyName] = finalValue
         }
       } else {
         // create new child instance for the new value entry having the value as default

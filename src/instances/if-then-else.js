@@ -83,7 +83,7 @@ class InstanceIfThenElse extends Instance {
       this.changeValue(value, initiator)
     })
 
-    const ifValue = this.instanceWithoutIf.getValue()
+    const ifValue = this.instanceWithoutIf.getValueRaw()
     this.changeValue(ifValue)
   }
 
@@ -128,7 +128,7 @@ class InstanceIfThenElse extends Instance {
       instance.setValue(instanceValue, false, initiator)
 
       instance.on('notifyParent', (initiator) => {
-        const value = instance.getValue()
+        const value = instance.getValueRaw()
         this.changeValue(value, initiator)
         this.emit('notifyParent', initiator)
         this.emit('change', initiator)
@@ -141,7 +141,7 @@ class InstanceIfThenElse extends Instance {
       this.activeInstance.setValue(value, false, 'secondary')
     }
 
-    this.value = this.activeInstance.getValue()
+    this.value = this.activeInstance.getValueRaw()
   }
 
   getWithoutIfValueFromValue (value) {
@@ -222,6 +222,7 @@ class InstanceIfThenElse extends Instance {
    */
   getFittestIndex (value) {
     let fittestIndex = this.index
+    const key = this.getKey()
 
     this.ifThenElseSchemas.forEach((schema, index) => {
       if (schema.if === true) {
@@ -229,13 +230,11 @@ class InstanceIfThenElse extends Instance {
       } else if (schema.if === false) {
         fittestIndex = 1
       } else {
-        const testSchema = clone(schema.if)
+        const testSchema = isSet(this.schema.type)
+          ? { ...schema.if, type: this.schema.type }
+          : schema.if
 
-        if (isSet(this.schema.type)) {
-          testSchema.type = this.schema.type
-        }
-
-        const ifErrors = this.jedison.validator.getErrors(value, testSchema, this.getKey(), this.path)
+        const ifErrors = this.jedison.validator.getErrors(value, testSchema, key, this.path)
 
         if (ifErrors.length === 0 && schema.then) {
           fittestIndex = index
