@@ -83,8 +83,8 @@ class Instance extends EventEmitter {
      */
     this.isDirty = false
 
-    this._cachedErrors = null
-    this._cachedErrorsValue = undefined
+    this.cachedErrors = null
+    this.cachedErrorsValue = undefined
 
     this.watched = {}
 
@@ -364,7 +364,7 @@ class Instance extends EventEmitter {
 
     this.value = newValue
     this.isDirty = true
-    this._cachedErrors = null
+    this.cachedErrors = null
 
     // Only emit events if value actually changed
     this.emit('set-value', newValue, initiator)
@@ -392,15 +392,15 @@ class Instance extends EventEmitter {
       return []
     }
 
-    if (this._cachedErrorsValue === this.value && this._cachedErrors !== null) {
-      return this._cachedErrors
+    if (this.cachedErrorsValue === this.value && this.cachedErrors !== null) {
+      return this.cachedErrors
     }
 
     const errors = removeDuplicatesFromArray(
       this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     )
-    this._cachedErrorsValue = this.value
-    this._cachedErrors = errors
+    this.cachedErrorsValue = this.value
+    this.cachedErrors = errors
     return errors
   }
 

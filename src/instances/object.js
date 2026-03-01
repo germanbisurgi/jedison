@@ -17,6 +17,8 @@ class InstanceObject extends Instance {
   prepare () {
     this.properties = {}
     this.requiredProperties = new Set()
+    this.schemaPatternProperties = getSchemaPatternProperties(this.schema)
+    this.schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema)
 
     const schemaProperties = getSchemaProperties(this.schema)
     const schemaRequired = getSchemaRequired(this.schema)
@@ -81,8 +83,8 @@ class InstanceObject extends Instance {
   removeNotListedPropertiesFromValue (value) {
     const schemaEnforceAdditionalProperties = getSchemaXOption(this.schema, 'enforceAdditionalProperties')
     const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.options.enforceAdditionalProperties
-    const schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema)
-    const schemaPatternProperties = getSchemaPatternProperties(this.schema) || {}
+    const schemaAdditionalProperties = this.schemaAdditionalProperties
+    const schemaPatternProperties = this.schemaPatternProperties || {}
 
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
       const compiledPatterns = Object.keys(schemaPatternProperties).map(p => new RegExp(p))
@@ -187,9 +189,9 @@ class InstanceObject extends Instance {
 
   getPropertySchema (propertyName) {
     let schema
-    const schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema)
+    const schemaAdditionalProperties = this.schemaAdditionalProperties
     const schemaProperties = getSchemaProperties(this.schema)
-    const schemaPatternProperties = getSchemaPatternProperties(this.schema)
+    const schemaPatternProperties = this.schemaPatternProperties
 
     // Determine the appropriate schema
     if (isSet(schemaProperties) && hasOwn(schemaProperties, propertyName)) {
@@ -282,10 +284,16 @@ class InstanceObject extends Instance {
       return
     }
 
-    Object.keys(value).forEach((propertyName) => {
-      const child = this.getChild(propertyName)
+    // Build child lookup map once to avoid repeated linear scans
+    const childMap = new Map()
+    for (const child of this.children) {
+      childMap.set(child.getKey(), child)
+    }
 
-      // If a value has already a child instance
+    Object.keys(value).forEach((propertyName) => {
+      const child = childMap.get(propertyName)
+
+      // If a value already has a child instance
       if (child) {
         child.activate()
         const oldValue = child.getValueRaw()
@@ -309,7 +317,7 @@ class InstanceObject extends Instance {
       const instance = this.children[i]
       const propertyName = instance.getKey()
       if (notSet(value[propertyName])) {
-        if (this.getChild(propertyName)) {
+        if (childMap.has(propertyName)) {
           instance.deactivate()
         } else {
           this.deleteChild(propertyName)

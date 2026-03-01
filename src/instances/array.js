@@ -14,6 +14,9 @@ import {
  */
 class InstanceArray extends Instance {
   prepare () {
+    this.schemaItems = getSchemaItems(this.schema)
+    this.schemaPrefixItems = getSchemaPrefixItems(this.schema)
+
     const schemaMinItems = getSchemaMinItems(this.schema, 'minItems')
     const schemaEnforceMinItems = getSchemaXOption(this.schema, 'enforceMinItems')
     const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.options.enforceMinItems
@@ -37,8 +40,8 @@ class InstanceArray extends Instance {
   createItemInstance (index) {
     let schema
     const itemsCount = this.children.length
-    const schemaItems = getSchemaItems(this.schema)
-    const schemaPrefixItems = getSchemaPrefixItems(this.schema)
+    const schemaItems = this.schemaItems
+    const schemaPrefixItems = this.schemaPrefixItems
     schema = isSet(schemaItems) ? schemaItems : {}
 
     const hasPrefixItemsSchema = isSet(schemaPrefixItems) && isSet(schemaPrefixItems[itemsCount])

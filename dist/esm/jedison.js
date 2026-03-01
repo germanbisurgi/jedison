@@ -1669,8 +1669,8 @@ class Instance extends EventEmitter {
     this.children = [];
     this.ui = null;
     this.isDirty = false;
-    this._cachedErrors = null;
-    this._cachedErrorsValue = void 0;
+    this.cachedErrors = null;
+    this.cachedErrorsValue = void 0;
     this.watched = {};
     this.key = this.path.split(this.jedison.pathSeparator).pop();
     this.arrayTemplateData = config.arrayTemplateData || {};
@@ -1886,7 +1886,7 @@ class Instance extends EventEmitter {
     }
     this.value = newValue;
     this.isDirty = true;
-    this._cachedErrors = null;
+    this.cachedErrors = null;
     this.emit("set-value", newValue, initiator);
     this.emit("change", initiator);
     this.jedison.emit("instance-change", this, initiator);
@@ -1907,14 +1907,14 @@ class Instance extends EventEmitter {
     if (!this.isActive) {
       return [];
     }
-    if (this._cachedErrorsValue === this.value && this._cachedErrors !== null) {
-      return this._cachedErrors;
+    if (this.cachedErrorsValue === this.value && this.cachedErrors !== null) {
+      return this.cachedErrors;
     }
     const errors = removeDuplicatesFromArray(
       this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     );
-    this._cachedErrorsValue = this.value;
-    this._cachedErrors = errors;
+    this.cachedErrorsValue = this.value;
+    this.cachedErrors = errors;
     return errors;
   }
   /**
@@ -2668,6 +2668,8 @@ class InstanceObject extends Instance {
   prepare() {
     this.properties = {};
     this.requiredProperties = /* @__PURE__ */ new Set();
+    this.schemaPatternProperties = getSchemaPatternProperties(this.schema);
+    this.schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema);
     const schemaProperties = getSchemaProperties(this.schema);
     const schemaRequired = getSchemaRequired(this.schema);
     if (isSet(schemaProperties)) {
@@ -2716,8 +2718,8 @@ class InstanceObject extends Instance {
   removeNotListedPropertiesFromValue(value) {
     const schemaEnforceAdditionalProperties = getSchemaXOption(this.schema, "enforceAdditionalProperties");
     const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.options.enforceAdditionalProperties;
-    const schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema);
-    const schemaPatternProperties = getSchemaPatternProperties(this.schema) || {};
+    const schemaAdditionalProperties = this.schemaAdditionalProperties;
+    const schemaPatternProperties = this.schemaPatternProperties || {};
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
       const compiledPatterns = Object.keys(schemaPatternProperties).map((p) => new RegExp(p));
       Object.keys(value).forEach((propertyName) => {
@@ -2801,9 +2803,9 @@ class InstanceObject extends Instance {
   }
   getPropertySchema(propertyName) {
     let schema;
-    const schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema);
+    const schemaAdditionalProperties = this.schemaAdditionalProperties;
     const schemaProperties = getSchemaProperties(this.schema);
-    const schemaPatternProperties = getSchemaPatternProperties(this.schema);
+    const schemaPatternProperties = this.schemaPatternProperties;
     if (isSet(schemaProperties) && hasOwn(schemaProperties, propertyName)) {
       schema = schemaProperties[propertyName];
     } else if (isSet(schemaPatternProperties)) {
@@ -2874,8 +2876,12 @@ class InstanceObject extends Instance {
     if (!isObject(value)) {
       return;
     }
+    const childMap = /* @__PURE__ */ new Map();
+    for (const child of this.children) {
+      childMap.set(child.getKey(), child);
+    }
     Object.keys(value).forEach((propertyName) => {
-      const child = this.getChild(propertyName);
+      const child = childMap.get(propertyName);
       if (child) {
         child.activate();
         const oldValue = child.getValueRaw();
@@ -2893,7 +2899,7 @@ class InstanceObject extends Instance {
       const instance = this.children[i];
       const propertyName = instance.getKey();
       if (notSet(value[propertyName])) {
-        if (this.getChild(propertyName)) {
+        if (childMap.has(propertyName)) {
           instance.deactivate();
         } else {
           this.deleteChild(propertyName);
@@ -2906,6 +2912,8 @@ class InstanceObject extends Instance {
 }
 class InstanceArray extends Instance {
   prepare() {
+    this.schemaItems = getSchemaItems(this.schema);
+    this.schemaPrefixItems = getSchemaPrefixItems(this.schema);
     const schemaMinItems = getSchemaMinItems(this.schema);
     const schemaEnforceMinItems = getSchemaXOption(this.schema, "enforceMinItems");
     const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.options.enforceMinItems;
@@ -2925,8 +2933,8 @@ class InstanceArray extends Instance {
   createItemInstance(index2) {
     let schema;
     const itemsCount = this.children.length;
-    const schemaItems = getSchemaItems(this.schema);
-    const schemaPrefixItems = getSchemaPrefixItems(this.schema);
+    const schemaItems = this.schemaItems;
+    const schemaPrefixItems = this.schemaPrefixItems;
     schema = isSet(schemaItems) ? schemaItems : {};
     const hasPrefixItemsSchema = isSet(schemaPrefixItems) && isSet(schemaPrefixItems[itemsCount]);
     if (hasPrefixItemsSchema) {
