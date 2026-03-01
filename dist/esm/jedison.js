@@ -2965,7 +2965,7 @@ class InstanceArray extends Instance {
   addItem(initiator) {
     const tempEditor = this.createItemInstance();
     const raw = this.getValueRaw();
-    let value = isArray(raw) ? clone(raw) : [];
+    const value = isArray(raw) ? clone(raw) : [];
     value.push(tempEditor.getValueRaw());
     tempEditor.destroy();
     this.setValue(value, true, initiator);
@@ -2995,18 +2995,28 @@ class InstanceArray extends Instance {
     this.emit("notifyParent", initiator);
   }
   refreshChildren() {
-    this.children = [];
     const value = this.getValueRaw();
     if (!isArray(value)) {
+      this.children = [];
       return;
     }
     const correctedValues = [];
-    value.forEach((itemValue, index2) => {
-      const child = this.createItemInstance(index2);
-      this.children.push(child);
-      const finalValue = child.setValue(itemValue, false);
-      correctedValues.push(finalValue);
-    });
+    for (let index2 = 0; index2 < value.length; index2++) {
+      if (index2 < this.children.length) {
+        const child = this.children[index2];
+        const finalValue = child.setValue(value[index2], false);
+        correctedValues.push(finalValue);
+      } else {
+        const child = this.createItemInstance(index2);
+        this.children.push(child);
+        const finalValue = child.setValue(value[index2], false);
+        correctedValues.push(finalValue);
+      }
+    }
+    while (this.children.length > value.length) {
+      const child = this.children.pop();
+      child.destroy();
+    }
     this.value = correctedValues;
   }
 }
