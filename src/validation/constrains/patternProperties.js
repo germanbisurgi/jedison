@@ -1,5 +1,4 @@
 import { isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import { getSchemaPatternProperties } from '../../helpers/schema.js'
 
 export function patternProperties (context) {
@@ -13,13 +12,7 @@ export function patternProperties (context) {
         if (regexp.test(propertyName)) {
           const schema = patternProperties[pattern]
 
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema: schema,
-            data: context.value[propertyName]
-          })
-
-          const editorErrors = editor.getErrors().map((error) => {
+          const editorErrors = context.validator.getErrors(context.value[propertyName], schema, propertyName, context.path + '/' + propertyName).map((error) => {
             return {
               type: 'error',
               path: context.path + '/' + propertyName,
@@ -29,8 +22,6 @@ export function patternProperties (context) {
           })
 
           errors = [...errors, ...editorErrors]
-
-          editor.destroy()
         }
       })
     })

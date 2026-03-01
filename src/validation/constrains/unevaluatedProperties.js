@@ -3,7 +3,6 @@
  */
 
 import { compileTemplate, hasOwn, isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import {
   getSchemaUnevaluatedProperties,
   getSchemaPatternProperties,
@@ -67,13 +66,7 @@ export function unevaluatedProperties (context) {
         }
 
         if (!definedInPatternProperty && isObject(unevaluatedProperties) && !hasOwn(properties, property)) {
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema: unevaluatedProperties,
-            data: context.value[property]
-          })
-
-          const unevaluatedPropertiesErrors = editor.getErrors().map((error) => {
+          const unevaluatedPropertiesErrors = context.validator.getErrors(context.value[property], unevaluatedProperties, property, context.path + '/' + property).map((error) => {
             return {
               type: 'error',
               path: property,
@@ -83,8 +76,6 @@ export function unevaluatedProperties (context) {
           })
 
           errors = [...errors, ...unevaluatedPropertiesErrors]
-
-          editor.destroy()
         }
       })
     }

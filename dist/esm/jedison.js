@@ -511,9 +511,7 @@ function allOf(context) {
   const allOf2 = getSchemaAllOf(context.schema);
   if (isSet(allOf2)) {
     allOf2.forEach((schema) => {
-      const subSchemaEditor = new Jedison({ refParser: context.validator.refParser, schema, data: context.value, rootName: context.key });
-      const subSchemaErrors = subSchemaEditor.getErrors();
-      subSchemaEditor.destroy();
+      const subSchemaErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
       subSchemaErrors.forEach((error) => {
         error.path = context.path;
       });
@@ -550,9 +548,7 @@ function anyOf(context) {
   if (isSet(anyOf2)) {
     let valid = false;
     anyOf2.forEach((schema) => {
-      const anyOfEditor = new Jedison({ refParser: context.validator.refParser, schema, data: context.value });
-      const anyOfErrors = anyOfEditor.getErrors();
-      anyOfEditor.destroy();
+      const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
       if (anyOfErrors.length === 0) {
         valid = true;
       }
@@ -678,13 +674,7 @@ function items(context) {
     } else if (isObject(items2)) {
       context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
         const index2 = prefixItemsSchemasCount + i;
-        const tmpEditor = new Jedison({
-          refParser: context.validator.refParser,
-          schema: items2,
-          data: itemValue
-        });
-        const tmpErrors = tmpEditor.getErrors();
-        tmpEditor.destroy();
+        const tmpErrors = context.validator.getErrors(itemValue, items2, index2, context.path + "/" + index2);
         if (tmpErrors.length > 0) {
           errors.push({
             type: "error",
@@ -851,9 +841,7 @@ function not(context) {
   const errors = [];
   const not2 = getSchemaNot(context.schema);
   if (isSet(not2)) {
-    const notEditor = new Jedison({ refParser: context.validator.refParser, schema: not2, data: context.value });
-    const notErrors = notEditor.getErrors();
-    notEditor.destroy();
+    const notErrors = context.validator.getErrors(context.value, not2, context.key, context.path);
     const invalid = notErrors.length === 0;
     if (invalid) {
       errors.push({
@@ -874,9 +862,7 @@ function oneOf(context) {
   if (isSet(oneOf2)) {
     let counter = 0;
     oneOf2.forEach((schema) => {
-      const oneOfEditor = new Jedison({ refParser: context.validator.refParser, schema, data: context.value });
-      const oneOfErrors = oneOfEditor.getErrors();
-      oneOfEditor.destroy();
+      const oneOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
       if (oneOfErrors.length === 0) {
         counter++;
       }
@@ -926,12 +912,7 @@ function patternProperties(context) {
         const regexp = new RegExp(pattern2);
         if (regexp.test(propertyName)) {
           const schema = patternProperties2[pattern2];
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema,
-            data: context.value[propertyName]
-          });
-          const editorErrors = editor.getErrors().map((error) => {
+          const editorErrors = context.validator.getErrors(context.value[propertyName], schema, propertyName, context.path + "/" + propertyName).map((error) => {
             return {
               type: "error",
               path: context.path + "/" + propertyName,
@@ -940,7 +921,6 @@ function patternProperties(context) {
             };
           });
           errors = [...errors, ...editorErrors];
-          editor.destroy();
         }
       });
     });
@@ -1124,19 +1104,13 @@ function additionalProperties(context) {
             ]
           });
         } else if (isObject(additionalProperties2)) {
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema: additionalProperties2,
-            data: context.value[property]
-          });
-          const additionalPropertyErrors = editor.getErrors().map((error) => ({
+          const additionalPropertyErrors = context.validator.getErrors(context.value[property], additionalProperties2, property, context.path + "/" + property).map((error) => ({
             type: "error",
             path: `${context.path}.${property}`,
             constraint: "additionalProperties",
             messages: error.messages
           }));
           errors.push(...additionalPropertyErrors);
-          editor.destroy();
         }
       }
     });
@@ -1198,13 +1172,11 @@ function contains(context) {
   const maxContains = getSchemaMaxContains(context.schema);
   if (isArray(context.value) && isSet(contains2)) {
     let counter = 0;
-    context.value.forEach((item) => {
-      const containsEditor = new Jedison({ refParser: context.validator.refParser, schema: contains2, data: item });
-      const containsErrors = containsEditor.getErrors();
+    context.value.forEach((item, index2) => {
+      const containsErrors = context.validator.getErrors(item, contains2, index2, context.path + "/" + index2);
       if (containsErrors.length === 0) {
         counter++;
       }
-      containsEditor.destroy();
     });
     const containsInvalid = counter === 0;
     if (isSet(minContains)) {
@@ -1287,9 +1259,7 @@ function dependentSchemas(context) {
     Object.keys(dependentSchemas2).forEach((key) => {
       if (isSet(context.value[key])) {
         const dependentSchema = dependentSchemas2[key];
-        const tmpEditor = new Jedison({ refParser: context.validator.refParser, schema: dependentSchema, data: context.value });
-        const tmpErrors = tmpEditor.getErrors();
-        tmpEditor.destroy();
+        const tmpErrors = context.validator.getErrors(context.value, dependentSchema, context.key, context.path);
         errors = [...errors, ...tmpErrors];
       }
     });
@@ -1297,43 +1267,26 @@ function dependentSchemas(context) {
   return errors;
 }
 function ifThenElse(context) {
-  const errors = [];
   const schemaIf = getSchemaIf(context.schema);
   const schemaThen = getSchemaThen(context.schema);
   const schemaElse = getSchemaElse(context.schema);
   if (isSet(schemaIf)) {
     if (notSet(schemaThen) && notSet(schemaElse)) {
-      return errors;
-    }
-    const ifEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaIf, data: context.value });
-    const ifErrors = ifEditor.getErrors();
-    ifEditor.destroy();
-    let thenErrors = [];
-    let elseErrors = [];
-    if (isSet(schemaThen)) {
-      const thenEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaThen, data: context.value });
-      thenErrors = thenEditor.getErrors();
-      thenEditor.destroy();
-    }
-    if (isSet(schemaElse)) {
-      const elseEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaElse, data: context.value });
-      elseErrors = elseEditor.getErrors();
-      elseEditor.destroy();
+      return [];
     }
     if (schemaIf === true) {
-      return thenErrors;
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
     }
     if (schemaIf === false) {
-      return elseErrors;
+      return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
     }
+    const ifErrors = context.validator.getErrors(context.value, schemaIf, context.key, context.path);
     if (ifErrors.length === 0) {
-      return thenErrors;
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
     }
-    if (ifErrors.length > 0) {
-      return elseErrors;
-    }
+    return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
   }
-  return errors;
+  return [];
 }
 function prefixItems(context) {
   const errors = [];
@@ -1342,9 +1295,7 @@ function prefixItems(context) {
     prefixItems2.forEach((itemSchema, index2) => {
       const itemValue = context.value[index2];
       if (isSet(itemValue)) {
-        const tmpEditor = new Jedison({ refParser: context.validator.refParser, schema: itemSchema, data: itemValue });
-        const tmpErrors = tmpEditor.getErrors();
-        tmpEditor.destroy();
+        const tmpErrors = context.validator.getErrors(itemValue, itemSchema, index2, context.path + "/" + index2);
         if (tmpErrors.length > 0) {
           errors.push({
             type: "error",
@@ -1476,12 +1427,7 @@ function unevaluatedProperties(context) {
           });
         }
         if (!definedInPatternProperty && isObject(unevaluatedProperties2) && !hasOwn(properties2, property)) {
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema: unevaluatedProperties2,
-            data: context.value[property]
-          });
-          const unevaluatedPropertiesErrors = editor.getErrors().map((error) => {
+          const unevaluatedPropertiesErrors = context.validator.getErrors(context.value[property], unevaluatedProperties2, property, context.path + "/" + property).map((error) => {
             return {
               type: "error",
               path: property,
@@ -1490,7 +1436,6 @@ function unevaluatedProperties(context) {
             };
           });
           errors = [...errors, ...unevaluatedPropertiesErrors];
-          editor.destroy();
         }
       });
     }
@@ -1536,12 +1481,7 @@ function propertyNames(context) {
   const schemaPropertyNames = getSchemaPropertyNames(context.schema);
   if (isObject(context.value) && isSet(schemaPropertyNames)) {
     Object.keys(context.value).forEach((propertyName) => {
-      const editor = new Jedison({
-        refParser: context.validator.refParser,
-        schema: schemaPropertyNames,
-        data: propertyName
-      });
-      const invalid = editor.getErrors().length > 0;
+      const invalid = context.validator.getErrors(propertyName, schemaPropertyNames, propertyName, context.path).length > 0;
       if (invalid) {
         errors.push({
           type: "error",
@@ -1620,6 +1560,9 @@ class Validator {
         messages: ["invalid"],
         path
       }];
+    }
+    if (this.refParser && isObject(schema) && hasOwn(schema, "$ref")) {
+      schema = this.refParser.expand(schema);
     }
     const allConstraints = { ...this.draft, ...this.constraints };
     for (const [constraintName, constraint] of Object.entries(allConstraints)) {

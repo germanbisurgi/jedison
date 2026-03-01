@@ -3,7 +3,6 @@
  */
 
 import { compileTemplate, hasOwn, isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import { getSchemaAdditionalProperties, getSchemaPatternProperties, getSchemaProperties } from '../../helpers/schema.js'
 
 export function additionalProperties (context) {
@@ -36,13 +35,7 @@ export function additionalProperties (context) {
             ]
           })
         } else if (isObject(additionalProperties)) {
-          const editor = new Jedison({
-            refParser: context.validator.refParser,
-            schema: additionalProperties,
-            data: context.value[property]
-          })
-
-          const additionalPropertyErrors = editor.getErrors().map((error) => ({
+          const additionalPropertyErrors = context.validator.getErrors(context.value[property], additionalProperties, property, context.path + '/' + property).map((error) => ({
             type: 'error',
             path: `${context.path}.${property}`,
             constraint: 'additionalProperties',
@@ -50,7 +43,6 @@ export function additionalProperties (context) {
           }))
 
           errors.push(...additionalPropertyErrors)
-          editor.destroy()
         }
       }
     })

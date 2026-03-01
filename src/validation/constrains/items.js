@@ -1,5 +1,4 @@
 import { compileTemplate, isArray, isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import { getSchemaItems, getSchemaPrefixItems } from '../../helpers/schema.js'
 
 export function items (context) {
@@ -20,13 +19,7 @@ export function items (context) {
     } else if (isObject(items)) {
       context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
         const index = prefixItemsSchemasCount + i
-        const tmpEditor = new Jedison({
-          refParser: context.validator.refParser,
-          schema: items,
-          data: itemValue
-        })
-        const tmpErrors = tmpEditor.getErrors()
-        tmpEditor.destroy()
+        const tmpErrors = context.validator.getErrors(itemValue, items, index, context.path + '/' + index)
 
         if (tmpErrors.length > 0) {
           errors.push({

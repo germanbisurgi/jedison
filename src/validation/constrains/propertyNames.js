@@ -3,7 +3,6 @@
  */
 
 import { compileTemplate, isObject, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import {
   getSchemaPropertyNames
 } from '../../helpers/schema.js'
@@ -14,13 +13,7 @@ export function propertyNames (context) {
 
   if (isObject(context.value) && isSet(schemaPropertyNames)) {
     Object.keys(context.value).forEach((propertyName) => {
-      const editor = new Jedison({
-        refParser: context.validator.refParser,
-        schema: schemaPropertyNames,
-        data: propertyName
-      })
-
-      const invalid = editor.getErrors().length > 0
+      const invalid = context.validator.getErrors(propertyName, schemaPropertyNames, propertyName, context.path).length > 0
 
       if (invalid) {
         errors.push({

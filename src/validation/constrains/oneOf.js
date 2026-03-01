@@ -1,5 +1,4 @@
 import { compileTemplate, isSet } from '../../helpers/utils.js'
-import Jedison from '../../jedison.js'
 import { getSchemaOneOf } from '../../helpers/schema.js'
 
 export function oneOf (context) {
@@ -10,9 +9,7 @@ export function oneOf (context) {
     let counter = 0
 
     oneOf.forEach((schema) => {
-      const oneOfEditor = new Jedison({ refParser: context.validator.refParser, schema: schema, data: context.value })
-      const oneOfErrors = oneOfEditor.getErrors()
-      oneOfEditor.destroy()
+      const oneOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path)
 
       if (oneOfErrors.length === 0) {
         counter++

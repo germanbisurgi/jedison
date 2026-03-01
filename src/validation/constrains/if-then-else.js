@@ -1,53 +1,32 @@
-import Jedison from '../../jedison.js'
 import { isSet, notSet } from '../../helpers/utils.js'
 import { getSchemaElse, getSchemaIf, getSchemaThen } from '../../helpers/schema.js'
 
 export function ifThenElse (context) {
-  const errors = []
   const schemaIf = getSchemaIf(context.schema)
   const schemaThen = getSchemaThen(context.schema)
   const schemaElse = getSchemaElse(context.schema)
 
   if (isSet(schemaIf)) {
     if (notSet(schemaThen) && notSet(schemaElse)) {
-      return errors
-    }
-
-    const ifEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaIf, data: context.value })
-    const ifErrors = ifEditor.getErrors()
-    ifEditor.destroy()
-
-    let thenErrors = []
-    let elseErrors = []
-
-    if (isSet(schemaThen)) {
-      const thenEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaThen, data: context.value })
-      thenErrors = thenEditor.getErrors()
-      thenEditor.destroy()
-    }
-
-    if (isSet(schemaElse)) {
-      const elseEditor = new Jedison({ refParser: context.validator.refParser, schema: schemaElse, data: context.value })
-      elseErrors = elseEditor.getErrors()
-      elseEditor.destroy()
+      return []
     }
 
     if (schemaIf === true) {
-      return thenErrors
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : []
     }
 
     if (schemaIf === false) {
-      return elseErrors
+      return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : []
     }
+
+    const ifErrors = context.validator.getErrors(context.value, schemaIf, context.key, context.path)
 
     if (ifErrors.length === 0) {
-      return thenErrors
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : []
     }
 
-    if (ifErrors.length > 0) {
-      return elseErrors
-    }
+    return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : []
   }
 
-  return errors
+  return []
 }
