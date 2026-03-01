@@ -145,6 +145,7 @@ class EditorObject extends Editor {
       this.control.propertiesActivators.appendChild(defaultGroupContainer)
 
       const propertiesGroups = {}
+      const currentValue = this.instance.getValue()
 
       properties.forEach((property) => {
         const isRequired = this.instance.isRequired(property)
@@ -206,7 +207,7 @@ class EditorObject extends Editor {
         }
 
         checkbox.disabled = this.disabled || isRequired
-        checkbox.checked = hasOwn(this.instance.getValue(), property)
+        checkbox.checked = hasOwn(currentValue, property)
       })
     }
   }

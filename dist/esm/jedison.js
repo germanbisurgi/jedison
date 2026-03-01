@@ -3742,6 +3742,7 @@ class EditorObject extends Editor {
       } = this.theme.getPropertiesGroup();
       this.control.propertiesActivators.appendChild(defaultGroupContainer);
       const propertiesGroups = {};
+      const currentValue = this.instance.getValue();
       properties2.forEach((property) => {
         const isRequired = this.instance.isRequired(property);
         const ariaLive = this.control.ariaLive;
@@ -3789,7 +3790,7 @@ class EditorObject extends Editor {
           defaultGroup.appendChild(checkboxControl.container);
         }
         checkbox.disabled = this.disabled || isRequired;
-        checkbox.checked = hasOwn(this.instance.getValue(), property);
+        checkbox.checked = hasOwn(currentValue, property);
       });
     }
   }
