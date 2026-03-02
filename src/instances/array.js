@@ -86,7 +86,7 @@ class InstanceArray extends Instance {
   addItem (initiator) {
     const tempEditor = this.createItemInstance()
     const raw = this.getValueRaw()
-    const value = isArray(raw) ? clone(raw) : []
+    let value = isArray(raw) ? clone(raw) : []
 
     value.push(tempEditor.getValueRaw())
     tempEditor.destroy()
@@ -121,36 +121,23 @@ class InstanceArray extends Instance {
   }
 
   refreshChildren () {
+    this.children = []
+
     const value = this.getValueRaw()
 
     if (!isArray(value)) {
-      this.children = []
       return
     }
 
     const correctedValues = []
+    value.forEach((itemValue, index) => {
+      const child = this.createItemInstance(index)
+      this.children.push(child)
+      const finalValue = child.setValue(itemValue, false)
+      correctedValues.push(finalValue)
+    })
 
-    // Reuse existing children, update their values
-    for (let index = 0; index < value.length; index++) {
-      if (index < this.children.length) {
-        const child = this.children[index]
-        const finalValue = child.setValue(value[index], false)
-        correctedValues.push(finalValue)
-      } else {
-        // New item — create child
-        const child = this.createItemInstance(index)
-        this.children.push(child)
-        const finalValue = child.setValue(value[index], false)
-        correctedValues.push(finalValue)
-      }
-    }
-
-    // Remove excess children
-    while (this.children.length > value.length) {
-      const child = this.children.pop()
-      child.destroy()
-    }
-
+    // Update the array's value with constraint-enforced values
     this.value = correctedValues
   }
 }
