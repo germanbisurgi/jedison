@@ -1,5 +1,9 @@
 ### dev
 
+### 1.4.2
+
+- Performance boosts
+
 ### 1.4.1
 
 - Fixed issue 13 InstanceIfThenElse should propagate arrayTemplateData to sub-instances
