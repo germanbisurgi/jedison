@@ -1,5 +1,9 @@
 ### dev
 
+### 1.4.3
+
+- Fix minor regression
+
 ### 1.4.2
 
 - Performance boosts
