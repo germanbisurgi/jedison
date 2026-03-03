@@ -2695,7 +2695,7 @@ class InstanceObject extends Instance {
           musstCreateChild = false;
         }
         if (musstCreateChild) {
-          this.createChild(schema, key);
+          this.createChild(schema, key, hasOwn(this.value, key) ? this.value[key] : void 0);
         }
       });
     }
@@ -2704,7 +2704,7 @@ class InstanceObject extends Instance {
         this.requiredProperties.add(requiredProperty);
         if (!hasOwn(this.properties, requiredProperty)) {
           this.properties[requiredProperty] = {};
-          this.createChild({}, requiredProperty);
+          this.createChild({}, requiredProperty, hasOwn(this.value, requiredProperty) ? this.value[requiredProperty] : void 0);
         }
       });
     }
@@ -2973,7 +2973,7 @@ class InstanceArray extends Instance {
   addItem(initiator) {
     const tempEditor = this.createItemInstance();
     const raw = this.getValueRaw();
-    let value = isArray(raw) ? clone(raw) : [];
+    const value = isArray(raw) ? clone(raw) : [];
     value.push(tempEditor.getValueRaw());
     tempEditor.destroy();
     this.setValue(value, true, initiator);

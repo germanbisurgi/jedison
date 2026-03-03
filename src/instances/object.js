@@ -54,7 +54,7 @@ class InstanceObject extends Instance {
         }
 
         if (musstCreateChild) {
-          this.createChild(schema, key)
+          this.createChild(schema, key, hasOwn(this.value, key) ? this.value[key] : undefined)
         }
       })
     }
@@ -66,7 +66,7 @@ class InstanceObject extends Instance {
 
         if (!hasOwn(this.properties, requiredProperty)) {
           this.properties[requiredProperty] = {}
-          this.createChild({}, requiredProperty)
+          this.createChild({}, requiredProperty, hasOwn(this.value, requiredProperty) ? this.value[requiredProperty] : undefined)
         }
       })
     }

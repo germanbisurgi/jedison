@@ -1,5 +1,9 @@
 ### dev
 
+### 1.4.4
+
+- Fix issue #17 data partially missing when using `additionalProperties`
+
 ### 1.4.3
 
 - Fix minor regression

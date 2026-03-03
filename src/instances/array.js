@@ -86,7 +86,7 @@ class InstanceArray extends Instance {
   addItem (initiator) {
     const tempEditor = this.createItemInstance()
     const raw = this.getValueRaw()
-    let value = isArray(raw) ? clone(raw) : []
+    const value = isArray(raw) ? clone(raw) : []
 
     value.push(tempEditor.getValueRaw())
     tempEditor.destroy()
