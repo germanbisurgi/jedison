@@ -1,5 +1,10 @@
 ### dev
 
+### 1.5.0
+
+- Added categories editor
+- Fix issue #17 using data option
+
 ### 1.4.4
 
 - Fix issue #17 data partially missing when using `additionalProperties`

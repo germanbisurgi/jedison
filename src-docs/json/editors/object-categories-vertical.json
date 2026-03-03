@@ -1,0 +1,56 @@
+{
+  "type": "object",
+  "title": "Categories Vertical",
+  "x-format": "categories-vertical",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "Your full name",
+      "minLength": 1
+    },
+    "email": {
+      "type": "string",
+      "title": "Email",
+      "description": "Your email address",
+      "x-category": "Contact"
+    },
+    "age": {
+      "type": "integer",
+      "title": "Age",
+      "description": "Your age",
+      "minimum": 0
+    },
+    "address": {
+      "type": "object",
+      "title": "Address",
+      "description": "Your home address",
+      "properties": {
+        "street": {
+          "type": "string",
+          "title": "Street",
+          "description": "Street address"
+        },
+        "city": {
+          "type": "string",
+          "title": "City",
+          "description": "City name"
+        },
+        "zip": {
+          "type": "string",
+          "title": "ZIP Code",
+          "description": "Postal code"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "title": "Tags",
+      "description": "List of tags",
+      "items": {
+        "type": "string",
+        "title": "Tag"
+      }
+    }
+  }
+}

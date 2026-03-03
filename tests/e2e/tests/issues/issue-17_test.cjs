@@ -2,9 +2,12 @@
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'issue/issue-17'
 const value = {
-  ssss: {
-    key: 'test',
-    details: []
+  "object": {
+    "key": "test",
+    "details": [
+      "A",
+      "B"
+    ]
   }
 }
 
@@ -22,5 +25,14 @@ Scenario('@issue @issue-17 should set correct data when using additionalProperti
   I._click('#set-value')
   I._scrollTo('[data-path="#"]')
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify(value))
-  I._waitForValue('#root-ssss-key', 'test')
+  I._waitForValue('#root-object-key', 'test')
+})
+
+Scenario('@issue @issue-17 should initialize nested array values from data option', ({ I }) => {
+  I.fillField('#data', JSON.stringify(value))
+  I._scrollTo('#set-data')
+  I._click('#set-data')
+  I._scrollTo('[data-path="#"]')
+  I._waitForValue('#root-object-details-0', 'A')
+  I._waitForValue('#root-object-details-1', 'B')
 })

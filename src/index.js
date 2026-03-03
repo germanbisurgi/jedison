@@ -23,6 +23,7 @@ import EditorNumberRadios from './editors/number-radios.js'
 import EditorNumberSelect from './editors/number-select.js'
 import EditorNumberInput from './editors/number-input.js'
 import EditorObjectGrid from './editors/object-grid.js'
+import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObject from './editors/object.js'
 import EditorArrayChoices from './editors/array-choices.js'
@@ -53,6 +54,7 @@ export default {
   EditorNumberSelect,
   EditorNumberInput,
   EditorObjectGrid,
+  EditorObjectCategories,
   EditorObjectNav,
   EditorObject,
   EditorArrayChoices,

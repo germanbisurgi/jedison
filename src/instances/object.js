@@ -23,6 +23,8 @@ class InstanceObject extends Instance {
     const schemaProperties = getSchemaProperties(this.schema)
     const schemaRequired = getSchemaRequired(this.schema)
 
+    const initialValue = clone(this.value)
+
     if (isSet(schemaProperties)) {
       Object.keys(schemaProperties).forEach((key) => {
         const schema = schemaProperties[key]
@@ -54,7 +56,7 @@ class InstanceObject extends Instance {
         }
 
         if (musstCreateChild) {
-          this.createChild(schema, key, hasOwn(this.value, key) ? this.value[key] : undefined)
+          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : undefined)
         }
       })
     }
@@ -66,7 +68,7 @@ class InstanceObject extends Instance {
 
         if (!hasOwn(this.properties, requiredProperty)) {
           this.properties[requiredProperty] = {}
-          this.createChild({}, requiredProperty, hasOwn(this.value, requiredProperty) ? this.value[requiredProperty] : undefined)
+          this.createChild({}, requiredProperty, hasOwn(initialValue, requiredProperty) ? initialValue[requiredProperty] : undefined)
         }
       })
     }

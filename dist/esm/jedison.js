@@ -2672,6 +2672,7 @@ class InstanceObject extends Instance {
     this.schemaAdditionalProperties = getSchemaAdditionalProperties(this.schema);
     const schemaProperties = getSchemaProperties(this.schema);
     const schemaRequired = getSchemaRequired(this.schema);
+    const initialValue = clone(this.value);
     if (isSet(schemaProperties)) {
       Object.keys(schemaProperties).forEach((key) => {
         const schema = schemaProperties[key];
@@ -2695,7 +2696,7 @@ class InstanceObject extends Instance {
           musstCreateChild = false;
         }
         if (musstCreateChild) {
-          this.createChild(schema, key, hasOwn(this.value, key) ? this.value[key] : void 0);
+          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : void 0);
         }
       });
     }
@@ -2704,7 +2705,7 @@ class InstanceObject extends Instance {
         this.requiredProperties.add(requiredProperty);
         if (!hasOwn(this.properties, requiredProperty)) {
           this.properties[requiredProperty] = {};
-          this.createChild({}, requiredProperty, hasOwn(this.value, requiredProperty) ? this.value[requiredProperty] : void 0);
+          this.createChild({}, requiredProperty, hasOwn(initialValue, requiredProperty) ? initialValue[requiredProperty] : void 0);
         }
       });
     }
@@ -3863,6 +3864,91 @@ class EditorObjectGrid extends EditorObject {
           child.ui.enable();
         }
       }
+    });
+  }
+}
+class EditorObjectCategories extends EditorObject {
+  static resolves(schema) {
+    const format2 = getSchemaXOption(schema, "format");
+    const regex = /^categories-(horizontal|vertical(?:-\d+)?)$/;
+    return getSchemaType(schema) === "object" && regex.test(format2);
+  }
+  init() {
+    super.init();
+    this.activeCategoryName = null;
+  }
+  refreshEditors() {
+    while (this.control.childrenSlot.firstChild) {
+      this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild);
+    }
+    const format2 = getSchemaXOption(this.instance.schema, "format");
+    const formatParts = format2.split("-");
+    const variant = formatParts[1];
+    const columns = formatParts[2];
+    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
+    const row = this.theme.getRow();
+    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
+    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const tabContent = this.theme.getTabContent();
+    const tabList = this.theme.getTabList({
+      variant
+    });
+    this.control.childrenSlot.appendChild(row);
+    row.appendChild(tabListCol);
+    row.appendChild(tabContentCol);
+    tabListCol.appendChild(tabList);
+    tabContentCol.appendChild(tabContent);
+    const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+    const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+    const defaultLabel = getSchemaXOption(this.instance.schema, "categoriesDefaultLabel") ?? "Basic";
+    const categoriesMap = /* @__PURE__ */ new Map();
+    this.instance.children.forEach((child) => {
+      if (!child.isActive) return;
+      const childSchemaType = getSchemaType(child.schema);
+      const xCategory = getSchemaXOption(child.schema, "category");
+      let categoryName;
+      if (isSet(xCategory)) {
+        categoryName = xCategory;
+      } else if (childSchemaType === "object" || childSchemaType === "array") {
+        const schemaTitle = getSchemaTitle(child.schema);
+        categoryName = isSet(schemaTitle) ? schemaTitle : child.getKey();
+      } else {
+        categoryName = defaultLabel;
+      }
+      if (!categoriesMap.has(categoryName)) {
+        categoriesMap.set(categoryName, { children: [], id: pathToAttribute(child.path) });
+      }
+      categoriesMap.get(categoryName).children.push(child);
+    });
+    if (!categoriesMap.has(this.activeCategoryName)) {
+      this.activeCategoryName = categoriesMap.keys().next().value;
+    }
+    categoriesMap.forEach((category, categoryName) => {
+      const active = categoryName === this.activeCategoryName;
+      const { children, id } = category;
+      const hasErrors = navWarning && children.some((child) => child.hasNestedValidationErrors());
+      const tab = this.theme.getTab({
+        hasErrors,
+        navWarningMessage,
+        title: categoryName,
+        id,
+        active
+      });
+      tab.list.addEventListener("click", () => {
+        this.activeCategoryName = categoryName;
+      });
+      const pane = document.createElement("div");
+      this.theme.setTabPaneAttributes(pane, active, id);
+      children.forEach((child) => {
+        pane.appendChild(child.ui.control.container);
+        if (this.disabled || this.instance.isReadOnly()) {
+          child.ui.disable();
+        } else {
+          child.ui.enable();
+        }
+      });
+      tabList.appendChild(tab.list);
+      tabContent.appendChild(pane);
     });
   }
 }
@@ -5227,6 +5313,7 @@ class UiResolver {
       EditorNumberSelect,
       EditorNumberInput,
       EditorObjectGrid,
+      EditorObjectCategories,
       EditorObjectNav,
       EditorObject,
       EditorArrayChoices,
@@ -8804,6 +8891,7 @@ const index = {
   EditorNumberSelect,
   EditorNumberInput,
   EditorObjectGrid,
+  EditorObjectCategories,
   EditorObjectNav,
   EditorObject,
   EditorArrayChoices,

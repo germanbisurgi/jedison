@@ -12,6 +12,7 @@ import EditorNumberSelect from './editors/number-select.js'
 import EditorNumberInputNullable from './editors/number-input-nullable.js'
 import EditorNumberInput from './editors/number-input.js'
 import EditorObjectGrid from './editors/object-grid.js'
+import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObject from './editors/object.js'
 import EditorArrayTuple from './editors/array-tuple.js'
@@ -65,6 +66,7 @@ class UiResolver {
       EditorNumberSelect,
       EditorNumberInput,
       EditorObjectGrid,
+      EditorObjectCategories,
       EditorObjectNav,
       EditorObject,
       EditorArrayChoices,
