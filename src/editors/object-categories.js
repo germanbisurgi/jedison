@@ -52,6 +52,8 @@ class EditorObjectCategories extends EditorObject {
 
     this.instance.children.forEach((child) => {
       if (!child.isActive) return
+      const hidden = getSchemaXOption(child.schema, 'hidden')
+      if (isSet(hidden) && hidden === true) return
 
       const childSchemaType = getSchemaType(child.schema)
       const xCategory = getSchemaXOption(child.schema, 'category')

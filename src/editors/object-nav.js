@@ -19,6 +19,25 @@ class EditorObjectNav extends EditorObject {
     this.activeTabIndex = 0
   }
 
+  isChildVisible (child) {
+    if (!child.isActive) return false
+    const hidden = getSchemaXOption(child.schema, 'hidden')
+    return !(isSet(hidden) && hidden === true)
+  }
+
+  getVisibleChildIndices () {
+    return this.instance.children.reduce((indices, child, index) => {
+      if (this.isChildVisible(child)) indices.push(index)
+      return indices
+    }, [])
+  }
+
+  ensureActiveTabIsVisible (visibleIndices) {
+    if (!visibleIndices.includes(this.activeTabIndex)) {
+      this.activeTabIndex = visibleIndices[0] ?? 0
+    }
+  }
+
   refreshEditors () {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild)
@@ -43,37 +62,40 @@ class EditorObjectNav extends EditorObject {
     tabListCol.appendChild(tabList)
     tabContentCol.appendChild(tabContent)
 
+    const visibleIndices = this.getVisibleChildIndices()
+    this.ensureActiveTabIsVisible(visibleIndices)
+
     this.instance.children.forEach((child, index) => {
-      if (child.isActive) {
-        const active = index === this.activeTabIndex
-        const id = pathToAttribute(child.path)
-        const schemaTitle = getSchemaTitle(child.schema)
+      if (!this.isChildVisible(child)) return
 
-        const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
-        const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+      const active = index === this.activeTabIndex
+      const id = pathToAttribute(child.path)
+      const schemaTitle = getSchemaTitle(child.schema)
 
-        const tab = this.theme.getTab({
-          hasErrors: navWarning && child.hasNestedValidationErrors(),
-          navWarningMessage: navWarningMessage,
-          title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
-          id: id,
-          active: active
-        })
+      const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+      const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
 
-        tab.list.addEventListener('click', () => {
-          this.activeTabIndex = index
-        })
+      const tab = this.theme.getTab({
+        hasErrors: navWarning && child.hasNestedValidationErrors(),
+        navWarningMessage: navWarningMessage,
+        title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
+        id: id,
+        active: active
+      })
 
-        this.theme.setTabPaneAttributes(child.ui.control.container, active, id)
+      tab.list.addEventListener('click', () => {
+        this.activeTabIndex = index
+      })
 
-        tabList.appendChild(tab.list)
-        tabContent.appendChild(child.ui.control.container)
+      this.theme.setTabPaneAttributes(child.ui.control.container, active, id)
 
-        if (this.disabled || this.instance.isReadOnly()) {
-          child.ui.disable()
-        } else {
-          child.ui.enable()
-        }
+      tabList.appendChild(tab.list)
+      tabContent.appendChild(child.ui.control.container)
+
+      if (this.disabled || this.instance.isReadOnly()) {
+        child.ui.disable()
+      } else {
+        child.ui.enable()
       }
     })
   }

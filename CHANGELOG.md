@@ -1,5 +1,10 @@
 ### dev
 
+### 1.5.1
+
+- Tabs should not render when `x-hidden: true`
+- Security updates
+
 ### 1.5.0
 
 - Added categories editor

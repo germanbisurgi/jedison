@@ -3904,6 +3904,8 @@ class EditorObjectCategories extends EditorObject {
     const categoriesMap = /* @__PURE__ */ new Map();
     this.instance.children.forEach((child) => {
       if (!child.isActive) return;
+      const hidden = getSchemaXOption(child.schema, "hidden");
+      if (isSet(hidden) && hidden === true) return;
       const childSchemaType = getSchemaType(child.schema);
       const xCategory = getSchemaXOption(child.schema, "category");
       let categoryName;
@@ -3963,6 +3965,22 @@ class EditorObjectNav extends EditorObject {
     super.init();
     this.activeTabIndex = 0;
   }
+  isChildVisible(child) {
+    if (!child.isActive) return false;
+    const hidden = getSchemaXOption(child.schema, "hidden");
+    return !(isSet(hidden) && hidden === true);
+  }
+  getVisibleChildIndices() {
+    return this.instance.children.reduce((indices, child, index2) => {
+      if (this.isChildVisible(child)) indices.push(index2);
+      return indices;
+    }, []);
+  }
+  ensureActiveTabIsVisible(visibleIndices) {
+    if (!visibleIndices.includes(this.activeTabIndex)) {
+      this.activeTabIndex = visibleIndices[0] ?? 0;
+    }
+  }
   refreshEditors() {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild);
@@ -3984,31 +4002,32 @@ class EditorObjectNav extends EditorObject {
     row.appendChild(tabContentCol);
     tabListCol.appendChild(tabList);
     tabContentCol.appendChild(tabContent);
+    const visibleIndices = this.getVisibleChildIndices();
+    this.ensureActiveTabIsVisible(visibleIndices);
     this.instance.children.forEach((child, index2) => {
-      if (child.isActive) {
-        const active = index2 === this.activeTabIndex;
-        const id = pathToAttribute(child.path);
-        const schemaTitle = getSchemaTitle(child.schema);
-        const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
-        const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
-        const tab = this.theme.getTab({
-          hasErrors: navWarning && child.hasNestedValidationErrors(),
-          navWarningMessage,
-          title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
-          id,
-          active
-        });
-        tab.list.addEventListener("click", () => {
-          this.activeTabIndex = index2;
-        });
-        this.theme.setTabPaneAttributes(child.ui.control.container, active, id);
-        tabList.appendChild(tab.list);
-        tabContent.appendChild(child.ui.control.container);
-        if (this.disabled || this.instance.isReadOnly()) {
-          child.ui.disable();
-        } else {
-          child.ui.enable();
-        }
+      if (!this.isChildVisible(child)) return;
+      const active = index2 === this.activeTabIndex;
+      const id = pathToAttribute(child.path);
+      const schemaTitle = getSchemaTitle(child.schema);
+      const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+      const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+      const tab = this.theme.getTab({
+        hasErrors: navWarning && child.hasNestedValidationErrors(),
+        navWarningMessage,
+        title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
+        id,
+        active
+      });
+      tab.list.addEventListener("click", () => {
+        this.activeTabIndex = index2;
+      });
+      this.theme.setTabPaneAttributes(child.ui.control.container, active, id);
+      tabList.appendChild(tab.list);
+      tabContent.appendChild(child.ui.control.container);
+      if (this.disabled || this.instance.isReadOnly()) {
+        child.ui.disable();
+      } else {
+        child.ui.enable();
       }
     });
   }
