@@ -41,6 +41,16 @@ class EditorStringRadios extends EditorString {
       radio.checked = (radio.value === this.instance.getValue())
     })
   }
+
+  setAriaInvalid (invalid) {
+    this.control.radios.forEach(radio => {
+      if (invalid) {
+        radio.setAttribute('aria-invalid', 'true')
+      } else {
+        radio.removeAttribute('aria-invalid')
+      }
+    })
+  }
 }
 
 export default EditorStringRadios

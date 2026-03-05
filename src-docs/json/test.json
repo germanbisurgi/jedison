@@ -1,432 +1,217 @@
 {
-  "type": "array",
-  "x-format": "nav-horizontal",
-  "minItems": 1,
-  "maxItems": 5,
-  "x-arrayMove": false,
-  "x-navWarningMessage": "Die Zählung ist noch nicht vollständig.",
-  "items": {
-    "type": "object",
-    "x-format": "nav-horizontal",
-    "properties": {
-      "zeit": {
-        "type": "object",
-        "x-format": "nav-horizontal",
-        "x-options": {
-          "titleHidden": true,
-          "format": "grid"
-        },
-        "properties": {
-          "datum": {
-            "type": "string",
-            "x-format": "date",
-            "x-grid": {
-              "columns": 4
-            }
-          },
-          "start": {
-            "type": "string",
-            "x-format": "time",
-            "x-grid": {
-              "columns": 4
-            }
-          },
-          "ende": {
-            "type": "string",
-            "x-format": "time",
-            "x-grid": {
-              "columns": 4
-            }
-          }
-        }
+  "$ref": "#/$defs/schema",
+  "x-titleHidden": true,
+  "$defs": {
+    "schema": {
+      "x-deactivateNonRequired": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/schema",
+        "x-propGroup": "Object"
       },
-      "verhaeltnisse": {
-        "type": "object",
-        "x-format": "nav-horizontal",
-        "properties": {
-          "wind": {
-            "type": "string",
-            "enum": [
-              "still_bis_gering",
-              "leicht_bis_schwach",
-              "maessig_bis_frisch",
-              "stark_bis_stuermisch",
-              "keine_angabe"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "still bis gering",
-                "leicht bis schwach",
-                "mäßig bis frisch",
-                "stark bis stürmisch",
-                "keine Angabe"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
-          },
-          "boden": {
-            "type": "string",
-            "enum": [
-              "torcken",
-              "feucht",
-              "nass",
-              "staunass",
-              "keine_angabe"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "trocken",
-                "feucht",
-                "nass",
-                "staunass",
-                "keine Angabe"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
-          },
-          "niederschlag": {
-            "type": "string",
-            "enum": [
-              "torcken",
-              "sprueh_niesel_schauer",
-              "starker_regen",
-              "schnee_hagel",
-              "keine_angabe"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "trocken",
-                "Sprüh\/Niesel, Schauer",
-                "starker Regen",
-                "Schnee\/Hagel",
-                "keine Angabe"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
-          },
-          "sicht": {
-            "type": "string",
-            "enum": [
-              "sehr_klar",
-              "relativ_klar",
-              "diesig",
-              "bedeutende-einschraenkungen",
-              "keine_angabe"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "sehr klar",
-                "relativ klar",
-                "diesig",
-                "bedeutende Einschränkungen",
-                "keine Angabe"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
-          },
-          "mond": {
-            "type": "object",
-            "x-format": "nav-horizontal",
-            "properties": {
-              "mond_sichtbarkeit": {
-                "type": "string",
-                "enum": [
-                  "sichtbar",
-                  "zeitweilig_sichtbar",
-                  "nicht_sichtbar",
-                  "keine_angabe"
-                ],
-                "x-options": {
-                  "enumTitles": [
-                    "sichtbar",
-                    "zeitweilig sichtbar",
-                    "nicht sichtbar",
-                    "keine Angabe"
-                  ],
-                  "enforceEnumDefault": false,
-                  "format": "radios-inline"
-                }
-              },
-              "mond_phase": {
-                "type": "string",
-                "enum": [
-                  "vollmond",
-                  "3_4_mond",
-                  "1_2_mond",
-                  "1_4_mond",
-                  "neumond",
-                  "keine_angabe"
-                ],
-                "x-options": {
-                  "enumTitles": [
-                    "Vollmond",
-                    "3\/4 Mond",
-                    "1\/2 Mond",
-                    "1\/4 Mond",
-                    "Neumond",
-                    "keine Angabe"
-                  ],
-                  "enforceEnumDefault": false,
-                  "format": "radios-inline"
-                }
-              }
-            }
-          },
-          "temperatur": {
-            "type": "object",
-            "x-format": "nav-horizontal",
-            "x-options": {
-              "titleHidden": true
-            },
-            "properties": {
-              "temperatur": {
-                "type": "array",
-                "uniqueItems": true,
-                "x-format": "checkboxes-inline",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "bodenfrost",
-                    "raureif"
-                  ],
-                  "x-options": {
-                    "enumTitles": [
-                      "Bodenfrost",
-                      "Raureif"
-                    ]
-                  }
-                }
-              },
-              "temp2": {
-                "type": "integer"
-              }
-            }
-          }
-        }
-      },
-      "zaehlung": {
-        "type": "object",
-        "x-format": "nav-horizontal",
-        "x-options": {
-          "titleHidden": true
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "object",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "array",
+            "null"
+          ],
+          "x-propGroup": "Type"
         },
-        "required": [
-          "anmerkungen"
-        ],
-        "properties": {
-          "zaehlung": {
+        "const": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ],
+          "x-propGroup": "Type"
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-propGroup": "Type"
+        },
+
+        "title": {
+          "type": "string",
+          "x-propGroup": "Annotations"
+        },
+        "description": {
+          "type": "string",
+          "x-format": "textarea",
+          "x-propGroup": "Annotations"
+        },
+        "format": {
+          "type": "string",
+          "x-propGroup": "Annotations"
+        },
+        "default": {
+          "title": "default",
+          "type": [
+            "null",
+            "boolean",
+            "object",
+            "array",
+            "number",
+            "string",
+            "integer"
+          ],
+          "x-propGroup": "Annotations"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "x-propGroup": "Annotations"
+        },
+
+        "maxLength": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "String"
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "String"
+        },
+        "pattern": {
+          "type": "string",
+          "format": "regex",
+          "x-propGroup": "String"
+        },
+
+        "exclusiveMaximum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        },
+        "exclusiveMinimum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        },
+        "maximum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        },
+        "minimum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        },
+        "multipleOf": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "x-propGroup": "Numeric"
+        },
+
+        "contains": {
+          "$ref": "#/$defs/schema",
+          "x-propGroup": "Array"
+        },
+        "items": {
+          "$ref": "#/$defs/schema",
+          "x-propGroup": "Array"
+        },
+        "maxContains": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "minContains": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "prefixItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Array"
+        },
+        "uniqueItems": {
+          "type": "boolean",
+          "x-propGroup": "Array"
+        },
+
+        "additionalProperties": {
+          "$ref": "#/$defs/schema",
+          "x-propGroup": "Object"
+        },
+        "dependentRequired": {
+          "type": "object",
+          "additionalProperties": {
             "type": "array",
             "uniqueItems": true,
-            "x-format": "checkboxes-inline",
             "items": {
-              "type": "string",
-              "enforceEnumDefault": false,
-              "enum": [
-                "scheinwerfer",
-                "wbk",
-                "wbk_kontrolle"
-              ],
-              "x-options": {
-                "enumTitles": [
-                  "Scheinwerfer",
-                  "WBK",
-                  "WBK zur Kontrolle"
-                ]
-              }
-            }
-          },
-          "modell": {
-            "type": "string"
-          },
-          "anmerkungen": {
-            "type": "string",
-            "x-format": "textarea"
-          }
-        }
-      },
-      "feldhasen": {
-        "type": "object",
-        "x-format": "nav-horizontal",
-        "x-options": {
-          "titleHidden": true
-        },
-        "properties": {
-          "zaehlung": {
-            "type": "string",
-            "enum": [
-              "ja",
-              "nein"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "Ja",
-                "Nein"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
-          },
-          "gesamtstrecke": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "fallwild": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "niederwild": {
-            "type": "object",
-            "x-format": "nav-horizontal",
-            "x-titleHidden": true,
-            "required": [
-              "massnahme"
-            ],
-            "properties": {
-              "massnahme": {
-                "type": "string",
-                "x-format": "textarea",
-                "maxLength": 300
-              }
-            }
-          }
-        },
-        "if": {
-          "properties": {
-            "zaehlung": {
-              "const": "nein"
-            }
-          }
-        },
-        "then": {
-          "properties": {
-            "gesamtstrecke": {
-              "readOnly": true
-            }
-          }
-        }
-      },
-      "referenzobjekt_daten": {
-        "type": "object",
-        "x-format": "nav-horizontal",
-        "x-options": {
-          "titleHidden": true
-        },
-        "properties": {
-          "laenge": {
-            "type": "array",
-            "minItems": 1,
-            "x-arrayMove": false,
-            "items": {
-              "type": "object",
-              "x-format": "nav-horizontal",
-              "x-format": "grid",
-              "properties": {
-                "zaehlbar": {
-                  "type": "boolean",
-                  "x-format": "checkbox",
-                  "x-grid": {
-                    "columns": 6
-                  },
-                  "x-options": {
-                    "inputAttributes": {
-                      "readonly": true
-                    }
-                  }
-                },
-                "flaeche": {
-                  "type": "number",
-                  "description": "in ha",
-                  "default": 0,
-                  "minimum": 0,
-                  "maximum": 99999.99,
-                  "x-grid": {
-                    "columns": 6
-                  },
-                  "x-inputAttributes": {
-                    "step": 0.01
-                  },
-                  "x-options": {
-                    "inputAttributes": {
-                      "readonly": true
-                    }
-                  }
-                },
-                "beobachtungen": {
-                  "type": "object",
-                  "x-format": "nav-horizontal",
-                  "x-format": "grid",
-                  "properties": {
-                    "hase": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "reh": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "fuchs": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "dachs": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "kaninchen": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "katze": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 99,
-                      "x-grid": {
-                        "columns": 4
-                      }
-                    },
-                    "sonstiges": {
-                      "type": "string",
-                      "x-format": "textarea",
-                      "maxLength": 255
-                    }
-                  },
-                  "x-options": {
-                    "inputAttributes": {
-                      "readonly": true
-                    }
-                  }
-                }
-              }
+              "title": "property",
+              "type": "string"
             },
-            "default": []
+            "x-format": "choices",
+            "x-choicesOptions": {
+              "addChoices": true
+            }
+          },
+          "x-propGroup": "Object"
+        },
+        "dependentSchemas": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Object"
+        },
+        "maxProperties": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Object"
+        },
+        "minProperties": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Object"
+        },
+        "patternProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Object"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Object"
+        },
+        "required": {
+          "x-format": "table",
+          "x-propGroup": "Object",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
           }
         }
       }
     }
-  },
-  "$defs": []
+  }
 }

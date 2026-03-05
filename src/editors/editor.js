@@ -204,6 +204,7 @@ class Editor {
 
     this.control.messages.innerHTML = ''
     this.showingValidationErrors = false
+    this.setAriaInvalid(false)
 
     const neverShowErrors = this.instance.jedison.options.showErrors === 'never' || getSchemaXOption(this.instance.schema, 'showErrors') === 'never'
 
@@ -212,6 +213,8 @@ class Editor {
     }
 
     const muteValidationMessages = getSchemaXOption(this.instance.schema, 'muteValidationMessages') ?? this.instance.jedison.options.muteValidationMessages ?? []
+
+    let hasErrors = false
 
     errors.forEach((error) => {
       if (muteValidationMessages.includes(error.constraint)) {
@@ -222,6 +225,7 @@ class Editor {
         let invalidFeedback
 
         if (error.type === 'error') {
+          hasErrors = true
           invalidFeedback = this.getErrorFeedback({
             message: message
           })
@@ -235,7 +239,21 @@ class Editor {
       })
     })
 
+    if (hasErrors) {
+      this.setAriaInvalid(true)
+    }
+
     this.showingValidationErrors = true
+  }
+
+  setAriaInvalid (invalid) {
+    if (this.control.input) {
+      if (invalid) {
+        this.control.input.setAttribute('aria-invalid', 'true')
+      } else {
+        this.control.input.removeAttribute('aria-invalid')
+      }
+    }
   }
 
   /**

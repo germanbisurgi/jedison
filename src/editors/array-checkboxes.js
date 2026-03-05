@@ -90,6 +90,16 @@ class EditorArrayCheckboxes extends Editor {
       checkbox.checked = value.includes(checkbox.value)
     })
   }
+
+  setAriaInvalid (invalid) {
+    this.control.checkboxes.forEach(checkbox => {
+      if (invalid) {
+        checkbox.setAttribute('aria-invalid', 'true')
+      } else {
+        checkbox.removeAttribute('aria-invalid')
+      }
+    })
+  }
 }
 
 export default EditorArrayCheckboxes

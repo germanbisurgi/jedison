@@ -2123,11 +2123,13 @@ class Editor {
     });
     this.control.messages.innerHTML = "";
     this.showingValidationErrors = false;
+    this.setAriaInvalid(false);
     const neverShowErrors = this.instance.jedison.options.showErrors === "never" || getSchemaXOption(this.instance.schema, "showErrors") === "never";
     if (neverShowErrors && !force || errors.length === 0) {
       return;
     }
     const muteValidationMessages = getSchemaXOption(this.instance.schema, "muteValidationMessages") ?? this.instance.jedison.options.muteValidationMessages ?? [];
+    let hasErrors = false;
     errors.forEach((error) => {
       if (muteValidationMessages.includes(error.constraint)) {
         return;
@@ -2135,6 +2137,7 @@ class Editor {
       error.messages.forEach((message) => {
         let invalidFeedback;
         if (error.type === "error") {
+          hasErrors = true;
           invalidFeedback = this.getErrorFeedback({
             message
           });
@@ -2146,7 +2149,19 @@ class Editor {
         this.control.messages.appendChild(invalidFeedback);
       });
     });
+    if (hasErrors) {
+      this.setAriaInvalid(true);
+    }
     this.showingValidationErrors = true;
+  }
+  setAriaInvalid(invalid) {
+    if (this.control.input) {
+      if (invalid) {
+        this.control.input.setAttribute("aria-invalid", "true");
+      } else {
+        this.control.input.removeAttribute("aria-invalid");
+      }
+    }
   }
   /**
    * Get an error message container
@@ -3149,6 +3164,15 @@ class EditorRadios extends EditorBoolean {
       radio.checked = radioValue === this.instance.getValue();
     });
   }
+  setAriaInvalid(invalid) {
+    this.control.radios.forEach((radio) => {
+      if (invalid) {
+        radio.setAttribute("aria-invalid", "true");
+      } else {
+        radio.removeAttribute("aria-invalid");
+      }
+    });
+  }
 }
 class EditorBooleanSelect extends EditorBoolean {
   static resolves(schema) {
@@ -3244,6 +3268,15 @@ class EditorStringRadios extends EditorString {
     this.refreshDisabledState();
     this.control.radios.forEach((radio) => {
       radio.checked = radio.value === this.instance.getValue();
+    });
+  }
+  setAriaInvalid(invalid) {
+    this.control.radios.forEach((radio) => {
+      if (invalid) {
+        radio.setAttribute("aria-invalid", "true");
+      } else {
+        radio.removeAttribute("aria-invalid");
+      }
     });
   }
 }
@@ -3502,6 +3535,15 @@ class EditorNumberRadios extends EditorNumber {
     this.refreshDisabledState();
     this.control.radios.forEach((radio) => {
       radio.checked = Number(radio.value) === Number(this.instance.getValue());
+    });
+  }
+  setAriaInvalid(invalid) {
+    this.control.radios.forEach((radio) => {
+      if (invalid) {
+        radio.setAttribute("aria-invalid", "true");
+      } else {
+        radio.removeAttribute("aria-invalid");
+      }
     });
   }
 }
@@ -5134,6 +5176,15 @@ class EditorArrayCheckboxes extends Editor {
     }
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.checked = value.includes(checkbox.value);
+    });
+  }
+  setAriaInvalid(invalid) {
+    this.control.checkboxes.forEach((checkbox) => {
+      if (invalid) {
+        checkbox.setAttribute("aria-invalid", "true");
+      } else {
+        checkbox.removeAttribute("aria-invalid");
+      }
     });
   }
 }
