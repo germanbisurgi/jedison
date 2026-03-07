@@ -472,14 +472,17 @@
         },
         "origin": {
           "title": "Origin",
+          "type": "object",
           "description": "Your character's social background",
           "x-grid": { "columns": 6 },
+          "x-discriminator": "originType",
           "oneOf": [
             {
               "title": "Noble",
               "x-switcherTitle": "Noble",
               "type": "object",
               "properties": {
+                "originType": { "type": "string", "const": "noble" },
                 "house": {
                   "title": "Noble House",
                   "type": "string",
@@ -502,6 +505,7 @@
               "x-switcherTitle": "Commoner",
               "type": "object",
               "properties": {
+                "originType": { "type": "string", "const": "commoner" },
                 "trade": {
                   "title": "Trade",
                   "type": "string",
@@ -519,6 +523,7 @@
               "x-switcherTitle": "Outcast",
               "type": "object",
               "properties": {
+                "originType": { "type": "string", "const": "outcast" },
                 "reason": {
                   "title": "Reason for Exile",
                   "type": "string",
@@ -532,6 +537,7 @@
               "x-switcherTitle": "Wanderer",
               "type": "object",
               "properties": {
+                "originType": { "type": "string", "const": "wanderer" },
                 "yearsOnRoad": {
                   "title": "Years on the Road",
                   "type": "integer",
@@ -552,6 +558,7 @@
             }
           ],
           "default": {
+            "originType": "noble",
             "house": "House Oakenshield",
             "title": "lord"
           }

@@ -7,7 +7,7 @@
     "keep",
     "csfr"
   ],
-  "enablePropertiesToggle": false,
+  "x-enablePropertiesToggle": false,
   "properties": {
     "email": {
       "title": "E-Mail",

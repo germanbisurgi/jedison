@@ -2,6 +2,8 @@ import Instance from './instance.js'
 import {
   isSet,
   isArray,
+  isString,
+  isObject,
   different,
   clone,
   mergeDeep
@@ -159,6 +161,25 @@ class InstanceMultiple extends Instance {
    * Returns the index of the instance that has less validation errors
    */
   getFittestIndex (value) {
+    // discriminator validation
+    const discriminator = getSchemaXOption(this.schema, 'discriminator')
+    if (isSet(discriminator) && isObject(value)) {
+      const propName = isString(discriminator) ? discriminator : discriminator.propertyName
+      const discriminatorValue = value[propName]
+
+      if (isSet(discriminatorValue)) {
+        for (let index = 0; index < this.schemas.length; index++) {
+          const schema = this.schemas[index]
+          const propSchema = schema.properties && schema.properties[propName]
+          if (propSchema) {
+            const propErrors = this.jedison.validator.getErrors(discriminatorValue, propSchema, propName, this.path)
+            if (propErrors.length === 0) return index
+          }
+        }
+      }
+    }
+
+    // count validation
     let fittestIndex
     let championErrors
 
