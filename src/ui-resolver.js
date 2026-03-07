@@ -31,6 +31,7 @@ import EditorStringIMask from './editors/string-imask.js'
 import EditorNumberImask from './editors/number-imask.js'
 import EditorNumberRaty from './editors/number-raty.js'
 import EditorIfThenElse from './editors/if-then-else.js'
+import EditorAnyJson from './editors/any-json.js'
 import EditorArrayCheckboxes from './editors/array-checkboxes.js'
 import EditorNumberRange from './editors/number-range.js'
 import EditorStringAce from './editors/string-ace.js'
@@ -44,6 +45,7 @@ class UiResolver {
       EditorNumberInputNullable,
       EditorMultiple,
       EditorIfThenElse,
+      EditorAnyJson,
       EditorBooleanRadios,
       EditorBooleanCheckbox,
       EditorBooleanSelect,
