@@ -16,6 +16,7 @@ class EditorMultiple extends Editor {
 
   build () {
     this.switcherInput = getSchemaXOption(this.instance.schema, 'switcherInput') ?? this.instance.jedison.options.switcherInput
+    this.embedSwitcher = getSchemaXOption(this.instance.schema, 'embedSwitcher') ?? this.instance.jedison.options.embedSwitcher
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
       id: this.getIdFromPath(this.instance.path),
@@ -24,6 +25,10 @@ class EditorMultiple extends Editor {
       switcher: this.switcherInput,
       readOnly: this.instance.isReadOnly()
     })
+
+    if (this.embedSwitcher) {
+      this.control.header.style.display = 'none'
+    }
   }
 
   adaptForTable (td) {
@@ -52,6 +57,18 @@ class EditorMultiple extends Editor {
     this.refreshDisabledState()
     this.control.childrenSlot.innerHTML = ''
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container)
+
+    if (this.embedSwitcher) {
+      const slot = this.instance.activeInstance.ui.control.switcherSlot
+      if (slot) {
+        slot.innerHTML = ''
+        slot.appendChild(this.control.switcher.container)
+        this.control.header.style.display = 'none'
+      } else {
+        this.control.header.style.display = ''
+        this.control.header.appendChild(this.control.switcher.container)
+      }
+    }
 
     if (this.switcherInput === 'select') {
       this.control.switcher.input.value = this.instance.index

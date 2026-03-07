@@ -403,6 +403,20 @@ export function removeDuplicatesFromArray (arr) {
   return uniqueObjects
 }
 
+export function resolveInstancePath (currentPath, sourcePath) {
+  if (sourcePath.startsWith('#')) return sourcePath
+  const parts = currentPath.split('/')
+  parts.pop()
+  for (const part of sourcePath.split('/')) {
+    if (part === '..') {
+      if (parts.length > 1) parts.pop()
+    } else if (part !== '.' && part !== '') {
+      parts.push(part)
+    }
+  }
+  return parts.join('/')
+}
+
 export function generateRandomID (maxLength) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let randomID = ''

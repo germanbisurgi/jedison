@@ -1,0 +1,74 @@
+{
+  "title": "Embed Switcher",
+  "type": "object",
+  "properties": {
+    "objectTypes": {
+      "title": "Object editors — switcher embedded in legend",
+      "description": "x-embedSwitcher: true. Both options are objects, so the switcher always embeds in the legend.",
+      "x-embedSwitcher": true,
+      "anyOf": [
+        {
+          "x-switcherTitle": "Person",
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "age": { "type": "integer" }
+          }
+        },
+        {
+          "x-switcherTitle": "Organization",
+          "type": "object",
+          "properties": {
+            "orgName": { "type": "string" },
+            "employees": { "type": "integer" }
+          }
+        }
+      ]
+    },
+    "mixedTypes": {
+      "title": "Mixed editors — switcher embeds in legend or falls back to header",
+      "description": "x-embedSwitcher: true. Object and array options embed the switcher in their legends; string option falls back to the header.",
+      "x-embedSwitcher": true,
+      "anyOf": [
+        {
+          "x-switcherTitle": "As Object",
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" }
+          }
+        },
+        {
+          "x-switcherTitle": "As Array",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        {
+          "x-switcherTitle": "As String",
+          "type": "string"
+        }
+      ]
+    },
+    "noEmbed": {
+      "title": "Without embed switcher (default)",
+      "description": "No x-embedSwitcher. The switcher is always shown above the editor.",
+      "anyOf": [
+        {
+          "x-switcherTitle": "Person",
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "age": { "type": "integer" }
+          }
+        },
+        {
+          "x-switcherTitle": "Organization",
+          "type": "object",
+          "properties": {
+            "orgName": { "type": "string" },
+            "employees": { "type": "integer" }
+          }
+        }
+      ]
+    }
+  }
+}

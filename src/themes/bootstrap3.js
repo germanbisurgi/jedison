@@ -256,7 +256,10 @@ class ThemeBootstrap3 extends Theme {
   getSelectControl (config) {
     const control = super.getSelectControl(config)
     const { container, input, label } = control
-    container.classList.add('form-group')
+
+    if (!config.noSpacing) {
+      container.classList.add('form-group')
+    }
     input.classList.add('form-control')
 
     if (config.titleHidden) {

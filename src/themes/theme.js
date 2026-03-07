@@ -53,6 +53,8 @@ class Theme {
 
     left.classList.add('jedi-editor-legend-left')
     right.classList.add('jedi-editor-legend-right')
+    right.style.display = 'flex'
+    right.style.alignItems = 'center'
 
     legend.classList.add('jedi-editor-legend')
     legend.style.fontSize = 'inherit'
@@ -321,6 +323,21 @@ class Theme {
     return toggle
   }
 
+  getQuickAddPropertyToggle (config) {
+    const toggle = this.getButton(config)
+    toggle.classList.add('jedi-quick-add-property-toggle')
+
+    toggle.addEventListener('click', () => {
+      if (config.propertiesContainer.open) {
+        config.propertiesContainer.close()
+      } else {
+        config.propertiesContainer.showModal()
+      }
+    })
+
+    return toggle
+  }
+
   /**
    * Container that will collapse and expand to show and hide it contents
    */
@@ -387,6 +404,20 @@ class Theme {
   getPropertiesSlot (config) {
     const html = document.createElement('dialog')
     html.classList.add('jedi-properties-slot')
+    html.setAttribute('id', config.id)
+
+    window.addEventListener('click', (event) => {
+      if (event.target === html) {
+        html.close()
+      }
+    })
+
+    return html
+  }
+
+  getQuickAddPropertySlot (config) {
+    const html = document.createElement('dialog')
+    html.classList.add('jedi-quick-add-property-slot')
     html.setAttribute('id', config.id)
 
     window.addEventListener('click', (event) => {
@@ -821,17 +852,25 @@ class Theme {
       collapse: collapse,
       startCollapsed: config.startCollapsed
     })
-    const addPropertyControl = this.getInputControl({
+    const quickAddPropertyContainer = this.getQuickAddPropertySlot({
+      id: 'quick-add-property-slot-' + config.id
+    })
+    const quickAddPropertyControl = this.getInputControl({
       type: 'text',
-      id: 'jedi-add-property-input-' + config.id,
+      id: 'jedi-quick-add-property-input-' + config.id,
       title: config.addPropertyContent
     })
-    const addPropertyBtn = this.getAddPropertyButton({
+    const quickAddPropertyBtn = this.getAddPropertyButton({
       content: config.addPropertyContent,
       icon: 'add'
     })
+    const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
+      content: config.addPropertyContent,
+      icon: 'add',
+      propertiesContainer: quickAddPropertyContainer
+    })
     const fieldset = this.getFieldset()
-    const { legend, infoContainer, legendText } = this.getLegend({
+    const { legend, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
@@ -841,10 +880,14 @@ class Theme {
       this.infoAsModal(info, config.id, config.info)
     }
 
-    addPropertyBtn.classList.add('jedi-object-add')
-
     container.appendChild(fieldset)
     container.appendChild(propertiesContainer)
+    container.appendChild(quickAddPropertyContainer)
+
+    if (config.addProperty) {
+      quickAddPropertyContainer.appendChild(quickAddPropertyControl.container)
+      quickAddPropertyContainer.appendChild(quickAddPropertyBtn)
+    }
 
     if (config.editJsonData) {
       container.appendChild(jsonData.dialog)
@@ -865,20 +908,22 @@ class Theme {
 
     body.appendChild(messages)
 
+    const switcherSlot = document.createElement('div')
+    switcherSlot.classList.add('jedi-switcher-slot')
+
     if (config.readOnly === false) {
-      legend.appendChild(actions)
+      right.appendChild(switcherSlot)
+      right.appendChild(actions)
     }
 
     body.appendChild(childrenSlot)
 
-    if (config.addProperty) {
-      propertiesContainer.appendChild(addPropertyControl.container)
-      propertiesContainer.appendChild(addPropertyBtn)
-      propertiesContainer.appendChild(document.createElement('hr'))
-    }
-
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle)
+    }
+
+    if (config.addProperty) {
+      actions.appendChild(quickAddPropertyToggle)
     }
 
     if (config.enablePropertiesToggle) {
@@ -903,13 +948,17 @@ class Theme {
       propertiesToggle,
       jsonData,
       propertiesContainer,
-      addPropertyControl,
-      addPropertyBtn,
+      quickAddPropertyContainer,
+      quickAddPropertyControl,
+      quickAddPropertyBtn,
+      quickAddPropertyToggle,
       ariaLive,
       propertiesActivators,
       legend,
       legendText,
-      infoContainer
+      infoContainer,
+      right,
+      switcherSlot
     }
   }
 
@@ -932,7 +981,7 @@ class Theme {
 
     const fieldset = this.getFieldset()
     const info = this.getInfo(config.info)
-    const { legend, legendText, infoContainer } = this.getLegend({
+    const { legend, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
@@ -981,7 +1030,13 @@ class Theme {
 
     body.appendChild(messages)
 
-    legend.appendChild(actions)
+    const switcherSlot = document.createElement('div')
+    switcherSlot.classList.add('jedi-switcher-slot')
+
+    if (config.readOnly === false) {
+      right.appendChild(switcherSlot)
+      right.appendChild(actions)
+    }
 
     actions.appendChild(btnGroup)
 
@@ -1011,7 +1066,8 @@ class Theme {
       addBtn,
       jsonData,
       legend,
-      legendText
+      legendText,
+      switcherSlot
     }
   }
 
@@ -1056,10 +1112,12 @@ class Theme {
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
     const randomId = generateRandomID(5)
+    const knownSwitchers = ['select', 'radios', 'radios-inline']
+    const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : 'select'
 
     let switcher
 
-    if (config.switcher === 'select') {
+    if (switcherType === 'select') {
       switcher = this.getSwitcherSelect({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
@@ -1067,11 +1125,12 @@ class Theme {
         id: config.id + '-switcher' + '-' + randomId,
         label: config.id + '-switcher' + '-' + randomId,
         titleHidden: true,
-        readOnly: config.readOnly
+        readOnly: config.readOnly,
+        noSpacing: true
       })
     }
 
-    if (config.switcher === 'radios' || config.switcher === 'radios-inline') {
+    if (switcherType === 'radios' || switcherType === 'radios-inline') {
       switcher = this.getSwitcherRadios({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
@@ -1080,7 +1139,8 @@ class Theme {
         label: config.id + '-switcher' + '-' + randomId,
         titleHidden: true,
         readOnly: config.readOnly,
-        inline: config.switcher === 'radios-inline'
+        inline: switcherType === 'radios-inline',
+        noSpacing: true
       })
     }
 

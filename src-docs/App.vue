@@ -243,6 +243,7 @@ import objectPropertyOrder from './json/editors/object-propertyOrder.json'
 import objectEnforceRequired from './json/editors/object-enforceRequired.json'
 import objectEnforceAdditionalProperties from './json/editors/object-enforceAdditionalProperties.json'
 import objectPropGroup from './json/editors/object-propGroup.json'
+import objectPropGroupOrder from './json/editors/object-propGroupOrder.json'
 import stringRadios from './json/editors/string-radios.json'
 import stringRadiosInline from './json/editors/string-radios-inline.json'
 import stringSelect from './json/editors/string-select.json'
@@ -349,6 +350,7 @@ import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
+import embedSwitcher from './json/features/embed-switcher.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -410,6 +412,7 @@ export default {
           'editors/object-enforceRequired': objectEnforceRequired,
           'editors/object-enforceAdditionalProperties': objectEnforceAdditionalProperties,
           'editors/object-propGroup': objectPropGroup,
+          'editors/object-propGroupOrder': objectPropGroupOrder,
           'editors/string-radios': stringRadios,
           'editors/string-radios-inline': stringRadiosInline,
           'editors/string-select': stringSelect,
@@ -441,6 +444,7 @@ export default {
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
           'features/nav-warning': navWarning,
+          'features/embed-switcher': embedSwitcher,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,
@@ -720,7 +724,126 @@ export default {
         console.warn(refParser.cycles)
       }
 
-      const options = {
+      // this.data = {
+      //   "title": "John Frusciante",
+      //   "type": "object",
+      //   "description": "A schema describing John Frusciante's data, including personal details, guitars, and pedals.",
+      //   "properties": {
+      //     "name": {
+      //       "type": "string",
+      //       "title": "Full Name",
+      //       "description": "Full name of the musician",
+      //       "default": "John Frusciante"
+      //     },
+      //     "birthdate": {
+      //       "type": "string",
+      //       "format": "date",
+      //       "title": "Birth Date",
+      //       "description": "Birth date in YYYY-MM-DD format",
+      //       "default": "1970-03-05"
+      //     },
+      //     "genres": {
+      //       "x-format": "table",
+      //       "type": "array",
+      //       "title": "Musical Genres",
+      //       "description": "Genres associated with the musician",
+      //       "items": {
+      //         "type": "string"
+      //       },
+      //       "default": ["Alternative Rock", "Psychedelic Rock", "Experimental"]
+      //     },
+      //     "bands": {
+      //       "x-format": "table",
+      //       "type": "array",
+      //       "title": "Bands",
+      //       "description": "Bands the musician has been a part of",
+      //       "items": {
+      //         "type": "string"
+      //       },
+      //       "default": ["Red Hot Chili Peppers", "Solo Artist"]
+      //     },
+      //     "guitars": {
+      //       "x-format": "nav-horizontal",
+      //       "type": "array",
+      //       "title": "Guitars",
+      //       "description": "List of guitars used by the musician",
+      //       "items": {
+      //         "type": "object",
+      //         "title": "Guitar",
+      //         "description": "Details about a specific guitar",
+      //         "properties": {
+      //           "brand": {
+      //             "type": "string",
+      //             "title": "Brand",
+      //             "description": "Brand of the guitar"
+      //           },
+      //           "model": {
+      //             "type": "string",
+      //             "title": "Model",
+      //             "description": "Model name of the guitar"
+      //           },
+      //           "year": {
+      //             "type": "integer",
+      //             "title": "Year of Production",
+      //             "description": "Year of production"
+      //           },
+      //           "features": {
+      //             "x-format": "table",
+      //             "type": "array",
+      //             "title": "Features",
+      //             "description": "Notable features of the guitar",
+      //             "items": {
+      //               "type": "string"
+      //             }
+      //           }
+      //         },
+      //         "required": ["brand", "model"]
+      //       },
+      //       "default": [
+      //         {"brand": "Fender", "model": "Stratocaster", "year": 1962, "features": ["Rosewood fretboard", "Sunburst finish"]},
+      //         {"brand": "Gretsch", "model": "White Falcon", "year": 1955, "features": ["Hollow body", "Gold hardware"]}
+      //       ]
+      //     },
+      //     "pedals": {
+      //       "x-format": "table",
+      //       "type": "array",
+      //       "title": "Effect Pedals",
+      //       "description": "List of effect pedals used by the musician",
+      //       "items": {
+      //         "type": "object",
+      //         "title": "Effect Pedal",
+      //         "description": "Details about a specific effect pedal",
+      //         "properties": {
+      //           "brand": {
+      //             "type": "string",
+      //             "title": "Brand",
+      //             "description": "Brand of the pedal"
+      //           },
+      //           "model": {
+      //             "type": "string",
+      //             "title": "Model",
+      //             "description": "Model name of the pedal"
+      //           },
+      //           "effect_type": {
+      //             "type": "string",
+      //             "title": "Effect Type",
+      //             "description": "Type of effect the pedal produces"
+      //           }
+      //         },
+      //         "required": ["brand", "model"]
+      //       },
+      //       "default": [
+      //         {"brand": "Boss", "model": "DS-2", "effect_type": "Distortion"},
+      //         {"brand": "Boss", "model": "CE-1", "effect_type": "Chorus Ensemble"},
+      //         {"brand": "Ibanez", "model": "WH-10", "effect_type": "Wah"}
+      //       ]
+      //     }
+      //   },
+      //   "required": ["name", "birthdate", "genres", "bands", "guitars", "pedals"]
+      // }
+
+
+    const options = {
         container: document.querySelector('#jedison-container'),
         btnContents: this.btnContents,
         btnIcons: this.btnIcons,

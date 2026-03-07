@@ -186,7 +186,9 @@ class ThemeBootstrap5 extends Theme {
     const control = super.getRadiosControl(config)
     const { container, fieldset, radios, labels, labelTexts, radioControls, description, messages } = control
 
-    container.classList.add('mb-3')
+    if (!config.noSpacing) {
+      container.classList.add('mb-3')
+    }
 
     radioControls.forEach((radioControl, index) => {
       radioControl.classList.add('form-check')
@@ -268,7 +270,11 @@ class ThemeBootstrap5 extends Theme {
   getSelectControl (config) {
     const control = super.getSelectControl(config)
     const { container, input } = control
-    container.classList.add('mb-3')
+
+    if (!config.noSpacing) {
+      container.classList.add('mb-3')
+    }
+
     input.classList.add('form-select')
     return control
   }

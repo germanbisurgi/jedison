@@ -56,25 +56,27 @@ class EditorArrayTable extends EditorArray {
 
       const thTitle = this.theme.getTableHeader()
 
-      if (schemaItems.title) {
-        const fakeLabel = this.theme.getFakeLabel({
-          content: schemaItems.title
-        })
+      if (schemaItems) {
+        if (schemaItems.title) {
+          const fakeLabel = this.theme.getFakeLabel({
+            content: schemaItems.title
+          })
 
-        thTitle.appendChild(fakeLabel.label)
-      }
-
-      const schemaXInfo = getSchemaXOption(schemaItems, 'info')
-
-      if (isSet(schemaXInfo)) {
-        const infoContent = this.getInfo(schemaItems)
-        const info = this.theme.getInfo(infoContent)
-
-        if (schemaXInfo.variant === 'modal') {
-          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent)
+          thTitle.appendChild(fakeLabel.label)
         }
 
-        thTitle.appendChild(info.container)
+        const schemaXInfo = getSchemaXOption(schemaItems, 'info')
+
+        if (isSet(schemaXInfo)) {
+          const infoContent = this.getInfo(schemaItems)
+          const info = this.theme.getInfo(infoContent)
+
+          if (schemaXInfo.variant === 'modal') {
+            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent)
+          }
+
+          thTitle.appendChild(info.container)
+        }
       }
 
       table.thead.appendChild(thTitle)

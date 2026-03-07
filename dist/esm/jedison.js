@@ -220,6 +220,19 @@ function removeDuplicatesFromArray(arr) {
   }
   return uniqueObjects;
 }
+function resolveInstancePath(currentPath, sourcePath) {
+  if (sourcePath.startsWith("#")) return sourcePath;
+  const parts = currentPath.split("/");
+  parts.pop();
+  for (const part of sourcePath.split("/")) {
+    if (part === "..") {
+      if (parts.length > 1) parts.pop();
+    } else if (part !== "." && part !== "") {
+      parts.push(part);
+    }
+  }
+  return parts.join("/");
+}
 function generateRandomID(maxLength2) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let randomID = "";
@@ -510,14 +523,33 @@ function allOf(context) {
   let errors = [];
   const allOf2 = getSchemaAllOf(context.schema);
   if (isSet(allOf2)) {
-    allOf2.forEach((schema) => {
-      const subSchemaErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
-      subSchemaErrors.forEach((error) => {
-        error.path = context.path;
+    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
+    if (enableSubErrors) {
+      const schemaResults = [];
+      allOf2.forEach((schema, index2) => {
+        const subSchemaErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        if (subSchemaErrors.length > 0) {
+          schemaResults.push({ schemaIndex: index2, errors: subSchemaErrors });
+        }
       });
-      errors.push(...subSchemaErrors);
-    });
-    errors = removeDuplicatesFromArray(errors);
+      if (schemaResults.length > 0) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "allOf",
+          subErrors: schemaResults
+        });
+      }
+    } else {
+      allOf2.forEach((schema) => {
+        const subSchemaErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        subSchemaErrors.forEach((error) => {
+          error.path = context.path;
+        });
+        errors.push(...subSchemaErrors);
+      });
+      errors = removeDuplicatesFromArray(errors);
+    }
   }
   return errors;
 }
@@ -546,23 +578,46 @@ function anyOf(context) {
   const errors = [];
   const anyOf2 = getSchemaAnyOf(context.schema);
   if (isSet(anyOf2)) {
+    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
     let valid = false;
-    for (const schema of anyOf2) {
-      const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
-      if (anyOfErrors.length === 0) {
-        valid = true;
-        break;
-      }
-    }
-    if (!valid) {
-      errors.push({
-        type: "error",
-        path: context.path,
-        constraint: "anyOf",
-        messages: [
-          context.translator.translate("errorAnyOf")
-        ]
+    if (enableSubErrors) {
+      const schemaResults = [];
+      anyOf2.forEach((schema, index2) => {
+        const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        if (anyOfErrors.length === 0) {
+          valid = true;
+        }
+        schemaResults.push({ schemaIndex: index2, errors: anyOfErrors });
       });
+      if (!valid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "anyOf",
+          messages: [
+            context.translator.translate("errorAnyOf")
+          ],
+          subErrors: schemaResults.filter((r) => r.errors.length > 0)
+        });
+      }
+    } else {
+      for (const schema of anyOf2) {
+        const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        if (anyOfErrors.length === 0) {
+          valid = true;
+          break;
+        }
+      }
+      if (!valid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "anyOf",
+          messages: [
+            context.translator.translate("errorAnyOf")
+          ]
+        });
+      }
     }
   }
   return errors;
@@ -673,18 +728,23 @@ function items(context) {
         messages: [context.translator.translate("errorItems")]
       });
     } else if (isObject(items2)) {
+      const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
       context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
         const index2 = prefixItemsSchemasCount + i;
         const tmpErrors = context.validator.getErrors(itemValue, items2, index2, context.path + "/" + index2);
         if (tmpErrors.length > 0) {
-          errors.push({
+          const error = {
             type: "error",
             path: context.path,
             constraint: "items",
             messages: [
               compileTemplate(context.translator.translate("errorItems"), { index: index2 })
             ]
-          });
+          };
+          if (enableSubErrors) {
+            error.subErrors = tmpErrors;
+          }
+          errors.push(error);
         }
       });
     }
@@ -862,23 +922,64 @@ function oneOf(context) {
   const oneOf2 = getSchemaOneOf(context.schema);
   if (isSet(oneOf2)) {
     let counter = 0;
-    oneOf2.forEach((schema) => {
-      const oneOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
-      if (oneOfErrors.length === 0) {
-        counter++;
-      }
-    });
-    if (counter !== 1) {
-      errors.push({
-        type: "error",
-        path: context.path,
-        constraint: "oneOf",
-        messages: [
-          compileTemplate(context.translator.translate("errorOneOf"), {
-            counter
-          })
-        ]
+    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
+    if (enableSubErrors) {
+      const schemaResults = [];
+      oneOf2.forEach((schema, index2) => {
+        const oneOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        if (oneOfErrors.length === 0) {
+          counter++;
+          schemaResults.push({ schemaIndex: index2, matched: true, errors: [] });
+        } else {
+          schemaResults.push({ schemaIndex: index2, matched: false, errors: oneOfErrors });
+        }
       });
+      if (counter !== 1) {
+        const error = {
+          type: "error",
+          path: context.path,
+          constraint: "oneOf",
+          messages: [
+            compileTemplate(context.translator.translate("errorOneOf"), {
+              counter
+            })
+          ]
+        };
+        if (counter === 0) {
+          error.subErrors = schemaResults.filter((r) => !r.matched).map((r) => ({
+            schemaIndex: r.schemaIndex,
+            errors: r.errors
+          }));
+        } else {
+          error.matchingSchemas = schemaResults.filter((r) => r.matched).map((r) => r.schemaIndex);
+        }
+        errors.push(error);
+      }
+    } else {
+      const matchingSchemas = [];
+      oneOf2.forEach((schema, index2) => {
+        const oneOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path);
+        if (oneOfErrors.length === 0) {
+          counter++;
+          matchingSchemas.push(index2);
+        }
+      });
+      if (counter !== 1) {
+        const error = {
+          type: "error",
+          path: context.path,
+          constraint: "oneOf",
+          messages: [
+            compileTemplate(context.translator.translate("errorOneOf"), {
+              counter
+            })
+          ]
+        };
+        if (counter > 0) {
+          error.matchingSchemas = matchingSchemas;
+        }
+        errors.push(error);
+      }
     }
   }
   return errors;
@@ -931,6 +1032,8 @@ function patternProperties(context) {
 function properties(context) {
   const schemaProperties = getSchemaProperties(context.schema);
   const invalidProperties = [];
+  const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
+  const propertySubErrors = [];
   if (isObject(context.value) && isSet(schemaProperties)) {
     Object.keys(schemaProperties).forEach((propertyName) => {
       if (hasOwn(context.value, propertyName)) {
@@ -943,19 +1046,26 @@ function properties(context) {
         );
         if (propertyErrors.length > 0) {
           invalidProperties.push(propertyName);
+          if (enableSubErrors) {
+            propertySubErrors.push({ property: propertyName, errors: propertyErrors });
+          }
         }
       }
     });
   }
   if (invalidProperties.length > 0) {
-    return [{
+    const error = {
       type: "error",
       path: context.path,
       constraint: "properties",
       messages: [
         compileTemplate(context.translator.translate("errorProperties"), { properties: invalidProperties.join(", ") })
       ]
-    }];
+    };
+    if (enableSubErrors) {
+      error.subErrors = propertySubErrors;
+    }
+    return [error];
   }
   return [];
 }
@@ -1293,12 +1403,13 @@ function prefixItems(context) {
   const errors = [];
   const prefixItems2 = getSchemaPrefixItems(context.schema);
   if (isArray(context.value) && isSet(prefixItems2)) {
+    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
     prefixItems2.forEach((itemSchema, index2) => {
       const itemValue = context.value[index2];
       if (isSet(itemValue)) {
         const tmpErrors = context.validator.getErrors(itemValue, itemSchema, index2, context.path + "/" + index2);
         if (tmpErrors.length > 0) {
-          errors.push({
+          const error = {
             type: "error",
             path: context.path,
             constraint: "prefixItems",
@@ -1307,7 +1418,11 @@ function prefixItems(context) {
                 index: index2
               })
             ]
-          });
+          };
+          if (enableSubErrors) {
+            error.subErrors = tmpErrors;
+          }
+          errors.push(error);
         }
       }
     });
@@ -1538,6 +1653,7 @@ class Validator {
     this.constraints = config.constraints ?? {};
     this.assertFormat = config.assertFormat ? config.assertFormat : false;
     this.translator = config.translator ? config.translator : false;
+    this.subErrors = config.subErrors ?? false;
     this.draft = draft202012;
     this.jsonSchemaDrafts = {
       "http://json-schema.org/draft-04/schema#": draft04,
@@ -2650,6 +2766,21 @@ class InstanceMultiple extends Instance {
    * Returns the index of the instance that has less validation errors
    */
   getFittestIndex(value) {
+    const discriminator = getSchemaXOption(this.schema, "discriminator");
+    if (isSet(discriminator) && isObject(value)) {
+      const propName = isString(discriminator) ? discriminator : discriminator.propertyName;
+      const discriminatorValue = value[propName];
+      if (isSet(discriminatorValue)) {
+        for (let index2 = 0; index2 < this.schemas.length; index2++) {
+          const schema = this.schemas[index2];
+          const propSchema = schema.properties && schema.properties[propName];
+          if (propSchema) {
+            const propErrors = this.jedison.validator.getErrors(discriminatorValue, propSchema, propName, this.path);
+            if (propErrors.length === 0) return index2;
+          }
+        }
+      }
+    }
     let fittestIndex;
     let championErrors;
     for (let index2 = 0; index2 < this.instances.length; index2++) {
@@ -3242,17 +3373,85 @@ class EditorStringRadios extends EditorString {
   static resolves(schema) {
     return getSchemaType(schema) === "string" && (getSchemaXOption(schema, "format") === "radios" || getSchemaXOption(schema, "format") === "radios-inline");
   }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return getSchemaEnum(this.instance.schema) || [];
+  }
   build() {
+    const values = this.getEnumSourceValues();
     this.control = this.theme.getRadiosControl({
       title: this.getTitle(),
       description: this.getDescription(),
-      values: getSchemaEnum(this.instance.schema),
-      titles: getSchemaXOption(this.instance.schema, "enumTitles") || getSchemaEnum(this.instance.schema),
+      values,
+      titles: getSchemaXOption(this.instance.schema, "enumTitles") || values,
       id: this.getIdFromPath(this.instance.path),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       inline: getSchemaXOption(this.instance.schema, "format") === "radios-inline",
       info: this.getInfo()
     });
+  }
+  refreshOptions() {
+    const values = this.getEnumSourceValues();
+    const titles = getSchemaXOption(this.instance.schema, "enumTitles") || values;
+    const id = this.getIdFromPath(this.instance.path);
+    const messagesId = id + "-messages";
+    const descriptionId = id + "-description";
+    const describedBy = messagesId + " " + descriptionId;
+    this.control.radioControls.forEach((rc) => {
+      if (rc.parentNode) rc.parentNode.removeChild(rc);
+    });
+    this.control.radios = [];
+    this.control.labels = [];
+    this.control.radioControls = [];
+    this.control.labelTexts = [];
+    values.forEach((value, index2) => {
+      const radioControl = document.createElement("div");
+      const radio = document.createElement("input");
+      const label = document.createElement("label");
+      const labelText = document.createElement("span");
+      radio.setAttribute("type", "radio");
+      radio.setAttribute("id", id + "-" + index2);
+      radio.setAttribute("name", id);
+      radio.setAttribute("value", value);
+      radio.setAttribute("aria-describedby", describedBy);
+      label.setAttribute("for", id + "-" + index2);
+      label.classList.add("jedi-title");
+      label.classList.add("jedi-label");
+      labelText.textContent = titles && titles[index2] !== void 0 ? titles[index2] : value;
+      radioControl.appendChild(radio);
+      radioControl.appendChild(label);
+      label.appendChild(labelText);
+      this.control.radios.push(radio);
+      this.control.labels.push(label);
+      this.control.labelTexts.push(labelText);
+      this.control.radioControls.push(radioControl);
+      this.control.fieldset.insertBefore(radioControl, this.control.description);
+    });
+    this.addEventListeners();
+    this.refreshUI();
   }
   adaptForTable() {
     this.theme.adaptForTableRadiosControl(this.control);
@@ -3282,19 +3481,60 @@ class EditorStringRadios extends EditorString {
 }
 class EditorStringSelect extends EditorString {
   static resolves(schema) {
-    return getSchemaType(schema) === "string" && isSet(getSchemaEnum(schema));
+    return getSchemaType(schema) === "string" && (isSet(getSchemaEnum(schema)) || isSet(getSchemaXOption(schema, "enumSource")));
+  }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return getSchemaEnum(this.instance.schema) || [];
   }
   build() {
+    const values = this.getEnumSourceValues();
     this.control = this.theme.getSelectControl({
       title: this.getTitle(),
       description: this.getDescription(),
-      values: getSchemaEnum(this.instance.schema),
-      titles: getSchemaXOption(this.instance.schema, "enumTitles") || getSchemaEnum(this.instance.schema),
+      values,
+      titles: getSchemaXOption(this.instance.schema, "enumTitles") || values,
       id: this.getIdFromPath(this.instance.path),
       titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       info: this.getInfo()
     });
+  }
+  refreshOptions() {
+    const values = this.getEnumSourceValues();
+    const titles = getSchemaXOption(this.instance.schema, "enumTitles") || values;
+    const select = this.control.input;
+    select.innerHTML = "";
+    values.forEach((value, i) => {
+      const option = document.createElement("option");
+      option.setAttribute("value", value);
+      option.textContent = titles && titles[i] !== void 0 ? titles[i] : value;
+      select.appendChild(option);
+    });
+    this.refreshUI();
   }
   adaptForTable() {
     this.theme.adaptForTableSelectControl(this.control);
@@ -3551,19 +3791,60 @@ class EditorNumberSelect extends EditorNumber {
   static resolves(schema) {
     const schemaType = getSchemaType(schema);
     const typeIsNumeric = schemaType === "number" || schemaType === "integer";
-    return typeIsNumeric && isSet(getSchemaEnum(schema));
+    return typeIsNumeric && (isSet(getSchemaEnum(schema)) || isSet(getSchemaXOption(schema, "enumSource")));
+  }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return getSchemaEnum(this.instance.schema) || [];
   }
   build() {
+    const values = this.getEnumSourceValues();
     this.control = this.theme.getSelectControl({
       title: this.getTitle(),
       description: this.getDescription(),
-      values: getSchemaEnum(this.instance.schema),
-      titles: getSchemaXOption(this.instance.schema, "enumTitles") || getSchemaEnum(this.instance.schema),
+      values,
+      titles: getSchemaXOption(this.instance.schema, "enumTitles") || values,
       id: this.getIdFromPath(this.instance.path),
       titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       info: this.getInfo()
     });
+  }
+  refreshOptions() {
+    const values = this.getEnumSourceValues();
+    const titles = getSchemaXOption(this.instance.schema, "enumTitles") || values;
+    const select = this.control.input;
+    select.innerHTML = "";
+    values.forEach((value, i) => {
+      const option = document.createElement("option");
+      option.setAttribute("value", value);
+      option.textContent = titles && titles[i] !== void 0 ? titles[i] : value;
+      select.appendChild(option);
+    });
+    this.refreshUI();
   }
   adaptForTable() {
     this.theme.adaptForTableSelectControl(this.control);
@@ -3687,6 +3968,10 @@ class EditorObject extends Editor {
     if (isSet(additionalProperties2) && additionalProperties2 === false) {
       addProperty = false;
     }
+    const objectAdd = getSchemaXOption(this.instance.schema, "objectAdd") ?? this.instance.jedison.options.objectAdd;
+    if (isSet(objectAdd) && objectAdd === false) {
+      addProperty = false;
+    }
     let enablePropertiesToggle = false;
     if (isSet(this.instance.jedison.options.enablePropertiesToggle)) {
       enablePropertiesToggle = this.instance.jedison.options.enablePropertiesToggle;
@@ -3713,30 +3998,30 @@ class EditorObject extends Editor {
     });
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
+  announcePropertyAdded(propertyName, child) {
+    const schemaTitle = getSchemaTitle(child.schema);
+    const label = isSet(schemaTitle) ? schemaTitle : propertyName;
+    const ariaLiveMessage = this.theme.getAriaLiveMessage();
+    ariaLiveMessage.textContent = label + " " + this.instance.jedison.translator.translate("objectPropertyAdded");
+    this.control.ariaLive.appendChild(ariaLiveMessage);
+  }
+  addProperty(input, postAction) {
+    const propertyName = input.value.split(" ").join("");
+    if (propertyName.length === 0) return;
+    if (isSet(this.instance.value[propertyName])) return;
+    const schema = this.instance.getPropertySchema(propertyName);
+    const child = this.instance.createChild(schema, propertyName);
+    child.activate();
+    this.instance.setValue(this.instance.value, true, "user");
+    input.value = "";
+    this.announcePropertyAdded(propertyName, child);
+    postAction();
+  }
   addEventListeners() {
-    this.control.addPropertyBtn.addEventListener("click", () => {
-      const propertyName = this.control.addPropertyControl.input.value.split(" ").join("");
-      const propertyNameEmpty = propertyName.length === 0;
-      if (propertyNameEmpty) {
-        return;
-      }
-      const propertyExist = isSet(this.instance.value[propertyName]);
-      if (propertyExist) {
-        return;
-      }
-      const schema = this.instance.getPropertySchema(propertyName);
-      const child = this.instance.createChild(schema, propertyName);
-      child.activate();
-      this.instance.setValue(this.instance.value, true, "user");
-      this.control.addPropertyControl.input.value = "";
-      const ariaLive = this.control.ariaLive;
-      const schemaTitle = getSchemaTitle(child.schema);
-      const label = isSet(schemaTitle) ? schemaTitle : propertyName;
-      const ariaLiveMessage = this.theme.getAriaLiveMessage();
-      ariaLiveMessage.textContent = label + " " + this.instance.jedison.translator.translate("objectPropertyAdded");
-      ariaLive.appendChild(ariaLiveMessage);
-      this.control.propertiesContainer.close();
-      this.control.propertiesContainer.showModal();
+    this.control.quickAddPropertyBtn.addEventListener("click", () => {
+      this.addProperty(this.control.quickAddPropertyControl.input, () => {
+        this.control.quickAddPropertyContainer.close();
+      });
     });
     this.control.jsonData.saveBtn.addEventListener("click", () => {
       try {
@@ -3766,9 +4051,7 @@ class EditorObject extends Editor {
       const declaredProperties = Object.keys(this.instance.properties);
       const instanceProperties = this.instance.children.map((child) => child.getKey());
       const properties2 = [.../* @__PURE__ */ new Set([...declaredProperties, ...instanceProperties])];
-      while (this.control.propertiesActivators.firstChild) {
-        this.control.propertiesActivators.removeChild(this.control.propertiesActivators.firstChild);
-      }
+      this.control.propertiesActivators.replaceChildren();
       const {
         container: defaultGroupContainer,
         group: defaultGroup
@@ -3825,12 +4108,28 @@ class EditorObject extends Editor {
         checkbox.disabled = this.disabled || isRequired;
         checkbox.checked = hasOwn(currentValue, property);
       });
+      const propGroupOrder = getSchemaXOption(this.instance.schema, "propGroupOrder");
+      if (isSet(propGroupOrder) && Array.isArray(propGroupOrder)) {
+        const orderedContainers = [defaultGroupContainer];
+        propGroupOrder.forEach((groupName) => {
+          if (isSet(propertiesGroups[groupName])) {
+            orderedContainers.push(propertiesGroups[groupName].container);
+          }
+        });
+        Object.keys(propertiesGroups).forEach((groupName) => {
+          if (!propGroupOrder.includes(groupName)) {
+            orderedContainers.push(propertiesGroups[groupName].container);
+          }
+        });
+        this.control.propertiesActivators.replaceChildren();
+        orderedContainers.forEach((container) => {
+          this.control.propertiesActivators.appendChild(container);
+        });
+      }
     }
   }
   refreshEditors() {
-    while (this.control.childrenSlot.firstChild) {
-      this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild);
-    }
+    this.control.childrenSlot.replaceChildren();
     this.instance.children.forEach((child) => {
       const optIn = this.theme.getCheckboxControl({
         id: child.path + "-opt-in",
@@ -4317,20 +4616,22 @@ class EditorArrayTable extends EditorArray {
     if (this.instance.children.length) {
       const schemaItems = getSchemaItems(this.instance.schema);
       const thTitle = this.theme.getTableHeader();
-      if (schemaItems.title) {
-        const fakeLabel = this.theme.getFakeLabel({
-          content: schemaItems.title
-        });
-        thTitle.appendChild(fakeLabel.label);
-      }
-      const schemaXInfo = getSchemaXOption(schemaItems, "info");
-      if (isSet(schemaXInfo)) {
-        const infoContent = this.getInfo(schemaItems);
-        const info = this.theme.getInfo(infoContent);
-        if (schemaXInfo.variant === "modal") {
-          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent);
+      if (schemaItems) {
+        if (schemaItems.title) {
+          const fakeLabel = this.theme.getFakeLabel({
+            content: schemaItems.title
+          });
+          thTitle.appendChild(fakeLabel.label);
         }
-        thTitle.appendChild(info.container);
+        const schemaXInfo = getSchemaXOption(schemaItems, "info");
+        if (isSet(schemaXInfo)) {
+          const infoContent = this.getInfo(schemaItems);
+          const info = this.theme.getInfo(infoContent);
+          if (schemaXInfo.variant === "modal") {
+            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent);
+          }
+          thTitle.appendChild(info.container);
+        }
       }
       table.thead.appendChild(thTitle);
     }
@@ -4550,6 +4851,45 @@ class EditorArrayChoices extends Editor {
     const hasValidItemType = isSet(schemaItems) && isSet(schemaItemsType) && (validTypes.includes(schemaItemsType) || isArray(schemaItemsType) && schemaItemsType.some((type2) => validTypes.includes(type2)));
     return hasChoicesFormat && choicesInstalled && isArrayType && isUniqueItems && hasTypes && hasValidItemType;
   }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return this.instance.schema.items && this.instance.schema.items.enum || [];
+  }
+  refreshOptions() {
+    if (!this.choicesInstance) return;
+    const values = this.getEnumSourceValues();
+    const currentValue = this.instance.getValue();
+    const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
+    const choices = values.map((item, index2) => ({
+      value: item,
+      label: itemEnumTitles[index2] || item,
+      selected: isArray(currentValue) && currentValue.includes(item)
+    }));
+    this.choicesInstance.setChoices(choices, "value", "label", true);
+  }
   build() {
     this.control = this.theme.getSelectControl({
       title: this.getTitle(),
@@ -4564,8 +4904,8 @@ class EditorArrayChoices extends Editor {
     this.control.input.setAttribute("multiple", "");
     try {
       const value = this.instance.getValue();
-      const itemEnum = this.instance.schema.items.enum ?? [];
-      const itemEnumTitles = getSchemaXOption(this.instance.schema.items, "enumTitles") ?? this.instance.getValue();
+      const itemEnum = this.getEnumSourceValues();
+      const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
       const choicesOptions = getSchemaXOption(this.instance.schema, "choicesOptions") ?? {};
       if (this.choicesInstance) {
         this.choicesInstance.destroy();
@@ -4720,6 +5060,7 @@ class EditorMultiple extends Editor {
   }
   build() {
     this.switcherInput = getSchemaXOption(this.instance.schema, "switcherInput") ?? this.instance.jedison.options.switcherInput;
+    this.embedSwitcher = getSchemaXOption(this.instance.schema, "embedSwitcher") ?? this.instance.jedison.options.embedSwitcher;
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       id: this.getIdFromPath(this.instance.path),
@@ -4728,6 +5069,9 @@ class EditorMultiple extends Editor {
       switcher: this.switcherInput,
       readOnly: this.instance.isReadOnly()
     });
+    if (this.embedSwitcher) {
+      this.control.header.style.display = "none";
+    }
   }
   adaptForTable(td) {
     this.theme.adaptForTableMultipleControl(this.control, td);
@@ -4752,6 +5096,17 @@ class EditorMultiple extends Editor {
     this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
+    if (this.embedSwitcher) {
+      const slot = this.instance.activeInstance.ui.control.switcherSlot;
+      if (slot) {
+        slot.innerHTML = "";
+        slot.appendChild(this.control.switcher.container);
+        this.control.header.style.display = "none";
+      } else {
+        this.control.header.style.display = "";
+        this.control.header.appendChild(this.control.switcher.container);
+      }
+    }
     if (this.switcherInput === "select") {
       this.control.switcher.input.value = this.instance.index;
     }
@@ -5121,6 +5476,38 @@ class EditorNumberRaty extends EditorNumber {
     this.raty.score(this.instance.getValue());
   }
 }
+class EditorAnyJson extends Editor {
+  static resolves(schema) {
+    return getSchemaXOption(schema, "format") === "json";
+  }
+  build() {
+    this.control = this.theme.getTextareaControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    this.jsonErrorEl = document.createElement("div");
+    this.jsonErrorEl.style.color = "red";
+    this.control.container.appendChild(this.jsonErrorEl);
+  }
+  addEventListeners() {
+    this.control.input.addEventListener("change", () => {
+      try {
+        const parsed = JSON.parse(this.control.input.value);
+        this.jsonErrorEl.textContent = "";
+        this.instance.setValue(parsed, true, "user");
+      } catch (e) {
+        this.jsonErrorEl.textContent = e.message;
+      }
+    });
+  }
+  refreshUI() {
+    this.control.input.value = JSON.stringify(this.instance.getValue(), null, 2);
+  }
+}
 class EditorArrayCheckboxes extends Editor {
   static resolves(schema) {
     const schemaType = getSchemaType(schema);
@@ -5130,21 +5517,92 @@ class EditorArrayCheckboxes extends Editor {
     const isUniqueItems = getSchemaUniqueItems(schema) === true;
     const hasEnum = isSet(schemaItems) && isSet(getSchemaEnum(schema.items));
     const hasTypes = isSet(schemaItems) && isSet(schemaItemsType);
+    const hasEnumSource = isSet(getSchemaXOption(schema, "enumSource"));
     const validTypes = ["string", "number", "integer"];
     const hasValidItemType = isSet(schemaItems) && isSet(schemaItemsType) && (validTypes.includes(schemaItemsType) || isArray(schemaItemsType) && schemaItemsType.some((type2) => validTypes.includes(type2)));
-    return isArrayType && isUniqueItems && hasEnum && hasTypes && hasValidItemType;
+    return isArrayType && isUniqueItems && (hasEnumSource || hasEnum && hasTypes && hasValidItemType);
+  }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return getSchemaEnum(this.instance.schema.items) || [];
   }
   build() {
+    const values = this.getEnumSourceValues();
+    const schemaItems = this.instance.schema.items || {};
+    const titles = getSchemaXOption(schemaItems, "enumTitles") || values;
     this.control = this.theme.getCheckboxesControl({
       title: this.getTitle(),
       description: this.getDescription(),
-      values: getSchemaEnum(this.instance.schema.items),
-      titles: getSchemaXOption(this.instance.schema.items, "enumTitles") || getSchemaEnum(this.instance.schema.items),
+      values,
+      titles,
       id: this.getIdFromPath(this.instance.path),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       inline: getSchemaXOption(this.instance.schema, "format") === "checkboxes-inline",
       info: this.getInfo()
     });
+  }
+  refreshOptions() {
+    const values = this.getEnumSourceValues();
+    const schemaItems = this.instance.schema.items || {};
+    const titles = getSchemaXOption(schemaItems, "enumTitles") || values;
+    const id = this.getIdFromPath(this.instance.path);
+    const messagesId = id + "-messages";
+    const descriptionId = id + "-description";
+    const describedBy = messagesId + " " + descriptionId;
+    this.control.checkboxControls.forEach((cc) => {
+      if (cc.parentNode) cc.parentNode.removeChild(cc);
+    });
+    this.control.checkboxes = [];
+    this.control.labels = [];
+    this.control.checkboxControls = [];
+    this.control.labelTexts = [];
+    values.forEach((value, index2) => {
+      const checkboxId = id + "-" + index2;
+      const checkboxControl = document.createElement("div");
+      const checkbox = document.createElement("input");
+      const label = document.createElement("label");
+      const labelText = document.createElement("span");
+      checkbox.setAttribute("type", "checkbox");
+      checkbox.setAttribute("id", checkboxId);
+      checkbox.setAttribute("name", id);
+      checkbox.setAttribute("value", value);
+      checkbox.setAttribute("aria-describedby", describedBy);
+      label.setAttribute("for", checkboxId);
+      labelText.textContent = titles && titles[index2] !== void 0 ? titles[index2] : value;
+      checkboxControl.appendChild(checkbox);
+      checkboxControl.appendChild(label);
+      label.appendChild(labelText);
+      this.control.checkboxes.push(checkbox);
+      this.control.labels.push(label);
+      this.control.labelTexts.push(labelText);
+      this.control.checkboxControls.push(checkboxControl);
+      this.control.fieldset.insertBefore(checkboxControl, this.control.description);
+    });
+    this.addEventListeners();
+    this.refreshUI();
   }
   adaptForTable(td) {
     this.theme.adaptForTableCheckboxesControl(this.control, td);
@@ -5361,6 +5819,7 @@ class UiResolver {
       EditorNumberInputNullable,
       EditorMultiple,
       EditorIfThenElse,
+      EditorAnyJson,
       EditorRadios,
       EditorBooleanCheckbox,
       EditorBooleanSelect,
@@ -5701,12 +6160,14 @@ class Jedison extends EventEmitter {
       arrayDelete: true,
       arrayMove: true,
       arrayAdd: true,
+      objectAdd: true,
       arrayButtonsPosition: "left",
       startCollapsed: false,
       deactivateNonRequired: false,
       schema: {},
       showErrors: "change",
       switcherInput: "select",
+      embedSwitcher: false,
       data: void 0,
       assertFormat: false,
       customEditors: [],
@@ -5731,6 +6192,7 @@ class Jedison extends EventEmitter {
       enforceMinItems: true,
       enforceMaxItems: true,
       enforceEnum: true,
+      subErrors: false,
       debug: false
     }, options);
     this.rootName = "#";
@@ -5798,7 +6260,8 @@ class Jedison extends EventEmitter {
       refParser: this.refParser,
       assertFormat: this.options.assertFormat,
       translator: this.translator,
-      constraints: this.options.constraints
+      constraints: this.options.constraints,
+      subErrors: this.options.subErrors
     });
     this.root = this.createInstance({
       jedison: this,
@@ -6350,6 +6813,8 @@ class Theme {
     const dummyInputId = "legend-dummy-input-" + config.id;
     left.classList.add("jedi-editor-legend-left");
     right.classList.add("jedi-editor-legend-right");
+    right.style.display = "flex";
+    right.style.alignItems = "center";
     legend.classList.add("jedi-editor-legend");
     legend.style.fontSize = "inherit";
     legend.setAttribute("aria-labelledby", legendLabelId);
@@ -6565,6 +7030,18 @@ class Theme {
     });
     return toggle;
   }
+  getQuickAddPropertyToggle(config) {
+    const toggle = this.getButton(config);
+    toggle.classList.add("jedi-quick-add-property-toggle");
+    toggle.addEventListener("click", () => {
+      if (config.propertiesContainer.open) {
+        config.propertiesContainer.close();
+      } else {
+        config.propertiesContainer.showModal();
+      }
+    });
+    return toggle;
+  }
   /**
    * Container that will collapse and expand to show and hide it contents
    */
@@ -6619,6 +7096,17 @@ class Theme {
   getPropertiesSlot(config) {
     const html = document.createElement("dialog");
     html.classList.add("jedi-properties-slot");
+    html.setAttribute("id", config.id);
+    window.addEventListener("click", (event) => {
+      if (event.target === html) {
+        html.close();
+      }
+    });
+    return html;
+  }
+  getQuickAddPropertySlot(config) {
+    const html = document.createElement("dialog");
+    html.classList.add("jedi-quick-add-property-slot");
     html.setAttribute("id", config.id);
     window.addEventListener("click", (event) => {
       if (event.target === html) {
@@ -6979,17 +7467,25 @@ class Theme {
       collapse,
       startCollapsed: config.startCollapsed
     });
-    const addPropertyControl = this.getInputControl({
+    const quickAddPropertyContainer = this.getQuickAddPropertySlot({
+      id: "quick-add-property-slot-" + config.id
+    });
+    const quickAddPropertyControl = this.getInputControl({
       type: "text",
-      id: "jedi-add-property-input-" + config.id,
+      id: "jedi-quick-add-property-input-" + config.id,
       title: config.addPropertyContent
     });
-    const addPropertyBtn = this.getAddPropertyButton({
+    const quickAddPropertyBtn = this.getAddPropertyButton({
       content: config.addPropertyContent,
       icon: "add"
     });
+    const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
+      content: config.addPropertyContent,
+      icon: "add",
+      propertiesContainer: quickAddPropertyContainer
+    });
     const fieldset = this.getFieldset();
-    const { legend, infoContainer, legendText } = this.getLegend({
+    const { legend, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
@@ -6997,9 +7493,13 @@ class Theme {
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
-    addPropertyBtn.classList.add("jedi-object-add");
     container.appendChild(fieldset);
     container.appendChild(propertiesContainer);
+    container.appendChild(quickAddPropertyContainer);
+    if (config.addProperty) {
+      quickAddPropertyContainer.appendChild(quickAddPropertyControl.container);
+      quickAddPropertyContainer.appendChild(quickAddPropertyBtn);
+    }
     if (config.editJsonData) {
       container.appendChild(jsonData.dialog);
     }
@@ -7013,17 +7513,18 @@ class Theme {
       body.appendChild(description);
     }
     body.appendChild(messages);
+    const switcherSlot = document.createElement("div");
+    switcherSlot.classList.add("jedi-switcher-slot");
     if (config.readOnly === false) {
-      legend.appendChild(actions);
+      right.appendChild(switcherSlot);
+      right.appendChild(actions);
     }
     body.appendChild(childrenSlot);
-    if (config.addProperty) {
-      propertiesContainer.appendChild(addPropertyControl.container);
-      propertiesContainer.appendChild(addPropertyBtn);
-      propertiesContainer.appendChild(document.createElement("hr"));
-    }
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
+    }
+    if (config.addProperty) {
+      actions.appendChild(quickAddPropertyToggle);
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
@@ -7045,13 +7546,17 @@ class Theme {
       propertiesToggle,
       jsonData,
       propertiesContainer,
-      addPropertyControl,
-      addPropertyBtn,
+      quickAddPropertyContainer,
+      quickAddPropertyControl,
+      quickAddPropertyBtn,
+      quickAddPropertyToggle,
       ariaLive,
       propertiesActivators,
       legend,
       legendText,
-      infoContainer
+      infoContainer,
+      right,
+      switcherSlot
     };
   }
   /**
@@ -7072,7 +7577,7 @@ class Theme {
     });
     const fieldset = this.getFieldset();
     const info = this.getInfo(config.info);
-    const { legend, legendText, infoContainer } = this.getLegend({
+    const { legend, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden
@@ -7112,7 +7617,12 @@ class Theme {
       body.appendChild(description);
     }
     body.appendChild(messages);
-    legend.appendChild(actions);
+    const switcherSlot = document.createElement("div");
+    switcherSlot.classList.add("jedi-switcher-slot");
+    if (config.readOnly === false) {
+      right.appendChild(switcherSlot);
+      right.appendChild(actions);
+    }
     actions.appendChild(btnGroup);
     if (config.editJsonData) {
       btnGroup.appendChild(jsonData.toggle);
@@ -7136,7 +7646,8 @@ class Theme {
       addBtn,
       jsonData,
       legend,
-      legendText
+      legendText,
+      switcherSlot
     };
   }
   getArrayItem(config = {}) {
@@ -7172,8 +7683,10 @@ class Theme {
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
     const randomId = generateRandomID(5);
+    const knownSwitchers = ["select", "radios", "radios-inline"];
+    const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : "select";
     let switcher;
-    if (config.switcher === "select") {
+    if (switcherType === "select") {
       switcher = this.getSwitcherSelect({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
@@ -7181,10 +7694,11 @@ class Theme {
         id: config.id + "-switcher-" + randomId,
         label: config.id + "-switcher-" + randomId,
         titleHidden: true,
-        readOnly: config.readOnly
+        readOnly: config.readOnly,
+        noSpacing: true
       });
     }
-    if (config.switcher === "radios" || config.switcher === "radios-inline") {
+    if (switcherType === "radios" || switcherType === "radios-inline") {
       switcher = this.getSwitcherRadios({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
@@ -7193,7 +7707,8 @@ class Theme {
         label: config.id + "-switcher-" + randomId,
         titleHidden: true,
         readOnly: config.readOnly,
-        inline: config.switcher === "radios-inline"
+        inline: switcherType === "radios-inline",
+        noSpacing: true
       });
     }
     switcher.container.classList.add("jedi-switcher");
@@ -8042,7 +8557,9 @@ class ThemeBootstrap3 extends Theme {
   getSelectControl(config) {
     const control = super.getSelectControl(config);
     const { container, input, label } = control;
-    container.classList.add("form-group");
+    if (!config.noSpacing) {
+      container.classList.add("form-group");
+    }
     input.classList.add("form-control");
     if (config.titleHidden) {
       this.visuallyHidden(label);
@@ -8342,7 +8859,9 @@ class ThemeBootstrap4 extends Theme {
   getRadiosControl(config) {
     const control = super.getRadiosControl(config);
     const { container, fieldset, radios, labels, labelTexts, radioControls, description, messages } = control;
-    container.classList.add("form-group");
+    if (!config.noSpacing) {
+      container.classList.add("form-group");
+    }
     radioControls.forEach((radioControl, index2) => {
       radioControl.classList.add("form-check");
       radios[index2].classList.add("form-check-input");
@@ -8414,7 +8933,9 @@ class ThemeBootstrap4 extends Theme {
   getSelectControl(config) {
     const control = super.getSelectControl(config);
     const { container, input } = control;
-    container.classList.add("form-group");
+    if (!config.noSpacing) {
+      container.classList.add("form-group");
+    }
     input.classList.add("form-control");
     return control;
   }
@@ -8721,7 +9242,9 @@ class ThemeBootstrap5 extends Theme {
   getRadiosControl(config) {
     const control = super.getRadiosControl(config);
     const { container, fieldset, radios, labels, labelTexts, radioControls, description, messages } = control;
-    container.classList.add("mb-3");
+    if (!config.noSpacing) {
+      container.classList.add("mb-3");
+    }
     radioControls.forEach((radioControl, index2) => {
       radioControl.classList.add("form-check");
       radios[index2].classList.add("form-check-input");
@@ -8786,7 +9309,9 @@ class ThemeBootstrap5 extends Theme {
   getSelectControl(config) {
     const control = super.getSelectControl(config);
     const { container, input } = control;
-    container.classList.add("mb-3");
+    if (!config.noSpacing) {
+      container.classList.add("mb-3");
+    }
     input.classList.add("form-select");
     return control;
   }

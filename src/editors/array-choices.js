@@ -1,5 +1,5 @@
 import Editor from './editor.js'
-import { isArray, isSet } from '../helpers/utils.js'
+import { isArray, isObject, isSet, resolveInstancePath } from '../helpers/utils.js'
 import { getSchemaItems, getSchemaType, getSchemaUniqueItems, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -27,6 +27,49 @@ class EditorArrayChoices extends Editor {
     return hasChoicesFormat && choicesInstalled && isArrayType && isUniqueItems && hasTypes && hasValidItemType
   }
 
+  init () {
+    super.init()
+    this.setupEnumSource()
+  }
+
+  setupEnumSource () {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, 'enumSource')
+    if (!isSet(enumSourceRaw)) return
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw)
+    const src = this.instance.jedison.getInstance(enumSource)
+    if (src) this.enumSourceValues = src.getValue()
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return
+      const s = this.instance.jedison.getInstance(enumSource)
+      if (s) {
+        this.enumSourceValues = s.getValue()
+        this.refreshOptions()
+      }
+    })
+  }
+
+  getEnumSourceValues () {
+    if (this.enumSourceValues !== undefined) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues
+      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues)
+      return []
+    }
+    return (this.instance.schema.items && this.instance.schema.items.enum) || []
+  }
+
+  refreshOptions () {
+    if (!this.choicesInstance) return
+    const values = this.getEnumSourceValues()
+    const currentValue = this.instance.getValue()
+    const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, 'enumTitles') || []
+    const choices = values.map((item, index) => ({
+      value: item,
+      label: itemEnumTitles[index] || item,
+      selected: isArray(currentValue) && currentValue.includes(item)
+    }))
+    this.choicesInstance.setChoices(choices, 'value', 'label', true)
+  }
+
   build () {
     this.control = this.theme.getSelectControl({
       title: this.getTitle(),
@@ -43,8 +86,8 @@ class EditorArrayChoices extends Editor {
 
     try {
       const value = this.instance.getValue()
-      const itemEnum = this.instance.schema.items.enum ?? []
-      const itemEnumTitles = getSchemaXOption(this.instance.schema.items, 'enumTitles') ?? this.instance.getValue()
+      const itemEnum = this.getEnumSourceValues()
+      const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, 'enumTitles') || []
       const choicesOptions = getSchemaXOption(this.instance.schema, 'choicesOptions') ?? {}
 
       if (this.choicesInstance) {

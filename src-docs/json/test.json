@@ -1,84 +1,157 @@
 {
   "$ref": "#/$defs/schema",
-  "x-titleHidden": true,
   "$defs": {
-    "schema": {
-      "x-deactivateNonRequired": true,
-      "additionalProperties": {
-        "$ref": "#/$defs/schema",
-        "x-propGroup": "Object"
-      },
+    "schemaBase": {
       "type": "object",
+      "x-deactivateNonRequired": true,
+      "x-propGroupOrder": ["Common", "Composition", "Options"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "object",
-            "string",
-            "number",
-            "integer",
-            "boolean",
-            "array",
-            "null"
-          ],
-          "x-propGroup": "Type"
+          "readOnly": true,
+          "x-hidden": true,
+          "x-propGroup": "Common"
         },
-        "const": {
-          "type": [
-            "object",
-            "array",
-            "string",
-            "number",
-            "integer",
-            "boolean",
-            "null"
-          ],
-          "x-propGroup": "Type"
-        },
-        "enum": {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "x-propGroup": "Type"
-        },
-
         "title": {
           "type": "string",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Common"
         },
         "description": {
           "type": "string",
           "x-format": "textarea",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Common"
+        },
+        "enum": {
+          "type": "array",
+          "x-propGroup": "Common"
+        },
+        "oneOf": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Composition"
+        },
+        "anyOf": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Composition"
+        },
+        "x-format": {
+          "x-propGroup": "Options",
+          "type": "string"
+        },
+        "x-titleIconClass": {
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-titleTemplate": {
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-switcherTitle": {
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-grid": {
+          "x-propGroup": "Options",
+          "type": "object",
+          "properties": {
+            "columns": {
+              "type": "number"
+            }
+          }
+        },
+        "x-messages": {
+          "x-propGroup": "Options",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "x-enumTitles": {
+          "x-propGroup": "Options",
+          "x-format": "table",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x-titleHidden": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-enableCollapseToggle": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-startCollapsed": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-sortable": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-showErrors": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-deactivateNonRequired": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-assertFormat": {
+          "x-propGroup": "Options",
+          "type": "boolean"
+        }
+      }
+    },
+
+    "schema": {
+      "x-embedSwitcher": true,
+      "x-discriminator": "type",
+      "oneOf": [
+        { "$ref": "#/$defs/schemaString" },
+        { "$ref": "#/$defs/schemaNumber" },
+        { "$ref": "#/$defs/schemaInteger" },
+        { "$ref": "#/$defs/schemaBoolean" },
+        { "$ref": "#/$defs/schemaObject" },
+        { "$ref": "#/$defs/schemaArray" },
+        { "$ref": "#/$defs/schemaNoType" }
+      ]
+    },
+
+    "schemaString": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "String",
+      "x-propGroupOrder": ["Common", "String", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["string"], "x-propGroup": "Common" },
+        "default": {
+          "type": "string",
+          "x-propGroup": "Common"
+        },
+        "enum": {
+          "x-format": "table",
+          "x-propGroup": "Common",
+          "items": {
+            "type": "string"
+          }
         },
         "format": {
           "type": "string",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "String"
         },
-        "default": {
-          "title": "default",
-          "type": [
-            "null",
-            "boolean",
-            "object",
-            "array",
-            "number",
-            "string",
-            "integer"
-          ],
-          "x-propGroup": "Annotations"
-        },
-        "readOnly": {
-          "type": "boolean",
-          "x-propGroup": "Annotations"
-        },
-
-        "maxLength": {
+        "minLength": {
           "type": "integer",
           "minimum": 0,
           "x-propGroup": "String"
         },
-        "minLength": {
+        "maxLength": {
           "type": "integer",
           "minimum": 0,
           "x-propGroup": "String"
@@ -87,15 +160,20 @@
           "type": "string",
           "format": "regex",
           "x-propGroup": "String"
-        },
+        }
+      }
+    },
 
-        "exclusiveMaximum": {
+    "schemaNumber": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "Number",
+      "x-propGroupOrder": ["Common", "Numeric", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["number"], "x-propGroup": "Common" },
+        "default": {
           "type": "number",
-          "x-propGroup": "Numeric"
-        },
-        "exclusiveMinimum": {
-          "type": "number",
-          "x-propGroup": "Numeric"
+          "x-propGroup": "Common"
         },
         "maximum": {
           "type": "number",
@@ -110,50 +188,95 @@
           "exclusiveMinimum": 0,
           "x-propGroup": "Numeric"
         },
+        "exclusiveMaximum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        },
+        "exclusiveMinimum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        }
+      }
+    },
 
-        "contains": {
-          "$ref": "#/$defs/schema",
-          "x-propGroup": "Array"
-        },
-        "items": {
-          "$ref": "#/$defs/schema",
-          "x-propGroup": "Array"
-        },
-        "maxContains": {
+    "schemaInteger": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "Integer",
+      "x-propGroupOrder": ["Common", "Numeric", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["integer"], "x-propGroup": "Common" },
+        "default": {
           "type": "integer",
-          "minimum": 0,
-          "x-propGroup": "Array"
+          "x-propGroup": "Common"
         },
-        "maxItems": {
-          "type": "integer",
-          "minimum": 0,
-          "x-propGroup": "Array"
+        "maximum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
         },
-        "minContains": {
-          "type": "integer",
-          "minimum": 0,
-          "x-propGroup": "Array"
+        "minimum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
         },
-        "minItems": {
-          "type": "integer",
-          "minimum": 0,
-          "x-propGroup": "Array"
+        "multipleOf": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "x-propGroup": "Numeric"
         },
-        "prefixItems": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/schema"
-          },
-          "x-propGroup": "Array"
+        "exclusiveMaximum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
         },
-        "uniqueItems": {
+        "exclusiveMinimum": {
+          "type": "number",
+          "x-propGroup": "Numeric"
+        }
+      }
+    },
+
+    "schemaBoolean": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "Boolean",
+      "x-propGroupOrder": ["Common", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["boolean"], "x-propGroup": "Common" },
+        "default": {
           "type": "boolean",
-          "x-propGroup": "Array"
-        },
+          "x-propGroup": "Common"
+        }
+      }
+    },
 
-        "additionalProperties": {
-          "$ref": "#/$defs/schema",
+    "schemaObject": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "Object",
+      "x-propGroupOrder": ["Common", "Object", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["object"], "x-propGroup": "Common" },
+        "default": {
+          "type": "object",
+          "x-format": "json",
+          "x-propGroup": "Common"
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "x-format": "choices",
+          "x-enumSource": "properties",
           "x-propGroup": "Object"
+        },
+        "properties": {
+          "type": "object",
+          "x-propGroup": "Object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema",
+            "x-startCollapsed": true
+          }
         },
         "dependentRequired": {
           "type": "object",
@@ -194,23 +317,70 @@
             "$ref": "#/$defs/schema"
           },
           "x-propGroup": "Object"
+        }
+      }
+    },
+
+    "schemaArray": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "Array",
+      "x-propGroupOrder": ["Common", "Array", "Composition", "Options"],
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["array"], "x-propGroup": "Common" },
+        "default": {
+          "type": "array",
+          "x-format": "json",
+          "x-propGroup": "Common"
         },
-        "properties": {
-          "type": "object",
-          "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/schema",
+          "x-propGroup": "Array"
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+        "uniqueItems": {
+          "type": "boolean",
+          "x-propGroup": "Array"
+        },
+        "contains": {
+          "$ref": "#/$defs/schema",
+          "x-propGroup": "Array"
+        },
+        "maxContains": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+
+        "minContains": {
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Array"
+        },
+
+        "prefixItems": {
+          "type": "array",
+          "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Object"
-        },
-        "required": {
-          "x-format": "table",
-          "x-propGroup": "Object",
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
+          "x-propGroup": "Array"
         }
+      }
+    },
+    "schemaNoType": {
+      "$ref": "#/$defs/schemaBase",
+      "x-switcherTitle": "No Type",
+      "not": {
+        "required": ["type"]
       }
     }
   }
