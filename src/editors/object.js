@@ -30,6 +30,11 @@ class EditorObject extends Editor {
       addProperty = false
     }
 
+    const objectAdd = getSchemaXOption(this.instance.schema, 'objectAdd') ?? this.instance.jedison.options.objectAdd
+    if (isSet(objectAdd) && objectAdd === false) {
+      addProperty = false
+    }
+
     let enablePropertiesToggle = false
 
     if (isSet(this.instance.jedison.options.enablePropertiesToggle)) {
@@ -62,39 +67,32 @@ class EditorObject extends Editor {
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
   }
 
+  announcePropertyAdded (propertyName, child) {
+    const schemaTitle = getSchemaTitle(child.schema)
+    const label = isSet(schemaTitle) ? schemaTitle : propertyName
+    const ariaLiveMessage = this.theme.getAriaLiveMessage()
+    ariaLiveMessage.textContent = label + ' ' + this.instance.jedison.translator.translate('objectPropertyAdded')
+    this.control.ariaLive.appendChild(ariaLiveMessage)
+  }
+
+  addProperty (input, postAction) {
+    const propertyName = input.value.split(' ').join('')
+    if (propertyName.length === 0) return
+    if (isSet(this.instance.value[propertyName])) return
+    const schema = this.instance.getPropertySchema(propertyName)
+    const child = this.instance.createChild(schema, propertyName)
+    child.activate()
+    this.instance.setValue(this.instance.value, true, 'user')
+    input.value = ''
+    this.announcePropertyAdded(propertyName, child)
+    postAction()
+  }
+
   addEventListeners () {
-    this.control.addPropertyBtn.addEventListener('click', () => {
-      const propertyName = this.control.addPropertyControl.input.value.split(' ').join('')
-
-      const propertyNameEmpty = propertyName.length === 0
-
-      if (propertyNameEmpty) {
-        return
-      }
-
-      const propertyExist = isSet(this.instance.value[propertyName])
-
-      if (propertyExist) {
-        return
-      }
-
-      const schema = this.instance.getPropertySchema(propertyName)
-
-      const child = this.instance.createChild(schema, propertyName)
-      child.activate()
-      this.instance.setValue(this.instance.value, true, 'user')
-      this.control.addPropertyControl.input.value = ''
-
-      const ariaLive = this.control.ariaLive
-      const schemaTitle = getSchemaTitle(child.schema)
-      const label = isSet(schemaTitle) ? schemaTitle : propertyName
-      const ariaLiveMessage = this.theme.getAriaLiveMessage()
-      ariaLiveMessage.textContent = label + ' ' + this.instance.jedison.translator.translate('objectPropertyAdded')
-      ariaLive.appendChild(ariaLiveMessage)
-
-      // keeps dialog open
-      this.control.propertiesContainer.close()
-      this.control.propertiesContainer.showModal()
+    this.control.quickAddPropertyBtn.addEventListener('click', () => {
+      this.addProperty(this.control.quickAddPropertyControl.input, () => {
+        this.control.quickAddPropertyContainer.close()
+      })
     })
 
     this.control.jsonData.saveBtn.addEventListener('click', () => {
@@ -133,9 +131,7 @@ class EditorObject extends Editor {
       const instanceProperties = this.instance.children.map((child) => child.getKey())
       const properties = [...new Set([...declaredProperties, ...instanceProperties])]
 
-      while (this.control.propertiesActivators.firstChild) {
-        this.control.propertiesActivators.removeChild(this.control.propertiesActivators.firstChild)
-      }
+      this.control.propertiesActivators.replaceChildren()
 
       const {
         container: defaultGroupContainer,
@@ -209,13 +205,35 @@ class EditorObject extends Editor {
         checkbox.disabled = this.disabled || isRequired
         checkbox.checked = hasOwn(currentValue, property)
       })
+
+      const propGroupOrder = getSchemaXOption(this.instance.schema, 'propGroupOrder')
+
+      if (isSet(propGroupOrder) && Array.isArray(propGroupOrder)) {
+        const orderedContainers = [defaultGroupContainer]
+
+        propGroupOrder.forEach((groupName) => {
+          if (isSet(propertiesGroups[groupName])) {
+            orderedContainers.push(propertiesGroups[groupName].container)
+          }
+        })
+
+        Object.keys(propertiesGroups).forEach((groupName) => {
+          if (!propGroupOrder.includes(groupName)) {
+            orderedContainers.push(propertiesGroups[groupName].container)
+          }
+        })
+
+        this.control.propertiesActivators.replaceChildren()
+
+        orderedContainers.forEach((container) => {
+          this.control.propertiesActivators.appendChild(container)
+        })
+      }
     }
   }
 
   refreshEditors () {
-    while (this.control.childrenSlot.firstChild) {
-      this.control.childrenSlot.removeChild(this.control.childrenSlot.firstChild)
-    }
+    this.control.childrenSlot.replaceChildren()
 
     this.instance.children.forEach((child) => {
       const showOptIn = true

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "title": "propGroupOrder",
+  "description": "Use x-propGroupOrder to control the display order of groups in the properties toggle dialog.",
+  "x-propGroupOrder": ["Numbers", "Strings"],
+  "properties": {
+    "prop": {
+      "title": "Ungrouped Property",
+      "type": "string"
+    },
+    "propA": {
+      "title": "Property A",
+      "type": "string",
+      "x-propGroup": "Strings"
+    },
+    "propB": {
+      "title": "Property B",
+      "type": "string",
+      "x-propGroup": "Strings"
+    },
+    "propC": {
+      "title": "Property C",
+      "type": "number",
+      "x-propGroup": "Numbers"
+    },
+    "propD": {
+      "title": "Property D",
+      "type": "number",
+      "x-propGroup": "Numbers"
+    }
+  }
+}

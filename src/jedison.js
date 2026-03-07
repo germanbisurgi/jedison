@@ -51,6 +51,7 @@ class Jedison extends EventEmitter {
       arrayDelete: true,
       arrayMove: true,
       arrayAdd: true,
+      objectAdd: true,
       arrayButtonsPosition: 'left',
       startCollapsed: false,
       deactivateNonRequired: false,

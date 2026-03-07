@@ -26,11 +26,13 @@ Scenario('@editor @object should have @infoButton', ({I}) => {
 })
 
 Scenario('@editor @object @enablePropertiesToggle should add properties', ({ I }) => {
-  I._click('.jedi-properties-toggle')
-  I.fillField('#jedi-add-property-input-root', 'test')
+  I._click('.jedi-quick-add-property-toggle')
+  I.fillField('#jedi-quick-add-property-input-root', 'test')
   I.pressKey('Tab')
-  I._click('.jedi-object-add')
+  I._click('.jedi-add-property-btn')
   I._waitForElement('[data-path="#/test"')
+  I._click('.jedi-properties-toggle')
+  I._waitForElement('[id="root-test-activator"]')
   I._click('[id="root-test-activator"]')
   I.dontSee('[data-path="#/test"')
 })
