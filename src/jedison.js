@@ -57,6 +57,7 @@ class Jedison extends EventEmitter {
       schema: {},
       showErrors: 'change',
       switcherInput: 'select',
+      embedSwitcher: false,
       data: undefined,
       assertFormat: false,
       customEditors: [],
@@ -80,6 +81,7 @@ class Jedison extends EventEmitter {
       enforceMinItems: true,
       enforceMaxItems: true,
       enforceEnum: true,
+      subErrors: false,
       debug: false
     }, options)
 
@@ -211,7 +213,8 @@ class Jedison extends EventEmitter {
       refParser: this.refParser,
       assertFormat: this.options.assertFormat,
       translator: this.translator,
-      constraints: this.options.constraints
+      constraints: this.options.constraints,
+      subErrors: this.options.subErrors
     })
 
     this.root = this.createInstance({

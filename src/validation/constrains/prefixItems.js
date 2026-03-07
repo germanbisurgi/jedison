@@ -1,11 +1,13 @@
 import { compileTemplate, isArray, isSet } from '../../helpers/utils.js'
-import { getSchemaPrefixItems } from '../../helpers/schema.js'
+import { getSchemaPrefixItems, getSchemaXOption } from '../../helpers/schema.js'
 
 export function prefixItems (context) {
   const errors = []
   const prefixItems = getSchemaPrefixItems(context.schema)
 
   if (isArray(context.value) && isSet(prefixItems)) {
+    const enableSubErrors = getSchemaXOption(context.schema, 'subErrors') ?? context.validator.subErrors
+
     prefixItems.forEach((itemSchema, index) => {
       const itemValue = context.value[index]
 
@@ -13,7 +15,7 @@ export function prefixItems (context) {
         const tmpErrors = context.validator.getErrors(itemValue, itemSchema, index, context.path + '/' + index)
 
         if (tmpErrors.length > 0) {
-          errors.push({
+          const error = {
             type: 'error',
             path: context.path,
             constraint: 'prefixItems',
@@ -22,7 +24,13 @@ export function prefixItems (context) {
                 index: index
               })
             ]
-          })
+          }
+
+          if (enableSubErrors) {
+            error.subErrors = tmpErrors
+          }
+
+          errors.push(error)
         }
       }
     })

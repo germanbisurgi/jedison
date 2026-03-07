@@ -1,31 +1,58 @@
 import { isSet } from '../../helpers/utils.js'
-import { getSchemaAnyOf } from '../../helpers/schema.js'
+import { getSchemaAnyOf, getSchemaXOption } from '../../helpers/schema.js'
 
 export function anyOf (context) {
   const errors = []
   const anyOf = getSchemaAnyOf(context.schema)
 
   if (isSet(anyOf)) {
+    const enableSubErrors = getSchemaXOption(context.schema, 'subErrors') ?? context.validator.subErrors
     let valid = false
 
-    for (const schema of anyOf) {
-      const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path)
+    if (enableSubErrors) {
+      const schemaResults = []
 
-      if (anyOfErrors.length === 0) {
-        valid = true
-        break
-      }
-    }
+      anyOf.forEach((schema, index) => {
+        const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path)
 
-    if (!valid) {
-      errors.push({
-        type: 'error',
-        path: context.path,
-        constraint: 'anyOf',
-        messages: [
-          context.translator.translate('errorAnyOf')
-        ]
+        if (anyOfErrors.length === 0) {
+          valid = true
+        }
+
+        schemaResults.push({ schemaIndex: index, errors: anyOfErrors })
       })
+
+      if (!valid) {
+        errors.push({
+          type: 'error',
+          path: context.path,
+          constraint: 'anyOf',
+          messages: [
+            context.translator.translate('errorAnyOf')
+          ],
+          subErrors: schemaResults.filter(r => r.errors.length > 0)
+        })
+      }
+    } else {
+      for (const schema of anyOf) {
+        const anyOfErrors = context.validator.getErrors(context.value, schema, context.key, context.path)
+
+        if (anyOfErrors.length === 0) {
+          valid = true
+          break
+        }
+      }
+
+      if (!valid) {
+        errors.push({
+          type: 'error',
+          path: context.path,
+          constraint: 'anyOf',
+          messages: [
+            context.translator.translate('errorAnyOf')
+          ]
+        })
+      }
     }
   }
 

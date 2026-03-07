@@ -15,6 +15,7 @@ class Validator {
     this.constraints = config.constraints ?? {}
     this.assertFormat = config.assertFormat ? config.assertFormat : false
     this.translator = config.translator ? config.translator : false
+    this.subErrors = config.subErrors ?? false
     this.draft = draft202012
 
     this.jsonSchemaDrafts = {
