@@ -1,5 +1,13 @@
 ### dev
 
+### 1.6.0
+
+- Added discriminator validation
+- Added AnyJson editor
+- Added subErrors option
+- Added `x-propGroupOrder` schema option,
+- Added `x-embedSwitcher` schema option,
+
 ### 1.5.2
 
 - Improved accessibility
