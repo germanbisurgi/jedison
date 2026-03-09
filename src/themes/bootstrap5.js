@@ -64,6 +64,10 @@ class ThemeBootstrap5 extends Theme {
     return superLegend
   }
 
+  styleLegendWarning (span) {
+    span.classList.add('ms-1')
+  }
+
   getLabel (config) {
     const labelObj = super.getLabel(config)
 

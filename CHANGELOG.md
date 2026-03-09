@@ -2,6 +2,7 @@
 
 ### 1.6.0
 
+- Added warning in legends
 - Added discriminator validation
 - Added AnyJson editor
 - Added subErrors option

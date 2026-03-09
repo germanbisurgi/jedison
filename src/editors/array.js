@@ -222,6 +222,31 @@ class EditorArray extends Editor {
 
     this.refreshAddBtn()
     this.refreshJsonData()
+    this.refreshLegendWarning()
+  }
+
+  refreshLegendWarning () {
+    if (!this.control.legendText) return
+    const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+    const hasErrors = navWarning && this.instance.hasNestedValidationErrors()
+
+    const existing = this.control.legendText.querySelector('.jedi-legend-warning')
+    if (existing) existing.parentNode.removeChild(existing)
+
+    if (hasErrors) {
+      const warning = document.createElement('span')
+      warning.classList.add('jedi-legend-warning')
+      warning.textContent = '⚠'
+      const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+      if (navWarningMessage) warning.setAttribute('title', navWarningMessage)
+      this.theme.styleLegendWarning(warning)
+      this.control.legendText.appendChild(warning)
+    }
+  }
+
+  showValidationErrors (errors, force = false) {
+    super.showValidationErrors(errors, force)
+    this.refreshLegendWarning()
   }
 }
 

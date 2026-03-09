@@ -1783,6 +1783,8 @@ class Theme {
     return tabList
   }
 
+  styleLegendWarning (span) {}
+
   /**
    * A Tab is a wrapper for content
    */

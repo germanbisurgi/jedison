@@ -366,6 +366,8 @@ class Editor {
     return schemaInfo
   }
 
+  refreshLegendWarning () {}
+
   /**
    * Updates control UI when its state changes
    */

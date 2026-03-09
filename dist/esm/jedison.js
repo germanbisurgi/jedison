@@ -2365,6 +2365,8 @@ class Editor {
     }
     return schemaInfo;
   }
+  refreshLegendWarning() {
+  }
   /**
    * Updates control UI when its state changes
    */
@@ -4163,11 +4165,32 @@ class EditorObject extends Editor {
       }
     });
   }
+  refreshLegendWarning() {
+    if (!this.control.legendText) return;
+    const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+    const hasErrors = navWarning && this.instance.hasNestedValidationErrors();
+    const existing = this.control.legendText.querySelector(".jedi-legend-warning");
+    if (existing) existing.parentNode.removeChild(existing);
+    if (hasErrors) {
+      const warning = document.createElement("span");
+      warning.classList.add("jedi-legend-warning");
+      warning.textContent = "⚠";
+      const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+      if (navWarningMessage) warning.setAttribute("title", navWarningMessage);
+      this.theme.styleLegendWarning(warning);
+      this.control.legendText.appendChild(warning);
+    }
+  }
+  showValidationErrors(errors, force = false) {
+    super.showValidationErrors(errors, force);
+    this.refreshLegendWarning();
+  }
   refreshUI() {
     super.refreshUI();
     this.refreshPropertiesSlot();
     this.refreshEditors();
     this.refreshJsonData();
+    this.refreshLegendWarning();
   }
 }
 class EditorObjectGrid extends EditorObject {
@@ -4542,6 +4565,27 @@ class EditorArray extends Editor {
     });
     this.refreshAddBtn();
     this.refreshJsonData();
+    this.refreshLegendWarning();
+  }
+  refreshLegendWarning() {
+    if (!this.control.legendText) return;
+    const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+    const hasErrors = navWarning && this.instance.hasNestedValidationErrors();
+    const existing = this.control.legendText.querySelector(".jedi-legend-warning");
+    if (existing) existing.parentNode.removeChild(existing);
+    if (hasErrors) {
+      const warning = document.createElement("span");
+      warning.classList.add("jedi-legend-warning");
+      warning.textContent = "⚠";
+      const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+      if (navWarningMessage) warning.setAttribute("title", navWarningMessage);
+      this.theme.styleLegendWarning(warning);
+      this.control.legendText.appendChild(warning);
+    }
+  }
+  showValidationErrors(errors, force = false) {
+    super.showValidationErrors(errors, force);
+    this.refreshLegendWarning();
   }
 }
 class EditorArrayTuple extends EditorArray {
@@ -8246,6 +8290,8 @@ class Theme {
     tabList.classList.add("jedi-nav-list");
     return tabList;
   }
+  styleLegendWarning(span) {
+  }
   /**
    * A Tab is a wrapper for content
    */
@@ -9143,6 +9189,9 @@ class ThemeBootstrap5 extends Theme {
     legend.classList.add("align-items-center");
     legend.classList.add("py-2");
     return superLegend;
+  }
+  styleLegendWarning(span) {
+    span.classList.add("ms-1");
   }
   getLabel(config) {
     const labelObj = super.getLabel(config);

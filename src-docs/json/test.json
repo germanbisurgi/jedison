@@ -2,6 +2,7 @@
   "$ref": "#/$defs/schema",
   "$defs": {
     "schemaBase": {
+      "x-format": "categories-horizontal",
       "type": "object",
       "x-deactivateNonRequired": true,
       "x-propGroupOrder": ["Common", "Composition", "Options"],
@@ -106,6 +107,10 @@
         "x-assertFormat": {
           "x-propGroup": "Options",
           "type": "boolean"
+        },
+        "x-discriminator": {
+          "x-propGroup": "Options",
+          "type": "string"
         }
       }
     },

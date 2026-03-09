@@ -3,6 +3,7 @@
   "x-titleHidden": true,
   "$defs": {
     "schema": {
+      "x-format": "categories-horizontal",
       "x-deactivateNonRequired": true,
       "additionalProperties": {
         "$ref": "#/$defs/schema",
@@ -198,7 +199,8 @@
         "properties": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/$defs/schema"
+            "$ref": "#/$defs/schema",
+            "x-startCollapsed": true
           },
           "x-propGroup": "Object"
         },
@@ -255,8 +257,8 @@
         },
 
         "x-format": {
-          "type": "string",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "string"
         },
         "x-titleIconClass": {
           "type": "string",
@@ -270,51 +272,61 @@
           "type": "string",
           "x-propGroup": "Options"
         },
-        "x-propGroup": {
-          "type": "string",
-          "x-propGroup": "Options"
-        },
         "x-grid": {
+          "x-propGroup": "Options",
           "type": "object",
-          "x-propGroup": "Options"
-        },
-        "x-enumTitles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-propGroup": "Options"
+          "properties": {
+            "columns": {
+              "type": "number"
+            }
+          }
         },
         "x-messages": {
+          "x-propGroup": "Options",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "x-enumTitles": {
+          "x-propGroup": "Options",
+          "x-format": "table",
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-propGroup": "Options"
+          }
         },
         "x-titleHidden": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
         },
         "x-enableCollapseToggle": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
         },
         "x-startCollapsed": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-sortable": {
+          "x-propGroup": "Options",
+          "type": "boolean"
         },
         "x-showErrors": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
         },
         "x-deactivateNonRequired": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
         },
         "x-assertFormat": {
-          "type": "boolean",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-discriminator": {
+          "x-propGroup": "Options",
+          "type": "string"
         }
       }
     }
