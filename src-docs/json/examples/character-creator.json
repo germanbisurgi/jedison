@@ -58,7 +58,7 @@
           "x-grid": { "columns": 6 },
           "x-messages": {
             "minimum": "Even the greenest adventurer starts at level 1.",
-            "maximum": "The gods cap mortal power at level 20."
+            "maximum": "The gods cap mortal power at level 20. "
           },
           "default": 1
         },
