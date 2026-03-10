@@ -18,6 +18,30 @@ class EditorObjectCategories extends EditorObject {
     this.activeCategoryName = null
   }
 
+  navigateTo (path) {
+    const nextChildPath = this.getNextChildPath(path)
+    if (nextChildPath) {
+      const child = this.instance.children.find(c => c.path === nextChildPath)
+      if (child) {
+        const defaultLabel = getSchemaXOption(this.instance.schema, 'categoriesDefaultLabel') ?? 'Basic'
+        const childSchemaType = getSchemaType(child.schema)
+        const xCategory = getSchemaXOption(child.schema, 'category')
+        let categoryName
+        if (isSet(xCategory)) {
+          categoryName = xCategory
+        } else if (childSchemaType === 'object' || childSchemaType === 'array') {
+          const schemaTitle = getSchemaTitle(child.schema)
+          categoryName = isSet(schemaTitle) ? schemaTitle : child.getKey()
+        } else {
+          categoryName = defaultLabel
+        }
+        this.activeCategoryName = categoryName
+        this.refreshUI()
+      }
+    }
+    super.navigateTo(path)
+  }
+
   refreshEditors () {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild)

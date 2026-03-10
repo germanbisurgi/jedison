@@ -14,6 +14,18 @@ class EditorArrayNav extends EditorArray {
     return getSchemaType(schema) === 'array' && hasNavFormat
   }
 
+  navigateTo (path) {
+    const nextChildPath = this.getNextChildPath(path)
+    if (nextChildPath) {
+      const childIndex = this.instance.children.findIndex(c => c.path === nextChildPath)
+      if (childIndex !== -1) {
+        this.activeItemIndex = childIndex
+        this.refreshUI()
+      }
+    }
+    super.navigateTo(path)
+  }
+
   addEventListeners () {
     this.control.addBtn.addEventListener('click', () => {
       this.activeItemIndex = this.instance.value.length

@@ -356,6 +356,7 @@ import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
 import embedSwitcher from './json/features/embed-switcher.json'
+import navigateTo from './json/features/navigate-to.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -450,6 +451,7 @@ export default {
           'features/options-overrides': optionsOverrides,
           'features/nav-warning': navWarning,
           'features/embed-switcher': embedSwitcher,
+          'features/navigate-to': navigateTo,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,

@@ -1,0 +1,90 @@
+{
+  "title": "Navigate To",
+  "description": "Call editor.navigateTo(path) from the browser console to jump to a deeply nested field.",
+  "type": "object",
+  "x-format": "nav-vertical",
+  "properties": {
+    "organization": {
+      "type": "object",
+      "title": "Organization",
+      "x-format": "categories-horizontal",
+      "properties": {
+        "info": {
+          "type": "object",
+          "title": "Info",
+          "x-format": "grid",
+          "properties": {
+            "name":     { "type": "string",  "title": "Company Name" },
+            "industry": { "type": "string",  "title": "Industry", "enum": ["Technology","Finance","Healthcare","Education"] }
+          }
+        },
+        "departments": {
+          "type": "array",
+          "title": "Departments",
+          "x-format": "nav-horizontal",
+          "x-titleTemplate": "Dept {{ i1 }}: {{ value.details.name }}",
+          "items": {
+            "type": "object",
+            "x-format": "categories-vertical",
+            "properties": {
+              "details": {
+                "type": "object",
+                "title": "Details",
+                "x-format": "grid",
+                "properties": {
+                  "name":      { "type": "string",  "title": "Name" },
+                  "headcount": { "type": "integer", "title": "Headcount" }
+                }
+              },
+              "teams": {
+                "type": "array",
+                "title": "Teams",
+                "x-format": "nav-vertical",
+                "x-titleTemplate": "Team {{ i1 }}: {{ value.name }}",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name":   { "type": "string",  "title": "Team Name" },
+                    "lead":   { "type": "string",  "title": "Team Lead" },
+                    "active": { "type": "boolean", "title": "Active" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "x-format": "grid",
+      "properties": {
+        "timezone": { "type": "string", "title": "Timezone", "enum": ["UTC","EST","PST","CET"] },
+        "currency":  { "type": "string", "title": "Currency",  "enum": ["USD","EUR","GBP","JPY"] }
+      }
+    }
+  },
+  "default": {
+    "organization": {
+      "info": { "name": "Acme Corp", "industry": "Technology" },
+      "departments": [
+        {
+          "details": { "name": "Engineering", "headcount": 50 },
+          "teams": [
+            { "name": "Frontend", "lead": "Alice",   "active": true },
+            { "name": "Backend",  "lead": "Bob",     "active": true }
+          ]
+        },
+        {
+          "details": { "name": "Marketing", "headcount": 20 },
+          "teams": [
+            { "name": "Brand",  "lead": "Charlie", "active": true },
+            { "name": "Growth", "lead": "Diana",   "active": false }
+          ]
+        }
+      ]
+    },
+    "settings": { "timezone": "UTC", "currency": "USD" }
+  }
+}

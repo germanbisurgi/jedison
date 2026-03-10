@@ -439,6 +439,26 @@ class Editor {
     }
   }
 
+  getNextChildPath (path) {
+    const currentDepth = this.instance.path.split(this.instance.jedison.pathSeparator).length
+    const targetSegments = path.split(this.instance.jedison.pathSeparator)
+    if (targetSegments.length <= currentDepth) return null
+    return targetSegments.slice(0, currentDepth + 1).join(this.instance.jedison.pathSeparator)
+  }
+
+  navigateTo (path) {
+    if (path === this.instance.path) {
+      this.control.container.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      return
+    }
+    const nextChildPath = this.getNextChildPath(path)
+    if (!nextChildPath) return
+    const child = this.instance.children.find(c => c.path === nextChildPath)
+    if (child?.ui) {
+      child.ui.navigateTo(path)
+    }
+  }
+
   /**
    * Destroys the editor
    */

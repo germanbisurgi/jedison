@@ -2427,6 +2427,24 @@ class Editor {
       this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
     }
   }
+  getNextChildPath(path) {
+    const currentDepth = this.instance.path.split(this.instance.jedison.pathSeparator).length;
+    const targetSegments = path.split(this.instance.jedison.pathSeparator);
+    if (targetSegments.length <= currentDepth) return null;
+    return targetSegments.slice(0, currentDepth + 1).join(this.instance.jedison.pathSeparator);
+  }
+  navigateTo(path) {
+    if (path === this.instance.path) {
+      this.control.container.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    const nextChildPath = this.getNextChildPath(path);
+    if (!nextChildPath) return;
+    const child = this.instance.children.find((c) => c.path === nextChildPath);
+    if (child == null ? void 0 : child.ui) {
+      child.ui.navigateTo(path);
+    }
+  }
   /**
    * Destroys the editor
    */
@@ -4243,6 +4261,29 @@ class EditorObjectCategories extends EditorObject {
     super.init();
     this.activeCategoryName = null;
   }
+  navigateTo(path) {
+    const nextChildPath = this.getNextChildPath(path);
+    if (nextChildPath) {
+      const child = this.instance.children.find((c) => c.path === nextChildPath);
+      if (child) {
+        const defaultLabel = getSchemaXOption(this.instance.schema, "categoriesDefaultLabel") ?? "Basic";
+        const childSchemaType = getSchemaType(child.schema);
+        const xCategory = getSchemaXOption(child.schema, "category");
+        let categoryName;
+        if (isSet(xCategory)) {
+          categoryName = xCategory;
+        } else if (childSchemaType === "object" || childSchemaType === "array") {
+          const schemaTitle = getSchemaTitle(child.schema);
+          categoryName = isSet(schemaTitle) ? schemaTitle : child.getKey();
+        } else {
+          categoryName = defaultLabel;
+        }
+        this.activeCategoryName = categoryName;
+        this.refreshUI();
+      }
+    }
+    super.navigateTo(path);
+  }
   refreshEditors() {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild);
@@ -4346,6 +4387,17 @@ class EditorObjectNav extends EditorObject {
     if (!visibleIndices.includes(this.activeTabIndex)) {
       this.activeTabIndex = visibleIndices[0] ?? 0;
     }
+  }
+  navigateTo(path) {
+    const nextChildPath = this.getNextChildPath(path);
+    if (nextChildPath) {
+      const childIndex = this.instance.children.findIndex((c) => c.path === nextChildPath);
+      if (childIndex !== -1) {
+        this.activeTabIndex = childIndex;
+        this.refreshUI();
+      }
+    }
+    super.navigateTo(path);
   }
   refreshEditors() {
     while (this.control.childrenSlot.firstChild) {
@@ -5016,6 +5068,17 @@ class EditorArrayNav extends EditorArray {
     const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "array" && hasNavFormat;
+  }
+  navigateTo(path) {
+    const nextChildPath = this.getNextChildPath(path);
+    if (nextChildPath) {
+      const childIndex = this.instance.children.findIndex((c) => c.path === nextChildPath);
+      if (childIndex !== -1) {
+        this.activeItemIndex = childIndex;
+        this.refreshUI();
+      }
+    }
+    super.navigateTo(path);
   }
   addEventListeners() {
     this.control.addBtn.addEventListener("click", () => {
@@ -6579,6 +6642,14 @@ class Jedison extends EventEmitter {
    */
   getInstance(path) {
     return this.instances.get(path);
+  }
+  /**
+   * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.
+   * @param {string} path - The instance path (e.g. '#/address/street')
+   */
+  navigateTo(path) {
+    if (!this.isEditor) return;
+    this.root.ui.navigateTo(path);
   }
   /**
    * Disables the root instance and it's children user interfaces
@@ -8717,10 +8788,8 @@ class ThemeBootstrap3 extends Theme {
   setTabPaneAttributes(element, active, id) {
     super.setTabPaneAttributes(element, active, id);
     element.classList.add("tab-pane");
-    if (active) {
-      element.classList.add("in");
-      element.classList.add("active");
-    }
+    element.classList.toggle("in", active);
+    element.classList.toggle("active", active);
   }
   infoAsModal(info, id, config = {}) {
     const modal = document.createElement("div");
@@ -9098,9 +9167,7 @@ class ThemeBootstrap4 extends Theme {
   setTabPaneAttributes(element, active, id) {
     super.setTabPaneAttributes(element, active, id);
     element.classList.add("tab-pane");
-    if (active) {
-      element.classList.add("active");
-    }
+    element.classList.toggle("active", active);
   }
   infoAsModal(info, id, config = {}) {
     const modal = document.createElement("div");
@@ -9474,9 +9541,7 @@ class ThemeBootstrap5 extends Theme {
   setTabPaneAttributes(element, active, id) {
     super.setTabPaneAttributes(element, active, id);
     element.classList.add("tab-pane");
-    if (active) {
-      element.classList.add("active");
-    }
+    element.classList.toggle("active", active);
   }
   infoAsModal(info, id, config = {}) {
     const modal = document.createElement("div");

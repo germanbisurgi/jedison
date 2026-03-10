@@ -38,6 +38,18 @@ class EditorObjectNav extends EditorObject {
     }
   }
 
+  navigateTo (path) {
+    const nextChildPath = this.getNextChildPath(path)
+    if (nextChildPath) {
+      const childIndex = this.instance.children.findIndex(c => c.path === nextChildPath)
+      if (childIndex !== -1) {
+        this.activeTabIndex = childIndex
+        this.refreshUI()
+      }
+    }
+    super.navigateTo(path)
+  }
+
   refreshEditors () {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild)

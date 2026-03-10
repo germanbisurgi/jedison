@@ -545,6 +545,15 @@ class Jedison extends EventEmitter {
   }
 
   /**
+   * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.
+   * @param {string} path - The instance path (e.g. '#/address/street')
+   */
+  navigateTo (path) {
+    if (!this.isEditor) return
+    this.root.ui.navigateTo(path)
+  }
+
+  /**
    * Disables the root instance and it's children user interfaces
    */
   disable () {

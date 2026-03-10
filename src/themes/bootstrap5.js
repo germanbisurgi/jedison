@@ -411,9 +411,7 @@ class ThemeBootstrap5 extends Theme {
     super.setTabPaneAttributes(element, active, id)
     element.classList.add('tab-pane')
 
-    if (active) {
-      element.classList.add('active')
-    }
+    element.classList.toggle('active', active)
   }
 
   infoAsModal (info, id, config = {}) {
