@@ -66,7 +66,7 @@ export function replaceAll (str, find, replace) {
  * @return {string}
  */
 export function pathToAttribute (path) {
-  return replaceAll(replaceAll(path, '#', 'root'), '/', '-')
+  return replaceAll(replaceAll(path, '#', 'root'), '/', '-').replace(/[^a-zA-Z0-9_-]/g, '')
 }
 
 /**

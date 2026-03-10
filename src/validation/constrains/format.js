@@ -4,11 +4,8 @@ import { getSchemaFormat, getSchemaXOption } from '../../helpers/schema.js'
 export function format (context) {
   const errors = []
   const format = getSchemaFormat(context.schema)
-  let assertFormat = context.validator.assertFormat
-
-  if (getSchemaXOption(context.schema, 'assertFormat')) {
-    assertFormat = context.schema.options.assertFormat
-  }
+  const xAssertFormat = getSchemaXOption(context.schema, 'assertFormat')
+  const assertFormat = xAssertFormat !== undefined ? xAssertFormat : context.validator.assertFormat
 
   if (isSet(format) && isString(context.value) && assertFormat) {
     let regexp

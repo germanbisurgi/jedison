@@ -1,4 +1,4 @@
-import { compileTemplate, hasOwn, isObject, isSet } from '../../helpers/utils.js'
+import { compileTemplate, hasOwn, isArray, isObject, isSet } from '../../helpers/utils.js'
 import { getSchemaDependentRequired } from '../../helpers/schema.js'
 
 export function dependentRequired (context) {
@@ -12,9 +12,11 @@ export function dependentRequired (context) {
       if (isSet(context.value[key])) {
         const requiredProperties = dependentRequired[key]
 
-        missingProperties = requiredProperties.filter((property) => {
-          return !hasOwn(context.value, property)
-        })
+        if (isArray(requiredProperties)) {
+          missingProperties = requiredProperties.filter((property) => {
+            return !hasOwn(context.value, property)
+          })
+        }
       }
     })
 

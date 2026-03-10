@@ -73,6 +73,11 @@
           "type": "boolean",
           "x-propGroup": "Annotations"
         },
+        "$schema": {
+          "type": "string",
+          "format": "uri",
+          "x-propGroup": "Annotations"
+        },
 
         "maxLength": {
           "type": "integer",

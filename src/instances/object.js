@@ -1,5 +1,5 @@
 import Instance from './instance.js'
-import { different, isSet, notSet, isObject, hasOwn, clone, isNumber } from '../helpers/utils.js'
+import { different, isSet, notSet, isObject, hasOwn, clone, isNumber, isArray } from '../helpers/utils.js'
 import {
   getSchemaAdditionalProperties,
   getSchemaDependentRequired,
@@ -137,9 +137,11 @@ class InstanceObject extends Instance {
         if (isSet(this.value[key])) {
           const requiredProperties = dependentRequired[key]
 
-          missingProperties = requiredProperties.filter((property) => {
-            return !hasOwn(this.value, property)
-          })
+          if (isArray(requiredProperties)) {
+            missingProperties = requiredProperties.filter((property) => {
+              return !hasOwn(this.value, property)
+            })
+          }
         }
       })
 

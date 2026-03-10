@@ -32,7 +32,7 @@ function replaceAll(str, find, replace) {
   return str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
 function pathToAttribute(path) {
-  return replaceAll(replaceAll(path, "#", "root"), "/", "-");
+  return replaceAll(replaceAll(path, "#", "root"), "/", "-").replace(/[^a-zA-Z0-9_-]/g, "");
 }
 function hasOwn(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -685,10 +685,8 @@ function exclusiveMinimum(context) {
 function format(context) {
   const errors = [];
   const format2 = getSchemaFormat(context.schema);
-  let assertFormat = context.validator.assertFormat;
-  if (getSchemaXOption(context.schema, "assertFormat")) {
-    assertFormat = context.schema.options.assertFormat;
-  }
+  const xAssertFormat = getSchemaXOption(context.schema, "assertFormat");
+  const assertFormat = xAssertFormat !== void 0 ? xAssertFormat : context.validator.assertFormat;
   if (isSet(format2) && isString(context.value) && assertFormat) {
     let regexp;
     if (format2 === "email") {
@@ -1342,9 +1340,11 @@ function dependentRequired(context) {
     Object.keys(dependentRequired2).forEach((key) => {
       if (isSet(context.value[key])) {
         const requiredProperties = dependentRequired2[key];
-        missingProperties = requiredProperties.filter((property) => {
-          return !hasOwn(context.value, property);
-        });
+        if (isArray(requiredProperties)) {
+          missingProperties = requiredProperties.filter((property) => {
+            return !hasOwn(context.value, property);
+          });
+        }
       }
     });
     const invalid = missingProperties.length > 0;
@@ -2909,9 +2909,11 @@ class InstanceObject extends Instance {
       Object.keys(dependentRequired2).forEach((key) => {
         if (isSet(this.value[key])) {
           const requiredProperties = dependentRequired2[key];
-          missingProperties = requiredProperties.filter((property2) => {
-            return !hasOwn(this.value, property2);
-          });
+          if (isArray(requiredProperties)) {
+            missingProperties = requiredProperties.filter((property2) => {
+              return !hasOwn(this.value, property2);
+            });
+          }
         }
       });
       return missingProperties.includes(property);
