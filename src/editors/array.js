@@ -102,11 +102,21 @@ class EditorArray extends Editor {
     const btnGroup = this.theme.getBtnGroup()
 
     deleteBtn.addEventListener('click', () => {
-      const confirmDeletion = window.confirm(this.instance.jedison.translator.translate('arrayConfirmDelete'))
+      const schemaConfirm = getSchemaXOption(this.instance.schema, 'arrayDeleteConfirm')
+      const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm
+      const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm
 
-      if (confirmDeletion) {
+      const doDelete = () => {
         this.activeItemIndex = clamp((index - 1), 0, (this.instance.value.length - 1))
         this.instance.deleteItem(index, 'user')
+      }
+
+      if (shouldConfirm) {
+        if (window.confirm(this.instance.jedison.translator.translate('arrayConfirmDelete'))) {
+          doDelete()
+        }
+      } else {
+        doDelete()
       }
     })
 

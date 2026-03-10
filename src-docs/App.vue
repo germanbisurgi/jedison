@@ -196,6 +196,11 @@
             <input type="checkbox" id="useConstraintAttributes" v-model="useConstraintAttributes" @change="initEditor()">
             <label for="useConstraintAttributes"><code>useConstraintAttributes</code></label>
           </div>
+
+          <div class="form-group mb-3">
+            <input type="checkbox" id="arrayDeleteConfirm" v-model="arrayDeleteConfirm" @change="initEditor()">
+            <label for="arrayDeleteConfirm"><code>arrayDeleteConfirm</code></label>
+          </div>
         </aside>
       </div>
     </div>
@@ -572,7 +577,8 @@ export default {
       enforceMaxItems: true,
       enforceAdditionalProperties: true,
       editJsonData: false,
-      useConstraintAttributes: true
+      useConstraintAttributes: true,
+      arrayDeleteConfirm: true,
     }
   },
   created() {
@@ -599,6 +605,7 @@ export default {
     this.startCollapsed = this.getQueryParam('startCollapsed') ? this.parseBooleanString(this.getQueryParam('startCollapsed')) : false
     this.editJsonData = this.getQueryParam('editJsonData') ? this.parseBooleanString(this.getQueryParam('editJsonData')) : false
     this.useConstraintAttributes = this.getQueryParam('useConstraintAttributes') ? this.parseBooleanString(this.getQueryParam('useConstraintAttributes')) : true
+    this.arrayDeleteConfirm = this.getQueryParam('arrayDeleteConfirm') ? this.parseBooleanString(this.getQueryParam('arrayDeleteConfirm')) : true
   },
   mounted() {
     switch (this.theme) {
@@ -747,6 +754,7 @@ export default {
         enforceAdditionalProperties: this.enforceAdditionalProperties,
         editJsonData: this.editJsonData,
         useConstraintAttributes: this.useConstraintAttributes,
+        arrayDeleteConfirm: this.arrayDeleteConfirm,
         muteValidationMessages: ['properties'],
         schema: this.schema,
         data: this.data,
@@ -877,6 +885,7 @@ export default {
       newUrl += "&startCollapsed=" + this.startCollapsed
       newUrl += "&editJsonData=" + this.editJsonData
       newUrl += "&useConstraintAttributes=" + this.useConstraintAttributes
+      newUrl += "&arrayDeleteConfirm=" + this.arrayDeleteConfirm
 
       window.open(newUrl, '_self')
     },
@@ -905,6 +914,7 @@ export default {
       newUrl += "&startCollapsed=" + this.startCollapsed
       newUrl += "&editJsonData=" + this.editJsonData
       newUrl += "&useConstraintAttributes=" + this.useConstraintAttributes
+      newUrl += "&arrayDeleteConfirm=" + this.arrayDeleteConfirm
       newUrl += "&schema=" + this.compress(JSON.stringify(this.schema))
       newUrl += "&data=" + this.compress(JSON.stringify(this.editor.getValue()))
 

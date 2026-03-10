@@ -49,6 +49,7 @@ class Jedison extends EventEmitter {
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
+      arrayDeleteConfirm: true,
       arrayMove: true,
       arrayAdd: true,
       objectAdd: true,

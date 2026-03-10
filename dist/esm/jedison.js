@@ -4471,10 +4471,19 @@ class EditorArray extends Editor {
     });
     const btnGroup = this.theme.getBtnGroup();
     deleteBtn.addEventListener("click", () => {
-      const confirmDeletion = window.confirm(this.instance.jedison.translator.translate("arrayConfirmDelete"));
-      if (confirmDeletion) {
+      const schemaConfirm = getSchemaXOption(this.instance.schema, "arrayDeleteConfirm");
+      const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm;
+      const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm;
+      const doDelete = () => {
         this.activeItemIndex = clamp(index2 - 1, 0, this.instance.value.length - 1);
         this.instance.deleteItem(index2, "user");
+      };
+      if (shouldConfirm) {
+        if (window.confirm(this.instance.jedison.translator.translate("arrayConfirmDelete"))) {
+          doDelete();
+        }
+      } else {
+        doDelete();
       }
     });
     moveUpBtn.addEventListener("click", () => {
@@ -6204,6 +6213,7 @@ class Jedison extends EventEmitter {
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
+      arrayDeleteConfirm: true,
       arrayMove: true,
       arrayAdd: true,
       objectAdd: true,

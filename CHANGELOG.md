@@ -8,6 +8,7 @@
 - Added subErrors option
 - Added `x-propGroupOrder` schema option,
 - Added `x-embedSwitcher` schema option,
+- Added `arrayDeleteConfirm` option
 
 ### 1.5.2
 
