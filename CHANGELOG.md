@@ -1,5 +1,12 @@
 ### dev
 
+### 1.6.1
+
+- Updated character-creator example to showcase correct use of `oneOf` and `x-discriminator`
+- Prefixed tabs IDs with editor ID to avoid clashes
+- Added `arrayAddAfter` feature
+- Fixed issue #24 `"x-format": "choices"` doesn't trigger when items is a `$ref`
+
 ### 1.6.0
 
 - Added warning in legends

@@ -82,6 +82,7 @@ class EditorArray extends Editor {
     const schemaMoveUpContent = getSchemaXOption(this.instance.schema, 'arrayMoveUpContent')
     const schemaMoveDownContent = getSchemaXOption(this.instance.schema, 'arrayMoveDownContent')
     const schemaDragContent = getSchemaXOption(this.instance.schema, 'arrayDragContent')
+    const schemaAddAfterContent = getSchemaXOption(this.instance.schema, 'arrayAddAfterContent')
 
     const deleteBtn = this.theme.getDeleteItemBtn({
       content: schemaDeleteContent ?? this.instance.jedison.translator.translate('arrayDelete')
@@ -97,6 +98,10 @@ class EditorArray extends Editor {
 
     const dragBtn = this.theme.getDragItemBtn({
       content: schemaDragContent ?? this.instance.jedison.translator.translate('arrayDrag')
+    })
+
+    const addAfterBtn = this.theme.getAddAfterItemBtn({
+      content: schemaAddAfterContent ?? this.instance.jedison.translator.translate('arrayAddAfter')
     })
 
     const btnGroup = this.theme.getBtnGroup()
@@ -132,6 +137,11 @@ class EditorArray extends Editor {
       this.instance.move(index, toIndex, 'user')
     })
 
+    addAfterBtn.addEventListener('click', () => {
+      this.activeItemIndex = index + 1
+      this.instance.addItemAfter(index, 'user')
+    })
+
     if (index === 0) {
       moveUpBtn.setAttribute('always-disabled', true)
     }
@@ -140,7 +150,7 @@ class EditorArray extends Editor {
       moveDownBtn.setAttribute('always-disabled', true)
     }
 
-    return { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, dragBtn }
+    return { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, dragBtn, addAfterBtn }
   }
 
   isSortable () {
@@ -171,10 +181,18 @@ class EditorArray extends Editor {
     if (isSet(maxItems) && enforceMaxItems && maxItems <= this.instance.value.length) {
       this.control.addBtn.setAttribute('disabled', '')
       this.control.addBtn.setAttribute('always-disabled', true)
+      this.control.childrenSlot.querySelectorAll('.jedi-array-add-after').forEach((btn) => {
+        btn.setAttribute('disabled', '')
+        btn.setAttribute('always-disabled', true)
+      })
     } else {
       if (!this.disabled && !this.readOnly) {
         this.control.addBtn.removeAttribute('disabled')
         this.control.addBtn.removeAttribute('always-disabled')
+        this.control.childrenSlot.querySelectorAll('.jedi-array-add-after').forEach((btn) => {
+          btn.removeAttribute('disabled')
+          btn.removeAttribute('always-disabled')
+        })
       }
     }
   }
@@ -184,11 +202,12 @@ class EditorArray extends Editor {
     const minItems = getSchemaMinItems(this.instance.schema)
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
 
     this.control.childrenSlot.innerHTML = ''
 
     this.instance.children.forEach((child, index) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index)
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index)
       const { container, arrayActions, body } = this.theme.getArrayItem({
         readOnly: this.instance.isReadOnly(),
         index: index
@@ -207,6 +226,10 @@ class EditorArray extends Editor {
 
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn)
+      }
+
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn)
       }
 
       this.control.childrenSlot.appendChild(container)

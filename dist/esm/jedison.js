@@ -2556,18 +2556,22 @@ class InstanceIfThenElse extends Instance {
         });
       }
       const startingValue = this.instanceStartingValues[index2];
-      const currentValue = instance.getValue();
       let instanceValue = value;
       if (isObject(startingValue) && isObject(value)) {
-        if (indexChanged) {
+        if (indexChanged && initiator !== "api") {
           instanceValue = overwriteExistingProperties(startingValue, withoutIf);
-          this.jedison.updateInstancesWatchedData();
         } else {
+          const audacity = this.jedison.options.audacity;
+          if (audacity && initiator === "api" && index2 === fittestIndex) {
+            const prePassValue = mergeDeep({}, instance.getValue(), value);
+            instance.setValue(prePassValue, false, "api");
+          }
+          const currentValue = instance.getValue();
           instanceValue = overwriteExistingProperties(currentValue, value);
         }
-        if (initiator === "api") {
-          instanceValue = overwriteExistingProperties(currentValue, value);
-        }
+      }
+      if (indexChanged) {
+        this.jedison.updateInstancesWatchedData();
       }
       instance.setValue(instanceValue, false, initiator);
       instance.on("notifyParent", (initiator2) => {
@@ -3147,6 +3151,17 @@ class InstanceArray extends Instance {
     tempEditor.destroy();
     this.setValue(value, true, initiator);
     const instance = this.children[this.children.length - 1];
+    this.emit("item-add", initiator, instance);
+    this.jedison.emit("item-add", initiator, instance);
+  }
+  addItemAfter(afterIndex, initiator) {
+    const tempEditor = this.createItemInstance();
+    const raw = this.getValueRaw();
+    const value = isArray(raw) ? clone(raw) : [];
+    value.splice(afterIndex + 1, 0, tempEditor.getValueRaw());
+    tempEditor.destroy();
+    this.setValue(value, true, initiator);
+    const instance = this.children[afterIndex + 1];
     this.emit("item-add", initiator, instance);
     this.jedison.emit("item-add", initiator, instance);
   }
@@ -4325,7 +4340,7 @@ class EditorObjectCategories extends EditorObject {
         categoryName = defaultLabel;
       }
       if (!categoriesMap.has(categoryName)) {
-        categoriesMap.set(categoryName, { children: [], id: pathToAttribute(child.path) });
+        categoriesMap.set(categoryName, { children: [], id: this.getIdFromPath(child.path) });
       }
       categoriesMap.get(categoryName).children.push(child);
     });
@@ -4425,7 +4440,7 @@ class EditorObjectNav extends EditorObject {
     this.instance.children.forEach((child, index2) => {
       if (!this.isChildVisible(child)) return;
       const active = index2 === this.activeTabIndex;
-      const id = pathToAttribute(child.path);
+      const id = this.getIdFromPath(child.path);
       const schemaTitle = getSchemaTitle(child.schema);
       const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
       const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
@@ -4509,6 +4524,7 @@ class EditorArray extends Editor {
     const schemaMoveUpContent = getSchemaXOption(this.instance.schema, "arrayMoveUpContent");
     const schemaMoveDownContent = getSchemaXOption(this.instance.schema, "arrayMoveDownContent");
     const schemaDragContent = getSchemaXOption(this.instance.schema, "arrayDragContent");
+    const schemaAddAfterContent = getSchemaXOption(this.instance.schema, "arrayAddAfterContent");
     const deleteBtn = this.theme.getDeleteItemBtn({
       content: schemaDeleteContent ?? this.instance.jedison.translator.translate("arrayDelete")
     });
@@ -4520,6 +4536,9 @@ class EditorArray extends Editor {
     });
     const dragBtn = this.theme.getDragItemBtn({
       content: schemaDragContent ?? this.instance.jedison.translator.translate("arrayDrag")
+    });
+    const addAfterBtn = this.theme.getAddAfterItemBtn({
+      content: schemaAddAfterContent ?? this.instance.jedison.translator.translate("arrayAddAfter")
     });
     const btnGroup = this.theme.getBtnGroup();
     deleteBtn.addEventListener("click", () => {
@@ -4548,13 +4567,17 @@ class EditorArray extends Editor {
       this.activeItemIndex = toIndex;
       this.instance.move(index2, toIndex, "user");
     });
+    addAfterBtn.addEventListener("click", () => {
+      this.activeItemIndex = index2 + 1;
+      this.instance.addItemAfter(index2, "user");
+    });
     if (index2 === 0) {
       moveUpBtn.setAttribute("always-disabled", true);
     }
     if (index2 === this.instance.children.length - 1) {
       moveDownBtn.setAttribute("always-disabled", true);
     }
-    return { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, dragBtn };
+    return { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, dragBtn, addAfterBtn };
   }
   isSortable() {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
@@ -4580,10 +4603,18 @@ class EditorArray extends Editor {
     if (isSet(maxItems2) && enforceMaxItems && maxItems2 <= this.instance.value.length) {
       this.control.addBtn.setAttribute("disabled", "");
       this.control.addBtn.setAttribute("always-disabled", true);
+      this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
+        btn.setAttribute("disabled", "");
+        btn.setAttribute("always-disabled", true);
+      });
     } else {
       if (!this.disabled && !this.readOnly) {
         this.control.addBtn.removeAttribute("disabled");
         this.control.addBtn.removeAttribute("always-disabled");
+        this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
+          btn.removeAttribute("disabled");
+          btn.removeAttribute("always-disabled");
+        });
       }
     }
   }
@@ -4592,9 +4623,10 @@ class EditorArray extends Editor {
     const minItems2 = getSchemaMinItems(this.instance.schema);
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
     this.control.childrenSlot.innerHTML = "";
     this.instance.children.forEach((child, index2) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index2);
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
       const { container, arrayActions, body } = this.theme.getArrayItem({
         readOnly: this.instance.isReadOnly(),
         index: index2
@@ -4609,6 +4641,9 @@ class EditorArray extends Editor {
       }
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn);
+      }
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn);
       }
       this.control.childrenSlot.appendChild(container);
       body.appendChild(child.ui.control.container);
@@ -4711,6 +4746,7 @@ class EditorArrayTable extends EditorArray {
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
@@ -4748,7 +4784,7 @@ class EditorArrayTable extends EditorArray {
     this.instance.children.forEach((child, index2) => {
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
-      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index2);
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn);
       }
@@ -4758,6 +4794,9 @@ class EditorArrayTable extends EditorArray {
       if (isSet(arrayMove) && arrayMove === true) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
+      }
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn);
       }
       buttonsTd.appendChild(btnGroup);
       if (arrayButtonsPosition === "left") {
@@ -4836,6 +4875,7 @@ class EditorArrayTableObject extends EditorArray {
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
@@ -4879,7 +4919,7 @@ class EditorArrayTableObject extends EditorArray {
     this.instance.children.forEach((child, index2) => {
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
-      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index2);
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn);
       }
@@ -4889,6 +4929,9 @@ class EditorArrayTableObject extends EditorArray {
       if (isSet(arrayMove) && arrayMove === true) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
+      }
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn);
       }
       buttonsTd.appendChild(btnGroup);
       if (arrayButtonsPosition === "left") {
@@ -5104,19 +5147,23 @@ class EditorArrayNav extends EditorArray {
     });
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
     this.control.childrenSlot.appendChild(row);
     row.appendChild(tabListCol);
     row.appendChild(tabContentCol);
     tabListCol.appendChild(tabList);
     tabContentCol.appendChild(tabContent);
     this.instance.children.forEach((child, index2) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup } = this.getButtons(index2);
+      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
       if (isSet(arrayDelete) && arrayDelete === true) {
         btnGroup.appendChild(deleteBtn);
       }
       if (isSet(arrayMove) && arrayMove === true) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
+      }
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn);
       }
       this.control.childrenSlot.appendChild(child.ui.control.container);
       const schemaTitle = getSchemaTitle(child.schema);
@@ -5129,7 +5176,7 @@ class EditorArrayNav extends EditorArray {
         titleTemplate = compileTemplate(template, data) ?? childTitle;
       }
       const active = index2 === this.activeItemIndex;
-      const id = pathToAttribute(child.path);
+      const id = this.getIdFromPath(child.path);
       const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
       const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
       const { list, arrayActions } = this.theme.getTab({
@@ -6024,6 +6071,7 @@ const defaultTranslations = {
   arrayMoveDown: "Move down",
   arrayDrag: "Drag",
   arrayAdd: "Add item",
+  arrayAddAfter: "Add after",
   arrayConfirmDelete: "Are you sure you want to delete this item?",
   objectAddProperty: "Add property",
   objectPropertyAdded: "field was added to the form",
@@ -6279,6 +6327,7 @@ class Jedison extends EventEmitter {
       arrayDeleteConfirm: true,
       arrayMove: true,
       arrayAdd: true,
+      arrayAddAfter: false,
       objectAdd: true,
       arrayButtonsPosition: "left",
       startCollapsed: false,
@@ -6312,7 +6361,8 @@ class Jedison extends EventEmitter {
       enforceMaxItems: true,
       enforceEnum: true,
       subErrors: false,
-      debug: false
+      debug: false,
+      audacity: true
     }, options);
     this.rootName = "#";
     this.pathSeparator = "/";
@@ -6522,6 +6572,9 @@ class Jedison extends EventEmitter {
           node.oneOf.forEach((subschema, index2) => {
             node.oneOf[index2] = this.refParser.expand(subschema);
           });
+        }
+        if (isObject(node.items) && this.refParser.hasRef(node.items)) {
+          node.items = this.refParser.expand(node.items);
         }
       });
     }
@@ -7391,6 +7444,17 @@ class Theme {
     });
     html.classList.add("jedi-array-add");
     return html;
+  }
+  /**
+   * Array "add after" item button
+   */
+  getAddAfterItemBtn(config) {
+    const addAfterItemBtn = this.getButton({
+      content: config.content,
+      icon: "add"
+    });
+    addAfterItemBtn.classList.add("jedi-array-add-after");
+    return addAfterItemBtn;
   }
   /**
    * Array "delete" item button

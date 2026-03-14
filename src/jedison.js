@@ -52,6 +52,7 @@ class Jedison extends EventEmitter {
       arrayDeleteConfirm: true,
       arrayMove: true,
       arrayAdd: true,
+      arrayAddAfter: false,
       objectAdd: true,
       arrayButtonsPosition: 'left',
       startCollapsed: false,
@@ -84,7 +85,8 @@ class Jedison extends EventEmitter {
       enforceMaxItems: true,
       enforceEnum: true,
       subErrors: false,
-      debug: false
+      debug: false,
+      audacity: true
     }, options)
 
     /**
@@ -385,6 +387,11 @@ class Jedison extends EventEmitter {
           node.oneOf.forEach((subschema, index) => {
             node.oneOf[index] = this.refParser.expand(subschema)
           })
+        }
+
+        // expand items $ref (fixes issue #24)
+        if (isObject(node.items) && this.refParser.hasRef(node.items)) {
+          node.items = this.refParser.expand(node.items)
         }
       })
     }

@@ -1,6 +1,13 @@
 ## Todo
 
-### Essential (Core functionality and fixes)
+### notes
+
+- options, deprecate old names but keep aliases for retro compatibility
+- getSchemaOption, extra param for deprecatedold names
+
+### braking
+
+- enforceConst true default
 
 #### Bug Fixes & Critical Issues
 - focus issues with safari?

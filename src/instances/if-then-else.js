@@ -88,6 +88,8 @@ class InstanceIfThenElse extends Instance {
   }
 
   changeValue (value, initiator = 'api') {
+    // Strip keys belonging to if/then/else branches so only "base" properties
+    // are used when evaluating which branch applies.
     const withoutIf = this.getWithoutIfValueFromValue(value)
     const fittestIndex = this.getFittestIndex(withoutIf)
     const indexChanged = fittestIndex !== this.index
@@ -95,9 +97,14 @@ class InstanceIfThenElse extends Instance {
     this.activeInstance = this.instances[fittestIndex]
     this.activeInstance.register()
 
+    // All instances are kept in sync so that switching back to a previously
+    // active branch shows up-to-date values instead of stale schema defaults.
     this.instances.forEach((instance, index) => {
+      // Re-register listener each cycle to avoid stacking duplicate handlers.
       instance.off('notifyParent')
 
+      // When a child instance is itself a "multiple" (anyOf/oneOf), pass its
+      // slice of the value directly so it can pick the right sub-schema.
       if (instance.children && isObject(value)) {
         instance.children.forEach((child) => {
           const shouldUpdateValue = child.isMultiple && hasOwn(value, child.getKey())
@@ -109,24 +116,42 @@ class InstanceIfThenElse extends Instance {
       }
 
       const startingValue = this.instanceStartingValues[index]
-      const currentValue = instance.getValue()
       let instanceValue = value
 
       if (isObject(startingValue) && isObject(value)) {
-        if (indexChanged) {
+        // When the user switches branches (not an API call), reset to the
+        // branch's schema defaults merged with the base (non-conditional) data
+        // so that branch-specific fields don't carry over stale user input.
+        // Otherwise, merge incoming data onto the instance's current values to
+        // preserve anything the user has already entered.
+        if (indexChanged && initiator !== 'api') {
           instanceValue = overwriteExistingProperties(startingValue, withoutIf)
-          this.jedison.updateInstancesWatchedData()
         } else {
-          instanceValue = overwriteExistingProperties(currentValue, value)
-        }
+          const audacity = this.jedison.options.audacity
 
-        if (initiator === 'api') {
+          if (audacity && initiator === 'api' && index === fittestIndex) {
+            // Pre-pass (active instance only): trigger nested ITE branch switches
+            // so currentValue reflects the correct branch types before the merge.
+            // Merge existing values with incoming to prevent property deactivation
+            // when the incoming value is a partial object.
+            const prePassValue = mergeDeep({}, instance.getValue(), value)
+            instance.setValue(prePassValue, false, 'api')
+          }
+          const currentValue = instance.getValue()
           instanceValue = overwriteExistingProperties(currentValue, value)
         }
       }
 
+      // Notify watched-data subscribers that the active branch changed.
+      if (indexChanged) {
+        this.jedison.updateInstancesWatchedData()
+      }
+
       instance.setValue(instanceValue, false, initiator)
 
+      // When a child field changes, re-evaluates which branch is active because
+      // the change may affect the if-condition (e.g., a select that drives the
+      // conditional).
       instance.on('notifyParent', (initiator) => {
         const value = instance.getValueRaw()
         this.changeValue(value, initiator)

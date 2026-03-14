@@ -1,5 +1,5 @@
 import EditorObject from './object.js'
-import { isSet, pathToAttribute } from '../helpers/utils.js'
+import { isSet } from '../helpers/utils.js'
 import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -93,7 +93,7 @@ class EditorObjectCategories extends EditorObject {
       }
 
       if (!categoriesMap.has(categoryName)) {
-        categoriesMap.set(categoryName, { children: [], id: pathToAttribute(child.path) })
+        categoriesMap.set(categoryName, { children: [], id: this.getIdFromPath(child.path) })
       }
       categoriesMap.get(categoryName).children.push(child)
     })

@@ -23,7 +23,7 @@
             "no",
             "unknown"
           ],
-          "x-format": "radios"
+          "x-format": "radios-inline"
         }
       },
       "if": {
@@ -44,11 +44,7 @@
               "no",
               "unknown"
             ],
-            "x-format": "radios"
-          },
-          "pairCount": {
-            "title": "Nesting Pairs Count",
-            "type": "integer"
+            "x-format": "radios-inline"
           }
         },
         "if": {
@@ -116,7 +112,7 @@
                 "no",
                 "unknown"
               ],
-              "x-format": "radios",
+              "x-format": "radios-inline",
               "readOnly": true
             },
             "pairCount": {
@@ -146,7 +142,7 @@
                   "no",
                   "unknown"
                 ],
-                "x-format": "radios",
+                "x-format": "radios-inline",
                 "readOnly": true
               },
               "pairCount": {

@@ -1,5 +1,5 @@
 import EditorObject from './object.js'
-import { isSet, pathToAttribute } from '../helpers/utils.js'
+import { isSet } from '../helpers/utils.js'
 import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -81,7 +81,7 @@ class EditorObjectNav extends EditorObject {
       if (!this.isChildVisible(child)) return
 
       const active = index === this.activeTabIndex
-      const id = pathToAttribute(child.path)
+      const id = this.getIdFromPath(child.path)
       const schemaTitle = getSchemaTitle(child.schema)
 
       const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true

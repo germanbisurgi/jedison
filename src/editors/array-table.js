@@ -34,6 +34,7 @@ class EditorArrayTable extends EditorArray {
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, 'arrayButtonsPosition') ?? this.instance.jedison.options.arrayButtonsPosition
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
 
     // thead labels
     const th = this.theme.getTableHeader()
@@ -93,7 +94,7 @@ class EditorArrayTable extends EditorArray {
 
       // buttons
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true })
-      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup } = this.getButtons(index)
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index)
 
       if (this.isSortable()) {
         btnGroup.appendChild(dragBtn)
@@ -106,6 +107,10 @@ class EditorArrayTable extends EditorArray {
       if (isSet(arrayMove) && arrayMove === true) {
         btnGroup.appendChild(moveUpBtn)
         btnGroup.appendChild(moveDownBtn)
+      }
+
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn)
       }
 
       buttonsTd.appendChild(btnGroup)

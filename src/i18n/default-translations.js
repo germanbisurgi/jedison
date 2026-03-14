@@ -35,6 +35,7 @@ export default {
   arrayMoveDown: 'Move down',
   arrayDrag: 'Drag',
   arrayAdd: 'Add item',
+  arrayAddAfter: 'Add after',
   arrayConfirmDelete: 'Are you sure you want to delete this item?',
   objectAddProperty: 'Add property',
   objectPropertyAdded: 'field was added to the form',

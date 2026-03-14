@@ -5,13 +5,7 @@
   ],
   "properties": {
     "test": {
-      "$ref": "#/$defs/global/myDef",
-      "properties": {
-        "propA": {
-        },
-        "propB": {
-        }
-      }
+      "$ref": "#/$defs/global/myDef"
     }
   },
   "$defs": {
@@ -38,9 +32,6 @@
             ],
             "x-enforceEnum": false,
             "x-format": "radios-inline"
-          },
-          "propB": {
-            "x-enforceConst": true
           }
         },
         "if": {
@@ -83,25 +74,10 @@
           }
         },
         "else": {
-          "if": {
-            "properties": {
-              "propA": {
-                "const": "unknown"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "propB": {
-                "type": "null"
-              }
-            }
-          },
-          "else": {
-            "properties": {
-              "propB": {
-                "type": "null"
-              }
+          "properties": {
+            "propB": {
+              "type": "null",
+              "const": null
             }
           }
         }

@@ -410,7 +410,6 @@ class ThemeBootstrap5 extends Theme {
   setTabPaneAttributes (element, active, id) {
     super.setTabPaneAttributes(element, active, id)
     element.classList.add('tab-pane')
-
     element.classList.toggle('active', active)
   }
 

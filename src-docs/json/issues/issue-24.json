@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "divisions": {
+      "description": "Divisions or wild card standings to rotate through",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/division"
+      },
+      "default": [],
+      "uniqueItems": true,
+      "x-format": "choices"
+    }
+  },
+  "$defs": {
+    "division": {
+      "title": "MLB division or wildcard group",
+      "type": "string",
+      "enum": [
+        "AL East", "AL Central", "AL West",
+        "NL East", "NL Central", "NL West",
+        "AL Wild Card", "NL Wild Card"
+      ]
+    }
+  }
+}

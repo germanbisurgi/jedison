@@ -616,6 +616,18 @@ class Theme {
   }
 
   /**
+   * Array "add after" item button
+   */
+  getAddAfterItemBtn (config) {
+    const addAfterItemBtn = this.getButton({
+      content: config.content,
+      icon: 'add'
+    })
+    addAfterItemBtn.classList.add('jedi-array-add-after')
+    return addAfterItemBtn
+  }
+
+  /**
    * Array "delete" item button
    */
   getDeleteItemBtn (config) {

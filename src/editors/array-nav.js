@@ -1,5 +1,5 @@
 import EditorArray from './array.js'
-import { compileTemplate, isSet, pathToAttribute } from '../helpers/utils.js'
+import { compileTemplate, isSet } from '../helpers/utils.js'
 import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -55,6 +55,7 @@ class EditorArrayNav extends EditorArray {
 
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
 
     this.control.childrenSlot.appendChild(row)
     row.appendChild(tabListCol)
@@ -63,7 +64,7 @@ class EditorArrayNav extends EditorArray {
     tabContentCol.appendChild(tabContent)
 
     this.instance.children.forEach((child, index) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup } = this.getButtons(index)
+      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, addAfterBtn } = this.getButtons(index)
 
       if (isSet(arrayDelete) && arrayDelete === true) {
         btnGroup.appendChild(deleteBtn)
@@ -72,6 +73,10 @@ class EditorArrayNav extends EditorArray {
       if (isSet(arrayMove) && arrayMove === true) {
         btnGroup.appendChild(moveUpBtn)
         btnGroup.appendChild(moveDownBtn)
+      }
+
+      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+        btnGroup.appendChild(addAfterBtn)
       }
 
       this.control.childrenSlot.appendChild(child.ui.control.container)
@@ -90,7 +95,7 @@ class EditorArrayNav extends EditorArray {
       }
 
       const active = index === this.activeItemIndex
-      const id = pathToAttribute(child.path)
+      const id = this.getIdFromPath(child.path)
 
       const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
       const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')

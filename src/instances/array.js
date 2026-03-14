@@ -96,6 +96,18 @@ class InstanceArray extends Instance {
     this.jedison.emit('item-add', initiator, instance)
   }
 
+  addItemAfter (afterIndex, initiator) {
+    const tempEditor = this.createItemInstance()
+    const raw = this.getValueRaw()
+    const value = isArray(raw) ? clone(raw) : []
+    value.splice(afterIndex + 1, 0, tempEditor.getValueRaw())
+    tempEditor.destroy()
+    this.setValue(value, true, initiator)
+    const instance = this.children[afterIndex + 1]
+    this.emit('item-add', initiator, instance)
+    this.jedison.emit('item-add', initiator, instance)
+  }
+
   deleteItem (itemIndex, initiator) {
     const raw = this.getValueRaw()
     if (!isArray(raw)) { return }

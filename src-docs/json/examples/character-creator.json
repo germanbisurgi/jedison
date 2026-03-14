@@ -481,8 +481,9 @@
               "title": "Noble",
               "x-switcherTitle": "Noble",
               "type": "object",
+              "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "noble" },
+                "originType": { "type": "string", "const": "noble", "default": "noble", "readOnly": true, "x-enforceConst": true },
                 "house": {
                   "title": "Noble House",
                   "type": "string",
@@ -504,8 +505,9 @@
               "title": "Commoner",
               "x-switcherTitle": "Commoner",
               "type": "object",
+              "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "commoner" },
+                "originType": { "type": "string", "const": "commoner", "default": "commoner", "readOnly": true, "x-enforceConst": true },
                 "trade": {
                   "title": "Trade",
                   "type": "string",
@@ -522,8 +524,9 @@
               "title": "Outcast",
               "x-switcherTitle": "Outcast",
               "type": "object",
+              "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "outcast" },
+                "originType": { "type": "string", "const": "outcast", "default": "outcast", "readOnly": true, "x-enforceConst": true },
                 "reason": {
                   "title": "Reason for Exile",
                   "type": "string",
@@ -536,8 +539,9 @@
               "title": "Wanderer",
               "x-switcherTitle": "Wanderer",
               "type": "object",
+              "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "wanderer" },
+                "originType": { "type": "string", "const": "wanderer", "default": "wanderer", "readOnly": true, "x-enforceConst": true },
                 "yearsOnRoad": {
                   "title": "Years on the Road",
                   "type": "integer",
