@@ -1,6 +1,6 @@
 ### dev
 
-### 1.6.1
+### 1.7.0
 
 - Updated character-creator example to showcase correct use of `oneOf` and `x-discriminator`
 - Prefixed tabs IDs with editor ID to avoid clashes
