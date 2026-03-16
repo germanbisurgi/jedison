@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "title": "Array Footer",
+  "properties": {
+    "default": {
+      "type": "array",
+      "title": "Default (footer right-aligned, delete all)",
+      "minItems": 2,
+      "x-arrayFooterAdd": true,
+      "x-arrayDeleteAll": true,
+      "x-arrayFooterDeleteAll": true,
+      "items": { "type": "string", "title": "Item" },
+      "default": ["foo", "bar"]
+    },
+    "footer_left": {
+      "type": "array",
+      "title": "Footer left-aligned",
+      "x-arrayFooterAdd": true,
+      "x-arrayFooterButtonsPosition": "left",
+      "items": { "type": "string", "title": "Item" },
+      "default": ["foo", "bar"]
+    },
+    "nav_vertical": {
+      "type": "array",
+      "title": "Nav Vertical",
+      "minItems": 2,
+      "x-format": "nav-vertical",
+      "x-arrayFooterAdd": true,
+      "x-arrayDeleteAll": true,
+      "x-arrayFooterDeleteAll": true,
+      "items": { "type": "string", "title": "Item" },
+      "default": ["foo", "bar"]
+    },
+    "nav_horizontal": {
+      "type": "array",
+      "title": "Nav Horizontal",
+      "minItems": 2,
+      "x-format": "nav-horizontal",
+      "x-arrayFooterAdd": true,
+      "x-arrayDeleteAll": true,
+      "x-arrayFooterDeleteAll": true,
+      "items": { "type": "string", "title": "Item" },
+      "default": ["foo", "bar"]
+    },
+    "table": {
+      "type": "array",
+      "title": "Table",
+      "minItems": 2,
+      "x-format": "table",
+      "x-arrayFooterAdd": true,
+      "x-arrayDeleteAll": true,
+      "x-arrayFooterDeleteAll": true,
+      "items": { "type": "string", "title": "Item" },
+      "default": ["foo", "bar"]
+    },
+    "table_object": {
+      "type": "array",
+      "title": "Table Object",
+      "minItems": 2,
+      "x-format": "table-object",
+      "x-arrayFooterAdd": true,
+      "x-arrayDeleteAll": true,
+      "x-arrayFooterDeleteAll": true,
+      "items": {
+        "type": "object",
+        "title": "Item",
+        "properties": {
+          "name": { "type": "string", "title": "Name" }
+        }
+      },
+      "default": [{ "name": "foo" }, { "name": "bar" }]
+    }
+  }
+}

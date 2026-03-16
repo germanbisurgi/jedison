@@ -102,6 +102,12 @@ class ThemeBootstrap5 extends Theme {
     return html
   }
 
+  getArrayFooter () {
+    const footer = super.getArrayFooter()
+    footer.classList.add('card-footer')
+    return footer
+  }
+
   getControlSlot () {
     const controlSlot = super.getControlSlot()
     controlSlot.classList.add('mb-3')

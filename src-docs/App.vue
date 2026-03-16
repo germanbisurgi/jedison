@@ -224,6 +224,7 @@ import arrayTableButtonsPosition from './json/editors/array-table-buttons-positi
 import arrayNavVertical from './json/editors/array-nav-vertical.json'
 import arrayNavHorizontal from './json/editors/array-nav-horizontal.json'
 import arrayEnforceMinItems from './json/editors/array-enforceMinItems.json'
+import arrayFooter from './json/editors/array-footer.json'
 import booleanCheckbox from './json/editors/boolean-checkbox.json'
 import booleanSelect from './json/editors/boolean-select.json'
 import booleanRadios from './json/editors/boolean-radios.json'
@@ -395,6 +396,7 @@ export default {
           'editors/array-table-buttons-position': arrayTableButtonsPosition,
           'editors/array-tuple': arrayTuple,
           'editors/array-enforceMinItems': arrayEnforceMinItems,
+          'editors/array-footer': arrayFooter,
           'editors/boolean-checkbox': booleanCheckbox,
           'editors/boolean-radios': booleanRadios,
           'editors/boolean-radios-inline': booleanRadiosInline,

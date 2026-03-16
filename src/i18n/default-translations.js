@@ -37,6 +37,8 @@ export default {
   arrayAdd: 'Add item',
   arrayAddAfter: 'Add after',
   arrayConfirmDelete: 'Are you sure you want to delete this item?',
+  arrayDeleteAll: 'Delete all items',
+  arrayConfirmDeleteAll: 'Are you sure you want to delete all items?',
   objectAddProperty: 'Add property',
   objectPropertyAdded: 'field was added to the form',
   objectPropertyRemoved: 'field was removed from the form',

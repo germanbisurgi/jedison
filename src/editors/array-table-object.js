@@ -33,6 +33,23 @@ class EditorArrayTableObject extends EditorArray {
       this.instance.addItem('user')
     })
 
+    this.control.footerAddBtn.addEventListener('click', () => {
+      this.activeItemIndex = this.instance.value.length
+      this.instance.addItem('user')
+    })
+
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener('click', () => {
+        this.deleteAllItems()
+      })
+    }
+
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener('click', () => {
+        this.deleteAllItems()
+      })
+    }
+
     this.addJsonDataEventListeners()
   }
 
@@ -167,6 +184,7 @@ class EditorArrayTableObject extends EditorArray {
 
     this.refreshSortable(table.tbody)
     this.refreshAddBtn()
+    this.refreshDeleteAllBtn()
     this.refreshJsonData()
     this.refreshDisabledState()
     this.refreshScrollPosition(table.container)

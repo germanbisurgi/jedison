@@ -106,6 +106,12 @@ class ThemeBootstrap3 extends Theme {
     return html
   }
 
+  getArrayFooter () {
+    const footer = super.getArrayFooter()
+    footer.classList.add('panel-footer')
+    return footer
+  }
+
   getBtnGroup () {
     const html = super.getBtnGroup()
     html.classList.add('btn-group')

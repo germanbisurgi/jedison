@@ -32,6 +32,25 @@ class EditorArrayNav extends EditorArray {
       this.instance.addItem('user')
     })
 
+    this.control.footerAddBtn.addEventListener('click', () => {
+      this.activeItemIndex = this.instance.value.length
+      this.instance.addItem('user')
+    })
+
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener('click', () => {
+        this.activeItemIndex = 0
+        this.deleteAllItems()
+      })
+    }
+
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener('click', () => {
+        this.activeItemIndex = 0
+        this.deleteAllItems()
+      })
+    }
+
     this.addJsonDataEventListeners()
   }
 
@@ -144,6 +163,7 @@ class EditorArrayNav extends EditorArray {
 
     this.refreshDisabledState()
     this.refreshAddBtn()
+    this.refreshDeleteAllBtn()
     this.refreshJsonData()
   }
 }

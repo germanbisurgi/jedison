@@ -254,6 +254,17 @@ class Theme {
   }
 
   /**
+   * A footer for array cards
+   */
+  getArrayFooter () {
+    const html = document.createElement('div')
+    html.classList.add('jedi-array-footer')
+    html.style.display = 'flex'
+    html.style.alignItems = 'center'
+    return html
+  }
+
+  /**
    * Wrapper for editor actions buttons
    */
   getActionsSlot () {
@@ -612,6 +623,18 @@ class Theme {
       icon: 'add'
     })
     html.classList.add('jedi-array-add')
+    return html
+  }
+
+  /**
+   * Array "delete all" button
+   */
+  getArrayBtnDeleteAll (config) {
+    const html = this.getButton({
+      content: config.content,
+      icon: 'delete'
+    })
+    html.classList.add('jedi-array-delete-all')
     return html
   }
 
@@ -990,6 +1013,17 @@ class Theme {
     const addBtn = this.getArrayBtnAdd({
       content: config.arrayAddContent
     })
+    const footerAddBtn = this.getArrayBtnAdd({
+      content: config.arrayFooterAddContent
+    })
+    const deleteAllBtn = config.arrayDeleteAll === true
+      ? this.getArrayBtnDeleteAll({ content: config.arrayDeleteAllContent })
+      : null
+    const footerDeleteAllBtn = config.arrayFooterDeleteAll === true
+      ? this.getArrayBtnDeleteAll({ content: config.arrayFooterDeleteAllContent })
+      : null
+    const footerBtnGroup = this.getBtnGroup()
+    const footer = this.getArrayFooter()
 
     const fieldset = this.getFieldset()
     const info = this.getInfo(config.info)
@@ -1056,6 +1090,10 @@ class Theme {
       btnGroup.appendChild(jsonData.toggle)
     }
 
+    if (deleteAllBtn) {
+      btnGroup.appendChild(deleteAllBtn)
+    }
+
     if (isSet(config.arrayAdd) && config.arrayAdd === true) {
       btnGroup.appendChild(addBtn)
     }
@@ -1064,6 +1102,25 @@ class Theme {
 
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle)
+    }
+
+    const showFooter = (
+      (config.arrayFooterAdd === true || config.arrayFooterDeleteAll === true) &&
+      config.readOnly === false
+    )
+
+    if (showFooter) {
+      if (footerDeleteAllBtn) {
+        footerBtnGroup.appendChild(footerDeleteAllBtn)
+      }
+      if (config.arrayFooterAdd === true) {
+        footerBtnGroup.appendChild(footerAddBtn)
+      }
+      if (config.arrayFooterButtonsPosition === 'right') {
+        footerBtnGroup.style.marginLeft = 'auto'
+      }
+      footer.appendChild(footerBtnGroup)
+      collapse.appendChild(footer)
     }
 
     return {
@@ -1079,7 +1136,10 @@ class Theme {
       jsonData,
       legend,
       legendText,
-      switcherSlot
+      switcherSlot,
+      footerAddBtn,
+      deleteAllBtn,
+      footerDeleteAllBtn
     }
   }
 

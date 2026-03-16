@@ -4487,14 +4487,49 @@ class EditorArray extends Editor {
       editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.options.editJsonData,
       arrayAdd: getSchemaXOption(this.instance.schema, "arrayAdd") ?? this.instance.jedison.options.arrayAdd,
       arrayAddContent: getSchemaXOption(this.instance.schema, "arrayAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
+      arrayFooterAdd: getSchemaXOption(this.instance.schema, "arrayFooterAdd") ?? this.instance.jedison.options.arrayFooterAdd,
+      arrayFooterAddContent: getSchemaXOption(this.instance.schema, "arrayFooterAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
+      arrayFooterButtonsPosition: getSchemaXOption(this.instance.schema, "arrayFooterButtonsPosition") ?? this.instance.jedison.options.arrayFooterButtonsPosition,
+      arrayDeleteAll: getSchemaXOption(this.instance.schema, "arrayDeleteAll") ?? this.instance.jedison.options.arrayDeleteAll,
+      arrayDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
+      arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAll") ?? this.instance.jedison.options.arrayFooterDeleteAll,
+      arrayFooterDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle")
     });
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
+  }
+  deleteAllItems() {
+    const schemaConfirm = getSchemaXOption(this.instance.schema, "arrayDeleteConfirm");
+    const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm;
+    const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm;
+    const doDeleteAll = () => {
+      this.instance.setValue([], true, "user");
+    };
+    if (shouldConfirm) {
+      if (window.confirm(this.instance.jedison.translator.translate("arrayConfirmDeleteAll"))) {
+        doDeleteAll();
+      }
+    } else {
+      doDeleteAll();
+    }
   }
   addEventListeners() {
     this.control.addBtn.addEventListener("click", () => {
       this.instance.addItem("user");
     });
+    this.control.footerAddBtn.addEventListener("click", () => {
+      this.instance.addItem("user");
+    });
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
     this.addJsonDataEventListeners();
   }
   addJsonDataEventListeners() {
@@ -4598,12 +4633,33 @@ class EditorArray extends Editor {
       });
     }
   }
+  refreshDeleteAllBtn() {
+    if (!this.control.deleteAllBtn && !this.control.footerDeleteAllBtn) return;
+    const isEmpty = this.instance.value.length === 0;
+    const cannotDeleteAll = isEmpty;
+    const btns = [this.control.deleteAllBtn, this.control.footerDeleteAllBtn].filter(Boolean);
+    if (cannotDeleteAll || this.disabled || this.readOnly) {
+      btns.forEach((btn) => {
+        btn.setAttribute("disabled", "");
+        btn.setAttribute("always-disabled", true);
+      });
+    } else {
+      if (!this.disabled && !this.readOnly) {
+        btns.forEach((btn) => {
+          btn.removeAttribute("disabled");
+          btn.removeAttribute("always-disabled");
+        });
+      }
+    }
+  }
   refreshAddBtn() {
     const maxItems2 = getSchemaMaxItems(this.instance.schema);
     const enforceMaxItems = getSchemaXOption(this.instance.schema, "enforceMaxItems") ?? this.instance.jedison.options.enforceMaxItems;
     if (isSet(maxItems2) && enforceMaxItems && maxItems2 <= this.instance.value.length) {
       this.control.addBtn.setAttribute("disabled", "");
       this.control.addBtn.setAttribute("always-disabled", true);
+      this.control.footerAddBtn.setAttribute("disabled", "");
+      this.control.footerAddBtn.setAttribute("always-disabled", true);
       this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
         btn.setAttribute("disabled", "");
         btn.setAttribute("always-disabled", true);
@@ -4612,6 +4668,8 @@ class EditorArray extends Editor {
       if (!this.disabled && !this.readOnly) {
         this.control.addBtn.removeAttribute("disabled");
         this.control.addBtn.removeAttribute("always-disabled");
+        this.control.footerAddBtn.removeAttribute("disabled");
+        this.control.footerAddBtn.removeAttribute("always-disabled");
         this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
           btn.removeAttribute("disabled");
           btn.removeAttribute("always-disabled");
@@ -4663,6 +4721,7 @@ class EditorArray extends Editor {
       child.ui.refreshUI();
     });
     this.refreshAddBtn();
+    this.refreshDeleteAllBtn();
     this.refreshJsonData();
     this.refreshLegendWarning();
   }
@@ -4735,6 +4794,20 @@ class EditorArrayTable extends EditorArray {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.control.footerAddBtn.addEventListener("click", () => {
+      this.activeItemIndex = this.instance.value.length;
+      this.instance.addItem("user");
+    });
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
     this.addJsonDataEventListeners();
   }
   isSortable() {
@@ -4814,6 +4887,7 @@ class EditorArrayTable extends EditorArray {
     });
     this.refreshSortable(table.tbody);
     this.refreshAddBtn();
+    this.refreshDeleteAllBtn();
     this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
@@ -4864,6 +4938,20 @@ class EditorArrayTableObject extends EditorArray {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.control.footerAddBtn.addEventListener("click", () => {
+      this.activeItemIndex = this.instance.value.length;
+      this.instance.addItem("user");
+    });
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener("click", () => {
+        this.deleteAllItems();
+      });
+    }
     this.addJsonDataEventListeners();
   }
   isSortable() {
@@ -4958,6 +5046,7 @@ class EditorArrayTableObject extends EditorArray {
     });
     this.refreshSortable(table.tbody);
     this.refreshAddBtn();
+    this.refreshDeleteAllBtn();
     this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
@@ -5129,6 +5218,22 @@ class EditorArrayNav extends EditorArray {
       this.activeItemIndex = this.instance.value.length;
       this.instance.addItem("user");
     });
+    this.control.footerAddBtn.addEventListener("click", () => {
+      this.activeItemIndex = this.instance.value.length;
+      this.instance.addItem("user");
+    });
+    if (this.control.deleteAllBtn) {
+      this.control.deleteAllBtn.addEventListener("click", () => {
+        this.activeItemIndex = 0;
+        this.deleteAllItems();
+      });
+    }
+    if (this.control.footerDeleteAllBtn) {
+      this.control.footerDeleteAllBtn.addEventListener("click", () => {
+        this.activeItemIndex = 0;
+        this.deleteAllItems();
+      });
+    }
     this.addJsonDataEventListeners();
   }
   refreshUI() {
@@ -5214,6 +5319,7 @@ class EditorArrayNav extends EditorArray {
     });
     this.refreshDisabledState();
     this.refreshAddBtn();
+    this.refreshDeleteAllBtn();
     this.refreshJsonData();
   }
 }
@@ -6074,6 +6180,8 @@ const defaultTranslations = {
   arrayAdd: "Add item",
   arrayAddAfter: "Add after",
   arrayConfirmDelete: "Are you sure you want to delete this item?",
+  arrayDeleteAll: "Delete all items",
+  arrayConfirmDeleteAll: "Are you sure you want to delete all items?",
   objectAddProperty: "Add property",
   objectPropertyAdded: "field was added to the form",
   objectPropertyRemoved: "field was removed from the form",
@@ -6119,6 +6227,8 @@ const translations = {
     arrayDrag: "Drag",
     arrayAdd: "Add item",
     arrayConfirmDelete: "Are you sure you want to delete this item?",
+    arrayDeleteAll: "Delete all items",
+    arrayConfirmDeleteAll: "Are you sure you want to delete all items?",
     objectAddProperty: "Add property",
     objectPropertyAdded: "field was added to the form",
     objectPropertyRemoved: "field was removed from the form",
@@ -6163,6 +6273,8 @@ const translations = {
     arrayDrag: "Ziehen",
     arrayAdd: "Element hinzufügen",
     arrayConfirmDelete: "Möchten Sie dieses Element wirklich löschen?",
+    arrayDeleteAll: "Alle Elemente löschen",
+    arrayConfirmDeleteAll: "Möchten Sie wirklich alle Elemente löschen?",
     objectAddProperty: "Eigenschaft hinzufügen",
     objectPropertyAdded: "Feld wurde dem Formular hinzugefügt",
     objectPropertyRemoved: "Feld wurde aus dem Formular entfernt",
@@ -6207,6 +6319,8 @@ const translations = {
     arrayDrag: "Trascina",
     arrayAdd: "Aggiungi elemento",
     arrayConfirmDelete: "Sei sicuro di voler eliminare questo elemento?",
+    arrayDeleteAll: "Elimina tutti gli elementi",
+    arrayConfirmDeleteAll: "Sei sicuro di voler eliminare tutti gli elementi?",
     objectAddProperty: "Aggiungi proprietà",
     objectPropertyAdded: "Campo aggiunto al modulo",
     objectPropertyRemoved: "Campo rimosso dal modulo",
@@ -6251,6 +6365,8 @@ const translations = {
     arrayDrag: "Arrastrar",
     arrayAdd: "Agregar elemento",
     arrayConfirmDelete: "¿Estás seguro de que deseas eliminar este elemento?",
+    arrayDeleteAll: "Eliminar todos los elementos",
+    arrayConfirmDeleteAll: "¿Está seguro de que desea eliminar todos los elementos?",
     objectAddProperty: "Agregar propiedad",
     objectPropertyAdded: "campo fue añadido al formulario",
     objectPropertyRemoved: "campo fue eliminado del formulario",
@@ -6329,6 +6445,10 @@ class Jedison extends EventEmitter {
       arrayMove: true,
       arrayAdd: true,
       arrayAddAfter: false,
+      arrayFooterAdd: false,
+      arrayFooterButtonsPosition: "right",
+      arrayDeleteAll: false,
+      arrayFooterDeleteAll: false,
       objectAdd: true,
       arrayButtonsPosition: "left",
       startCollapsed: false,
@@ -6362,7 +6482,7 @@ class Jedison extends EventEmitter {
       enforceMaxItems: true,
       enforceEnum: true,
       subErrors: false,
-      debug: true,
+      debug: false,
       audacity: true
     }, options);
     this.rootName = "#";
@@ -7152,6 +7272,16 @@ class Theme {
     return html;
   }
   /**
+   * A footer for array cards
+   */
+  getArrayFooter() {
+    const html = document.createElement("div");
+    html.classList.add("jedi-array-footer");
+    html.style.display = "flex";
+    html.style.alignItems = "center";
+    return html;
+  }
+  /**
    * Wrapper for editor actions buttons
    */
   getActionsSlot() {
@@ -7444,6 +7574,17 @@ class Theme {
       icon: "add"
     });
     html.classList.add("jedi-array-add");
+    return html;
+  }
+  /**
+   * Array "delete all" button
+   */
+  getArrayBtnDeleteAll(config) {
+    const html = this.getButton({
+      content: config.content,
+      icon: "delete"
+    });
+    html.classList.add("jedi-array-delete-all");
     return html;
   }
   /**
@@ -7767,6 +7908,13 @@ class Theme {
     const addBtn = this.getArrayBtnAdd({
       content: config.arrayAddContent
     });
+    const footerAddBtn = this.getArrayBtnAdd({
+      content: config.arrayFooterAddContent
+    });
+    const deleteAllBtn = config.arrayDeleteAll === true ? this.getArrayBtnDeleteAll({ content: config.arrayDeleteAllContent }) : null;
+    const footerDeleteAllBtn = config.arrayFooterDeleteAll === true ? this.getArrayBtnDeleteAll({ content: config.arrayFooterDeleteAllContent }) : null;
+    const footerBtnGroup = this.getBtnGroup();
+    const footer = this.getArrayFooter();
     const fieldset = this.getFieldset();
     const info = this.getInfo(config.info);
     const { legend, legendText, infoContainer, right } = this.getLegend({
@@ -7819,12 +7967,29 @@ class Theme {
     if (config.editJsonData) {
       btnGroup.appendChild(jsonData.toggle);
     }
+    if (deleteAllBtn) {
+      btnGroup.appendChild(deleteAllBtn);
+    }
     if (isSet(config.arrayAdd) && config.arrayAdd === true) {
       btnGroup.appendChild(addBtn);
     }
     body.appendChild(childrenSlot);
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
+    }
+    const showFooter = (config.arrayFooterAdd === true || config.arrayFooterDeleteAll === true) && config.readOnly === false;
+    if (showFooter) {
+      if (footerDeleteAllBtn) {
+        footerBtnGroup.appendChild(footerDeleteAllBtn);
+      }
+      if (config.arrayFooterAdd === true) {
+        footerBtnGroup.appendChild(footerAddBtn);
+      }
+      if (config.arrayFooterButtonsPosition === "right") {
+        footerBtnGroup.style.marginLeft = "auto";
+      }
+      footer.appendChild(footerBtnGroup);
+      collapse.appendChild(footer);
     }
     return {
       container,
@@ -7839,7 +8004,10 @@ class Theme {
       jsonData,
       legend,
       legendText,
-      switcherSlot
+      switcherSlot,
+      footerAddBtn,
+      deleteAllBtn,
+      footerDeleteAllBtn
     };
   }
   getArrayItem(config = {}) {
@@ -8630,6 +8798,11 @@ class ThemeBootstrap3 extends Theme {
     html.style.paddingBottom = "0";
     return html;
   }
+  getArrayFooter() {
+    const footer = super.getArrayFooter();
+    footer.classList.add("panel-footer");
+    return footer;
+  }
   getBtnGroup() {
     const html = super.getBtnGroup();
     html.classList.add("btn-group");
@@ -8983,6 +9156,11 @@ class ThemeBootstrap4 extends Theme {
     html.classList.add("card-body");
     html.classList.add("pb-0");
     return html;
+  }
+  getArrayFooter() {
+    const footer = super.getArrayFooter();
+    footer.classList.add("card-footer");
+    return footer;
   }
   getBtnGroup() {
     const html = super.getBtnGroup();
@@ -9364,6 +9542,11 @@ class ThemeBootstrap5 extends Theme {
     html.classList.add("card-body");
     html.classList.add("pb-0");
     return html;
+  }
+  getArrayFooter() {
+    const footer = super.getArrayFooter();
+    footer.classList.add("card-footer");
+    return footer;
   }
   getControlSlot() {
     const controlSlot = super.getControlSlot();

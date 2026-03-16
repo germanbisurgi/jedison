@@ -2,6 +2,10 @@
 
 ### 1.8.0
 
+- added `arrayDeleteAll` and `x-arrayDeleteAll` options
+- added `arrayFooterAdd` and `x-arrayFooterAdd` options
+- added `arrayFooterButtonsPosition` and `x-arrayFooterButtonsPosition` options
+- added `arrayFooterDeleteAll` and `x-arrayarrayFooterDeleteAllDeleteAll` options
 - Fix registration of correct if-then-else branch
 
 ### 1.7.0

@@ -99,6 +99,12 @@ class ThemeBootstrap4 extends Theme {
     return html
   }
 
+  getArrayFooter () {
+    const footer = super.getArrayFooter()
+    footer.classList.add('card-footer')
+    return footer
+  }
+
   getBtnGroup () {
     const html = super.getBtnGroup()
     html.classList.add('btn-group')
