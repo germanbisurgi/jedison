@@ -1,5 +1,9 @@
 ### dev
 
+### 1.8.0
+
+- Fix registration of correct if-then-else branch
+
 ### 1.7.0
 
 - Updated character-creator example to showcase correct use of `oneOf` and `x-discriminator`

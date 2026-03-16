@@ -2584,6 +2584,7 @@ class InstanceIfThenElse extends Instance {
     if (initiator === "api" && this.hasNullableFields(this.activeInstance)) {
       this.activeInstance.setValue(value, false, "secondary");
     }
+    this.activeInstance.register();
     this.value = this.activeInstance.getValueRaw();
   }
   getWithoutIfValueFromValue(value) {
@@ -6361,7 +6362,7 @@ class Jedison extends EventEmitter {
       enforceMaxItems: true,
       enforceEnum: true,
       subErrors: false,
-      debug: false,
+      debug: true,
       audacity: true
     }, options);
     this.rootName = "#";

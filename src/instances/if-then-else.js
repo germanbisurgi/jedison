@@ -166,6 +166,11 @@ class InstanceIfThenElse extends Instance {
       this.activeInstance.setValue(value, false, 'secondary')
     }
 
+    // Re-register active instance to restore jedison.instances consistency.
+    // Inactive instances may have triggered their own register() calls during
+    // setValue (via inner changeValue), overwriting the correct active instance.
+    this.activeInstance.register()
+
     this.value = this.activeInstance.getValueRaw()
   }
 
