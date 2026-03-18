@@ -27,19 +27,19 @@ class EditorArray extends Editor {
       description: this.getDescription(),
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
       id: this.getIdFromPath(this.instance.path),
-      enableCollapseToggle: getSchemaXOption(this.instance.schema, 'enableCollapseToggle') ?? this.instance.jedison.options.enableCollapseToggle,
-      startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.options.startCollapsed,
+      enableCollapseToggle: getSchemaXOption(this.instance.schema, 'enableCollapseToggle') ?? this.instance.jedison.getOption('enableCollapseToggle'),
+      startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.getOption('startCollapsed'),
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
-      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.options.editJsonData,
-      arrayAdd: getSchemaXOption(this.instance.schema, 'arrayAdd') ?? this.instance.jedison.options.arrayAdd,
+      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.getOption('editJsonData'),
+      arrayAdd: getSchemaXOption(this.instance.schema, 'arrayAdd') ?? this.instance.jedison.getOption('arrayAdd'),
       arrayAddContent: getSchemaXOption(this.instance.schema, 'arrayAddContent') ?? this.instance.jedison.translator.translate('arrayAdd'),
-      arrayFooterAdd: getSchemaXOption(this.instance.schema, 'arrayFooterAdd') ?? this.instance.jedison.options.arrayFooterAdd,
+      arrayFooterAdd: getSchemaXOption(this.instance.schema, 'arrayFooterAdd') ?? this.instance.jedison.getOption('arrayFooterAdd'),
       arrayFooterAddContent: getSchemaXOption(this.instance.schema, 'arrayFooterAddContent') ?? this.instance.jedison.translator.translate('arrayAdd'),
-      arrayFooterButtonsPosition: getSchemaXOption(this.instance.schema, 'arrayFooterButtonsPosition') ?? this.instance.jedison.options.arrayFooterButtonsPosition,
-      arrayDeleteAll: getSchemaXOption(this.instance.schema, 'arrayDeleteAll') ?? this.instance.jedison.options.arrayDeleteAll,
+      arrayFooterButtonsPosition: getSchemaXOption(this.instance.schema, 'arrayFooterButtonsPosition') ?? this.instance.jedison.getOption('arrayFooterButtonsPosition'),
+      arrayDeleteAll: getSchemaXOption(this.instance.schema, 'arrayDeleteAll') ?? this.instance.jedison.getOption('arrayDeleteAll'),
       arrayDeleteAllContent: getSchemaXOption(this.instance.schema, 'arrayDeleteAllContent') ?? this.instance.jedison.translator.translate('arrayDeleteAll'),
-      arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, 'arrayFooterDeleteAll') ?? this.instance.jedison.options.arrayFooterDeleteAll,
+      arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, 'arrayFooterDeleteAll') ?? this.instance.jedison.getOption('arrayFooterDeleteAll'),
       arrayFooterDeleteAllContent: getSchemaXOption(this.instance.schema, 'arrayFooterDeleteAllContent') ?? this.instance.jedison.translator.translate('arrayDeleteAll'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle')
     })
@@ -49,7 +49,7 @@ class EditorArray extends Editor {
 
   deleteAllItems () {
     const schemaConfirm = getSchemaXOption(this.instance.schema, 'arrayDeleteConfirm')
-    const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm
+    const globalConfirm = this.instance.jedison.getOption('arrayDeleteConfirm')
     const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm
 
     const doDeleteAll = () => {
@@ -149,7 +149,7 @@ class EditorArray extends Editor {
 
     deleteBtn.addEventListener('click', () => {
       const schemaConfirm = getSchemaXOption(this.instance.schema, 'arrayDeleteConfirm')
-      const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm
+      const globalConfirm = this.instance.jedison.getOption('arrayDeleteConfirm')
       const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm
 
       const doDelete = () => {
@@ -240,7 +240,7 @@ class EditorArray extends Editor {
 
   refreshAddBtn () {
     const maxItems = getSchemaMaxItems(this.instance.schema)
-    const enforceMaxItems = getSchemaXOption(this.instance.schema, 'enforceMaxItems') ?? this.instance.jedison.options.enforceMaxItems
+    const enforceMaxItems = getSchemaXOption(this.instance.schema, 'enforceMaxItems') ?? this.instance.jedison.getOption('enforceMaxItems')
 
     if (isSet(maxItems) && enforceMaxItems && maxItems <= this.instance.value.length) {
       this.control.addBtn.setAttribute('disabled', '')
@@ -268,9 +268,9 @@ class EditorArray extends Editor {
   refreshUI () {
     super.refreshUI()
     const minItems = getSchemaMinItems(this.instance.schema)
-    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
-    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
+    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
+    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
 
     this.control.childrenSlot.innerHTML = ''
 

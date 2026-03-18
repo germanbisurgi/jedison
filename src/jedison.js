@@ -20,6 +20,7 @@ import {
   getSchemaOneOf,
   getSchemaType, getSchemaXOption
 } from './helpers/schema.js'
+import { resolveAlias } from './helpers/option-aliases.js'
 import { bootstrapIcons, fontAwesome3, fontAwesome4, fontAwesome5, fontAwesome6, glyphicons } from './themes/icons/icons.js'
 import UiResolver from './ui-resolver.js'
 import Translator from './i18n/translator.js'
@@ -83,7 +84,6 @@ class Jedison extends EventEmitter {
       mergeAllOf: false,
       enforceConst: false,
       enforceRequired: true,
-      enforceEnumDefault: true, // todo: deprecated
       enforceAdditionalProperties: true,
       enforceMinItems: true,
       enforceMaxItems: true,
@@ -392,11 +392,6 @@ class Jedison extends EventEmitter {
             node.oneOf[index] = this.refParser.expand(subschema)
           })
         }
-
-        // expand items $ref (fixes issue #24)
-        if (isObject(node.items) && this.refParser.hasRef(node.items)) {
-          node.items = this.refParser.expand(node.items)
-        }
       })
     }
 
@@ -553,6 +548,19 @@ class Jedison extends EventEmitter {
    */
   getInstance (path) {
     return this.instances.get(path)
+  }
+
+  /**
+   * Returns the value of a jedison option
+   * @param {string} option
+   * @return {*}
+   */
+  getOption (option) {
+    const canonical = resolveAlias(option)
+    if (canonical !== option) {
+      console.warn(`Jedison: option "${option}" is deprecated. Use "${canonical}" instead.`)
+    }
+    return this.options[canonical]
   }
 
   /**

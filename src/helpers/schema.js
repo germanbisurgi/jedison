@@ -1,4 +1,5 @@
 import { isString, isArray, isNumber, isInteger, isBoolean, isObject, isSet, clone } from './utils.js'
+import { getAliasesFor } from './option-aliases.js'
 
 export function getSchemaX (schema, keyword) {
   const key = 'x-' + keyword
@@ -180,7 +181,24 @@ export function getSchemaXOption (schema, option) {
     return schema[xOption]
   }
 
-  return (schema['x-options'] && isSet(schema['x-options'][option])) ? schema['x-options'][option] : undefined
+  if (schema['x-options'] && isSet(schema['x-options'][option])) {
+    return schema['x-options'][option]
+  }
+
+  // Fall back to deprecated names
+  for (const alias of getAliasesFor(option)) {
+    const xAlias = 'x-' + alias
+    if (isSet(schema[xAlias])) {
+      console.warn(`Jedison: schema option "${xAlias}" is deprecated. Use "${xOption}" instead.`)
+      return schema[xAlias]
+    }
+    if (schema['x-options'] && isSet(schema['x-options'][alias])) {
+      console.warn(`Jedison: schema x-options.${alias} is deprecated. Use x-options.${option} instead.`)
+      return schema['x-options'][alias]
+    }
+  }
+
+  return undefined
 }
 
 export function getSchemaPattern (schema) {

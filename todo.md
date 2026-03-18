@@ -3,38 +3,23 @@
 ### notes
 
 - options, deprecate old names but keep aliases for retro compatibility
-- getSchemaOption, extra param for deprecatedold names
 
 ### braking
 
 - enforceConst true default
-
-#### Bug Fixes & Critical Issues
-- focus issues with safari?
-- implement clearStoredEventListeners() in all editors that need event listener cleanup
-
-#### Core Validation
 - Validation: support multiple drafts
 - Validation: formats: https://json-schema.org/understanding-json-schema/reference/string#format
-
-#### Core Array/Object Features
+- implement clearStoredEventListeners() in all editors that need event listener cleanup
 - disable add item if maxItems reached
 - array copy value button
 - array set value button
 - object copy value button
 - object set value button
 - object activators sort by property order
-
-#### Critical Refactoring
-- refactor setInitialValue
 - use super.refreshUI() in all editors
-
-#### Core Functionality
-- "properties" button + and additionalProperties
 - error messages subcategories by data type?
 - use editor methods and overrides in build configs
-
-### Nice to Have (Enhancements)
+- recursive collapse
 
 #### New Editors
 - Editor: SignaturePad
@@ -50,7 +35,6 @@
 - collapse expands text and animation, collapse children on collapse
 - info variant tooltip
 - info variant popover
-- inline switch activators
 
 #### Theme Improvements
 - Themes: a theme option should be a string. to better handle config and config options and avoid duplication

@@ -30,15 +30,15 @@ class EditorObject extends Editor {
       addProperty = false
     }
 
-    const objectAdd = getSchemaXOption(this.instance.schema, 'objectAdd') ?? this.instance.jedison.options.objectAdd
+    const objectAdd = getSchemaXOption(this.instance.schema, 'objectAdd') ?? this.instance.jedison.getOption('objectAdd')
     if (isSet(objectAdd) && objectAdd === false) {
       addProperty = false
     }
 
     let enablePropertiesToggle = false
 
-    if (isSet(this.instance.jedison.options.enablePropertiesToggle)) {
-      enablePropertiesToggle = this.instance.jedison.options.enablePropertiesToggle
+    if (isSet(this.instance.jedison.getOption('enablePropertiesToggle'))) {
+      enablePropertiesToggle = this.instance.jedison.getOption('enablePropertiesToggle')
     }
 
     const schemaEnablePropertiesToggle = getSchemaXOption(this.instance.schema, 'enablePropertiesToggle')
@@ -54,11 +54,11 @@ class EditorObject extends Editor {
       id: this.getIdFromPath(this.instance.path),
       enablePropertiesToggle: enablePropertiesToggle,
       addProperty: addProperty,
-      enableCollapseToggle: getSchemaXOption(this.instance.schema, 'enableCollapseToggle') ?? this.instance.jedison.options.enableCollapseToggle,
-      startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.options.startCollapsed,
+      enableCollapseToggle: getSchemaXOption(this.instance.schema, 'enableCollapseToggle') ?? this.instance.jedison.getOption('enableCollapseToggle'),
+      startCollapsed: getSchemaXOption(this.instance.schema, 'startCollapsed') ?? this.instance.jedison.getOption('startCollapsed'),
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
-      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.options.editJsonData,
+      editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.getOption('editJsonData'),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, 'propertiesToggleContent') ?? this.instance.jedison.translator.translate('propertiesToggle'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
       addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty')
@@ -124,7 +124,7 @@ class EditorObject extends Editor {
   }
 
   refreshPropertiesSlot () {
-    const schemaOptionEnablePropertiesToggle = getSchemaXOption(this.instance.schema, 'enablePropertiesToggle') ?? this.instance.jedison.options.enablePropertiesToggle
+    const schemaOptionEnablePropertiesToggle = getSchemaXOption(this.instance.schema, 'enablePropertiesToggle') ?? this.instance.jedison.getOption('enablePropertiesToggle')
 
     if (equal(schemaOptionEnablePropertiesToggle, true)) {
       const declaredProperties = Object.keys(this.instance.properties)

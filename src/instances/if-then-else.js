@@ -127,7 +127,7 @@ class InstanceIfThenElse extends Instance {
         if (indexChanged && initiator !== 'api') {
           instanceValue = overwriteExistingProperties(startingValue, withoutIf)
         } else {
-          const audacity = this.jedison.options.audacity
+          const audacity = this.jedison.getOption('audacity')
 
           if (audacity && initiator === 'api' && index === fittestIndex) {
             // Pre-pass (active instance only): trigger nested ITE branch switches

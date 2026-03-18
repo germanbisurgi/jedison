@@ -32,7 +32,7 @@ class EditorNumberIMask extends EditorNumber {
     try {
       const schemaImask = getSchemaXOption(this.instance.schema, 'imask') ?? {}
       const schemaImaskSettings = schemaImask['x-settings']
-      const settings = schemaImaskSettings && this.instance.jedison.options.settings[schemaImaskSettings] ? this.instance.jedison.options.settings[schemaImaskSettings] : {}
+      const settings = schemaImaskSettings && this.instance.jedison.getOption('settings')[schemaImaskSettings] ? this.instance.jedison.getOption('settings')[schemaImaskSettings] : {}
       const imaskOptions = {
         mask: Number,
         ...schemaImask,

@@ -64,10 +64,10 @@ class EditorArrayTableObject extends EditorArray {
 
     this.control.childrenSlot.appendChild(table.container)
 
-    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
-    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
-    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, 'arrayButtonsPosition') ?? this.instance.jedison.options.arrayButtonsPosition
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
+    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
+    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, 'arrayButtonsPosition') ?? this.instance.jedison.getOption('arrayButtonsPosition')
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
 
     // thead labels
     const th = this.theme.getTableHeader()

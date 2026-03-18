@@ -1,5 +1,5 @@
 import Instance from './instance.js'
-import { isSet, clone, isArray } from '../helpers/utils.js'
+import { isSet, clone, isArray, isObject } from '../helpers/utils.js'
 import {
   getSchemaDefault,
   getSchemaItems,
@@ -15,11 +15,19 @@ import {
 class InstanceArray extends Instance {
   prepare () {
     this.schemaItems = getSchemaItems(this.schema)
+
+    // Expand items $ref so editors can resolve enum/type correctly (fixes issue #24)
+    if (isObject(this.schemaItems) && this.jedison.refParser &&
+        this.jedison.refParser.hasRef(this.schemaItems) && !this.schemaItems['x-recursive']) {
+      this.schemaItems = this.jedison.refParser.expand(this.schemaItems)
+      this.schema.items = this.schemaItems
+    }
+
     this.schemaPrefixItems = getSchemaPrefixItems(this.schema)
 
     const schemaMinItems = getSchemaMinItems(this.schema, 'minItems')
     const schemaEnforceMinItems = getSchemaXOption(this.schema, 'enforceMinItems')
-    const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.options.enforceMinItems
+    const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.getOption('enforceMinItems')
     const isEditor = this.jedison.isEditor
     const hasEnforceMinItems = isSet(enforceMinItems) && enforceMinItems === true
     const hasMinItems = isSet(schemaMinItems)

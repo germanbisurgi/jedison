@@ -21,7 +21,7 @@ class EditorStringTextarea extends EditorString {
       info: this.getInfo()
     })
 
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useConstraintAttributes
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.getOption('useConstraintAttributes')
 
     if (useConstraintAttributes === true) {
       const schemaMinLength = getSchemaMinLength(this.instance.schema)

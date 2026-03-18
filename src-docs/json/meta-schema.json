@@ -78,6 +78,11 @@
           "format": "uri",
           "x-propGroup": "Annotations"
         },
+        "$id": {
+          "type": "string",
+          "format": "uri",
+          "x-propGroup": "Annotations"
+        },
 
         "maxLength": {
           "type": "integer",

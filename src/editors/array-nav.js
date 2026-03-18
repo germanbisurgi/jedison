@@ -72,9 +72,9 @@ class EditorArrayNav extends EditorArray {
       variant: variant
     })
 
-    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.options.arrayDelete
-    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.options.arrayMove
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.options.arrayAddAfter
+    const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
+    const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
 
     this.control.childrenSlot.appendChild(row)
     row.appendChild(tabListCol)

@@ -28,7 +28,7 @@ class EditorNumberInput extends EditorNumber {
 
     this.control.input.setAttribute('step', 'any')
 
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.options.useConstraintAttributes
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, 'useConstraintAttributes') ?? this.instance.jedison.getOption('useConstraintAttributes')
 
     if (useConstraintAttributes === true) {
       const schemaMinimum = getSchemaMinimum(this.instance.schema)

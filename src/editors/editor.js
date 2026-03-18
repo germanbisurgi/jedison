@@ -60,7 +60,7 @@ class Editor {
     this.setContainerAttributes()
     this.refreshUI()
 
-    const alwaysShowErrors = this.instance.jedison.options.showErrors === 'always' || getSchemaXOption(this.instance.schema, 'showErrors') === 'always'
+    const alwaysShowErrors = this.instance.jedison.getOption('showErrors') === 'always' || getSchemaXOption(this.instance.schema, 'showErrors') === 'always'
 
     if (alwaysShowErrors) {
       this.showValidationErrors(this.instance.getErrors())
@@ -81,8 +81,8 @@ class Editor {
    */
   init () {
     this.theme = this.instance.jedison.theme
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.options.parseMarkdown
-    this.purifyEnabled = getSchemaXOption(this.instance.schema, 'purifyHtml') ?? this.instance.jedison.options.purifyHtml
+    this.markdownEnabled = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.getOption('parseMarkdown')
+    this.purifyEnabled = getSchemaXOption(this.instance.schema, 'purifyHtml') ?? this.instance.jedison.getOption('purifyHtml')
   }
 
   /**
@@ -160,7 +160,7 @@ class Editor {
   }
 
   getIdFromPath (path) {
-    const optionId = this.instance.jedison.options.id
+    const optionId = this.instance.jedison.getOption('id')
     return optionId ? optionId + '-' + pathToAttribute(path) : pathToAttribute(path)
   }
 
@@ -169,7 +169,7 @@ class Editor {
    * @returns {string} - 'input' or 'change'
    */
   getValidationEventType () {
-    const showErrors = getSchemaXOption(this.instance.schema, 'showErrors') ?? this.instance.jedison.options.showErrors
+    const showErrors = getSchemaXOption(this.instance.schema, 'showErrors') ?? this.instance.jedison.getOption('showErrors')
     return showErrors === 'input' ? 'input' : 'change'
   }
 
@@ -206,13 +206,13 @@ class Editor {
     this.showingValidationErrors = false
     this.setAriaInvalid(false)
 
-    const neverShowErrors = this.instance.jedison.options.showErrors === 'never' || getSchemaXOption(this.instance.schema, 'showErrors') === 'never'
+    const neverShowErrors = this.instance.jedison.getOption('showErrors') === 'never' || getSchemaXOption(this.instance.schema, 'showErrors') === 'never'
 
     if ((neverShowErrors && !force) || errors.length === 0) {
       return
     }
 
-    const muteValidationMessages = getSchemaXOption(this.instance.schema, 'muteValidationMessages') ?? this.instance.jedison.options.muteValidationMessages ?? []
+    const muteValidationMessages = getSchemaXOption(this.instance.schema, 'muteValidationMessages') ?? this.instance.jedison.getOption('muteValidationMessages') ?? []
 
     let hasErrors = false
 
@@ -290,7 +290,7 @@ class Editor {
    * Clean out HTML tags from txt
    */
   purifyContent (content, domPurifyOptions) {
-    if (this.instance.jedison.options.purifyHtml && typeof window !== 'undefined' && window.DOMPurify) {
+    if (this.instance.jedison.getOption('purifyHtml') && typeof window !== 'undefined' && window.DOMPurify) {
       return window.DOMPurify.sanitize(content, domPurifyOptions)
     } else {
       const tmp = document.createElement('div')
@@ -318,7 +318,7 @@ class Editor {
       this.title = compileTemplate(this.title, this.instance.getTemplateData(this.title))
       this.title = this.markdownEnabled ? this.getHtmlFromMarkdown(this.title) : this.title
 
-      const domPurifyOptions = combineDeep({}, this.instance.jedison.options.domPurifyOptions, {
+      const domPurifyOptions = combineDeep({}, this.instance.jedison.getOption('domPurifyOptions'), {
         FORBID_TAGS: ['p']
       })
 
@@ -335,7 +335,7 @@ class Editor {
       this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description))
       this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description
 
-      const domPurifyOptions = this.instance.jedison.options.domPurifyOptions
+      const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
 
       this.description = this.purifyEnabled ? this.purifyContent(this.description, domPurifyOptions) : this.description
     }
@@ -351,7 +351,7 @@ class Editor {
       return schemaInfo
     }
 
-    const domPurifyOptions = this.instance.jedison.options.domPurifyOptions
+    const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
 
     if (isSet(schemaInfo.title)) {
       schemaInfo.title = this.markdownEnabled ? this.getHtmlFromMarkdown(schemaInfo.title) : schemaInfo.title

@@ -270,6 +270,15 @@ const Utils = {
   removeDuplicatesFromArray,
   generateRandomID
 };
+const OPTION_ALIASES = {
+  enforceEnumDefault: "enforceEnum"
+};
+function resolveAlias(name) {
+  return OPTION_ALIASES[name] ?? name;
+}
+function getAliasesFor(canonicalName) {
+  return Object.keys(OPTION_ALIASES).filter((old) => OPTION_ALIASES[old] === canonicalName);
+}
 function getSchemaX(schema, keyword) {
   const key = "x-" + keyword;
   return schema[key];
@@ -405,7 +414,21 @@ function getSchemaXOption(schema, option) {
   if (isSet(schema[xOption])) {
     return schema[xOption];
   }
-  return schema["x-options"] && isSet(schema["x-options"][option]) ? schema["x-options"][option] : void 0;
+  if (schema["x-options"] && isSet(schema["x-options"][option])) {
+    return schema["x-options"][option];
+  }
+  for (const alias of getAliasesFor(option)) {
+    const xAlias = "x-" + alias;
+    if (isSet(schema[xAlias])) {
+      console.warn(`Jedison: schema option "${xAlias}" is deprecated. Use "${xOption}" instead.`);
+      return schema[xAlias];
+    }
+    if (schema["x-options"] && isSet(schema["x-options"][alias])) {
+      console.warn(`Jedison: schema x-options.${alias} is deprecated. Use x-options.${option} instead.`);
+      return schema["x-options"][alias];
+    }
+  }
+  return void 0;
 }
 function getSchemaPattern(schema) {
   return isString(schema.pattern) ? clone(schema.pattern) : void 0;
@@ -1802,7 +1825,7 @@ class Instance extends EventEmitter {
     this.setDefaultValue();
     this.registerWatcher();
     this.setValueFormTemplate();
-    if (this.jedison.options.container) {
+    if (this.jedison.getOption("container")) {
       this.setUI();
     }
     this.on("notifyParent", (initiator) => {
@@ -1865,13 +1888,9 @@ class Instance extends EventEmitter {
    * Sets the default value of the instance based on it's type
    */
   setInitialValue() {
-    const schemaEnforceEnumDefault = getSchemaXOption(this.schema, "enforceEnumDefault");
-    const schemaEnforceEnum = getSchemaXOption(this.schema, "enforceEnum");
-    const enforceEnumDefault = schemaEnforceEnumDefault ?? this.jedison.options.enforceEnumDefault;
-    const enforceEnum = schemaEnforceEnum ?? this.jedison.options.enforceEnum;
-    const finalEnforceEnum = isSet(schemaEnforceEnum) ? enforceEnum : enforceEnumDefault;
+    const enforceEnum = getSchemaXOption(this.schema, "enforceEnum") ?? this.jedison.getOption("enforceEnum");
     const schemaEnum = getSchemaEnum(this.schema);
-    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
+    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && enforceEnum) {
       this.setValue(schemaEnum[0], false);
     }
     if (notSet(this.value)) {
@@ -1892,7 +1911,7 @@ class Instance extends EventEmitter {
     if (isSet(schemaDefault)) {
       this.setValue(schemaDefault, false);
     }
-    const enforceConst = getSchemaXOption(this.schema, "enforceConst") ?? this.jedison.options.enforceConst;
+    const enforceConst = getSchemaXOption(this.schema, "enforceConst") ?? this.jedison.getOption("enforceConst");
     if (isSet(enforceConst) && equal(enforceConst, true)) {
       const schemaConst = getSchemaConst(this.schema);
       if (isSet(schemaConst)) {
@@ -1949,7 +1968,7 @@ class Instance extends EventEmitter {
     const templateData = {
       ...this.arrayTemplateData,
       value: this.getValueRaw(),
-      settings: this.jedison.options.settings
+      settings: this.jedison.getOption("settings")
     };
     if (typeof this.value === "string") {
       templateData.length = this.value.length;
@@ -1959,7 +1978,7 @@ class Instance extends EventEmitter {
     }
     if (template == null ? void 0 : template.includes("{{ functions.")) {
       templateData.functions = this.resolveTemplateFunctions(
-        this.jedison.options.functions
+        this.jedison.getOption("functions")
       );
     }
     if (this.parent) {
@@ -1974,7 +1993,7 @@ class Instance extends EventEmitter {
     return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]));
   }
   purify(value) {
-    if (typeof value === "string" && this.jedison.options.purifyData && typeof window !== "undefined" && window.DOMPurify) {
+    if (typeof value === "string" && this.jedison.getOption("purifyData") && typeof window !== "undefined" && window.DOMPurify) {
       value = window.DOMPurify.sanitize(value);
     }
     return value;
@@ -1990,7 +2009,7 @@ class Instance extends EventEmitter {
     const purifiedValue = this.purify(newValue);
     const wasPurified = newValue !== purifiedValue;
     newValue = purifiedValue;
-    const enforceConst = getSchemaXOption(this.schema, "enforceConst") ?? this.jedison.options.enforceConst;
+    const enforceConst = getSchemaXOption(this.schema, "enforceConst") ?? this.jedison.getOption("enforceConst");
     if (isSet(enforceConst) && equal(enforceConst, true)) {
       const schemaConst = getSchemaConst(this.schema);
       if (isSet(schemaConst)) {
@@ -2116,7 +2135,7 @@ class Editor {
     this.setVisibility();
     this.setContainerAttributes();
     this.refreshUI();
-    const alwaysShowErrors = this.instance.jedison.options.showErrors === "always" || getSchemaXOption(this.instance.schema, "showErrors") === "always";
+    const alwaysShowErrors = this.instance.jedison.getOption("showErrors") === "always" || getSchemaXOption(this.instance.schema, "showErrors") === "always";
     if (alwaysShowErrors) {
       this.showValidationErrors(this.instance.getErrors());
     }
@@ -2133,8 +2152,8 @@ class Editor {
    */
   init() {
     this.theme = this.instance.jedison.theme;
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.options.parseMarkdown;
-    this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.options.purifyHtml;
+    this.markdownEnabled = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
+    this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.getOption("purifyHtml");
   }
   /**
    * Gets the json path level by counting how many "/" it has
@@ -2200,7 +2219,7 @@ class Editor {
     }
   }
   getIdFromPath(path) {
-    const optionId = this.instance.jedison.options.id;
+    const optionId = this.instance.jedison.getOption("id");
     return optionId ? optionId + "-" + pathToAttribute(path) : pathToAttribute(path);
   }
   /**
@@ -2208,7 +2227,7 @@ class Editor {
    * @returns {string} - 'input' or 'change'
    */
   getValidationEventType() {
-    const showErrors = getSchemaXOption(this.instance.schema, "showErrors") ?? this.instance.jedison.options.showErrors;
+    const showErrors = getSchemaXOption(this.instance.schema, "showErrors") ?? this.instance.jedison.getOption("showErrors");
     return showErrors === "input" ? "input" : "change";
   }
   /**
@@ -2240,11 +2259,11 @@ class Editor {
     this.control.messages.innerHTML = "";
     this.showingValidationErrors = false;
     this.setAriaInvalid(false);
-    const neverShowErrors = this.instance.jedison.options.showErrors === "never" || getSchemaXOption(this.instance.schema, "showErrors") === "never";
+    const neverShowErrors = this.instance.jedison.getOption("showErrors") === "never" || getSchemaXOption(this.instance.schema, "showErrors") === "never";
     if (neverShowErrors && !force || errors.length === 0) {
       return;
     }
-    const muteValidationMessages = getSchemaXOption(this.instance.schema, "muteValidationMessages") ?? this.instance.jedison.options.muteValidationMessages ?? [];
+    const muteValidationMessages = getSchemaXOption(this.instance.schema, "muteValidationMessages") ?? this.instance.jedison.getOption("muteValidationMessages") ?? [];
     let hasErrors = false;
     errors.forEach((error) => {
       if (muteValidationMessages.includes(error.constraint)) {
@@ -2309,7 +2328,7 @@ class Editor {
    * Clean out HTML tags from txt
    */
   purifyContent(content, domPurifyOptions) {
-    if (this.instance.jedison.options.purifyHtml && typeof window !== "undefined" && window.DOMPurify) {
+    if (this.instance.jedison.getOption("purifyHtml") && typeof window !== "undefined" && window.DOMPurify) {
       return window.DOMPurify.sanitize(content, domPurifyOptions);
     } else {
       const tmp = document.createElement("div");
@@ -2331,7 +2350,7 @@ class Editor {
     if (titleFromSchema) {
       this.title = compileTemplate(this.title, this.instance.getTemplateData(this.title));
       this.title = this.markdownEnabled ? this.getHtmlFromMarkdown(this.title) : this.title;
-      const domPurifyOptions = combineDeep({}, this.instance.jedison.options.domPurifyOptions, {
+      const domPurifyOptions = combineDeep({}, this.instance.jedison.getOption("domPurifyOptions"), {
         FORBID_TAGS: ["p"]
       });
       this.title = this.purifyEnabled ? this.purifyContent(this.title, domPurifyOptions) : this.title;
@@ -2343,7 +2362,7 @@ class Editor {
     if (isSet(schemaDescription)) {
       this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description));
       this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description;
-      const domPurifyOptions = this.instance.jedison.options.domPurifyOptions;
+      const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
       this.description = this.purifyEnabled ? this.purifyContent(this.description, domPurifyOptions) : this.description;
     }
     return this.description;
@@ -2354,7 +2373,7 @@ class Editor {
     if (!isSet(schemaInfo)) {
       return schemaInfo;
     }
-    const domPurifyOptions = this.instance.jedison.options.domPurifyOptions;
+    const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
     if (isSet(schemaInfo.title)) {
       schemaInfo.title = this.markdownEnabled ? this.getHtmlFromMarkdown(schemaInfo.title) : schemaInfo.title;
       schemaInfo.title = this.purifyEnabled ? this.purifyContent(schemaInfo.title, domPurifyOptions) : schemaInfo.title;
@@ -2561,7 +2580,7 @@ class InstanceIfThenElse extends Instance {
         if (indexChanged && initiator !== "api") {
           instanceValue = overwriteExistingProperties(startingValue, withoutIf);
         } else {
-          const audacity = this.jedison.options.audacity;
+          const audacity = this.jedison.getOption("audacity");
           if (audacity && initiator === "api" && index2 === fittestIndex) {
             const prePassValue = mergeDeep({}, instance.getValue(), value);
             instance.setValue(prePassValue, false, "api");
@@ -2850,7 +2869,7 @@ class InstanceObject extends Instance {
         this.properties[key] = { schema };
         let musstCreateChild = true;
         const isRecursive = isSet(schema["x-recursive"]);
-        const optionsDeactivateNonRequired = this.jedison.options.deactivateNonRequired;
+        const optionsDeactivateNonRequired = this.jedison.getOption("deactivateNonRequired");
         const deactivateNonRequired = getSchemaXOption(this.schema, "deactivateNonRequired");
         const schemaDeactivateNonRequired = getSchemaXOption(schema, "deactivateNonRequired");
         const isReq = this.isRequired(key);
@@ -2871,7 +2890,7 @@ class InstanceObject extends Instance {
         }
       });
     }
-    if (isSet(schemaRequired) && this.jedison.isEditor && this.jedison.options.enforceRequired === true) {
+    if (isSet(schemaRequired) && this.jedison.isEditor && this.jedison.getOption("enforceRequired") === true) {
       schemaRequired.forEach((requiredProperty) => {
         this.requiredProperties.add(requiredProperty);
         if (!hasOwn(this.properties, requiredProperty)) {
@@ -2889,7 +2908,7 @@ class InstanceObject extends Instance {
   }
   removeNotListedPropertiesFromValue(value) {
     const schemaEnforceAdditionalProperties = getSchemaXOption(this.schema, "enforceAdditionalProperties");
-    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.options.enforceAdditionalProperties;
+    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.getOption("enforceAdditionalProperties");
     const schemaAdditionalProperties = this.schemaAdditionalProperties;
     const schemaPatternProperties = this.schemaPatternProperties || {};
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
@@ -2904,7 +2923,7 @@ class InstanceObject extends Instance {
     }
   }
   addMissingRequiredPropertiesToValue(value) {
-    const enforceRequired = getSchemaXOption(this.schema, "enforceRequired") ?? this.jedison.options.enforceRequired;
+    const enforceRequired = getSchemaXOption(this.schema, "enforceRequired") ?? this.jedison.getOption("enforceRequired");
     if (this.jedison.isEditor && enforceRequired) {
       this.requiredProperties.forEach((propertyName) => {
         if (!hasOwn(value, propertyName)) {
@@ -2953,7 +2972,7 @@ class InstanceObject extends Instance {
     });
     this.children.push(instance);
     this.value[key] = instance.getValue();
-    const deactivateNonRequired = getSchemaXOption(this.schema, "deactivateNonRequired") ?? this.jedison.options.deactivateNonRequired;
+    const deactivateNonRequired = getSchemaXOption(this.schema, "deactivateNonRequired") ?? this.jedison.getOption("deactivateNonRequired");
     if (!this.isRequired(key) && isSet(deactivateNonRequired) && deactivateNonRequired === true && !activate) {
       instance.deactivate();
     }
@@ -3087,10 +3106,14 @@ class InstanceObject extends Instance {
 class InstanceArray extends Instance {
   prepare() {
     this.schemaItems = getSchemaItems(this.schema);
+    if (isObject(this.schemaItems) && this.jedison.refParser && this.jedison.refParser.hasRef(this.schemaItems) && !this.schemaItems["x-recursive"]) {
+      this.schemaItems = this.jedison.refParser.expand(this.schemaItems);
+      this.schema.items = this.schemaItems;
+    }
     this.schemaPrefixItems = getSchemaPrefixItems(this.schema);
     const schemaMinItems = getSchemaMinItems(this.schema);
     const schemaEnforceMinItems = getSchemaXOption(this.schema, "enforceMinItems");
-    const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.options.enforceMinItems;
+    const enforceMinItems = isSet(schemaEnforceMinItems) ? schemaEnforceMinItems : this.jedison.getOption("enforceMinItems");
     const isEditor = this.jedison.isEditor;
     const hasEnforceMinItems = isSet(enforceMinItems) && enforceMinItems === true;
     const hasMinItems = isSet(schemaMinItems);
@@ -3600,7 +3623,7 @@ class EditorStringTextarea extends EditorString {
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       info: this.getInfo()
     });
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.options.useConstraintAttributes;
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.getOption("useConstraintAttributes");
     if (useConstraintAttributes === true) {
       const schemaMinLength = getSchemaMinLength(this.instance.schema);
       const schemaMaxLength = getSchemaMaxLength(this.instance.schema);
@@ -3736,7 +3759,7 @@ class EditorStringInput extends EditorString {
     if (optionFormat === "color" && this.instance.value.length === 0) {
       this.instance.setValue("#000000", false, "user");
     }
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.options.useConstraintAttributes;
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.getOption("useConstraintAttributes");
     if (useConstraintAttributes === true) {
       const schemaMinLength = getSchemaMinLength(this.instance.schema);
       const schemaMaxLength = getSchemaMaxLength(this.instance.schema);
@@ -3917,7 +3940,7 @@ class EditorNumberInput extends EditorNumber {
       info: this.getInfo()
     });
     this.control.input.setAttribute("step", "any");
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.options.useConstraintAttributes;
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.getOption("useConstraintAttributes");
     if (useConstraintAttributes === true) {
       const schemaMinimum = getSchemaMinimum(this.instance.schema);
       const schemaMaximum = getSchemaMaximum(this.instance.schema);
@@ -4006,13 +4029,13 @@ class EditorObject extends Editor {
     if (isSet(additionalProperties2) && additionalProperties2 === false) {
       addProperty = false;
     }
-    const objectAdd = getSchemaXOption(this.instance.schema, "objectAdd") ?? this.instance.jedison.options.objectAdd;
+    const objectAdd = getSchemaXOption(this.instance.schema, "objectAdd") ?? this.instance.jedison.getOption("objectAdd");
     if (isSet(objectAdd) && objectAdd === false) {
       addProperty = false;
     }
     let enablePropertiesToggle = false;
-    if (isSet(this.instance.jedison.options.enablePropertiesToggle)) {
-      enablePropertiesToggle = this.instance.jedison.options.enablePropertiesToggle;
+    if (isSet(this.instance.jedison.getOption("enablePropertiesToggle"))) {
+      enablePropertiesToggle = this.instance.jedison.getOption("enablePropertiesToggle");
     }
     const schemaEnablePropertiesToggle = getSchemaXOption(this.instance.schema, "enablePropertiesToggle");
     if (isSet(schemaEnablePropertiesToggle)) {
@@ -4025,11 +4048,11 @@ class EditorObject extends Editor {
       id: this.getIdFromPath(this.instance.path),
       enablePropertiesToggle,
       addProperty,
-      enableCollapseToggle: getSchemaXOption(this.instance.schema, "enableCollapseToggle") ?? this.instance.jedison.options.enableCollapseToggle,
-      startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.options.startCollapsed,
+      enableCollapseToggle: getSchemaXOption(this.instance.schema, "enableCollapseToggle") ?? this.instance.jedison.getOption("enableCollapseToggle"),
+      startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.getOption("startCollapsed"),
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
-      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.options.editJsonData,
+      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.getOption("editJsonData"),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, "propertiesToggleContent") ?? this.instance.jedison.translator.translate("propertiesToggle"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
       addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty")
@@ -4084,7 +4107,7 @@ class EditorObject extends Editor {
     return this.theme.getAlert(config);
   }
   refreshPropertiesSlot() {
-    const schemaOptionEnablePropertiesToggle = getSchemaXOption(this.instance.schema, "enablePropertiesToggle") ?? this.instance.jedison.options.enablePropertiesToggle;
+    const schemaOptionEnablePropertiesToggle = getSchemaXOption(this.instance.schema, "enablePropertiesToggle") ?? this.instance.jedison.getOption("enablePropertiesToggle");
     if (equal(schemaOptionEnablePropertiesToggle, true)) {
       const declaredProperties = Object.keys(this.instance.properties);
       const instanceProperties = this.instance.children.map((child) => child.getKey());
@@ -4480,19 +4503,19 @@ class EditorArray extends Editor {
       description: this.getDescription(),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       id: this.getIdFromPath(this.instance.path),
-      enableCollapseToggle: getSchemaXOption(this.instance.schema, "enableCollapseToggle") ?? this.instance.jedison.options.enableCollapseToggle,
-      startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.options.startCollapsed,
+      enableCollapseToggle: getSchemaXOption(this.instance.schema, "enableCollapseToggle") ?? this.instance.jedison.getOption("enableCollapseToggle"),
+      startCollapsed: getSchemaXOption(this.instance.schema, "startCollapsed") ?? this.instance.jedison.getOption("startCollapsed"),
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
-      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.options.editJsonData,
-      arrayAdd: getSchemaXOption(this.instance.schema, "arrayAdd") ?? this.instance.jedison.options.arrayAdd,
+      editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.getOption("editJsonData"),
+      arrayAdd: getSchemaXOption(this.instance.schema, "arrayAdd") ?? this.instance.jedison.getOption("arrayAdd"),
       arrayAddContent: getSchemaXOption(this.instance.schema, "arrayAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
-      arrayFooterAdd: getSchemaXOption(this.instance.schema, "arrayFooterAdd") ?? this.instance.jedison.options.arrayFooterAdd,
+      arrayFooterAdd: getSchemaXOption(this.instance.schema, "arrayFooterAdd") ?? this.instance.jedison.getOption("arrayFooterAdd"),
       arrayFooterAddContent: getSchemaXOption(this.instance.schema, "arrayFooterAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
-      arrayFooterButtonsPosition: getSchemaXOption(this.instance.schema, "arrayFooterButtonsPosition") ?? this.instance.jedison.options.arrayFooterButtonsPosition,
-      arrayDeleteAll: getSchemaXOption(this.instance.schema, "arrayDeleteAll") ?? this.instance.jedison.options.arrayDeleteAll,
+      arrayFooterButtonsPosition: getSchemaXOption(this.instance.schema, "arrayFooterButtonsPosition") ?? this.instance.jedison.getOption("arrayFooterButtonsPosition"),
+      arrayDeleteAll: getSchemaXOption(this.instance.schema, "arrayDeleteAll") ?? this.instance.jedison.getOption("arrayDeleteAll"),
       arrayDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
-      arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAll") ?? this.instance.jedison.options.arrayFooterDeleteAll,
+      arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAll") ?? this.instance.jedison.getOption("arrayFooterDeleteAll"),
       arrayFooterDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle")
     });
@@ -4500,7 +4523,7 @@ class EditorArray extends Editor {
   }
   deleteAllItems() {
     const schemaConfirm = getSchemaXOption(this.instance.schema, "arrayDeleteConfirm");
-    const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm;
+    const globalConfirm = this.instance.jedison.getOption("arrayDeleteConfirm");
     const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm;
     const doDeleteAll = () => {
       this.instance.setValue([], true, "user");
@@ -4579,7 +4602,7 @@ class EditorArray extends Editor {
     const btnGroup = this.theme.getBtnGroup();
     deleteBtn.addEventListener("click", () => {
       const schemaConfirm = getSchemaXOption(this.instance.schema, "arrayDeleteConfirm");
-      const globalConfirm = this.instance.jedison.options.arrayDeleteConfirm;
+      const globalConfirm = this.instance.jedison.getOption("arrayDeleteConfirm");
       const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm;
       const doDelete = () => {
         this.activeItemIndex = clamp(index2 - 1, 0, this.instance.value.length - 1);
@@ -4654,7 +4677,7 @@ class EditorArray extends Editor {
   }
   refreshAddBtn() {
     const maxItems2 = getSchemaMaxItems(this.instance.schema);
-    const enforceMaxItems = getSchemaXOption(this.instance.schema, "enforceMaxItems") ?? this.instance.jedison.options.enforceMaxItems;
+    const enforceMaxItems = getSchemaXOption(this.instance.schema, "enforceMaxItems") ?? this.instance.jedison.getOption("enforceMaxItems");
     if (isSet(maxItems2) && enforceMaxItems && maxItems2 <= this.instance.value.length) {
       this.control.addBtn.setAttribute("disabled", "");
       this.control.addBtn.setAttribute("always-disabled", true);
@@ -4680,9 +4703,9 @@ class EditorArray extends Editor {
   refreshUI() {
     super.refreshUI();
     const minItems2 = getSchemaMinItems(this.instance.schema);
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
     this.control.childrenSlot.innerHTML = "";
     this.instance.children.forEach((child, index2) => {
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
@@ -4817,10 +4840,10 @@ class EditorArrayTable extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
-    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.getOption("arrayButtonsPosition");
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
@@ -4961,10 +4984,10 @@ class EditorArrayTableObject extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
-    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.options.arrayButtonsPosition;
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
+    const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.getOption("arrayButtonsPosition");
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
@@ -5251,9 +5274,9 @@ class EditorArrayNav extends EditorArray {
     const tabList = this.theme.getTabList({
       variant
     });
-    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.options.arrayDelete;
-    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.options.arrayMove;
-    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.options.arrayAddAfter;
+    const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
+    const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
+    const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
     this.control.childrenSlot.appendChild(row);
     row.appendChild(tabListCol);
     row.appendChild(tabContentCol);
@@ -5331,8 +5354,8 @@ class EditorMultiple extends Editor {
     return isSet(schemaAnyOf) || isSet(schemaOneOf) || schemaType === "any" || isArray(schemaType) || notSet(schemaType);
   }
   build() {
-    this.switcherInput = getSchemaXOption(this.instance.schema, "switcherInput") ?? this.instance.jedison.options.switcherInput;
-    this.embedSwitcher = getSchemaXOption(this.instance.schema, "embedSwitcher") ?? this.instance.jedison.options.embedSwitcher;
+    this.switcherInput = getSchemaXOption(this.instance.schema, "switcherInput") ?? this.instance.jedison.getOption("switcherInput");
+    this.embedSwitcher = getSchemaXOption(this.instance.schema, "embedSwitcher") ?? this.instance.jedison.getOption("embedSwitcher");
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       id: this.getIdFromPath(this.instance.path),
@@ -5639,7 +5662,7 @@ class EditorStringIMask extends EditorString {
     try {
       const schemaImask = getSchemaXOption(this.instance.schema, "imask") ?? {};
       const schemaImaskSettings = schemaImask["x-settings"];
-      const settings = schemaImaskSettings && this.instance.jedison.options.settings[schemaImaskSettings] ? this.instance.jedison.options.settings[schemaImaskSettings] : {};
+      const settings = schemaImaskSettings && this.instance.jedison.getOption("settings")[schemaImaskSettings] ? this.instance.jedison.getOption("settings")[schemaImaskSettings] : {};
       const imaskOptions = { ...schemaImask, ...settings };
       this.imask = window.IMask(this.control.input, imaskOptions);
       this.useMaskedValue = schemaImask["x-masked"] ?? false;
@@ -5682,7 +5705,7 @@ class EditorNumberIMask extends EditorNumber {
     try {
       const schemaImask = getSchemaXOption(this.instance.schema, "imask") ?? {};
       const schemaImaskSettings = schemaImask["x-settings"];
-      const settings = schemaImaskSettings && this.instance.jedison.options.settings[schemaImaskSettings] ? this.instance.jedison.options.settings[schemaImaskSettings] : {};
+      const settings = schemaImaskSettings && this.instance.jedison.getOption("settings")[schemaImaskSettings] ? this.instance.jedison.getOption("settings")[schemaImaskSettings] : {};
       const imaskOptions = {
         mask: Number,
         ...schemaImask,
@@ -5960,7 +5983,7 @@ class EditorNumberRange extends EditorNumber {
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       info: this.getInfo()
     });
-    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.options.useConstraintAttributes;
+    const useConstraintAttributes = getSchemaXOption(this.instance.schema, "useConstraintAttributes") ?? this.instance.jedison.getOption("useConstraintAttributes");
     if (useConstraintAttributes === true) {
       this.control.input.setAttribute("min", optionMin);
       this.control.input.setAttribute("max", optionMax);
@@ -6475,8 +6498,6 @@ class Jedison extends EventEmitter {
       mergeAllOf: false,
       enforceConst: false,
       enforceRequired: true,
-      enforceEnumDefault: true,
-      // todo: deprecated
       enforceAdditionalProperties: true,
       enforceMinItems: true,
       enforceMaxItems: true,
@@ -6694,9 +6715,6 @@ class Jedison extends EventEmitter {
             node.oneOf[index2] = this.refParser.expand(subschema);
           });
         }
-        if (isObject(node.items) && this.refParser.hasRef(node.items)) {
-          node.items = this.refParser.expand(node.items);
-        }
       });
     }
     if (this.isEditor) {
@@ -6816,6 +6834,18 @@ class Jedison extends EventEmitter {
    */
   getInstance(path) {
     return this.instances.get(path);
+  }
+  /**
+   * Returns the value of a jedison option
+   * @param {string} option
+   * @return {*}
+   */
+  getOption(option) {
+    const canonical = resolveAlias(option);
+    if (canonical !== option) {
+      console.warn(`Jedison: option "${option}" is deprecated. Use "${canonical}" instead.`);
+    }
+    return this.options[canonical];
   }
   /**
    * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.

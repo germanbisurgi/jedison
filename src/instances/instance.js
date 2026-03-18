@@ -111,7 +111,7 @@ class Instance extends EventEmitter {
     this.registerWatcher()
     this.setValueFormTemplate()
 
-    if (this.jedison.options.container) {
+    if (this.jedison.getOption('container')) {
       this.setUI()
     }
 
@@ -187,14 +187,10 @@ class Instance extends EventEmitter {
    * Sets the default value of the instance based on it's type
    */
   setInitialValue () {
-    const schemaEnforceEnumDefault = getSchemaXOption(this.schema, 'enforceEnumDefault') // todo: deprecated
-    const schemaEnforceEnum = getSchemaXOption(this.schema, 'enforceEnum')
-    const enforceEnumDefault = schemaEnforceEnumDefault ?? this.jedison.options.enforceEnumDefault // todo: deprecated
-    const enforceEnum = schemaEnforceEnum ?? this.jedison.options.enforceEnum
-    const finalEnforceEnum = isSet(schemaEnforceEnum) ? enforceEnum : enforceEnumDefault // todo: remove this after deprecation
+    const enforceEnum = getSchemaXOption(this.schema, 'enforceEnum') ?? this.jedison.getOption('enforceEnum')
     const schemaEnum = getSchemaEnum(this.schema)
 
-    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && finalEnforceEnum) {
+    if (isSet(schemaEnum) && !schemaEnum.includes(this.getValueRaw()) && isSet(schemaEnum[0]) && enforceEnum) {
       this.setValue(schemaEnum[0], false)
     }
 
@@ -221,7 +217,7 @@ class Instance extends EventEmitter {
       this.setValue(schemaDefault, false)
     }
 
-    const enforceConst = getSchemaXOption(this.schema, 'enforceConst') ?? this.jedison.options.enforceConst
+    const enforceConst = getSchemaXOption(this.schema, 'enforceConst') ?? this.jedison.getOption('enforceConst')
 
     if (isSet(enforceConst) && equal(enforceConst, true)) {
       const schemaConst = getSchemaConst(this.schema)
@@ -293,7 +289,7 @@ class Instance extends EventEmitter {
     const templateData = {
       ...this.arrayTemplateData,
       value: this.getValueRaw(),
-      settings: this.jedison.options.settings
+      settings: this.jedison.getOption('settings')
     }
 
     // Add string length and remaining to template data
@@ -306,7 +302,7 @@ class Instance extends EventEmitter {
 
     if (template?.includes('{{ functions.')) {
       templateData.functions = this.resolveTemplateFunctions(
-        this.jedison.options.functions
+        this.jedison.getOption('functions')
       )
     }
 
@@ -327,7 +323,7 @@ class Instance extends EventEmitter {
   }
 
   purify (value) {
-    if (typeof value === 'string' && this.jedison.options.purifyData && typeof window !== 'undefined' && window.DOMPurify) {
+    if (typeof value === 'string' && this.jedison.getOption('purifyData') && typeof window !== 'undefined' && window.DOMPurify) {
       value = window.DOMPurify.sanitize(value)
     }
 
@@ -349,7 +345,7 @@ class Instance extends EventEmitter {
     newValue = purifiedValue
 
     // Only check const enforcement if necessary
-    const enforceConst = getSchemaXOption(this.schema, 'enforceConst') ?? this.jedison.options.enforceConst
+    const enforceConst = getSchemaXOption(this.schema, 'enforceConst') ?? this.jedison.getOption('enforceConst')
     if (isSet(enforceConst) && equal(enforceConst, true)) {
       const schemaConst = getSchemaConst(this.schema)
       if (isSet(schemaConst)) {

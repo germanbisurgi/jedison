@@ -33,7 +33,7 @@ class InstanceObject extends Instance {
         let musstCreateChild = true
 
         const isRecursive = isSet(schema['x-recursive'])
-        const optionsDeactivateNonRequired = this.jedison.options.deactivateNonRequired
+        const optionsDeactivateNonRequired = this.jedison.getOption('deactivateNonRequired')
         const deactivateNonRequired = getSchemaXOption(this.schema, 'deactivateNonRequired')
         const schemaDeactivateNonRequired = getSchemaXOption(schema, 'deactivateNonRequired')
 
@@ -62,7 +62,7 @@ class InstanceObject extends Instance {
     }
 
     // Add properties listed in schema required too if not present in schema properties
-    if (isSet(schemaRequired) && this.jedison.isEditor && this.jedison.options.enforceRequired === true) {
+    if (isSet(schemaRequired) && this.jedison.isEditor && this.jedison.getOption('enforceRequired') === true) {
       schemaRequired.forEach((requiredProperty) => {
         this.requiredProperties.add(requiredProperty)
 
@@ -84,7 +84,7 @@ class InstanceObject extends Instance {
 
   removeNotListedPropertiesFromValue (value) {
     const schemaEnforceAdditionalProperties = getSchemaXOption(this.schema, 'enforceAdditionalProperties')
-    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.options.enforceAdditionalProperties
+    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.jedison.getOption('enforceAdditionalProperties')
     const schemaAdditionalProperties = this.schemaAdditionalProperties
     const schemaPatternProperties = this.schemaPatternProperties || {}
 
@@ -102,7 +102,7 @@ class InstanceObject extends Instance {
   }
 
   addMissingRequiredPropertiesToValue (value) {
-    const enforceRequired = getSchemaXOption(this.schema, 'enforceRequired') ?? this.jedison.options.enforceRequired
+    const enforceRequired = getSchemaXOption(this.schema, 'enforceRequired') ?? this.jedison.getOption('enforceRequired')
 
     if (this.jedison.isEditor && enforceRequired) {
       this.requiredProperties.forEach((propertyName) => {
@@ -163,7 +163,7 @@ class InstanceObject extends Instance {
     this.children.push(instance)
     this.value[key] = instance.getValue()
 
-    const deactivateNonRequired = getSchemaXOption(this.schema, 'deactivateNonRequired') ?? this.jedison.options.deactivateNonRequired
+    const deactivateNonRequired = getSchemaXOption(this.schema, 'deactivateNonRequired') ?? this.jedison.getOption('deactivateNonRequired')
 
     if (!this.isRequired(key) && isSet(deactivateNonRequired) && deactivateNonRequired === true && !activate) {
       instance.deactivate()
