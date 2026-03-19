@@ -103,7 +103,31 @@ class EditorObjectCategories extends EditorObject {
       this.activeCategoryName = categoriesMap.keys().next().value
     }
 
-    categoriesMap.forEach((category, categoryName) => {
+    // Sort categories based on x-categoryOrder
+    const categoryOrder = getSchemaXOption(this.instance.schema, 'categoryOrder')
+    let orderedCategoryNames = []
+
+    if (isSet(categoryOrder) && Array.isArray(categoryOrder)) {
+      // Add categories in the order specified by x-categoryOrder
+      categoryOrder.forEach((categoryName) => {
+        if (categoriesMap.has(categoryName)) {
+          orderedCategoryNames.push(categoryName)
+        }
+      })
+
+      // Add remaining categories
+      categoriesMap.forEach((category, categoryName) => {
+        if (!categoryOrder.includes(categoryName)) {
+          orderedCategoryNames.push(categoryName)
+        }
+      })
+    } else {
+      // No ordering specified
+      orderedCategoryNames = Array.from(categoriesMap.keys())
+    }
+
+    orderedCategoryNames.forEach((categoryName) => {
+      const category = categoriesMap.get(categoryName)
       const active = categoryName === this.activeCategoryName
       const { children, id } = category
 
