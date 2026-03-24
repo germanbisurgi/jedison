@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "title": "Categories with Custom Order",
+  "x-format": "categories-vertical",
+  "x-categoryOrder": ["Contact", "Address", "Basic"],
+  "properties": {
+    "name":   { "type": "string", "title": "Name",   "x-category": "Basic" },
+    "email":  { "type": "string", "title": "Email",  "x-category": "Contact" },
+    "phone":  { "type": "string", "title": "Phone",  "x-category": "Contact" },
+    "street": { "type": "string", "title": "Street", "x-category": "Address" },
+    "city":   { "type": "string", "title": "City",   "x-category": "Address" }
+  }
+}

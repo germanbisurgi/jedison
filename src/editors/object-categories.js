@@ -1,5 +1,5 @@
 import EditorObject from './object.js'
-import { isSet } from '../helpers/utils.js'
+import { isSet, isArray } from '../helpers/utils.js'
 import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -105,25 +105,14 @@ class EditorObjectCategories extends EditorObject {
 
     // Sort categories based on x-categoryOrder
     const categoryOrder = getSchemaXOption(this.instance.schema, 'categoryOrder')
-    let orderedCategoryNames = []
+    const allNames = Array.from(categoriesMap.keys())
 
-    if (isSet(categoryOrder) && Array.isArray(categoryOrder)) {
-      // Add categories in the order specified by x-categoryOrder
-      categoryOrder.forEach((categoryName) => {
-        if (categoriesMap.has(categoryName)) {
-          orderedCategoryNames.push(categoryName)
-        }
-      })
+    let orderedCategoryNames = allNames
 
-      // Add remaining categories
-      categoriesMap.forEach((category, categoryName) => {
-        if (!categoryOrder.includes(categoryName)) {
-          orderedCategoryNames.push(categoryName)
-        }
-      })
-    } else {
-      // No ordering specified
-      orderedCategoryNames = Array.from(categoriesMap.keys())
+    if (isSet(categoryOrder) && isArray(categoryOrder)) {
+      const specifiedFirst = categoryOrder.filter(name => categoriesMap.has(name))
+      const unspecified = allNames.filter(name => !categoryOrder.includes(name))
+      orderedCategoryNames = [...specifiedFirst, ...unspecified]
     }
 
     orderedCategoryNames.forEach((categoryName) => {

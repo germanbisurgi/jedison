@@ -4371,7 +4371,16 @@ class EditorObjectCategories extends EditorObject {
     if (!categoriesMap.has(this.activeCategoryName)) {
       this.activeCategoryName = categoriesMap.keys().next().value;
     }
-    categoriesMap.forEach((category, categoryName) => {
+    const categoryOrder = getSchemaXOption(this.instance.schema, "categoryOrder");
+    const allNames = Array.from(categoriesMap.keys());
+    let orderedCategoryNames = allNames;
+    if (isSet(categoryOrder) && isArray(categoryOrder)) {
+      const specifiedFirst = categoryOrder.filter((name) => categoriesMap.has(name));
+      const unspecified = allNames.filter((name) => !categoryOrder.includes(name));
+      orderedCategoryNames = [...specifiedFirst, ...unspecified];
+    }
+    orderedCategoryNames.forEach((categoryName) => {
+      const category = categoriesMap.get(categoryName);
       const active = categoryName === this.activeCategoryName;
       const { children, id } = category;
       const hasErrors = navWarning && children.some((child) => child.hasNestedValidationErrors());

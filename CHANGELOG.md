@@ -1,5 +1,9 @@
 ### dev
 
+### 1.9.0
+
+- added `x-categoryOrder` option
+
 ### 1.8.0
 
 - added `arrayDeleteAll` and `x-arrayDeleteAll` options

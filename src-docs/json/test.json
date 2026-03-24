@@ -1,207 +1,102 @@
 {
+  "title": "Form Example",
   "type": "object",
-  "x-options": {
-    "format": "grid",
-    "grid": {
-      "columns": 12
-    }
-  },
-  "required": [
-    "rebhuhn"
-  ],
   "properties": {
-    "rebhuhn": {
-      "$ref": "#\/$defs\/global\/vorkommen_anzahl_individuen",
-      "properties": {
-        "vk_JJ": {
-          "type": "string",
-          "default": "",
-          "enum": [
-            "ja",
-            "nein",
-            "unbekannt"
-          ],
-          "x-format": "radios-inline",
-          "x-propertyOrder": 10
-        },
-        "vk": {
-          "x-propertyOrder": 20,
-          "x-info": {
-            "variant": "modal",
-            "content": "Diese Frage bezieht sich auf das vorangegangene JJ 2024\/2025"
-          },
-          "enum": [
-            "ja",
-            "nein",
-            "unbekannt"
-          ],
-          "x-options": {
-            "enumTitles": [
-              "ja",
-              "nein",
-              "unbekannt"
-            ]
-          }
-        },
-        "anzahl_individuen": {
-          "x-propertyOrder": 30
-        },
-        "vk_2": {
-          "$ref": "#\/$defs\/kueken"
-        }
-      }
+    "A": {
+      "title": "Element A",
+      "type": "string",
+      "enum": [
+        "Large",
+        "Medium",
+        "Small"
+      ],
+      "default": "Medium",
+      "x-format": "select"
+    },
+    "B": {
+      "title": "Element B",
+      "type": "string",
+      "x-format": "input"
+    },
+    "C": {
+      "title": "Element C",
+      "type": "string",
+      "enum": [
+        "Large",
+        "Medium",
+        "Small"
+      ],
+      "default": "Medium",
+      "x-format": "select"
+    },
+    "D": {
+      "title": "Element D",
+      "type": "string",
+      "x-format": "input"
     }
   },
-  "$defs": {
-    "kueken": {
-      "type": "object",
-      "properties": {
-        "beobachtet": {
-          "type": "string",
-          "default": "",
-          "enum": [
-            "ja",
-            "nein",
-            "unbekannt"
-          ],
-          "x-format": "radios-inline",
-          "x-propertyOrder": 40
-        },
-        "geschaetzte": {
-          "x-propertyOrder": 50
-        }
-      },
+  "allOf": [
+    {
       "if": {
         "properties": {
-          "beobachtet": {
-            "const": "ja"
+          "A": {
+            "const": "Large"
           }
-        }
+        },
+        "required": [
+          "A"
+        ]
       },
       "then": {
         "properties": {
-          "geschaetzte": {
-            "type": "integer"
+          "B": {
+            "type": "string",
+            "x-format": "input"
           }
-        }
+        },
+        "required": [
+          "B"
+        ]
       },
       "else": {
         "properties": {
-          "geschaetzte": {
-            "readOnly": true,
+          "B": {
             "type": "string",
-            "const": "",
-            "x-enforceConst": true
+            "x-hidden": true
           }
         }
       }
     },
-    "global": {
-      "vorkommen_anzahl_individuen": {
-        "$ref": "#\/$defs\/global\/vorkommen",
+    {
+      "if": {
         "properties": {
-          "anzahl_individuen": {
-            "x-options": {
-              "enforceConst": true
-            }
-          },
-          "vk_2": {
-            "$ref": "#\/$defs\/kueken"
+          "A": {
+            "const": "Large"
           }
         },
-        "if": {
-          "properties": {
-            "vk": {
-              "const": "ja"
-            }
-          }
-        },
-        "then": {
-          "properties": {
-            "anzahl_individuen": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9999
-            }
-          }
-        },
-        "else": {
-          "if": {
-            "properties": {
-              "vk": {
-                "const": "nein"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "anzahl_individuen": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 9999,
-                "const": 0,
-                "readOnly": true
-              }
-            }
-          },
-          "else": {
-            "if": {
-              "properties": {
-                "vk": {
-                  "const": "unbekannt"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "anzahl_individuen": {
-                  "type": "string",
-                  "const": "",
-                  "readOnly": true,
-                  "description": "unbekannt"
-                }
-              }
-            },
-            "else": {
-              "properties": {
-                "anzahl_individuen": {
-                  "type": "string",
-                  "const": "",
-                  "readOnly": true,
-                  "description": "keine Angabe"
-                }
-              }
-            }
-          }
-        }
-      },
-      "vorkommen": {
-        "type": "object",
         "required": [
-          "vk"
-        ],
+          "A"
+        ]
+      },
+      "then": {
         "properties": {
-          "vk": {
+          "D": {
             "type": "string",
-            "enum": [
-              "ja",
-              "nein",
-              "unbekannt",
-              "keine_angabe"
-            ],
-            "x-options": {
-              "enumTitles": [
-                "ja",
-                "nein",
-                "unbekannt",
-                "keine Angabe"
-              ],
-              "enforceEnumDefault": false,
-              "format": "radios-inline"
-            }
+            "x-format": "input"
+          }
+        },
+        "required": [
+          "D"
+        ]
+      },
+      "else": {
+        "properties": {
+          "D": {
+            "type": "string",
+            "x-hidden": true
           }
         }
       }
     }
-  }
+  ]
 }

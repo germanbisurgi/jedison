@@ -245,6 +245,7 @@ import objectNavVertical from './json/editors/object-nav-vertical.json'
 import objectNavHorizontal from './json/editors/object-nav-horizontal.json'
 import objectCategoriesVertical from './json/editors/object-categories-vertical.json'
 import objectCategoriesHorizontal from './json/editors/object-categories-horizontal.json'
+import objectCategoriesCategoryOrder from './json/editors/object-categories-categoryOrder.json'
 import objectPropertyOrder from './json/editors/object-propertyOrder.json'
 import objectEnforceRequired from './json/editors/object-enforceRequired.json'
 import objectEnforceAdditionalProperties from './json/editors/object-enforceAdditionalProperties.json'
@@ -417,6 +418,7 @@ export default {
           'editors/object-nav-horizontal': objectNavHorizontal,
           'editors/object-categories-vertical': objectCategoriesVertical,
           'editors/object-categories-horizontal': objectCategoriesHorizontal,
+          'editors/object-categories-categoryOrder': objectCategoriesCategoryOrder,
           'editors/object-propertyOrder': objectPropertyOrder,
           'editors/object-enforceRequired': objectEnforceRequired,
           'editors/object-enforceAdditionalProperties': objectEnforceAdditionalProperties,
