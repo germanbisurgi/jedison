@@ -2793,11 +2793,15 @@ class InstanceMultiple extends Instance {
     this.switchInstance(fittestIndex, this.value);
   }
   switchInstance(index2, value, initiator = "api") {
+    if (this.activeInstance) {
+      this.activeInstance.children.forEach((child) => child.unregister());
+    }
     this.index = index2;
     this.activeInstance = this.instances[index2];
     if (isSet(value)) {
       this.activeInstance.setValue(value, false, initiator);
     }
+    this.activeInstance.children.forEach((child) => child.register());
     this.setValue(this.activeInstance.getValueRaw(), true, initiator);
   }
   onSetValue() {

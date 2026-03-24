@@ -140,6 +140,10 @@ class InstanceMultiple extends Instance {
   }
 
   switchInstance (index, value, initiator = 'api') {
+    if (this.activeInstance) {
+      this.activeInstance.children.forEach((child) => child.unregister())
+    }
+
     this.index = index
     this.activeInstance = this.instances[index]
 
@@ -147,6 +151,7 @@ class InstanceMultiple extends Instance {
       this.activeInstance.setValue(value, false, initiator)
     }
 
+    this.activeInstance.children.forEach((child) => child.register())
     this.setValue(this.activeInstance.getValueRaw(), true, initiator)
   }
 

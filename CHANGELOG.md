@@ -3,6 +3,7 @@
 ### 1.9.0
 
 - added `x-categoryOrder` option
+- fixed issue #35
 
 ### 1.8.0
 

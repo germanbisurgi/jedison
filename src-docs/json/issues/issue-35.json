@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "switcher_test": {
+      "title": "Switcher Test",
+      "x-embedSwitcher": true,
+      "anyOf": [
+        {
+          "x-switcherTitle": "Option A",
+          "type": "object",
+          "properties": {
+            "field_a": { "type": "string", "default": "hello" },
+            "field_b": { "type": "integer", "default": 42 }
+          }
+        },
+        {
+          "x-switcherTitle": "Option B",
+          "type": "object",
+          "properties": {
+            "field_c": { "type": "string", "default": "world" },
+            "field_d": { "type": "boolean", "default": true }
+          }
+        }
+      ]
+    }
+  }
+}
