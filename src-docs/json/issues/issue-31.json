@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue 31",
+  "type": "array",
+  "x-format": "nav-vertical",
+  "x-titleTemplate": "{{ value.name || 'Unnamed' }}",
+  "minItems": 2,
+  "default": [
+    { "name": "Alice" },
+    {}
+  ],
+  "items": {
+    "title": "Person",
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "x-format": "input"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@
 - added `x-categoryOrder` option
 - fixed issue #35
 - fixed issue #33
+- fixed issue #31. Added x-titleTemplate fallback when placeholder is empty
 
 ### 1.8.0
 

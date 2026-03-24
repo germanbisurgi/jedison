@@ -199,10 +199,20 @@ function getValueByJSONPath(data, path) {
   return value;
 }
 function compileTemplate(template, data) {
-  return template.replace(/{{(.*?)}}/g, (match) => {
-    match = match.replace(/\s/g, "");
-    const path = match.split(/{{|}}/)[1];
-    return getValueByJSONPath(data, path);
+  return template.replace(/{{(.*?)}}/g, (_, inner) => {
+    inner = inner.trim();
+    const pipeIdx = inner.indexOf("||");
+    let path, fallback;
+    if (pipeIdx !== -1) {
+      path = inner.slice(0, pipeIdx).trim();
+      const raw = inner.slice(pipeIdx + 2).trim();
+      fallback = raw.replace(/^['"]|['"]$/g, "");
+    } else {
+      path = inner;
+      fallback = "";
+    }
+    const value = getValueByJSONPath(data, path);
+    return value !== void 0 && value !== null ? value : fallback;
   });
 }
 function clamp(number, min, max) {
