@@ -4,6 +4,7 @@
 
 - added `x-categoryOrder` option
 - fixed issue #35
+- fixed issue #33
 
 ### 1.8.0
 

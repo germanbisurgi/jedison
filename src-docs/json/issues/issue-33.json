@@ -7,18 +7,15 @@
       "title": "Size",
       "type": "string",
       "enum": ["large", "medium", "small"],
-      "default": "medium",
-      "x-format": "select"
+      "default": "medium"
     },
     "element_b": {
       "title": "Element B",
-      "type": "string",
-      "x-format": "input"
+      "type": "string"
     },
     "element_d": {
       "title": "Element D",
-      "type": "string",
-      "x-format": "input"
+      "type": "string"
     }
   },
   "allOf": [
@@ -28,7 +25,7 @@
         "required": ["size"]
       },
       "then": {
-        "properties": { "element_b": { "type": "string", "x-format": "input" } },
+        "properties": { "element_b": { "type": "string" } },
         "required": ["element_b"]
       },
       "else": {
@@ -41,7 +38,7 @@
         "required": ["size"]
       },
       "then": {
-        "properties": { "element_d": { "type": "string", "x-format": "input" } },
+        "properties": { "element_d": { "type": "string" } },
         "required": ["element_d"]
       },
       "else": {

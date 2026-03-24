@@ -6756,10 +6756,11 @@ class Jedison extends EventEmitter {
             if (sequentialIfThenElse === null) {
               sequentialIfThenElse = conditionals[i];
             } else {
+              const inner = sequentialIfThenElse;
               sequentialIfThenElse = {
                 if: conditionals[i].if,
-                then: conditionals[i].then,
-                else: sequentialIfThenElse
+                then: combineDeep({}, conditionals[i].then || {}, inner),
+                else: combineDeep({}, conditionals[i].else || {}, inner)
               };
             }
           }

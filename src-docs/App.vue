@@ -352,6 +352,7 @@ import issue13 from './json/issues/issue-13.json'
 import issue17 from './json/issues/issue-17.json'
 import issue24 from './json/issues/issue-24.json'
 import issue35 from './json/issues/issue-35.json'
+import issue33 from './json/issues/issue-33.json'
 import joditAsProp from './json/issues/jodit-as-prop.json'
 import perfCheckbox from './json/issues/perf-checkbox.json'
 import perfOneOf from './json/issues/perf-oneOf.json'
@@ -526,6 +527,7 @@ export default {
           'issue/issue-17': issue17,
           'issue/issue-24': issue24,
           'issue/issue-35': issue35,
+          'issue/issue-33': issue33,
           'issue/jodit-as-prop': joditAsProp,
           'issue/perf-checkbox': perfCheckbox,
           'issue/perf-oneOf': perfOneOf,
