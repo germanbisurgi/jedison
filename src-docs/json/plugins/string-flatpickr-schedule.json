@@ -1,0 +1,49 @@
+{
+  "title": "Time Entry",
+  "type": "object",
+  "x-options": {
+    "titleHidden": true,
+    "format": "grid"
+  },
+  "properties": {
+    "datum": {
+      "title": "Date",
+      "type": "string",
+      "x-format": "flatpickr",
+      "x-flatpickr": {
+        "dateFormat": "d.m.Y"
+      },
+      "x-grid": {
+        "columns": 4
+      }
+    },
+    "start": {
+      "title": "Start Time",
+      "type": "string",
+      "x-format": "flatpickr",
+      "x-flatpickr": {
+        "enableTime": true,
+        "noCalendar": true,
+        "dateFormat": "H:i",
+        "time_24hr": true
+      },
+      "x-grid": {
+        "columns": 4
+      }
+    },
+    "ende": {
+      "title": "End Time",
+      "type": "string",
+      "x-format": "flatpickr",
+      "x-flatpickr": {
+        "enableTime": true,
+        "noCalendar": true,
+        "dateFormat": "H:i",
+        "time_24hr": true
+      },
+      "x-grid": {
+        "columns": 4
+      }
+    }
+  }
+}
