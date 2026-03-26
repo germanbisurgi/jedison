@@ -1,52 +1,173 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Form Example",
+  "title": "Neozoen",
   "type": "object",
-  "properties": {
-    "size": {
-      "title": "Size",
-      "type": "string",
-      "enum": ["large", "medium", "small"],
-      "default": "medium",
-      "x-format": "select"
-    },
-    "element_b": {
-      "title": "Element B",
-      "type": "string",
-      "x-format": "input"
-    },
-    "element_d": {
-      "title": "Element D",
-      "type": "string",
-      "x-format": "input"
+  "x-options": {
+    "format": "grid",
+    "grid": {
+      "columns": 12
     }
   },
-  "allOf": [
-    {
-      "if": {
-        "properties": { "size": { "const": "large" } },
-        "required": ["size"]
-      },
-      "then": {
-        "properties": { "element_b": { "type": "string", "x-format": "input" } },
-        "required": ["element_b"]
-      },
-      "else": {
-        "properties": { "element_b": { "type": "string", "x-hidden": true } }
-      }
-    },
-    {
-      "if": {
-        "properties": { "size": { "const": "large" } },
-        "required": ["size"]
-      },
-      "then": {
-        "properties": { "element_d": { "type": "string", "x-format": "input" } },
-        "required": ["element_d"]
-      },
-      "else": {
-        "properties": { "element_d": { "type": "string", "x-hidden": true } }
+  "properties": {
+    "marderhund": {
+      "title": "Marderhund",
+      "$ref": "#\/$defs/custom_vorkommen_jungtiere_anzahl",
+      "properties": {
+        "vk": {
+          "title": "Kam die Art im **JJ 2025/2026** in Ihrem Revier vor?"
+        },
+        "jungtiere": {
+          "title": "Konnten Sie im **JJ 2025/2026** Jungtiere beobachten?"
+        },
+        "gehecke": {
+          "title": "Anzahl Gehecke (Wurfbaue):"
+        }
       }
     }
-  ]
+  },
+  "$defs": {
+    "custom_vorkommen_jungtiere_anzahl": {
+      "$ref": "#/$defs/global/vorkommen",
+      "x-options": {
+        "format": "grid"
+      },
+      "properties": {
+        "jungtiere": {
+          "title": "Konnten Sie im aktuellen Jagdjahr Jungtiere beobachten?"
+        },
+        "gehecke": {
+          "title": "Anzahl Gehecke:"
+        }
+      },
+      "if": {
+        "properties": {
+          "vk": {
+            "const": "ja"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "jungtiere": {
+            "type": "string",
+            "enum": [
+              "ja",
+              "nein"
+            ],
+            "x-options": {
+              "enforceEnumDefault": false,
+              "format": "radios-inline",
+              "enumTitles": [
+                "ja",
+                "nein"
+              ]
+            }
+          },
+          "gehecke": {
+            "type": "integer",
+            "x-enforceConst": true
+          }
+        },
+        "if": {
+          "properties": {
+            "jungtiere": {
+              "const": "ja"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "gehecke": {
+              "minimum": 0,
+              "maximum": 9999
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "gehecke": {
+              "const": 0,
+              "x-enforceConst": true,
+              "readOnly": true
+            }
+          }
+        }
+      },
+      "else": {
+        "if": {
+          "properties": {
+            "vk": {
+              "const": "nein"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "jungtiere": {
+              "type": "string",
+              "default": "",
+              "const": "",
+              "readOnly": true,
+              "x-enforceConst": true,
+              "description": "nein"
+            },
+            "gehecke": {
+              "type": "integer",
+              "const": 0,
+              "x-enforceConst": true,
+              "readOnly": true
+            }
+          }
+        },
+        "else": {
+          "if": {
+            "properties": {
+              "vk": {
+                "const": "unbekannt"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "jungtiere": {
+                "type": "string",
+                "default": "",
+                "const": "",
+                "readOnly": true,
+                "x-enforceConst": true,
+                "description": "unbekannt"
+              },
+              "gehecke": {
+                "type": "string",
+                "default": "",
+                "const": "",
+                "readOnly": true,
+                "x-enforceConst": true,
+                "description": "unbekannt"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "jungtiere": {
+                "type": "string",
+                "default": "",
+                "const": "",
+                "readOnly": true,
+                "x-enforceConst": true,
+                "description": "keine Angabe"
+              },
+              "gehecke": {
+                "type": "string",
+                "default": "",
+                "const": "",
+                "readOnly": true,
+                "x-enforceConst": true,
+                "description": "keine Angabe"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

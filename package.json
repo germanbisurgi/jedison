@@ -97,7 +97,11 @@
     "multer": ">=2.1.1",
     "ajv": "^6.14.0",
     "serialize-javascript": ">=7.0.3",
-    "immutable": ">=5.1.5"
+    "immutable": ">=5.1.5",
+    "picomatch": ">=4.0.4",
+    "flatted": ">=3.4.2",
+    "undici": ">=7.24.0",
+    "yaml": ">=2.8.3"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

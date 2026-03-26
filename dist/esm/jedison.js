@@ -116,11 +116,13 @@ function getType(value) {
   }
   return type2;
 }
+const UNSAFE_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "prototype"]);
 function mergeDeep(target, ...sources) {
   if (!sources.length) return target;
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key) => {
+      if (UNSAFE_KEYS.has(key)) return;
       if (isObject(source[key])) {
         if (!target[key]) {
           Object.assign(target, {
@@ -144,6 +146,7 @@ function combineDeep(target, ...sources) {
     target.push(...source);
   } else if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key) => {
+      if (UNSAFE_KEYS.has(key)) return;
       if (isObject(source[key])) {
         if (!target[key]) {
           Object.assign(target, {

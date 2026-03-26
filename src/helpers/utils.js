@@ -252,12 +252,15 @@ export function getType (value) {
  * @param {object[]} sources - Objects to be merged into the target object
  * @return {object} The merged object
  */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 export function mergeDeep (target, ...sources) {
   if (!sources.length) return target
   const source = sources.shift()
 
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key) => {
+      if (UNSAFE_KEYS.has(key)) return
       if (isObject(source[key])) {
         if (!target[key]) {
           Object.assign(target, {
@@ -284,6 +287,7 @@ export function combineDeep (target, ...sources) {
     target.push(...source)
   } else if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key) => {
+      if (UNSAFE_KEYS.has(key)) return
       if (isObject(source[key])) {
         if (!target[key]) {
           Object.assign(target, {
