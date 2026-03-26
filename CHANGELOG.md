@@ -1,5 +1,9 @@
 ### dev
 
+### 1.9.1
+
+- Security updates
+
 ### 1.9.0
 
 - added `x-categoryOrder` option
