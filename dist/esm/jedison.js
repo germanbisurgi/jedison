@@ -2481,6 +2481,7 @@ class Editor {
    * Destroys the editor
    */
   destroy() {
+    this.clearStoredEventListeners();
     if (this.control.container && this.control.container.parentNode) {
       this.control.container.parentNode.removeChild(this.control.container);
     }
@@ -2699,6 +2700,9 @@ class InstanceIfThenElse extends Instance {
     return this.activeInstance ? this.activeInstance.hasNestedValidationErrors() : false;
   }
   destroy() {
+    if (this.instanceWithoutIf) {
+      this.instanceWithoutIf.destroy();
+    }
     this.instances.forEach((instance) => {
       instance.destroy();
     });
@@ -6639,13 +6643,15 @@ class Jedison extends EventEmitter {
           }, 0);
         }
       });
-      document.addEventListener("focus", (event) => {
+      this._onFocus = (event) => {
         this.lastKeyEvent = null;
         this.lastFocusedId = event.target.id;
-      }, true);
-      document.addEventListener("keydown", (event) => {
+      };
+      this._onKeydown = (event) => {
         this.lastKeyEvent = event;
-      });
+      };
+      document.addEventListener("focus", this._onFocus, true);
+      document.addEventListener("keydown", this._onKeydown);
     }
   }
   updateInstancesWatchedData() {
@@ -6957,6 +6963,10 @@ class Jedison extends EventEmitter {
    * Destroy the root instance and it's children
    */
   destroy() {
+    if (this._onFocus) {
+      document.removeEventListener("focus", this._onFocus, true);
+      document.removeEventListener("keydown", this._onKeydown);
+    }
     this.root.destroy();
     if (this.options.container) {
       this.container.innerHTML = "";
@@ -7465,7 +7475,7 @@ class Theme {
     const html = document.createElement("dialog");
     html.classList.add("jedi-properties-slot");
     html.setAttribute("id", config.id);
-    window.addEventListener("click", (event) => {
+    html.addEventListener("click", (event) => {
       if (event.target === html) {
         html.close();
       }
@@ -7476,7 +7486,7 @@ class Theme {
     const html = document.createElement("dialog");
     html.classList.add("jedi-quick-add-property-slot");
     html.setAttribute("id", config.id);
-    window.addEventListener("click", (event) => {
+    html.addEventListener("click", (event) => {
       if (event.target === html) {
         html.close();
       }
@@ -7490,7 +7500,7 @@ class Theme {
     const dialog = document.createElement("dialog");
     dialog.classList.add("jedi-json-data");
     dialog.setAttribute("id", config.id);
-    window.addEventListener("click", (event) => {
+    dialog.addEventListener("click", (event) => {
       if (event.target === dialog) {
         dialog.close();
       }
@@ -7765,7 +7775,7 @@ class Theme {
     }
     closeBtn.classList.add("jedi-modal-close");
     closeBtn.setAttribute("always-enabled", "");
-    window.addEventListener("click", (event) => {
+    dialog.addEventListener("click", (event) => {
       if (event.target === dialog) {
         dialog.close();
       }

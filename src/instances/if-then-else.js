@@ -284,6 +284,10 @@ class InstanceIfThenElse extends Instance {
   }
 
   destroy () {
+    if (this.instanceWithoutIf) {
+      this.instanceWithoutIf.destroy()
+    }
+
     this.instances.forEach((instance) => {
       instance.destroy()
     })

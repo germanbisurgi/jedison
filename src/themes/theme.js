@@ -417,7 +417,7 @@ class Theme {
     html.classList.add('jedi-properties-slot')
     html.setAttribute('id', config.id)
 
-    window.addEventListener('click', (event) => {
+    html.addEventListener('click', (event) => {
       if (event.target === html) {
         html.close()
       }
@@ -431,7 +431,7 @@ class Theme {
     html.classList.add('jedi-quick-add-property-slot')
     html.setAttribute('id', config.id)
 
-    window.addEventListener('click', (event) => {
+    html.addEventListener('click', (event) => {
       if (event.target === html) {
         html.close()
       }
@@ -449,7 +449,7 @@ class Theme {
     dialog.classList.add('jedi-json-data')
     dialog.setAttribute('id', config.id)
 
-    window.addEventListener('click', (event) => {
+    dialog.addEventListener('click', (event) => {
       if (event.target === dialog) {
         dialog.close()
       }
@@ -785,7 +785,7 @@ class Theme {
     closeBtn.classList.add('jedi-modal-close')
     closeBtn.setAttribute('always-enabled', '')
 
-    window.addEventListener('click', (event) => {
+    dialog.addEventListener('click', (event) => {
       if (event.target === dialog) {
         dialog.close()
       }

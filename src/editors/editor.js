@@ -463,6 +463,8 @@ class Editor {
    * Destroys the editor
    */
   destroy () {
+    this.clearStoredEventListeners()
+
     if (this.control.container && this.control.container.parentNode) {
       this.control.container.parentNode.removeChild(this.control.container)
     }

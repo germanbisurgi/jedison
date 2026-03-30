@@ -271,14 +271,15 @@ class Jedison extends EventEmitter {
         }
       })
 
-      document.addEventListener('focus', (event) => {
+      this._onFocus = (event) => {
         this.lastKeyEvent = null
         this.lastFocusedId = event.target.id
-      }, true)
-
-      document.addEventListener('keydown', (event) => {
+      }
+      this._onKeydown = (event) => {
         this.lastKeyEvent = event
-      })
+      }
+      document.addEventListener('focus', this._onFocus, true)
+      document.addEventListener('keydown', this._onKeydown)
     }
   }
 
@@ -664,6 +665,11 @@ class Jedison extends EventEmitter {
    * Destroy the root instance and it's children
    */
   destroy () {
+    if (this._onFocus) {
+      document.removeEventListener('focus', this._onFocus, true)
+      document.removeEventListener('keydown', this._onKeydown)
+    }
+
     this.root.destroy()
 
     if (this.options.container) {

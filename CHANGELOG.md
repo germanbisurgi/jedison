@@ -2,7 +2,8 @@
 
 ### 1.9.2
 
-- fixed issue #42
+- fixed issue #32 (memory leak)
+- fixed issue #42 (x-info content not scoped)
 
 ### 1.9.1
 
