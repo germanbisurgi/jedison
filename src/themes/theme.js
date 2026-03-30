@@ -768,6 +768,7 @@ class Theme {
     })
 
     dialog.classList.add('jedi-modal-dialog')
+    dialog.setAttribute('id', id + '-modal')
 
     title.classList.add('jedi-modal-title')
 

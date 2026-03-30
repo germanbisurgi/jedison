@@ -7754,6 +7754,7 @@ class Theme {
       icon: "close"
     });
     dialog.classList.add("jedi-modal-dialog");
+    dialog.setAttribute("id", id + "-modal");
     title.classList.add("jedi-modal-title");
     if (isString(config.title)) {
       title.innerHTML = config.title;
