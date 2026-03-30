@@ -18,20 +18,23 @@ Scenario('@issue @issue-42 each column info button should open its own modal con
   I.click('th:nth-child(2) .jedi-info-button')
   I._waitForText('Info A')
   I._waitForText('Info content for Field A')
-  I._waitForElement('.modal.fade.show')
+  I._waitForVisible('.modal.fade.show')
   I._click('.modal.fade.show .jedi-modal-close')
+  I._waitForInvisible('.modal.fade.show')
 
   // Field B — second column info button
   I.click('th:nth-child(3) .jedi-info-button')
   I._waitForText('Info B')
   I._waitForText('Info content for Field B')
-  I._waitForElement('.modal.fade.show')
+  I._waitForVisible('.modal.fade.show')
   I._click('.modal.fade.show .jedi-modal-close')
+  I._waitForInvisible('.modal.fade.show')
 
   // Field C — third column info button
   I.click('th:nth-child(4) .jedi-info-button')
   I._waitForText('Info C')
   I._waitForText('Info content for Field C')
-  I._waitForElement('.modal.fade.show')
+  I._waitForVisible('.modal.fade.show')
   I._click('.modal.fade.show .jedi-modal-close')
+  I._waitForInvisible('.modal.fade.show')
 })
