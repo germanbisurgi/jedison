@@ -4894,7 +4894,7 @@ class EditorArrayTable extends EditorArray {
           const infoContent = this.getInfo(schemaItems);
           const info = this.theme.getInfo(infoContent);
           if (schemaXInfo.variant === "modal") {
-            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent);
+            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path) + "-item", infoContent);
           }
           thTitle.appendChild(info.container);
         }
@@ -5032,7 +5032,7 @@ class EditorArrayTableObject extends EditorArray {
       schemaItems = this.instance.jedison.refParser.expand(schemaItems);
     }
     const itemProperties = getSchemaProperties(schemaItems);
-    Object.values(itemProperties).forEach((propertySchema) => {
+    Object.entries(itemProperties).forEach(([propertyKey, propertySchema]) => {
       const th2 = this.theme.getTableHeader();
       if (propertySchema.title) {
         const fakeLabel = this.theme.getFakeLabel({
@@ -5045,7 +5045,7 @@ class EditorArrayTableObject extends EditorArray {
         const infoContent = this.getInfo(propertySchema);
         const info = this.theme.getInfo(infoContent);
         if (schemaXInfo.variant === "modal") {
-          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent);
+          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path) + "-" + propertyKey, infoContent);
         }
         th2.appendChild(info.container);
       }

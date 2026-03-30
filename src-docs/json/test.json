@@ -1,171 +1,287 @@
 {
-  "title": "Neozoen",
-  "type": "object",
-  "x-options": {
-    "format": "grid",
-    "grid": {
-      "columns": 12
+  "title": "Array",
+  "description": "Arrays are used for ordered elements. In JSON, each element in an array may be of a different type.",
+  "type": "array",
+  "minItems": 2,
+  "maxItems": 3,
+  "x-sortable": true,
+  "x-format": "table-object",
+  "x-tableColMinWidth": "100px",
+  "default": [
+    {
+      "boolean-select": true,
+      "boolean-radios": true,
+      "boolean": true,
+      "string": "ut Lorem laborum quis",
+      "string-textarea": "non reprehenderit",
+      "string-select": "albert",
+      "string-radios": "betti",
+      "number": 16348035.233686866,
+      "number-select": 1.5,
+      "number-radios": 1.5,
+      "integer": 49878374,
+      "integer-select": 3,
+      "integer-radios": 1
+    },
+    {
+      "boolean-select": false,
+      "boolean-radios": false,
+      "boolean": false,
+      "string": "Lorem eu laborum nostrud",
+      "string-textarea": "ad reprehenderit exercitation est",
+      "string-select": "carl",
+      "string-radios": "betti",
+      "number": 59176757.926051416,
+      "number-select": 2.5,
+      "number-radios": 1.5,
+      "integer": 81128216,
+      "integer-select": 2,
+      "integer-radios": 1
     }
-  },
-  "properties": {
-    "marderhund": {
-      "title": "Marderhund",
-      "$ref": "#\/$defs/custom_vorkommen_jungtiere_anzahl",
-      "properties": {
-        "vk": {
-          "title": "Kam die Art im **JJ 2025/2026** in Ihrem Revier vor?"
-        },
-        "jungtiere": {
-          "title": "Konnten Sie im **JJ 2025/2026** Jungtiere beobachten?"
-        },
-        "gehecke": {
-          "title": "Anzahl Gehecke (Wurfbaue):"
-        }
-      }
-    }
-  },
-  "$defs": {
-    "custom_vorkommen_jungtiere_anzahl": {
-      "$ref": "#/$defs/global/vorkommen",
-      "x-options": {
-        "format": "grid"
-      },
-      "properties": {
-        "jungtiere": {
-          "title": "Konnten Sie im aktuellen Jagdjahr Jungtiere beobachten?"
-        },
-        "gehecke": {
-          "title": "Anzahl Gehecke:"
-        }
-      },
-      "if": {
-        "properties": {
-          "vk": {
-            "const": "ja"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "jungtiere": {
-            "type": "string",
-            "enum": [
-              "ja",
-              "nein"
-            ],
-            "x-options": {
-              "enforceEnumDefault": false,
-              "format": "radios-inline",
-              "enumTitles": [
-                "ja",
-                "nein"
-              ]
-            }
-          },
-          "gehecke": {
-            "type": "integer",
-            "x-enforceConst": true
-          }
-        },
-        "if": {
-          "properties": {
-            "jungtiere": {
-              "const": "ja"
-            }
-          }
-        },
-        "then": {
-          "properties": {
-            "gehecke": {
-              "minimum": 0,
-              "maximum": 9999
-            }
-          }
-        },
-        "else": {
-          "properties": {
-            "gehecke": {
-              "const": 0,
-              "x-enforceConst": true,
-              "readOnly": true
-            }
-          }
+  ],
+  "items": {
+    "type": "object",
+    "title": "Person",
+    "description": "Person",
+    "required": [
+      "boolean-select",
+      "boolean-radios",
+      "boolean",
+      "string",
+      "string-textarea",
+      "string-select",
+      "string-radios",
+      "number",
+      "number-select",
+      "number-radios",
+      "integer",
+      "integer-select",
+      "integer-radios"
+    ],
+    "properties": {
+      "boolean-select": {
+        "type": "boolean",
+        "title": "Boolean select",
+        "description": "A boolean editor using select input.",
+        "const": true,
+        "x-tableColMinWidth": "300px",
+        "x-format": "select",
+        "x-enumTitles": [
+          "No",
+          "Yes"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title A",
+          "content": "Info button content A"
         }
       },
-      "else": {
-        "if": {
-          "properties": {
-            "vk": {
-              "const": "nein"
-            }
-          }
-        },
-        "then": {
-          "properties": {
-            "jungtiere": {
-              "type": "string",
-              "default": "",
-              "const": "",
-              "readOnly": true,
-              "x-enforceConst": true,
-              "description": "nein"
-            },
-            "gehecke": {
-              "type": "integer",
-              "const": 0,
-              "x-enforceConst": true,
-              "readOnly": true
-            }
-          }
-        },
-        "else": {
-          "if": {
-            "properties": {
-              "vk": {
-                "const": "unbekannt"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "jungtiere": {
-                "type": "string",
-                "default": "",
-                "const": "",
-                "readOnly": true,
-                "x-enforceConst": true,
-                "description": "unbekannt"
-              },
-              "gehecke": {
-                "type": "string",
-                "default": "",
-                "const": "",
-                "readOnly": true,
-                "x-enforceConst": true,
-                "description": "unbekannt"
-              }
-            }
-          },
-          "else": {
-            "properties": {
-              "jungtiere": {
-                "type": "string",
-                "default": "",
-                "const": "",
-                "readOnly": true,
-                "x-enforceConst": true,
-                "description": "keine Angabe"
-              },
-              "gehecke": {
-                "type": "string",
-                "default": "",
-                "const": "",
-                "readOnly": true,
-                "x-enforceConst": true,
-                "description": "keine Angabe"
-              }
-            }
-          }
+      "boolean-radios": {
+        "type": "boolean",
+        "title": "Boolean radios",
+        "description": "A boolean editor using radios.",
+        "const": true,
+        "x-format": "radios-inline",
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "No",
+          "Yes"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "boolean": {
+        "type": "boolean",
+        "title": "Boolean",
+        "description": "A boolean editor checkbox.",
+        "const": true,
+        "x-tableColMinWidth": "300px",
+        "x-format": "checkbox",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "string": {
+        "type": "string",
+        "title": "String input",
+        "description": "A string editor.",
+        "minLength": 1,
+        "x-tableColMinWidth": "300px",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "string-textarea": {
+        "type": "string",
+        "title": "String textarea",
+        "description": "A string editor using textarea.",
+        "minLength": 1,
+        "x-format": "textarea",
+        "x-tableColMinWidth": "300px",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "string-select": {
+        "type": "string",
+        "title": "String select",
+        "description": "A string editor using select.",
+        "enum": [
+          "albert",
+          "betti",
+          "carl"
+        ],
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "Albert",
+          "Betti",
+          "Carl"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "string-radios": {
+        "type": "string",
+        "title": "String radios",
+        "description": "A string editor using radios.",
+        "enum": [
+          "albert",
+          "betti",
+          "carl"
+        ],
+        "x-format": "radios-inline",
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "Albert",
+          "Betti",
+          "Carl"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "number": {
+        "type": "number",
+        "title": "Number input",
+        "description": "A number editor.",
+        "minimum": 1,
+        "x-tableColMinWidth": "300px",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "number-select": {
+        "type": "number",
+        "title": "Number select",
+        "description": "A number editor using select.",
+        "enum": [
+          1.5,
+          2.5,
+          3.5
+        ],
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "small (1.5)",
+          "medium (2.5)",
+          "big (3.5)"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "number-radios": {
+        "type": "number",
+        "title": "Number radios",
+        "description": "A number editor using radios.",
+        "enum": [
+          1.5,
+          2.5,
+          3.5
+        ],
+        "x-format": "radios-inline",
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "small (1.5)",
+          "medium (2.5)",
+          "big (3.5)"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "integer": {
+        "type": "integer",
+        "title": "Integer",
+        "description": "A integer editor.",
+        "minimum": 1,
+        "x-tableColMinWidth": "300px",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "integer-select": {
+        "type": "integer",
+        "title": "Integer select",
+        "description": "A integer editor using select.",
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "small (1)",
+          "medium (2)",
+          "big (3)"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
+        }
+      },
+      "integer-radios": {
+        "type": "number",
+        "title": "Integer radios",
+        "description": "A integer editor using radios.",
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "x-format": "radios-inline",
+        "x-tableColMinWidth": "300px",
+        "x-enumTitles": [
+          "small (1)",
+          "medium (2)",
+          "big (3)"
+        ],
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info Button title",
+          "content": "Info button content"
         }
       }
     }

@@ -95,7 +95,7 @@ class EditorArrayTableObject extends EditorArray {
     }
     const itemProperties = getSchemaProperties(schemaItems)
 
-    Object.values(itemProperties).forEach((propertySchema) => {
+    Object.entries(itemProperties).forEach(([propertyKey, propertySchema]) => {
       const th = this.theme.getTableHeader()
 
       if (propertySchema.title) {
@@ -113,7 +113,7 @@ class EditorArrayTableObject extends EditorArray {
         const info = this.theme.getInfo(infoContent)
 
         if (schemaXInfo.variant === 'modal') {
-          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent)
+          this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path) + '-' + propertyKey, infoContent)
         }
 
         th.appendChild(info.container)

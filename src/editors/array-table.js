@@ -90,7 +90,7 @@ class EditorArrayTable extends EditorArray {
           const info = this.theme.getInfo(infoContent)
 
           if (schemaXInfo.variant === 'modal') {
-            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path), infoContent)
+            this.theme.infoAsModal(info, this.getIdFromPath(this.instance.path) + '-item', infoContent)
           }
 
           thTitle.appendChild(info.container)

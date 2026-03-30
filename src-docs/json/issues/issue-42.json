@@ -1,0 +1,47 @@
+{
+  "title": "Issue 42 - x-info scoped per-column in table-object",
+  "description": "x-info annotations on item properties should be scoped to their respective columns.",
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 3,
+  "x-format": "table-object",
+  "default": [
+    {
+      "field-a": "value a",
+      "field-b": "value b",
+      "field-c": "value c"
+    }
+  ],
+  "items": {
+    "type": "object",
+    "properties": {
+      "field-a": {
+        "type": "string",
+        "title": "Field A",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info A",
+          "content": "Info content for Field A"
+        }
+      },
+      "field-b": {
+        "type": "string",
+        "title": "Field B",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info B",
+          "content": "Info content for Field B"
+        }
+      },
+      "field-c": {
+        "type": "string",
+        "title": "Field C",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info C",
+          "content": "Info content for Field C"
+        }
+      }
+    }
+  }
+}

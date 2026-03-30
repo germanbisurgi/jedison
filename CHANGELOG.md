@@ -1,5 +1,9 @@
 ### dev
 
+### 1.9.2
+
+- fixed issue #42
+
 ### 1.9.1
 
 - Security updates
