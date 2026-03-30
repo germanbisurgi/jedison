@@ -26,6 +26,7 @@ import EditorNull from './editors/null.js'
 import EditorStringSimpleMDE from './editors/string-simplemde.js'
 import EditorStringQuill from './editors/string-quill.js'
 import EditorStringJodit from './editors/string-jodit.js'
+import EditorStringPickr from './editors/string-pickr.js'
 import EditorStringFlatpickr from './editors/string-flatpickr.js'
 import EditorStringIMask from './editors/string-imask.js'
 import EditorNumberImask from './editors/number-imask.js'
@@ -57,6 +58,7 @@ class UiResolver {
       EditorStringSimpleMDE,
       EditorStringQuill,
       EditorStringJodit,
+      EditorStringPickr,
       EditorStringFlatpickr,
       EditorStringIMask,
       EditorStringAce,

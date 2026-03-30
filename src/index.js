@@ -16,6 +16,7 @@ import EditorStringRadios from './editors/string-radios.js'
 import EditorStringSelect from './editors/string-select.js'
 import EditorStringTextarea from './editors/string-textarea.js'
 import EditorStringAwesomplete from './editors/string-awesomplete.js'
+import EditorStringPickr from './editors/string-pickr.js'
 import EditorStringInput from './editors/string-input.js'
 import EditorNumberRange from './editors/number-range.js'
 import EditorNumber from './editors/number.js'
@@ -47,6 +48,7 @@ export default {
   EditorStringSelect,
   EditorStringTextarea,
   EditorStringAwesomplete,
+  EditorStringPickr,
   EditorStringInput,
   EditorNumberRange,
   EditorNumber,

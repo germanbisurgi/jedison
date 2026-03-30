@@ -1,0 +1,24 @@
+{
+  "title": "Pickr",
+  "type": "string",
+  "description": "Pickr is a flat, simple, hackable color-picker.",
+  "default": "#1a73e8ff",
+  "x-format": "pickr",
+  "x-pickr": {
+    "theme": "classic",
+    "swatches": [
+      "#264653", "#2a9d8f", "#e9c46a", "#f4a261", "#e76f51",
+      "#d62828", "#023e8a", "#80b918"
+    ],
+    "components": {
+      "preview": true,
+      "opacity": true,
+      "hue": true,
+      "interaction": {
+        "hex": true,
+        "input": true,
+        "save": false
+      }
+    }
+  }
+}

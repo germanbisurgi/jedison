@@ -1,7 +1,8 @@
 ### dev
 
-### 1.9.2
+### 1.10.0
 
+- added pickr editor
 - fixed issue #32 (memory leak)
 - fixed issue #42 (x-info content not scoped)
 

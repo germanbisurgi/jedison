@@ -312,6 +312,7 @@ import quill from './json/plugins/string-quill.json'
 import jodit from './json/plugins/string-jodit.json'
 import flatpickr from './json/plugins/string-flatpickr.json'
 import flatpickrSchedule from './json/plugins/string-flatpickr-schedule.json'
+import pickr from './json/plugins/string-pickr.json'
 import numberImask from './json/plugins/number-imask.json'
 import imask from './json/plugins/string-imask.json'
 import imaskSettings from './json/plugins/string-imask-settings.json'
@@ -444,6 +445,7 @@ export default {
           'plugins/emoji-button': emojiButton,
           'plugins/flatpickr': flatpickr,
           'plugins/flatpickr-schedule': flatpickrSchedule,
+          'plugins/pickr': pickr,
           'plugins/number-imask': numberImask,
           'plugins/imask': imask,
           'plugins/imask-settings': imaskSettings,
