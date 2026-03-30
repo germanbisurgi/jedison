@@ -11,24 +11,27 @@ BeforeSuite(({ I }) => {
   I._waitForElement('.jedi-ready')
 })
 
-Scenario('@issue @issue-42 each column info button should open its own modal content', async ({ I }) => {
+Scenario('@issue @issue-42 each column info button should open its own modal content', ({ I }) => {
   I._waitForElement('.jedi-info-button')
 
   // Field A — first column info button
-  await I.executeScript(() => { document.querySelectorAll('thead .jedi-info-button')[0].click() })
+  I.click('th:nth-child(2) .jedi-info-button')
   I._waitForText('Info A')
   I._waitForText('Info content for Field A')
-  await I.executeScript(() => { document.querySelector('dialog[open] .jedi-modal-close').click() })
+  I._waitForElement('.modal.fade.show')
+  I._click('.modal.fade.show .jedi-modal-close')
 
   // Field B — second column info button
-  await I.executeScript(() => { document.querySelectorAll('thead .jedi-info-button')[1].click() })
+  I.click('th:nth-child(3) .jedi-info-button')
   I._waitForText('Info B')
   I._waitForText('Info content for Field B')
-  await I.executeScript(() => { document.querySelector('dialog[open] .jedi-modal-close').click() })
+  I._waitForElement('.modal.fade.show')
+  I._click('.modal.fade.show .jedi-modal-close')
 
   // Field C — third column info button
-  await I.executeScript(() => { document.querySelectorAll('thead .jedi-info-button')[2].click() })
+  I.click('th:nth-child(4) .jedi-info-button')
   I._waitForText('Info C')
   I._waitForText('Info content for Field C')
-  await I.executeScript(() => { document.querySelector('dialog[open] .jedi-modal-close').click() })
+  I._waitForElement('.modal.fade.show')
+  I._click('.modal.fade.show .jedi-modal-close')
 })
