@@ -1821,8 +1821,6 @@ class Instance extends EventEmitter {
     this.children = [];
     this.ui = null;
     this.isDirty = false;
-    this.cachedErrors = null;
-    this.cachedErrorsValue = void 0;
     this.watched = {};
     this.key = this.path.split(this.jedison.pathSeparator).pop();
     this.arrayTemplateData = config.arrayTemplateData || {};
@@ -2034,7 +2032,6 @@ class Instance extends EventEmitter {
     }
     this.value = newValue;
     this.isDirty = true;
-    this.cachedErrors = null;
     this.emit("set-value", newValue, initiator);
     this.emit("change", initiator);
     this.jedison.emit("instance-change", this, initiator);
@@ -2055,15 +2052,9 @@ class Instance extends EventEmitter {
     if (!this.isActive) {
       return [];
     }
-    if (this.cachedErrorsValue === this.value && this.cachedErrors !== null) {
-      return this.cachedErrors;
-    }
-    const errors = removeDuplicatesFromArray(
+    return removeDuplicatesFromArray(
       this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     );
-    this.cachedErrorsValue = this.value;
-    this.cachedErrors = errors;
-    return errors;
   }
   /**
    * Returns true if any leaf descendant is showing validation errors.
@@ -2937,7 +2928,6 @@ class InstanceObject extends Instance {
       Object.keys(value).forEach((propertyName) => {
         const matchesPattern = compiledPatterns.some((re) => re.test(propertyName));
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
-          console.warn("deleting", propertyName);
           delete value[propertyName];
         }
       });
@@ -5397,6 +5387,16 @@ class EditorMultiple extends Editor {
     if (this.embedSwitcher) {
       this.control.header.style.display = "none";
     }
+    this.instance.on("change", () => {
+      const jedison = this.instance.jedison;
+      const errors = jedison.getErrors(["error", "warning"]);
+      const prefix = this.instance.path + "/";
+      for (const inst of jedison.instances.values()) {
+        if (inst.ui && inst.path.startsWith(prefix)) {
+          inst.ui.showValidationErrors(errors);
+        }
+      }
+    });
   }
   adaptForTable(td) {
     this.theme.adaptForTableMultipleControl(this.control, td);
@@ -5842,15 +5842,19 @@ class EditorNumberRaty extends EditorNumber {
     });
     try {
       const ratyOptions = getSchemaXOption(this.instance.schema, "raty") ?? {};
-      this.raty = new Raty(this.control.placeholder, Object.assign({}, ratyOptions), {
+      this.raty = new Raty(this.control.placeholder, Object.assign({}, ratyOptions, {
         click: (score) => {
           this.instance.setValue(score, true, "user");
         }
-      });
+      }));
       this.raty.init();
     } catch (e) {
       console.error("Raty is not available or not loaded correctly.", e);
     }
+  }
+  adaptForTable() {
+    this.theme.visuallyHidden(this.control.label);
+    this.theme.visuallyHidden(this.control.description);
   }
   refreshDisabledState() {
     if (this.disabled || this.readOnly) {

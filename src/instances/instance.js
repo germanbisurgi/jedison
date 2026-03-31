@@ -83,9 +83,6 @@ class Instance extends EventEmitter {
      */
     this.isDirty = false
 
-    this.cachedErrors = null
-    this.cachedErrorsValue = undefined
-
     this.watched = {}
 
     this.key = this.path.split(this.jedison.pathSeparator).pop()
@@ -360,7 +357,6 @@ class Instance extends EventEmitter {
 
     this.value = newValue
     this.isDirty = true
-    this.cachedErrors = null
 
     // Only emit events if value actually changed
     this.emit('set-value', newValue, initiator)
@@ -388,16 +384,9 @@ class Instance extends EventEmitter {
       return []
     }
 
-    if (this.cachedErrorsValue === this.value && this.cachedErrors !== null) {
-      return this.cachedErrors
-    }
-
-    const errors = removeDuplicatesFromArray(
+    return removeDuplicatesFromArray(
       this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     )
-    this.cachedErrorsValue = this.value
-    this.cachedErrors = errors
-    return errors
   }
 
   /**

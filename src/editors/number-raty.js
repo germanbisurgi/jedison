@@ -31,15 +31,20 @@ class EditorNumberRaty extends EditorNumber {
     try {
       const ratyOptions = getSchemaXOption(this.instance.schema, 'raty') ?? {}
 
-      this.raty = new Raty(this.control.placeholder, Object.assign({}, ratyOptions), {
+      this.raty = new Raty(this.control.placeholder, Object.assign({}, ratyOptions, {
         click: (score) => {
           this.instance.setValue(score, true, 'user')
         }
-      })
+      }))
       this.raty.init()
     } catch (e) {
       console.error('Raty is not available or not loaded correctly.', e)
     }
+  }
+
+  adaptForTable () {
+    this.theme.visuallyHidden(this.control.label)
+    this.theme.visuallyHidden(this.control.description)
   }
 
   refreshDisabledState () {

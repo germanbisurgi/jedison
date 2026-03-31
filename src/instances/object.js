@@ -94,7 +94,6 @@ class InstanceObject extends Instance {
         const matchesPattern = compiledPatterns.some(re => re.test(propertyName))
 
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
-          console.warn('deleting', propertyName)
           delete value[propertyName]
         }
       })

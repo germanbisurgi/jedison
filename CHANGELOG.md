@@ -1,5 +1,9 @@
 ### dev
 
+### 1.10.1
+
+- fixed issue #43 (Custom constraint errors persist in UI)
+
 ### 1.10.0
 
 - added pickr editor

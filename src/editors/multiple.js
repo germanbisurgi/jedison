@@ -29,6 +29,17 @@ class EditorMultiple extends Editor {
     if (this.embedSwitcher) {
       this.control.header.style.display = 'none'
     }
+
+    this.instance.on('change', () => {
+      const jedison = this.instance.jedison
+      const errors = jedison.getErrors(['error', 'warning'])
+      const prefix = this.instance.path + '/'
+      for (const inst of jedison.instances.values()) {
+        if (inst.ui && inst.path.startsWith(prefix)) {
+          inst.ui.showValidationErrors(errors)
+        }
+      }
+    })
   }
 
   adaptForTable (td) {

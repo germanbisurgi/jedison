@@ -1,0 +1,62 @@
+{
+  "title": "Issue 43 - Stale validation cache with cross-instance custom constraints",
+  "description": "After switching anyOf branch back to J2000, the error from the GALACTIC branch should be cleared.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "targets": {
+      "x-discriminator": "mode",
+      "x-switcherInput": "select",
+      "x-embedSwitcher": true,
+      "anyOf": [
+        {
+          "x-switcherTitle": "Branch A",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "frame",
+            "lng1"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "const": "a",
+              "default": "a",
+              "x-hidden": true
+            },
+            "frame": {
+              "type": "string",
+              "enum": [
+                "J2000",
+                "GALACTIC"
+              ],
+              "default": "J2000"
+            },
+            "lng1": {
+              "type": "string",
+              "default": "19:39:25.026661",
+              "x-coordinate-lng": true
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Branch B",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "const": "b",
+              "default": "b",
+              "x-hidden": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

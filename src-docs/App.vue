@@ -355,6 +355,7 @@ import issue17 from './json/issues/issue-17.json'
 import issue24 from './json/issues/issue-24.json'
 import issue35 from './json/issues/issue-35.json'
 import issue42 from './json/issues/issue-42.json'
+import issue43 from './json/issues/issue-43.json'
 import issue33 from './json/issues/issue-33.json'
 import issue31 from './json/issues/issue-31.json'
 import joditAsProp from './json/issues/jodit-as-prop.json'
@@ -536,6 +537,7 @@ export default {
           'issue/issue-33': issue33,
           'issue/issue-31': issue31,
           'issue/issue-42': issue42,
+          'issue/issue-43': issue43,
           'issue/jodit-as-prop': joditAsProp,
           'issue/perf-checkbox': perfCheckbox,
           'issue/perf-oneOf': perfOneOf,
@@ -808,6 +810,25 @@ export default {
           }
         },
         constraints: {
+          'x-coordinate-lng': (context) => {
+            if (!context.schema['x-coordinate-lng']) return []
+            const editor = window.editor
+            if (!editor) return []
+            const rowPath = context.path.replace(/\/lng1$/, '')
+            const frame = editor.getInstance(rowPath)?.getValue()?.frame
+            if (frame === 'J2000') {
+              const valid = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]{1,6})?$/.test(context.value)
+              if (!valid) {
+                return [{ type: 'error', path: context.path, constraint: 'x-coordinate-lng', messages: ['Invalid J2000 longitude format'] }]
+              }
+            }
+            if (frame === 'GALACTIC') {
+              if (String(context.value).includes(':')) {
+                return [{ type: 'error', path: context.path, constraint: 'x-coordinate-lng', messages: ['Invalid GALACTIC longitude'] }]
+              }
+            }
+            return []
+          },
           'x-my-constraint': (context) => {
             const errors = []
             const schemaMyConstraint = context.schema['x-my-constraint']
