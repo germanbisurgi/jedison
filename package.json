@@ -80,28 +80,29 @@
     "vue": "^3.5.12"
   },
   "resolutions": {
-    "@isaacs/brace-expansion ": ">=5.0.1",
+    "@isaacs/brace-expansion": ">=5.0.1",
     "js-yaml": ">=4.1.1",
     "ws": "^8.18.3",
     "braces": "^3.0.3",
-    "brace-expansion": ">=2.0.1",
+    "brace-expansion": ">=5.0.5",
     "axios": ">=1.13.5",
     "cross-spawn": "^7.0.5",
     "tar-fs": ">=3.1.1",
     "tmp": "^0.2.4",
     "glob": ">=11.1.0",
     "diff": ">=8.0.3",
-    "lodash": ">=4.17.23",
+    "lodash": ">=4.18.0",
     "minimatch": ">=10.2.3",
     "rollup": ">=4.59.0",
     "multer": ">=2.1.1",
     "ajv": "^6.14.0",
-    "serialize-javascript": ">=7.0.3",
+    "serialize-javascript": ">=7.0.5",
     "immutable": ">=5.1.5",
     "picomatch": ">=4.0.4",
     "flatted": ">=3.4.2",
     "undici": ">=7.24.0",
-    "yaml": ">=2.8.3"
+    "yaml": ">=2.8.3",
+    "@xmldom/xmldom": ">=0.9.9"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

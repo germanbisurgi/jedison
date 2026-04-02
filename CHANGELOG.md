@@ -3,6 +3,7 @@
 ### 1.11.0
 
 - Array nav support for `x-sortable`
+- Security updates
 
 ### 1.10.1
 
