@@ -2791,8 +2791,8 @@ class InstanceMultiple extends Instance {
       instance.off("notifyParent");
       instance.on("notifyParent", (initiator) => {
         this.value = this.activeInstance.getValueRaw();
-        this.emit("notifyParent", initiator);
         this.emit("change", initiator);
+        this.emit("notifyParent", initiator);
       });
       this.instances.push(instance);
       this.register();
@@ -5369,6 +5369,10 @@ class EditorArrayNav extends EditorArray {
     this.refreshDeleteAllBtn();
     this.refreshJsonData();
   }
+  showValidationErrors(errors, force = false) {
+    super.showValidationErrors(errors, force);
+    this.refreshUI();
+  }
   refreshSortable(container) {
     if (this.isSortable()) {
       if (this.sortable) {
@@ -5411,10 +5415,14 @@ class EditorMultiple extends Editor {
       const jedison = this.instance.jedison;
       const errors = jedison.getErrors(["error", "warning"]);
       const prefix = this.instance.path + "/";
+      const matching = [];
       for (const inst of jedison.instances.values()) {
         if (inst.ui && inst.path.startsWith(prefix)) {
-          inst.ui.showValidationErrors(errors);
+          matching.push(inst);
         }
+      }
+      for (const inst of matching.reverse()) {
+        inst.ui.showValidationErrors(errors);
       }
     });
   }

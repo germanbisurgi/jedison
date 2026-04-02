@@ -172,6 +172,11 @@ class EditorArrayNav extends EditorArray {
     this.refreshJsonData()
   }
 
+  showValidationErrors (errors, force = false) {
+    super.showValidationErrors(errors, force)
+    this.refreshUI()
+  }
+
   refreshSortable (container) {
     if (this.isSortable()) {
       if (this.sortable) {

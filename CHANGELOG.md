@@ -4,6 +4,7 @@
 
 - Array nav support for `x-sortable`
 - Security updates
+- fixed issue #43 (Custom constraint errors persist in UI nested)
 
 ### 1.10.1
 

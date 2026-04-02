@@ -34,10 +34,18 @@ class EditorMultiple extends Editor {
       const jedison = this.instance.jedison
       const errors = jedison.getErrors(['error', 'warning'])
       const prefix = this.instance.path + '/'
+      const matching = []
+
       for (const inst of jedison.instances.values()) {
         if (inst.ui && inst.path.startsWith(prefix)) {
-          inst.ui.showValidationErrors(errors)
+          matching.push(inst)
         }
+      }
+
+      // Iterate in reverse (deepest/last-registered first) so leaf error states
+      // are updated before descendant nav editors rebuild their tab badges
+      for (const inst of matching.reverse()) {
+        inst.ui.showValidationErrors(errors)
       }
     })
   }

@@ -1,10 +1,12 @@
 {
-  "title": "Issue 43 - Stale validation cache with cross-instance custom constraints",
-  "description": "After switching anyOf branch back to J2000, the error from the GALACTIC branch should be cleared.",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue 43 - Nav badge not cleared after cross-field constraint errors are resolved",
+  "description": "After switching the frame back to J2000 the error badge on the 'Source 1' nav-vertical tab must disappear.",
   "type": "object",
+  "x-format": "nav-horizontal",
   "properties": {
     "targets": {
+      "title": "Targets",
       "x-discriminator": "mode",
       "x-switcherInput": "select",
       "x-embedSwitcher": true,
@@ -15,8 +17,7 @@
           "additionalProperties": false,
           "required": [
             "mode",
-            "frame",
-            "lng1"
+            "sources"
           ],
           "properties": {
             "mode": {
@@ -25,18 +26,34 @@
               "default": "a",
               "x-hidden": true
             },
-            "frame": {
-              "type": "string",
-              "enum": [
-                "J2000",
-                "GALACTIC"
+            "sources": {
+              "title": "Sources",
+              "type": "array",
+              "x-format": "nav-vertical",
+              "default": [
+                {
+                  "frame": "J2000",
+                  "lng1": "19:39:25.026661"
+                }
               ],
-              "default": "J2000"
-            },
-            "lng1": {
-              "type": "string",
-              "default": "19:39:25.026661",
-              "x-coordinate-lng": true
+              "items": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "string",
+                    "enum": [
+                      "J2000",
+                      "GALACTIC"
+                    ],
+                    "default": "J2000"
+                  },
+                  "lng1": {
+                    "type": "string",
+                    "default": "19:39:25.026661",
+                    "x-coordinate-lng": true
+                  }
+                }
+              }
             }
           }
         },
@@ -57,6 +74,16 @@
           }
         }
       ]
+    },
+    "common": {
+      "title": "Common",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "test"
+        }
+      }
     }
   }
 }
