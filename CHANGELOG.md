@@ -1,5 +1,9 @@
 ### dev
 
+### 1.11.0
+
+- Array nav support for `x-sortable`
+
 ### 1.10.1
 
 - fixed issue #43 (Custom constraint errors persist in UI)

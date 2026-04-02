@@ -1,0 +1,29 @@
+{
+  "type": "array",
+  "title": "array-nav-sortable",
+  "x-format": "nav-vertical",
+  "x-sortable": true,
+  "x-arrayMove": false,
+  "x-arrayDelete": true,
+  "default": [
+    { "name": "Albert", "age": 30 },
+    { "name": "Betti", "age": 25 },
+    { "name": "Carl", "age": 40 }
+  ],
+  "items": {
+    "type": "object",
+    "title": "Person",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "New Person"
+      },
+      "age": {
+        "title": "Age",
+        "type": "integer",
+        "default": 0
+      }
+    }
+  }
+}

@@ -31,7 +31,6 @@
 - responsive options (xs, sm, sd, lg) for nav editors
 - array nav-horizontal needs left and right arrows buttons instead of up and down
 - array items titles in item containers
-- array nav drag
 - collapse expands text and animation, collapse children on collapse
 - info variant tooltip
 - info variant popover

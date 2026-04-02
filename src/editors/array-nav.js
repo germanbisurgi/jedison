@@ -83,7 +83,7 @@ class EditorArrayNav extends EditorArray {
     tabContentCol.appendChild(tabContent)
 
     this.instance.children.forEach((child, index) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, addAfterBtn } = this.getButtons(index)
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index)
 
       if (isSet(arrayDelete) && arrayDelete === true) {
         btnGroup.appendChild(deleteBtn)
@@ -96,6 +96,10 @@ class EditorArrayNav extends EditorArray {
 
       if (isSet(arrayAddAfter) && arrayAddAfter === true) {
         btnGroup.appendChild(addAfterBtn)
+      }
+
+      if (this.isSortable()) {
+        btnGroup.appendChild(dragBtn)
       }
 
       this.control.childrenSlot.appendChild(child.ui.control.container)
@@ -161,10 +165,29 @@ class EditorArrayNav extends EditorArray {
       }
     })
 
+    this.refreshSortable(tabList)
     this.refreshDisabledState()
     this.refreshAddBtn()
     this.refreshDeleteAllBtn()
     this.refreshJsonData()
+  }
+
+  refreshSortable (container) {
+    if (this.isSortable()) {
+      if (this.sortable) {
+        this.sortable.destroy()
+      }
+
+      this.sortable = window.Sortable.create(container, {
+        animation: 150,
+        handle: '.jedi-array-drag',
+        disabled: this.disabled || this.readOnly,
+        onEnd: (evt) => {
+          this.activeItemIndex = evt.newIndex
+          this.instance.move(evt.oldIndex, evt.newIndex)
+        }
+      })
+    }
   }
 }
 

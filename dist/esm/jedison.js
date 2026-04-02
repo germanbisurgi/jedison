@@ -5303,7 +5303,7 @@ class EditorArrayNav extends EditorArray {
     tabListCol.appendChild(tabList);
     tabContentCol.appendChild(tabContent);
     this.instance.children.forEach((child, index2) => {
-      const { deleteBtn, moveUpBtn, moveDownBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
+      const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
       if (isSet(arrayDelete) && arrayDelete === true) {
         btnGroup.appendChild(deleteBtn);
       }
@@ -5313,6 +5313,9 @@ class EditorArrayNav extends EditorArray {
       }
       if (isSet(arrayAddAfter) && arrayAddAfter === true) {
         btnGroup.appendChild(addAfterBtn);
+      }
+      if (this.isSortable()) {
+        btnGroup.appendChild(dragBtn);
       }
       this.control.childrenSlot.appendChild(child.ui.control.container);
       const schemaTitle = getSchemaTitle(child.schema);
@@ -5360,10 +5363,27 @@ class EditorArrayNav extends EditorArray {
         moveDownBtn.setAttribute("disabled", "");
       }
     });
+    this.refreshSortable(tabList);
     this.refreshDisabledState();
     this.refreshAddBtn();
     this.refreshDeleteAllBtn();
     this.refreshJsonData();
+  }
+  refreshSortable(container) {
+    if (this.isSortable()) {
+      if (this.sortable) {
+        this.sortable.destroy();
+      }
+      this.sortable = window.Sortable.create(container, {
+        animation: 150,
+        handle: ".jedi-array-drag",
+        disabled: this.disabled || this.readOnly,
+        onEnd: (evt) => {
+          this.activeItemIndex = evt.newIndex;
+          this.instance.move(evt.oldIndex, evt.newIndex);
+        }
+      });
+    }
   }
 }
 class EditorMultiple extends Editor {
