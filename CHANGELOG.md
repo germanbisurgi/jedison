@@ -5,6 +5,7 @@
 - Array nav support for `x-sortable`
 - Security updates
 - fixed issue #43 (Custom constraint errors persist in UI nested)
+- Copy json data to clipboard feature
 
 ### 1.10.1
 

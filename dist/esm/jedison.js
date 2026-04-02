@@ -3256,7 +3256,8 @@ const glyphicons = {
   info: "glyphicon glyphicon-question-sign",
   close: "glyphicon glyphicon-remove",
   edit: "glyphicon glyphicon-pencil",
-  save: "glyphicon glyphicon-floppy-disk"
+  save: "glyphicon glyphicon-floppy-disk",
+  copy: "glyphicon glyphicon-copy"
 };
 const bootstrapIcons = {
   properties: "bi bi-card-list",
@@ -3270,7 +3271,8 @@ const bootstrapIcons = {
   info: "bi bi-question-circle",
   close: "bi bi-x",
   edit: "bi bi-pencil",
-  save: "bi bi-floppy"
+  save: "bi bi-floppy",
+  copy: "bi bi-clipboard"
 };
 const fontAwesome3 = {
   properties: "icon-list",
@@ -3284,7 +3286,8 @@ const fontAwesome3 = {
   info: "icon-question-sign",
   close: "icon-remove",
   edit: "icon-pencil",
-  save: "icon-save"
+  save: "icon-save",
+  copy: "icon-copy"
 };
 const fontAwesome4 = {
   properties: "fa fa-list",
@@ -3298,7 +3301,8 @@ const fontAwesome4 = {
   info: "fa fa-question-circle",
   close: "fa fa-times",
   edit: "fa fa-pencil",
-  save: "fa fa-floppy-o"
+  save: "fa fa-floppy-o",
+  copy: "fa fa-clipboard"
 };
 const fontAwesome5 = {
   properties: "fas fa-list",
@@ -3312,7 +3316,8 @@ const fontAwesome5 = {
   info: "fas fa-question-circle",
   close: "fas fa-times",
   edit: "fas fa-pencil-alt",
-  save: "fas fa-save"
+  save: "fas fa-save",
+  copy: "fas fa-clipboard"
 };
 const fontAwesome6 = {
   properties: "fa-solid fa-list",
@@ -3326,7 +3331,8 @@ const fontAwesome6 = {
   info: "fa-solid fa-circle-question",
   close: "fa-solid fa-xmark",
   edit: "fa-solid fa-pencil",
-  save: "fa-solid fa-floppy-disk"
+  save: "fa-solid fa-floppy-disk",
+  copy: "fa-solid fa-clipboard"
 };
 class EditorBoolean extends Editor {
   sanitize(value) {
@@ -4104,6 +4110,9 @@ class EditorObject extends Editor {
         alert("Invalid JSON");
       }
     });
+    this.control.jsonData.copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(this.control.jsonData.input.value);
+    });
     this.control.jsonData.toggle.addEventListener("click", () => {
       this.refreshJsonDataInputSize();
     });
@@ -4576,6 +4585,9 @@ class EditorArray extends Editor {
     this.addJsonDataEventListeners();
   }
   addJsonDataEventListeners() {
+    this.control.jsonData.copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(this.control.jsonData.input.value);
+    });
     this.control.jsonData.saveBtn.addEventListener("click", () => {
       try {
         const inputValue = JSON.parse(this.control.jsonData.input.value);
@@ -7626,6 +7638,11 @@ class Theme {
     input.style.overflowX = "auto";
     input.style.resize = "both";
     input.style.maxHeight = "60vh";
+    const copyBtn = this.getButton({
+      id: "jedi-json-data-copy-" + config.id,
+      icon: "copy"
+    });
+    copyBtn.classList.add("jedi-json-data-copy");
     const saveBtn = this.getButton({
       // content: config.propertiesToggleContent, // todo: use text config or something
       id: "jedi-json-data-save-" + config.id,
@@ -7634,12 +7651,14 @@ class Theme {
     dialog.appendChild(control);
     control.appendChild(label);
     control.appendChild(input);
+    dialog.appendChild(copyBtn);
     dialog.appendChild(saveBtn);
     return {
       dialog,
       toggle,
       control,
       input,
+      copyBtn,
       saveBtn
     };
   }
@@ -8906,6 +8925,8 @@ class ThemeBootstrap3 extends Theme {
     const jsonData = super.getJsonData(config);
     jsonData.control.classList.add("form-group");
     jsonData.input.classList.add("form-control");
+    jsonData.copyBtn.classList.add("btn-default");
+    jsonData.copyBtn.classList.add("btn-block");
     jsonData.saveBtn.classList.add("btn-primary");
     jsonData.saveBtn.classList.add("btn-block");
     return jsonData;
@@ -9271,6 +9292,8 @@ class ThemeBootstrap4 extends Theme {
     const jsonData = super.getJsonData(config);
     jsonData.control.classList.add("form-group");
     jsonData.input.classList.add("form-control");
+    jsonData.copyBtn.classList.add("btn-secondary");
+    jsonData.copyBtn.classList.add("btn-block");
     jsonData.saveBtn.classList.add("btn-primary");
     jsonData.saveBtn.classList.add("btn-block");
     return jsonData;
@@ -9655,6 +9678,8 @@ class ThemeBootstrap5 extends Theme {
     const jsonData = super.getJsonData(config);
     jsonData.control.classList.add("mb-3");
     jsonData.input.classList.add("form-control");
+    jsonData.copyBtn.classList.add("btn-secondary");
+    jsonData.copyBtn.classList.add("w-100");
     jsonData.saveBtn.classList.add("btn-primary");
     jsonData.saveBtn.classList.add("w-100");
     return jsonData;

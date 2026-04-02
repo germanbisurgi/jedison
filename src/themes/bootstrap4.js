@@ -40,6 +40,8 @@ class ThemeBootstrap4 extends Theme {
     const jsonData = super.getJsonData(config)
     jsonData.control.classList.add('form-group')
     jsonData.input.classList.add('form-control')
+    jsonData.copyBtn.classList.add('btn-secondary')
+    jsonData.copyBtn.classList.add('btn-block')
     jsonData.saveBtn.classList.add('btn-primary')
     jsonData.saveBtn.classList.add('btn-block')
     return jsonData

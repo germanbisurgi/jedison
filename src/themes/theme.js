@@ -489,6 +489,13 @@ class Theme {
     input.style.resize = 'both'
     input.style.maxHeight = '60vh'
 
+    // copyBtn
+    const copyBtn = this.getButton({
+      id: 'jedi-json-data-copy-' + config.id,
+      icon: 'copy'
+    })
+    copyBtn.classList.add('jedi-json-data-copy')
+
     // saveBtn
     const saveBtn = this.getButton({
       // content: config.propertiesToggleContent, // todo: use text config or something
@@ -499,6 +506,7 @@ class Theme {
     dialog.appendChild(control)
     control.appendChild(label)
     control.appendChild(input)
+    dialog.appendChild(copyBtn)
     dialog.appendChild(saveBtn)
 
     return {
@@ -506,6 +514,7 @@ class Theme {
       toggle,
       control,
       input,
+      copyBtn,
       saveBtn
     }
   }

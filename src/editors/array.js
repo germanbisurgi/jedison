@@ -90,6 +90,10 @@ class EditorArray extends Editor {
   }
 
   addJsonDataEventListeners () {
+    this.control.jsonData.copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(this.control.jsonData.input.value)
+    })
+
     this.control.jsonData.saveBtn.addEventListener('click', () => {
       try {
         const inputValue = JSON.parse(this.control.jsonData.input.value)

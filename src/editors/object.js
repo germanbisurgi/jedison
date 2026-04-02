@@ -106,6 +106,10 @@ class EditorObject extends Editor {
       }
     })
 
+    this.control.jsonData.copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(this.control.jsonData.input.value)
+    })
+
     this.control.jsonData.toggle.addEventListener('click', () => {
       this.refreshJsonDataInputSize()
     })
