@@ -5,6 +5,7 @@
   "x-sortable": true,
   "x-arrayMove": false,
   "x-arrayDelete": true,
+  "x-titleTemplate": "{{ value.name }}",
   "default": [
     { "name": "Albert", "age": 30 },
     { "name": "Betti", "age": 25 },
