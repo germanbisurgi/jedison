@@ -384,6 +384,14 @@ class Instance extends EventEmitter {
       return []
     }
 
+    let ancestor = this.parent
+    while (ancestor) {
+      if (!ancestor.isActive) {
+        return []
+      }
+      ancestor = ancestor.parent
+    }
+
     return removeDuplicatesFromArray(
       this.jedison.validator.getErrors(this.getValueRaw(), this.originalSchema, this.getKey(), this.path)
     )

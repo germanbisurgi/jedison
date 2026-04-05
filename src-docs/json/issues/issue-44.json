@@ -1,0 +1,39 @@
+{
+  "x-embedSwitcher": true,
+  "$ref": "#/$defs/node",
+  "$defs": {
+    "subtype": {
+      "type": "object",
+      "properties": {
+        "prop1": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "prop1"
+      ],
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "title": "Node",
+      "default": { "id": "a" },
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Activity Title"
+        },
+        "subtype": {
+          "$ref": "#/$defs/subtype"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "x-recursive": true
+}

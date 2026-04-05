@@ -1,5 +1,9 @@
 ### dev
 
+### 1.11.1
+
+- fixed issue #43 (Optional property of a type object creates an error)
+
 ### 1.11.0
 
 - Array nav support for `x-sortable`
