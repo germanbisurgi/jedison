@@ -1,5 +1,9 @@
 ### dev
 
+### 1.11.2
+
+- security updates
+
 ### 1.11.1
 
 - fixed issue #43 (Optional property of a type object creates an error)
