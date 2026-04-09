@@ -857,7 +857,7 @@ export default {
         }
       }
 
-      // options.data = Array.from({ length: 50 }, (_, i) => ({
+      // options.data = Array.from({ length: 300 }, (_, i) => ({
       //   observer: `Observer ${i+1}`,
       //   location: `Location ${i+1}`,
       //   date: new Date(2026, 3, (i % 28) + 1).toISOString().split('T')[0],

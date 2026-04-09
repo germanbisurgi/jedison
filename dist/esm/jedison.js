@@ -5436,7 +5436,8 @@ class EditorMultiple extends Editor {
     if (this.embedSwitcher) {
       this.control.header.style.display = "none";
     }
-    this.instance.on("change", () => {
+    this.instance.on("change", (initiator) => {
+      if (initiator === "api") return;
       const jedison = this.instance.jedison;
       const errors = jedison.getErrors(["error", "warning"]);
       const prefix = this.instance.path + "/";
