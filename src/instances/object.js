@@ -243,7 +243,15 @@ class InstanceObject extends Instance {
     this.value = value
     this.jedison.emit('instance-change', this, initiator)
     this.emit('change', initiator)
-    this.emit('notifyParent', initiator)
+
+    // Suppress upward propagation while this object is rebuilding its children.
+    // Intermediate notifications would cause ancestors to re-walk the tree once
+    // per child created, leading to O(n²) work for large arrays. The flag is
+    // cleared by refreshInstances() after all children are settled, at which
+    // point setValue() emits its own notifyParent exactly once.
+    if (!this.refreshingInstances) {
+      this.emit('notifyParent', initiator)
+    }
   }
 
   /**
@@ -281,9 +289,16 @@ class InstanceObject extends Instance {
   }
 
   refreshInstances (initiator) {
+    // Save and restore rather than set/clear so that re-entrant calls (nested
+    // objects calling refreshInstances on their own children) do not prematurely
+    // lower the flag while an outer call is still in progress.
+    const wasRefreshing = this.refreshingInstances
+    this.refreshingInstances = true
+
     const value = this.getValue()
 
     if (!isObject(value)) {
+      this.refreshingInstances = wasRefreshing
       return
     }
 
@@ -332,6 +347,7 @@ class InstanceObject extends Instance {
 
     // Update the object's value with the corrected values after constraint enforcement
     this.value = value
+    this.refreshingInstances = wasRefreshing // restore so onChildChange can emit notifyParent again
   }
 }
 
