@@ -3053,7 +3053,9 @@ class InstanceObject extends Instance {
     this.value = value;
     this.jedison.emit("instance-change", this, initiator);
     this.emit("change", initiator);
-    this.emit("notifyParent", initiator);
+    if (!this.refreshingInstances) {
+      this.emit("notifyParent", initiator);
+    }
   }
   /**
    * Sorts the children of the current instance based on their `propertyOrder` value in ascending order.
@@ -3083,8 +3085,11 @@ class InstanceObject extends Instance {
     });
   }
   refreshInstances(initiator) {
+    const wasRefreshing = this.refreshingInstances;
+    this.refreshingInstances = true;
     const value = this.getValue();
     if (!isObject(value)) {
+      this.refreshingInstances = wasRefreshing;
       return;
     }
     const childMap = /* @__PURE__ */ new Map();
@@ -3119,6 +3124,7 @@ class InstanceObject extends Instance {
     }
     this.sortChildrenByPropertyOrder();
     this.value = value;
+    this.refreshingInstances = wasRefreshing;
   }
 }
 class InstanceArray extends Instance {

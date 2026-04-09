@@ -857,6 +857,18 @@ export default {
         }
       }
 
+      // options.data = Array.from({ length: 50 }, (_, i) => ({
+      //   observer: `Observer ${i+1}`,
+      //   location: `Location ${i+1}`,
+      //   date: new Date(2026, 3, (i % 28) + 1).toISOString().split('T')[0],
+      //   targets: i % 2 === 0
+      //       ? { type: "PlantTarget", species: `Plant Species ${i+1}`, count: Math.floor(Math.random() * 20) }
+      //       : { type: "AnimalTarget", species: `Animal Species ${i+1}`, behavior: "Active" },
+      //   apollo: i % 3 === 0
+      //       ? { version: "v1", notes: "Apollo test 1" }
+      //       : { version: "v2", notes: "Apollo test 2", extra: "Extra info" }
+      // }));
+
       const t1 = window.performance.now()
       this.editor = new Jedison.Create(options)
       const t2 = window.performance.now()

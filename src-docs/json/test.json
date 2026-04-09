@@ -1,89 +1,61 @@
 {
-  "title": "Cron Schedule Configurator",
-  "type": "object",
-  "required": ["minute", "hour", "dayOfMonth", "month", "dayOfWeek"],
-  "properties": {
-    "minute": {
-      "type": "string",
-      "title": "Minute",
-      "enum": [
-        "*",
-        "*/5",
-        "*/10",
-        "*/15",
-        "*/30",
-        "0"
-      ],
-      "default": "*"
-    },
-    "hour": {
-      "type": "string",
-      "title": "Hour",
-      "enum": [
-        "*",
-        "*/1",
-        "*/2",
-        "*/6",
-        "*/12",
-        "0"
-      ],
-      "default": "*"
-    },
-    "dayOfMonth": {
-      "type": "string",
-      "title": "Day of Month",
-      "enum": [
-        "*",
-        "1",
-        "15",
-        "L"
-      ],
-      "default": "*"
-    },
-    "month": {
-      "type": "string",
-      "title": "Month",
-      "enum": [
-        "*",
-        "1",
-        "4",
-        "7",
-        "10"
-      ],
-      "default": "*"
-    },
-    "dayOfWeek": {
-      "type": "string",
-      "title": "Day of Week",
-      "enum": [
-        "*",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "0"
-      ],
-      "options": {
-        "enum_titles": [
-          "Every day",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday"
+  "type": "array",
+  "title": "Observations",
+  "items": {
+    "type": "object",
+    "properties": {
+      "observer": { "type": "string" },
+      "location": { "type": "string" },
+      "date": { "type": "string", "format": "date" },
+      "targets": {
+        "type": "object",
+        "anyOf": [
+          {
+            "title": "PlantTarget",
+            "type": "object",
+            "properties": {
+              "type": { "const": "PlantTarget" },
+              "species": { "type": "string" },
+              "count": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["type","species","count"]
+          },
+          {
+            "title": "AnimalTarget",
+            "type": "object",
+            "properties": {
+              "type": { "const": "AnimalTarget" },
+              "species": { "type": "string" },
+              "behavior": { "type": "string" }
+            },
+            "required": ["type","species","behavior"]
+          }
         ]
       },
-      "default": "*"
+      "apollo": {
+        "anyOf": [
+          {
+            "title": "Apollo v1",
+            "type": "object",
+            "properties": {
+              "version": { "const": "v1" },
+              "notes": { "type": "string" }
+            },
+            "required": ["version","notes"]
+          },
+          {
+            "title": "Apollo v2",
+            "type": "object",
+            "properties": {
+              "version": { "const": "v2" },
+              "notes": { "type": "string" },
+              "extra": { "type": "string" }
+            },
+            "required": ["version","notes"]
+          }
+        ]
+      }
     },
-    "cronPreview": {
-      "type": "string",
-      "title": "Cron Expression",
-      "readOnly": true,
-      "default": "* * * * *"
-    }
+    "required": ["observer","location","date","targets","apollo"]
   }
 }
