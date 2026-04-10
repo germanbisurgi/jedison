@@ -3,6 +3,7 @@
 ### 1.11.2
 
 - security updates
+- boosted performance
 
 ### 1.11.1
 
