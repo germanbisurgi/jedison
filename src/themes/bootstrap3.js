@@ -370,6 +370,29 @@ class ThemeBootstrap3 extends Theme {
     control.container.classList.remove('form-group')
   }
 
+  getSwitcherSelect (config) {
+    const control = super.getSwitcherSelect(config)
+    control.input.classList.add('input-sm')
+    return control
+  }
+
+  getSwitcherModal (config) {
+    const control = super.getSwitcherModal(config)
+    control.container.style.marginLeft = '4px'
+    control.trigger.classList.add('label', 'label-default')
+    control.dialogBody.classList.add('btn-group-vertical')
+    control.optionButtons.forEach(btn => {
+      btn.classList.add('btn', 'btn-default')
+    })
+    return control
+  }
+
+  setSwitcherOptionActive (btn, active) {
+    super.setSwitcherOptionActive(btn, active)
+    btn.classList.toggle('btn-primary', active)
+    btn.classList.toggle('btn-default', !active)
+  }
+
   adaptForTableMultipleControl (control, td) {
     super.adaptForTableMultipleControl(control, td)
   }

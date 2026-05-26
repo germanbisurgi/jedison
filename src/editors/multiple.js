@@ -71,6 +71,16 @@ class EditorMultiple extends Editor {
         })
       })
     }
+
+    if (this.switcherInput === 'modal') {
+      this.control.switcher.optionButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const index = Number(btn.dataset.switcherValue)
+          this.control.switcher.dialog.close()
+          this.instance.switchInstance(index, undefined, 'user')
+        })
+      })
+    }
   }
 
   refreshUI () {
@@ -90,6 +100,15 @@ class EditorMultiple extends Editor {
       }
     }
 
+    if (this.switcherInput === 'modal') {
+      const childControl = this.instance.activeInstance.ui.control
+      const titleEl = childControl.legendText || childControl.label
+      if (titleEl) {
+        titleEl.after(this.control.switcher.container)
+        this.control.header.style.display = 'none'
+      }
+    }
+
     if (this.switcherInput === 'select') {
       this.control.switcher.input.value = this.instance.index
     }
@@ -98,6 +117,13 @@ class EditorMultiple extends Editor {
       this.control.switcher.radios.forEach((radio) => {
         const radioIndex = Number(radio.value)
         radio.checked = radioIndex === this.instance.index
+      })
+    }
+
+    if (this.switcherInput === 'modal') {
+      this.control.switcher.triggerText.textContent = this.instance.switcherOptionsLabels[this.instance.index]
+      this.control.switcher.optionButtons.forEach((btn, index) => {
+        this.theme.setSwitcherOptionActive(btn, index === this.instance.index)
       })
     }
 

@@ -3270,7 +3270,8 @@ const glyphicons = {
   close: "glyphicon glyphicon-remove",
   edit: "glyphicon glyphicon-pencil",
   save: "glyphicon glyphicon-floppy-disk",
-  copy: "glyphicon glyphicon-copy"
+  copy: "glyphicon glyphicon-copy",
+  switcher: "glyphicon glyphicon-chevron-down"
 };
 const bootstrapIcons = {
   properties: "bi bi-card-list",
@@ -3285,7 +3286,8 @@ const bootstrapIcons = {
   close: "bi bi-x",
   edit: "bi bi-pencil",
   save: "bi bi-floppy",
-  copy: "bi bi-clipboard"
+  copy: "bi bi-clipboard",
+  switcher: "bi bi-chevron-down"
 };
 const fontAwesome3 = {
   properties: "icon-list",
@@ -3300,7 +3302,8 @@ const fontAwesome3 = {
   close: "icon-remove",
   edit: "icon-pencil",
   save: "icon-save",
-  copy: "icon-copy"
+  copy: "icon-copy",
+  switcher: "icon-chevron-down"
 };
 const fontAwesome4 = {
   properties: "fa fa-list",
@@ -3315,7 +3318,8 @@ const fontAwesome4 = {
   close: "fa fa-times",
   edit: "fa fa-pencil",
   save: "fa fa-floppy-o",
-  copy: "fa fa-clipboard"
+  copy: "fa fa-clipboard",
+  switcher: "fa fa-chevron-down"
 };
 const fontAwesome5 = {
   properties: "fas fa-list",
@@ -3330,7 +3334,8 @@ const fontAwesome5 = {
   close: "fas fa-times",
   edit: "fas fa-pencil-alt",
   save: "fas fa-save",
-  copy: "fas fa-clipboard"
+  copy: "fas fa-clipboard",
+  switcher: "fas fa-chevron-down"
 };
 const fontAwesome6 = {
   properties: "fa-solid fa-list",
@@ -3345,7 +3350,8 @@ const fontAwesome6 = {
   close: "fa-solid fa-xmark",
   edit: "fa-solid fa-pencil",
   save: "fa-solid fa-floppy-disk",
-  copy: "fa-solid fa-clipboard"
+  copy: "fa-solid fa-clipboard",
+  switcher: "fa-solid fa-chevron-down"
 };
 class EditorBoolean extends Editor {
   sanitize(value) {
@@ -5500,6 +5506,15 @@ class EditorMultiple extends Editor {
         });
       });
     }
+    if (this.switcherInput === "modal") {
+      this.control.switcher.optionButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index2 = Number(btn.dataset.switcherValue);
+          this.control.switcher.dialog.close();
+          this.instance.switchInstance(index2, void 0, "user");
+        });
+      });
+    }
   }
   refreshUI() {
     this.refreshDisabledState();
@@ -5516,6 +5531,14 @@ class EditorMultiple extends Editor {
         this.control.header.appendChild(this.control.switcher.container);
       }
     }
+    if (this.switcherInput === "modal") {
+      const childControl = this.instance.activeInstance.ui.control;
+      const titleEl = childControl.legendText || childControl.label;
+      if (titleEl) {
+        titleEl.after(this.control.switcher.container);
+        this.control.header.style.display = "none";
+      }
+    }
     if (this.switcherInput === "select") {
       this.control.switcher.input.value = this.instance.index;
     }
@@ -5523,6 +5546,12 @@ class EditorMultiple extends Editor {
       this.control.switcher.radios.forEach((radio) => {
         const radioIndex = Number(radio.value);
         radio.checked = radioIndex === this.instance.index;
+      });
+    }
+    if (this.switcherInput === "modal") {
+      this.control.switcher.triggerText.textContent = this.instance.switcherOptionsLabels[this.instance.index];
+      this.control.switcher.optionButtons.forEach((btn, index2) => {
+        this.theme.setSwitcherOptionActive(btn, index2 === this.instance.index);
       });
     }
     if (this.disabled || this.instance.isReadOnly()) {
@@ -7730,7 +7759,7 @@ class Theme {
    * Container for properties editing elements like property activators
    */
   getPropertiesSlot(config) {
-    const html = document.createElement("dialog");
+    const html = this.getDialog();
     html.classList.add("jedi-properties-slot");
     html.setAttribute("id", config.id);
     html.addEventListener("click", (event) => {
@@ -7741,7 +7770,7 @@ class Theme {
     return html;
   }
   getQuickAddPropertySlot(config) {
-    const html = document.createElement("dialog");
+    const html = this.getDialog();
     html.classList.add("jedi-quick-add-property-slot");
     html.setAttribute("id", config.id);
     html.addEventListener("click", (event) => {
@@ -7755,7 +7784,7 @@ class Theme {
    * Container for properties editing elements like property activators
    */
   getJsonData(config) {
-    const dialog = document.createElement("dialog");
+    const dialog = this.getDialog();
     dialog.classList.add("jedi-json-data");
     dialog.setAttribute("id", config.id);
     dialog.addEventListener("click", (event) => {
@@ -8018,17 +8047,27 @@ class Theme {
     return { container, info };
   }
   /**
+   * Creates a base native <dialog> element with shared styling
+   */
+  getDialog() {
+    const dialog = document.createElement("dialog");
+    dialog.classList.add("jedi-modal-dialog");
+    dialog.style.border = "1px solid #6c757d";
+    dialog.style.borderRadius = "4px";
+    dialog.style.minWidth = "200px";
+    return dialog;
+  }
+  /**
    * Dialog or modal that contains extra information about the control
    */
   infoAsModal(info, id, config = {}) {
-    const dialog = document.createElement("dialog");
+    const dialog = this.getDialog();
     const title = document.createElement("div");
     const content = document.createElement("div");
     const closeBtn = this.getButton({
       content: "Close",
       icon: "close"
     });
-    dialog.classList.add("jedi-modal-dialog");
     dialog.setAttribute("id", id + "-modal");
     title.classList.add("jedi-modal-title");
     if (isString(config.title)) {
@@ -8430,7 +8469,7 @@ class Theme {
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
     const randomId = generateRandomID(5);
-    const knownSwitchers = ["select", "radios", "radios-inline"];
+    const knownSwitchers = ["select", "radios", "radios-inline", "modal"];
     const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : "select";
     let switcher;
     if (switcherType === "select") {
@@ -8456,6 +8495,14 @@ class Theme {
         readOnly: config.readOnly,
         inline: switcherType === "radios-inline",
         noSpacing: true
+      });
+    }
+    if (switcherType === "modal") {
+      switcher = this.getSwitcherModal({
+        values: config.switcherOptionValues,
+        titles: config.switcherOptionsLabels,
+        id: config.id + "-switcher-" + randomId,
+        readOnly: config.readOnly
       });
     }
     switcher.container.classList.add("jedi-switcher");
@@ -8914,6 +8961,62 @@ class Theme {
    */
   getSwitcherRadios(config) {
     return this.getRadiosControl(config);
+  }
+  /**
+   * Compact badge-button trigger that opens a modal to switch between multiple editors options
+   */
+  getSwitcherModal(config) {
+    const container = document.createElement("span");
+    const trigger = document.createElement("span");
+    const dialog = this.getDialog();
+    const dialogBody = document.createElement("div");
+    const optionButtons = [];
+    const triggerText = document.createElement("span");
+    const triggerIcon = document.createElement("i");
+    container.classList.add("jedi-switcher-modal");
+    trigger.classList.add("jedi-switcher-modal-trigger");
+    trigger.setAttribute("role", "button");
+    trigger.setAttribute("tabindex", "0");
+    trigger.setAttribute("aria-haspopup", "dialog");
+    trigger.setAttribute("aria-label", "Switch type");
+    trigger.appendChild(triggerText);
+    if (this.icons && this.icons.switcher) {
+      this.addIconClass(triggerIcon, this.icons.switcher);
+      trigger.appendChild(document.createTextNode(" "));
+      trigger.appendChild(triggerIcon);
+    }
+    dialogBody.classList.add("jedi-modal-content");
+    config.values.forEach((value, index2) => {
+      const btn = document.createElement("button");
+      btn.setAttribute("type", "button");
+      btn.setAttribute("aria-label", `Select: ${config.titles[index2]}`);
+      btn.textContent = config.titles[index2];
+      btn.dataset.switcherValue = value;
+      btn.classList.add("jedi-switcher-option-btn");
+      optionButtons.push(btn);
+      dialogBody.appendChild(btn);
+    });
+    trigger.addEventListener("click", () => {
+      dialog.showModal();
+    });
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dialog.showModal();
+      }
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+    container.appendChild(trigger);
+    container.appendChild(dialog);
+    dialog.appendChild(dialogBody);
+    return { container, trigger, triggerText, dialog, dialogBody, optionButtons };
+  }
+  setSwitcherOptionActive(btn, active) {
+    btn.classList.toggle("jedi-switcher-option-active", active);
   }
   /**
    * Another type of error message container used for more complex editors like
@@ -9395,6 +9498,26 @@ class ThemeBootstrap3 extends Theme {
     super.adaptForTableSelectControl(control, td);
     control.container.classList.remove("form-group");
   }
+  getSwitcherSelect(config) {
+    const control = super.getSwitcherSelect(config);
+    control.input.classList.add("input-sm");
+    return control;
+  }
+  getSwitcherModal(config) {
+    const control = super.getSwitcherModal(config);
+    control.container.style.marginLeft = "4px";
+    control.trigger.classList.add("label", "label-default");
+    control.dialogBody.classList.add("btn-group-vertical");
+    control.optionButtons.forEach((btn) => {
+      btn.classList.add("btn", "btn-default");
+    });
+    return control;
+  }
+  setSwitcherOptionActive(btn, active) {
+    super.setSwitcherOptionActive(btn, active);
+    btn.classList.toggle("btn-primary", active);
+    btn.classList.toggle("btn-default", !active);
+  }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
   }
@@ -9835,6 +9958,26 @@ class ThemeBootstrap4 extends Theme {
   adaptForTableSelectControl(control, td) {
     super.adaptForTableSelectControl(control, td);
     control.container.classList.remove("form-group");
+  }
+  getSwitcherSelect(config) {
+    const control = super.getSwitcherSelect(config);
+    control.input.classList.add("form-control-sm");
+    return control;
+  }
+  getSwitcherModal(config) {
+    const control = super.getSwitcherModal(config);
+    control.container.classList.add("ml-1");
+    control.trigger.classList.add("badge", "badge-secondary");
+    control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
+    control.optionButtons.forEach((btn) => {
+      btn.classList.add("btn", "btn-secondary");
+    });
+    return control;
+  }
+  setSwitcherOptionActive(btn, active) {
+    super.setSwitcherOptionActive(btn, active);
+    btn.classList.toggle("btn-primary", active);
+    btn.classList.toggle("btn-secondary", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -10288,6 +10431,26 @@ class ThemeBootstrap5 extends Theme {
   adaptForTableSelectControl(control, td) {
     super.adaptForTableSelectControl(control, td);
     control.container.classList.remove("mb-3");
+  }
+  getSwitcherSelect(config) {
+    const control = super.getSwitcherSelect(config);
+    control.input.classList.add("form-select-sm");
+    return control;
+  }
+  getSwitcherModal(config) {
+    const control = super.getSwitcherModal(config);
+    control.container.classList.add("ms-1");
+    control.trigger.classList.add("badge", "bg-secondary");
+    control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
+    control.optionButtons.forEach((btn) => {
+      btn.classList.add("btn", "btn-secondary");
+    });
+    return control;
+  }
+  setSwitcherOptionActive(btn, active) {
+    super.setSwitcherOptionActive(btn, active);
+    btn.classList.toggle("btn-primary", active);
+    btn.classList.toggle("btn-secondary", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);

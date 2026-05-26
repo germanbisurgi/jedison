@@ -385,6 +385,29 @@ class ThemeBootstrap5 extends Theme {
     control.container.classList.remove('mb-3')
   }
 
+  getSwitcherSelect (config) {
+    const control = super.getSwitcherSelect(config)
+    control.input.classList.add('form-select-sm')
+    return control
+  }
+
+  getSwitcherModal (config) {
+    const control = super.getSwitcherModal(config)
+    control.container.classList.add('ms-1')
+    control.trigger.classList.add('badge', 'bg-secondary')
+    control.dialogBody.classList.add('btn-group', 'btn-group-vertical', 'w-100')
+    control.optionButtons.forEach(btn => {
+      btn.classList.add('btn', 'btn-secondary')
+    })
+    return control
+  }
+
+  setSwitcherOptionActive (btn, active) {
+    super.setSwitcherOptionActive(btn, active)
+    btn.classList.toggle('btn-primary', active)
+    btn.classList.toggle('btn-secondary', !active)
+  }
+
   adaptForTableMultipleControl (control, td) {
     super.adaptForTableMultipleControl(control, td)
     control.container.classList.remove('mb-3')

@@ -372,6 +372,7 @@ import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
 import embedSwitcher from './json/features/embed-switcher.json'
+import switcherModal from './json/features/switcher-modal.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
 import {isSet} from "../src/helpers/utils.js"
@@ -477,6 +478,7 @@ export default {
           'features/options-overrides': optionsOverrides,
           'features/nav-warning': navWarning,
           'features/embed-switcher': embedSwitcher,
+          'features/switcher-modal': switcherModal,
           'features/navigate-to': navigateTo,
           'features/title-icon-class': titleIconClass,
           'parsing/json-patch': jsonPatch,
@@ -582,7 +584,8 @@ export default {
       switcherInputOptions: [
         'select',
         'radios',
-        'radios-inline'
+        'radios-inline',
+        'modal'
       ],
       languageOptions: [
         'en',

@@ -411,7 +411,7 @@ class Theme {
    * Container for properties editing elements like property activators
    */
   getPropertiesSlot (config) {
-    const html = document.createElement('dialog')
+    const html = this.getDialog()
     html.classList.add('jedi-properties-slot')
     html.setAttribute('id', config.id)
 
@@ -425,7 +425,7 @@ class Theme {
   }
 
   getQuickAddPropertySlot (config) {
-    const html = document.createElement('dialog')
+    const html = this.getDialog()
     html.classList.add('jedi-quick-add-property-slot')
     html.setAttribute('id', config.id)
 
@@ -442,8 +442,7 @@ class Theme {
    * Container for properties editing elements like property activators
    */
   getJsonData (config) {
-    // dialog
-    const dialog = document.createElement('dialog')
+    const dialog = this.getDialog()
     dialog.classList.add('jedi-json-data')
     dialog.setAttribute('id', config.id)
 
@@ -763,10 +762,22 @@ class Theme {
   }
 
   /**
+   * Creates a base native <dialog> element with shared styling
+   */
+  getDialog () {
+    const dialog = document.createElement('dialog')
+    dialog.classList.add('jedi-modal-dialog')
+    dialog.style.border = '1px solid #6c757d'
+    dialog.style.borderRadius = '4px'
+    dialog.style.minWidth = '200px'
+    return dialog
+  }
+
+  /**
    * Dialog or modal that contains extra information about the control
    */
   infoAsModal (info, id, config = {}) {
-    const dialog = document.createElement('dialog')
+    const dialog = this.getDialog()
     const title = document.createElement('div')
     const content = document.createElement('div')
     const closeBtn = this.getButton({
@@ -774,7 +785,6 @@ class Theme {
       icon: 'close'
     })
 
-    dialog.classList.add('jedi-modal-dialog')
     dialog.setAttribute('id', id + '-modal')
 
     title.classList.add('jedi-modal-title')
@@ -1261,7 +1271,7 @@ class Theme {
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
     const randomId = generateRandomID(5)
-    const knownSwitchers = ['select', 'radios', 'radios-inline']
+    const knownSwitchers = ['select', 'radios', 'radios-inline', 'modal']
     const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : 'select'
 
     let switcher
@@ -1290,6 +1300,15 @@ class Theme {
         readOnly: config.readOnly,
         inline: switcherType === 'radios-inline',
         noSpacing: true
+      })
+    }
+
+    if (switcherType === 'modal') {
+      switcher = this.getSwitcherModal({
+        values: config.switcherOptionValues,
+        titles: config.switcherOptionsLabels,
+        id: config.id + '-switcher' + '-' + randomId,
+        readOnly: config.readOnly
       })
     }
 
@@ -1837,6 +1856,75 @@ class Theme {
    */
   getSwitcherRadios (config) {
     return this.getRadiosControl(config)
+  }
+
+  /**
+   * Compact badge-button trigger that opens a modal to switch between multiple editors options
+   */
+  getSwitcherModal (config) {
+    const container = document.createElement('span')
+    const trigger = document.createElement('span')
+    const dialog = this.getDialog()
+    const dialogBody = document.createElement('div')
+    const optionButtons = []
+
+    const triggerText = document.createElement('span')
+    const triggerIcon = document.createElement('i')
+
+    container.classList.add('jedi-switcher-modal')
+    trigger.classList.add('jedi-switcher-modal-trigger')
+    trigger.setAttribute('role', 'button')
+    trigger.setAttribute('tabindex', '0')
+    trigger.setAttribute('aria-haspopup', 'dialog')
+    trigger.setAttribute('aria-label', 'Switch type')
+
+    trigger.appendChild(triggerText)
+
+    if (this.icons && this.icons.switcher) {
+      this.addIconClass(triggerIcon, this.icons.switcher)
+      trigger.appendChild(document.createTextNode(' '))
+      trigger.appendChild(triggerIcon)
+    }
+
+    dialogBody.classList.add('jedi-modal-content')
+
+    config.values.forEach((value, index) => {
+      const btn = document.createElement('button')
+      btn.setAttribute('type', 'button')
+      btn.setAttribute('aria-label', `Select: ${config.titles[index]}`)
+      btn.textContent = config.titles[index]
+      btn.dataset.switcherValue = value
+      btn.classList.add('jedi-switcher-option-btn')
+      optionButtons.push(btn)
+      dialogBody.appendChild(btn)
+    })
+
+    trigger.addEventListener('click', () => {
+      dialog.showModal()
+    })
+
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        dialog.showModal()
+      }
+    })
+
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        dialog.close()
+      }
+    })
+
+    container.appendChild(trigger)
+    container.appendChild(dialog)
+    dialog.appendChild(dialogBody)
+
+    return { container, trigger, triggerText, dialog, dialogBody, optionButtons }
+  }
+
+  setSwitcherOptionActive (btn, active) {
+    btn.classList.toggle('jedi-switcher-option-active', active)
   }
 
   /**

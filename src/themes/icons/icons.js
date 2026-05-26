@@ -11,7 +11,8 @@ export const glyphicons = {
   close: 'glyphicon glyphicon-remove',
   edit: 'glyphicon glyphicon-pencil',
   save: 'glyphicon glyphicon-floppy-disk',
-  copy: 'glyphicon glyphicon-copy'
+  copy: 'glyphicon glyphicon-copy',
+  switcher: 'glyphicon glyphicon-chevron-down'
 }
 
 export const bootstrapIcons = {
@@ -27,7 +28,8 @@ export const bootstrapIcons = {
   close: 'bi bi-x',
   edit: 'bi bi-pencil',
   save: 'bi bi-floppy',
-  copy: 'bi bi-clipboard'
+  copy: 'bi bi-clipboard',
+  switcher: 'bi bi-chevron-down'
 }
 
 export const fontAwesome3 = {
@@ -43,7 +45,8 @@ export const fontAwesome3 = {
   close: 'icon-remove',
   edit: 'icon-pencil',
   save: 'icon-save',
-  copy: 'icon-copy'
+  copy: 'icon-copy',
+  switcher: 'icon-chevron-down'
 }
 
 export const fontAwesome4 = {
@@ -59,7 +62,8 @@ export const fontAwesome4 = {
   close: 'fa fa-times',
   edit: 'fa fa-pencil',
   save: 'fa fa-floppy-o',
-  copy: 'fa fa-clipboard'
+  copy: 'fa fa-clipboard',
+  switcher: 'fa fa-chevron-down'
 }
 
 export const fontAwesome5 = {
@@ -75,7 +79,8 @@ export const fontAwesome5 = {
   close: 'fas fa-times',
   edit: 'fas fa-pencil-alt',
   save: 'fas fa-save',
-  copy: 'fas fa-clipboard'
+  copy: 'fas fa-clipboard',
+  switcher: 'fas fa-chevron-down'
 }
 
 export const fontAwesome6 = {
@@ -91,5 +96,6 @@ export const fontAwesome6 = {
   close: 'fa-solid fa-xmark',
   edit: 'fa-solid fa-pencil',
   save: 'fa-solid fa-floppy-disk',
-  copy: 'fa-solid fa-clipboard'
+  copy: 'fa-solid fa-clipboard',
+  switcher: 'fa-solid fa-chevron-down'
 }

@@ -5,6 +5,7 @@
 - added filepond plugin editor
 - added `"x-sortable"` option for array-checkboxes
 - added `"x-format": "accordion"`
+- added switcherInput `modal` option  
 - security updates
 - fixed issue #50 (Icon doesn't display, depending on x-format)
 

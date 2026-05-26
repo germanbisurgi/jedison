@@ -1,0 +1,90 @@
+{
+  "title": "Modal Switcher",
+  "type": "object",
+  "additionalProperties": false,
+  "x-enablePropertiesToggle": false,
+  "properties": {
+    "anyOfExample": {
+      "title": "anyOf",
+      "description": "x-switcherInput: modal with anyOf — two object schemas",
+      "x-switcherInput": "modal",
+      "anyOf": [
+        {
+          "x-switcherTitle": "Person",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "age": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Organization",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "orgName": {
+              "type": "string"
+            },
+            "employees": {
+              "type": "integer"
+            }
+          }
+        }
+      ]
+    },
+    "oneOfExample": {
+      "title": "oneOf",
+      "description": "x-switcherInput: modal with oneOf — two object schemas",
+      "x-switcherInput": "modal",
+      "oneOf": [
+        {
+          "x-switcherTitle": "Circle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "radius": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Rectangle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "typeArrayExample": {
+      "title": "Type array",
+      "description": "x-switcherInput: modal with type: [string, number, boolean] — switcher label is the type name",
+      "x-switcherInput": "modal",
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ]
+    },
+    "noTypeExample": {
+      "title": "No type",
+      "description": "x-switcherInput: modal with no type keyword — all seven types available",
+      "x-switcherInput": "modal"
+    }
+  }
+}

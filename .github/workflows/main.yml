@@ -4,7 +4,7 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.1
       - name: Node version
         run: node -v
       - name: Install
@@ -14,7 +14,7 @@ jobs:
   e2e-barebones:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.1
       - name: Node version
         run: node -v
       - name: Install
@@ -24,7 +24,7 @@ jobs:
   e2e-bootstrap3:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.1
       - name: Node version
         run: node -v
       - name: Install
@@ -34,7 +34,7 @@ jobs:
   e2e-bootstrap4:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.1
       - name: Node version
         run: node -v
       - name: Install
@@ -44,7 +44,7 @@ jobs:
   e2e-bootstrap5:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.1
       - name: Node version
         run: node -v
       - name: Install
@@ -53,7 +53,7 @@ jobs:
         run: yarn e2e:b5
       - name: Test Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: codeceptjs-output
           path: tests/e2e/output
