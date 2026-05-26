@@ -1,50 +1,59 @@
 name: Tests
+
 on: [push, pull_request]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v4.2.2
       - name: Node version
         run: node -v
       - name: Install
         run: yarn install
       - name: Test
         run: yarn unit
+
   e2e-barebones:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v4.2.2
       - name: Node version
         run: node -v
       - name: Install
         run: yarn install
       - name: Test
         run: yarn e2e
+
   e2e-bootstrap3:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v4.2.2
       - name: Node version
         run: node -v
       - name: Install
         run: yarn install
       - name: Test
         run: yarn e2e:b3
+
   e2e-bootstrap4:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v4.2.2
       - name: Node version
         run: node -v
       - name: Install
         run: yarn install
       - name: Test
         run: yarn e2e:b4
+
   e2e-bootstrap5:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v4.2.2
       - name: Node version
         run: node -v
       - name: Install

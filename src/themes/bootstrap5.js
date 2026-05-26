@@ -397,7 +397,7 @@ class ThemeBootstrap5 extends Theme {
     control.trigger.classList.add('badge', 'bg-secondary')
     control.dialogBody.classList.add('btn-group', 'btn-group-vertical', 'w-100')
     control.optionButtons.forEach(btn => {
-      btn.classList.add('btn', 'btn-secondary')
+      btn.classList.add('btn', 'btn-light')
     })
     return control
   }
@@ -405,7 +405,7 @@ class ThemeBootstrap5 extends Theme {
   setSwitcherOptionActive (btn, active) {
     super.setSwitcherOptionActive(btn, active)
     btn.classList.toggle('btn-primary', active)
-    btn.classList.toggle('btn-secondary', !active)
+    btn.classList.toggle('btn-light', !active)
   }
 
   adaptForTableMultipleControl (control, td) {

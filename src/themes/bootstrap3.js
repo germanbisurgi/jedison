@@ -381,8 +381,9 @@ class ThemeBootstrap3 extends Theme {
     control.container.style.marginLeft = '4px'
     control.trigger.classList.add('label', 'label-default')
     control.dialogBody.classList.add('btn-group-vertical')
+    control.dialogBody.style.width = '100%'
     control.optionButtons.forEach(btn => {
-      btn.classList.add('btn', 'btn-default')
+      btn.classList.add('btn', 'btn-default', 'btn-block')
     })
     return control
   }
