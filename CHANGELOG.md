@@ -3,9 +3,10 @@
 ### 1.12.0
 
 - added filepond plugin editor
-- added accordion format
+- added `"x-sortable"` option for array-checkboxes
+- added `"x-format": "accordion"`
 - security updates
-- Fixed issue #50 (Icon doesn't display, depending on x-format)
+- fixed issue #50 (Icon doesn't display, depending on x-format)
 
 ### 1.11.2
 

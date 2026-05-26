@@ -2,6 +2,10 @@
   "title": "Embed Switcher",
   "type": "object",
   "properties": {
+    "noType": {
+      "title": "No type",
+      "x-embedSwitcher": true
+    },
     "objectTypes": {
       "title": "Object editors — switcher embedded in legend",
       "description": "x-embedSwitcher: true. Both options are objects, so the switcher always embeds in the legend.",

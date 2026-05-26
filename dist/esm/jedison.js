@@ -6025,6 +6025,48 @@ class EditorArrayCheckboxes extends Editor {
     }
     return getSchemaEnum(this.instance.schema.items) || [];
   }
+  isSortable() {
+    return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
+  }
+  addDragHandles() {
+    if (!this.isSortable()) return;
+    this.control.checkboxControls.forEach((checkboxControl, index2) => {
+      if (checkboxControl.classList.contains("jedi-checkbox-control")) return;
+      const wrapper = document.createElement("div");
+      wrapper.classList.add("jedi-checkbox-control");
+      wrapper.style.display = "flex";
+      wrapper.style.alignItems = "baseline";
+      const dragBtn = this.theme.getDragItemBtn({
+        content: this.instance.jedison.translator.translate("arrayDrag")
+      });
+      checkboxControl.parentNode.insertBefore(wrapper, checkboxControl);
+      wrapper.appendChild(dragBtn);
+      wrapper.appendChild(checkboxControl);
+      this.control.checkboxControls[index2] = wrapper;
+    });
+  }
+  refreshSortable() {
+    if (this.isSortable()) {
+      if (this.sortable) {
+        this.sortable.destroy();
+      }
+      this.sortable = window.Sortable.create(this.control.fieldset, {
+        animation: 150,
+        handle: ".jedi-array-drag",
+        draggable: ".jedi-checkbox-control",
+        disabled: this.disabled || this.readOnly,
+        onEnd: () => {
+          const sorted = Array.from(this.control.fieldset.querySelectorAll(".jedi-checkbox-control"));
+          this.control.checkboxControls = sorted;
+          this.control.checkboxes = sorted.map((cc) => cc.querySelector('input[type="checkbox"]'));
+          this.control.labels = sorted.map((cc) => cc.querySelector("label"));
+          this.control.labelTexts = sorted.map((cc) => cc.querySelector("label span"));
+          const newValue = this.control.checkboxes.filter((cb) => cb.checked).map((cb) => cb.value);
+          this.instance.setValue(newValue, true, "user");
+        }
+      });
+    }
+  }
   build() {
     const values = this.getEnumSourceValues();
     const schemaItems = this.instance.schema.items || {};
@@ -6039,6 +6081,7 @@ class EditorArrayCheckboxes extends Editor {
       inline: getSchemaXOption(this.instance.schema, "format") === "checkboxes-inline",
       info: this.getInfo()
     });
+    this.addDragHandles();
   }
   refreshOptions() {
     const values = this.getEnumSourceValues();
@@ -6077,6 +6120,7 @@ class EditorArrayCheckboxes extends Editor {
       this.control.checkboxControls.push(checkboxControl);
       this.control.fieldset.insertBefore(checkboxControl, this.control.description);
     });
+    this.addDragHandles();
     this.addEventListeners();
     this.refreshUI();
   }
@@ -6111,6 +6155,7 @@ class EditorArrayCheckboxes extends Editor {
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.checked = value.includes(checkbox.value);
     });
+    this.refreshSortable();
   }
   setAriaInvalid(invalid) {
     this.control.checkboxes.forEach((checkbox) => {
@@ -6319,10 +6364,18 @@ class EditorStringFilepond extends EditorString {
         const names = this.filepond.getFiles().map((f) => f.filename).join(", ");
         this.instance.setValue(names, true, "user");
       });
+      this.filepond.on("processfilerevert", () => {
+        const serverIds = this.filepond.getFiles().filter((f) => f.serverId).map((f) => f.serverId);
+        this.instance.setValue(serverIds.join(", "), true, "user");
+      });
       this.filepond.on("removefile", () => {
-        if (this.hasServer) return;
-        const names = this.filepond.getFiles().map((f) => f.filename).join(", ");
-        this.instance.setValue(names, true, "user");
+        const remaining = this.filepond.getFiles();
+        if (this.hasServer) {
+          const serverIds = remaining.filter((f) => f.serverId).map((f) => f.serverId);
+          this.instance.setValue(serverIds.join(", "), true, "user");
+        } else {
+          this.instance.setValue(remaining.map((f) => f.filename).join(", "), true, "user");
+        }
       });
     } catch (e) {
       console.error("FilePond is not available or not loaded correctly.", e);
@@ -6333,7 +6386,7 @@ class EditorStringFilepond extends EditorString {
   refreshUI() {
     if (!this.filepond) return;
     this.refreshTemplates();
-    this.filepond.setOptions({ disabled: this.disabled });
+    this.filepond.setOptions({ disabled: this.disabled || this.readOnly });
   }
   destroy() {
     if (this.filepond) {

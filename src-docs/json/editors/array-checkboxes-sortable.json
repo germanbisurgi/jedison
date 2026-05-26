@@ -11,9 +11,10 @@
       "value2"
     ]
   },
-  "default": ["value1"],
+  "default": [
+    "value1"
+  ],
   "minItems": 1,
-  "x-format": "checkboxes-inline",
   "x-info": {
     "variant": "modal",
     "title": "### Info Button title",

@@ -218,6 +218,7 @@ import arrayButtonsContent from './json/editors/array-buttons-content.json'
 import arrayNoButtons from './json/editors/array-no-buttons.json'
 import arrayCheckboxes from './json/editors/array-checkboxes.json'
 import arrayCheckboxesInline from './json/editors/array-checkboxes-inline.json'
+import arrayCheckboxesSortable from './json/editors/array-checkboxes-sortable.json'
 import arrayTable from './json/editors/array-table.json'
 import arrayTableObject from './json/editors/array-table-object.json'
 import arrayTableButtonsPosition from './json/editors/array-table-buttons-position.json'
@@ -403,6 +404,7 @@ export default {
           'editors/array-no-buttons': arrayNoButtons,
           'editors/array-checkboxes': arrayCheckboxes,
           'editors/array-checkboxes-inline': arrayCheckboxesInline,
+          'editors/array-checkboxes-sortable': arrayCheckboxesSortable,
           'editors/array-nav-vertical': arrayNavVertical,
           'editors/array-nav-horizontal': arrayNavHorizontal,
           'editors/array-nav-sortable': arrayNavSortable,
