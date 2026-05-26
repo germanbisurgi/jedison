@@ -1,0 +1,14 @@
+{
+  "title": "Upload Supporting Documents",
+  "description": "Attach photos or PDFs (max 5 files, 10 MB each).",
+  "type": "string",
+  "x-format": "filepond",
+  "x-filepond": {
+    "x-settings": "filepondDocuments"
+  },
+  "x-info": {
+    "variant": "modal",
+    "title": "### Settings: `filepondDocuments`",
+    "content": "These options are passed via `settings.filepondDocuments` in the Jedison init options.\n\nOptions like `acceptedFileTypes`, `labelIdle`, and `labelFileTypeNotAllowed` contain **MIME type arrays** and **HTML strings** that cannot be expressed cleanly in JSON — so the entire FilePond config is consolidated here.\n\n---\n\n```js\njedison({\n  settings: {\n    filepondDocuments: {\n      allowMultiple: true,\n      maxFiles: 5,\n      credits: false,\n      acceptedFileTypes: [\n        'image/jpeg',\n        'image/png',\n        'image/gif',\n        'image/webp',\n        'application/pdf'\n      ],\n      maxFileSize: '10MB',\n      labelIdle: 'Drag & drop photos or PDFs here or <span class=\"filepond--label-action\">Browse</span>',\n      labelFileTypeNotAllowed: 'Only images and PDFs are accepted',\n      fileValidateTypeLabelExpectedTypes: 'Accepts JPEG, PNG, GIF, WebP, PDF',\n\n      // Optional: set a server endpoint to enable real uploads.\n      // When present, the editor value is set to the server-returned ID(s)\n      // instead of the local filename(s).\n      // server: '/upload'\n    }\n  }\n})\n```"
+  }
+}

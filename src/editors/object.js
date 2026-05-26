@@ -21,8 +21,7 @@ class EditorObject extends Editor {
     return getSchemaType(schema) === 'object'
   }
 
-  build () {
-    this.propertyActivators = {}
+  getObjectControlConfig () {
     let addProperty = true
     const additionalProperties = getSchemaAdditionalProperties(this.instance.schema)
 
@@ -47,7 +46,7 @@ class EditorObject extends Editor {
       enablePropertiesToggle = schemaEnablePropertiesToggle
     }
 
-    this.control = this.theme.getObjectControl({
+    return {
       title: this.getTitle(),
       description: this.getDescription(),
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
@@ -61,9 +60,14 @@ class EditorObject extends Editor {
       editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.getOption('editJsonData'),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, 'propertiesToggleContent') ?? this.instance.jedison.translator.translate('propertiesToggle'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
-      addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty')
-    })
+      addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty'),
+      isAccordion: false
+    }
+  }
 
+  build () {
+    this.propertyActivators = {}
+    this.control = this.theme.getObjectControl(this.getObjectControlConfig())
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
   }
 

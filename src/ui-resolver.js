@@ -14,6 +14,7 @@ import EditorNumberInput from './editors/number-input.js'
 import EditorObjectGrid from './editors/object-grid.js'
 import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
+import EditorObjectAccordion from './editors/object-accordion.js'
 import EditorObject from './editors/object.js'
 import EditorArrayTuple from './editors/array-tuple.js'
 import EditorArrayTable from './editors/array-table.js'
@@ -36,6 +37,7 @@ import EditorAnyJson from './editors/any-json.js'
 import EditorArrayCheckboxes from './editors/array-checkboxes.js'
 import EditorNumberRange from './editors/number-range.js'
 import EditorStringAce from './editors/string-ace.js'
+import EditorStringFilepond from './editors/string-filepond.js'
 
 class UiResolver {
   constructor (options) {
@@ -62,6 +64,7 @@ class UiResolver {
       EditorStringFlatpickr,
       EditorStringIMask,
       EditorStringAce,
+      EditorStringFilepond,
       EditorStringInput,
       EditorNumberImask,
       EditorNumberRaty,
@@ -72,6 +75,7 @@ class UiResolver {
       EditorObjectGrid,
       EditorObjectCategories,
       EditorObjectNav,
+      EditorObjectAccordion,
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,

@@ -1,3 +1,5 @@
+/* global MutationObserver */
+
 import Theme from './theme.js'
 import { isObject, isString } from '../helpers/utils.js'
 
@@ -34,6 +36,87 @@ class ThemeBootstrap4 extends Theme {
     }
 
     return collapse
+  }
+
+  getObjectControl (config) {
+    const control = super.getObjectControl(config)
+
+    if (config.isAccordion) {
+      const { childrenSlot } = control
+      const accordionId = childrenSlot.id
+      const originalAppendChild = childrenSlot.appendChild.bind(childrenSlot)
+      childrenSlot.appendChild = (child) => {
+        const collapse = child.querySelector('.collapse')
+        if (collapse) {
+          collapse.classList.remove('show')
+          collapse.setAttribute('data-parent', '#' + accordionId)
+        }
+        return originalAppendChild(child)
+      }
+    }
+
+    if (config.isAccordionProperties) {
+      control.childrenSlot.classList.add('accordion', 'pb-3')
+    }
+
+    return control
+  }
+
+  getAccordionItem (config) {
+    const collapseId = config.id + '-acc-collapse'
+
+    const container = document.createElement('div')
+    container.classList.add('card', 'mb-0')
+
+    const header = document.createElement('div')
+    header.classList.add('card-header', 'p-0')
+
+    const toggle = document.createElement('button')
+    toggle.type = 'button'
+    toggle.classList.add('btn', 'btn-link', 'w-100', 'text-left')
+    toggle.setAttribute('data-toggle', 'collapse')
+    toggle.setAttribute('data-target', '#' + collapseId)
+    toggle.setAttribute('data-parent', '#' + config.accordionId)
+
+    toggle.classList.add('collapsed')
+
+    const chevron = document.createElement('i')
+    chevron.classList.add('jedi-accordion-chevron')
+    if (this.icons && this.icons['collapse']) {
+      this.addIconClass(chevron, this.icons['collapse'])
+    } else {
+      chevron.textContent = '▾'
+    }
+    chevron.style.display = 'inline-block'
+    chevron.style.transition = 'transform 0.1s ease'
+    chevron.style.marginRight = '0.5em'
+
+    toggle.appendChild(chevron)
+    toggle.appendChild(document.createTextNode(config.title))
+
+    const collapse = document.createElement('div')
+    collapse.id = collapseId
+    collapse.classList.add('collapse')
+    collapse.setAttribute('data-parent', '#' + config.accordionId)
+
+    const syncState = () => {
+      const collapsed = toggle.classList.contains('collapsed')
+      chevron.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)'
+    }
+
+    syncState()
+
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ['class'] })
+
+    const body = document.createElement('div')
+    body.classList.add('card-body', 'pb-0')
+
+    header.appendChild(toggle)
+    collapse.appendChild(body)
+    container.appendChild(header)
+    container.appendChild(collapse)
+
+    return { container, header, toggle, collapse, body }
   }
 
   getJsonData (config) {

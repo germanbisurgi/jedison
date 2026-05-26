@@ -1,61 +1,13 @@
 {
-  "type": "array",
-  "title": "Observations",
-  "items": {
-    "type": "object",
-    "properties": {
-      "observer": { "type": "string" },
-      "location": { "type": "string" },
-      "date": { "type": "string", "format": "date" },
-      "targets": {
-        "type": "object",
-        "anyOf": [
-          {
-            "title": "PlantTarget",
-            "type": "object",
-            "properties": {
-              "type": { "const": "PlantTarget" },
-              "species": { "type": "string" },
-              "count": { "type": "integer", "minimum": 0 }
-            },
-            "required": ["type","species","count"]
-          },
-          {
-            "title": "AnimalTarget",
-            "type": "object",
-            "properties": {
-              "type": { "const": "AnimalTarget" },
-              "species": { "type": "string" },
-              "behavior": { "type": "string" }
-            },
-            "required": ["type","species","behavior"]
-          }
-        ]
-      },
-      "apollo": {
-        "anyOf": [
-          {
-            "title": "Apollo v1",
-            "type": "object",
-            "properties": {
-              "version": { "const": "v1" },
-              "notes": { "type": "string" }
-            },
-            "required": ["version","notes"]
-          },
-          {
-            "title": "Apollo v2",
-            "type": "object",
-            "properties": {
-              "version": { "const": "v2" },
-              "notes": { "type": "string" },
-              "extra": { "type": "string" }
-            },
-            "required": ["version","notes"]
-          }
-        ]
-      }
+  "type": "object",
+  "properties": {
+    "a": {
+      "title": "A",
+      "type": "string"
     },
-    "required": ["observer","location","date","targets","apollo"]
+    "b": {
+      "title": "B",
+      "type": "string"
+    }
   }
 }

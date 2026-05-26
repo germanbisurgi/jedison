@@ -208,9 +208,9 @@
         },
         "properties": {
           "type": "object",
+          "x-format": "accordion",
           "additionalProperties": {
-            "$ref": "#/$defs/schema",
-            "x-startCollapsed": true
+            "$ref": "#/$defs/schema"
           },
           "x-propGroup": "Object"
         },

@@ -1,3 +1,5 @@
+/* global MutationObserver */
+
 import { generateRandomID, isObject, isSet, isString } from '../helpers/utils.js'
 
 /**
@@ -382,29 +384,25 @@ class Theme {
       })
     }
 
-    let collapsed = config.startCollapsed
-
-    if (collapsed) {
-      toggle.setAttribute('aria-expanded', 'false')
-    } else {
-      toggle.setAttribute('aria-expanded', 'true')
-    }
-
     toggle.style.transition = 'transform 0.1s ease'
 
-    if (collapsed) {
-      toggle.style.transform = 'rotate(90deg)'
+    if (config.startCollapsed) {
+      toggle.classList.add('collapsed')
     }
 
-    toggle.addEventListener('click', () => {
-      if (collapsed) {
-        toggle.style.transform = 'rotate(0deg)'
-      } else {
-        toggle.style.transform = 'rotate(90deg)'
-      }
+    const syncState = () => {
+      const collapsed = toggle.classList.contains('collapsed')
+      toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
+      toggle.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)'
+    }
 
-      collapsed = !collapsed
-    })
+    syncState()
+
+    if (this.useToggleEvents) {
+      toggle.addEventListener('click', () => toggle.classList.toggle('collapsed'))
+    }
+
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ['class'] })
 
     return toggle
   }
@@ -868,6 +866,11 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive()
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
+
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = 'accordion-' + config.id
+    }
+
     const propertiesActivators = this.getPropertiesActivators()
     const info = this.getInfo(config.info)
     const description = this.getDescription({
@@ -1005,6 +1008,70 @@ class Theme {
       right,
       switcherSlot
     }
+  }
+
+  /**
+   * Returns an accordion item wrapping a child editor.
+   * Used by EditorObjectAccordionProperties to wrap each property.
+   */
+  getAccordionItem (config) {
+    const container = document.createElement('div')
+    container.classList.add('jedi-accordion-item')
+
+    const header = document.createElement('div')
+    header.classList.add('jedi-accordion-header')
+
+    const toggle = document.createElement('button')
+    toggle.type = 'button'
+    toggle.classList.add('jedi-accordion-toggle', 'collapsed')
+
+    const chevron = document.createElement('i')
+    chevron.classList.add('jedi-accordion-chevron')
+    if (this.icons && this.icons['collapse']) {
+      this.addIconClass(chevron, this.icons['collapse'])
+    } else {
+      chevron.textContent = '▾'
+    }
+    chevron.style.display = 'inline-block'
+    chevron.style.transition = 'transform 0.1s ease'
+    chevron.style.marginRight = '0.5em'
+
+    toggle.appendChild(chevron)
+    toggle.appendChild(document.createTextNode(config.title))
+
+    const collapse = document.createElement('div')
+    collapse.classList.add('jedi-accordion-collapse')
+    collapse.style.display = 'none'
+
+    const body = document.createElement('div')
+    body.classList.add('jedi-accordion-body')
+
+    const syncState = () => {
+      const collapsed = toggle.classList.contains('collapsed')
+      chevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(-180deg)'
+    }
+
+    syncState()
+
+    if (this.useToggleEvents) {
+      toggle.addEventListener('click', () => {
+        if (collapse.style.display === 'none') {
+          collapse.style.display = 'block'
+        } else {
+          collapse.style.display = 'none'
+        }
+        toggle.classList.toggle('collapsed')
+      })
+    }
+
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ['class'] })
+
+    header.appendChild(toggle)
+    collapse.appendChild(body)
+    container.appendChild(header)
+    container.appendChild(collapse)
+
+    return { container, header, toggle, collapse, body }
   }
 
   /**
@@ -1332,7 +1399,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     })
     const description = this.getDescription({
       content: config.description,

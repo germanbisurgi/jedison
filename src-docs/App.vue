@@ -244,6 +244,7 @@ import objectGrid from './json/editors/object-grid.json'
 import objectGridBreakpoints from './json/editors/object-grid-breakpoints.json'
 import objectNavVertical from './json/editors/object-nav-vertical.json'
 import objectNavHorizontal from './json/editors/object-nav-horizontal.json'
+import objectAccordion from './json/editors/object-accordion.json'
 import objectCategoriesVertical from './json/editors/object-categories-vertical.json'
 import objectCategoriesHorizontal from './json/editors/object-categories-horizontal.json'
 import objectCategoriesCategoryOrder from './json/editors/object-categories-categoryOrder.json'
@@ -319,6 +320,8 @@ import imask from './json/plugins/string-imask.json'
 import imaskSettings from './json/plugins/string-imask-settings.json'
 import raty from './json/plugins/number-raty.json'
 import stringAce from './json/plugins/string-ace.json'
+import filepond from './json/plugins/string-filepond.json'
+import filepondDocuments from './json/plugins/string-filepond-documents.json'
 import custom from './json/custom/custom.json'
 import customConstraint from './json/custom/custom-constraint.json'
 import metaSchema from './json/meta-schema.json'
@@ -369,6 +372,7 @@ import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
 import embedSwitcher from './json/features/embed-switcher.json'
 import navigateTo from './json/features/navigate-to.json'
+import titleIconClass from './json/features/title-icon-class.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -426,6 +430,7 @@ export default {
           'editors/object-grid-breakpoints': objectGridBreakpoints,
           'editors/object-nav-vertical': objectNavVertical,
           'editors/object-nav-horizontal': objectNavHorizontal,
+          'editors/object-accordion': objectAccordion,
           'editors/object-categories-vertical': objectCategoriesVertical,
           'editors/object-categories-horizontal': objectCategoriesHorizontal,
           'editors/object-categories-categoryOrder': objectCategoriesCategoryOrder,
@@ -458,6 +463,8 @@ export default {
           'plugins/simplemde': simplemde,
           'plugins/raty': raty,
           'plugins/ace': stringAce,
+          'plugins/filepond': filepond,
+          'plugins/filepond-documents': filepondDocuments,
         },
         'Features': {
           'features/templates': templates,
@@ -469,6 +476,7 @@ export default {
           'features/nav-warning': navWarning,
           'features/embed-switcher': embedSwitcher,
           'features/navigate-to': navigateTo,
+          'features/title-icon-class': titleIconClass,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,
@@ -795,6 +803,13 @@ export default {
             min: new Date(1990, 0, 1),
             max: new Date(2020, 0, 1),
             lazy: false
+          },
+          filepondDocuments: {
+            acceptedFileTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'],
+            maxFileSize: '10MB',
+            labelIdle: 'Drag & drop photos or PDFs here or <span class="filepond--label-action">Browse</span>',
+            labelFileTypeNotAllowed: 'Only images and PDFs are accepted',
+            fileValidateTypeLabelExpectedTypes: 'Accepts JPEG, PNG, GIF, WebP, PDF'
           }
         },
         functions: {
@@ -856,6 +871,963 @@ export default {
           }
         }
       }
+
+      // options.data = {
+      //   "title": "RPG Character Creator",
+      //   "description": "Create and customize your adventurer",
+      //   "type": "object",
+      //   "x-format": "nav-vertical",
+      //   "properties": {
+      //     "identity": {
+      //       "title": "Identity",
+      //       "type": "object",
+      //       "x-format": "grid",
+      //       "required": [
+      //         "name"
+      //       ],
+      //       "properties": {
+      //         "name": {
+      //           "title": "Name",
+      //           "type": "string",
+      //           "description": "Your character's full name",
+      //           "minLength": 2,
+      //           "x-titleIconClass": "bi bi-person-fill",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minLength": "A hero's name must be at least 2 characters long.",
+      //             "required": "Every adventurer needs a name!"
+      //           },
+      //           "default": "Thalion Oakenshield"
+      //         },
+      //         "race": {
+      //           "title": "Race",
+      //           "type": "string",
+      //           "description": "Choose your character's race",
+      //           "enum": [
+      //             "human",
+      //             "elf",
+      //             "dwarf",
+      //             "orc",
+      //             "halfling"
+      //           ],
+      //           "x-enumTitles": [
+      //             "Human",
+      //             "Elf",
+      //             "Dwarf",
+      //             "Orc",
+      //             "Halfling"
+      //           ],
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "enum": "Choose a recognized race of the realm."
+      //           },
+      //           "default": "elf"
+      //         },
+      //         "class": {
+      //           "title": "Class",
+      //           "type": "string",
+      //           "description": "Your adventuring profession",
+      //           "enum": [
+      //             "warrior",
+      //             "mage",
+      //             "rogue",
+      //             "cleric",
+      //             "ranger"
+      //           ],
+      //           "x-enumTitles": [
+      //             "Warrior",
+      //             "Mage",
+      //             "Rogue",
+      //             "Cleric",
+      //             "Ranger"
+      //           ],
+      //           "x-format": "radios",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "enum": "Pick a valid adventuring class."
+      //           },
+      //           "default": "ranger"
+      //         },
+      //         "level": {
+      //           "title": "Level",
+      //           "type": "integer",
+      //           "description": "Character level (1-20)",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Even the greenest adventurer starts at level 1.",
+      //             "maximum": "The gods cap mortal power at level 20. "
+      //           },
+      //           "default": 1
+      //         },
+      //         "alignment": {
+      //           "title": "Alignment",
+      //           "type": "string",
+      //           "description": "Moral and ethical outlook",
+      //           "enum": [
+      //             "lawful-good",
+      //             "neutral-good",
+      //             "chaotic-good",
+      //             "lawful-neutral",
+      //             "true-neutral",
+      //             "chaotic-neutral",
+      //             "lawful-evil",
+      //             "neutral-evil",
+      //             "chaotic-evil"
+      //           ],
+      //           "x-enumTitles": [
+      //             "Lawful Good",
+      //             "Neutral Good",
+      //             "Chaotic Good",
+      //             "Lawful Neutral",
+      //             "True Neutral",
+      //             "Chaotic Neutral",
+      //             "Lawful Evil",
+      //             "Neutral Evil",
+      //             "Chaotic Evil"
+      //           ],
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "enum": "Choose one of the nine recognized alignments."
+      //           },
+      //           "default": "chaotic-good"
+      //         },
+      //         "active": {
+      //           "title": "Active adventurer",
+      //           "type": "boolean",
+      //           "description": "Currently on an active quest",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "default": true
+      //         }
+      //       }
+      //     },
+      //     "appearance": {
+      //       "title": "Appearance",
+      //       "type": "object",
+      //       "x-format": "grid",
+      //       "properties": {
+      //         "eyeColor": {
+      //           "title": "Eye Color",
+      //           "type": "string",
+      //           "description": "Character's eye color",
+      //           "x-format": "color",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "default": "#4a90d9"
+      //         },
+      //         "hairColor": {
+      //           "title": "Hair Color",
+      //           "type": "string",
+      //           "description": "Character's hair color",
+      //           "x-format": "color",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "default": "#c0a060"
+      //         },
+      //         "height": {
+      //           "title": "Height (cm)",
+      //           "type": "integer",
+      //           "description": "Height in centimeters",
+      //           "minimum": 60,
+      //           "maximum": 250,
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "No known race stands shorter than 60 cm.",
+      //             "maximum": "Even giants rarely exceed 250 cm."
+      //           },
+      //           "default": 178
+      //         },
+      //         "weight": {
+      //           "title": "Weight (kg)",
+      //           "type": "integer",
+      //           "description": "Weight in kilograms",
+      //           "minimum": 20,
+      //           "maximum": 300,
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "A character must weigh at least 20 kg.",
+      //             "maximum": "Even the heaviest half-giant tops out at 300 kg."
+      //           },
+      //           "default": 72
+      //         },
+      //         "build": {
+      //           "title": "Build",
+      //           "type": "string",
+      //           "description": "Physical build",
+      //           "enum": [
+      //             "slim",
+      //             "average",
+      //             "muscular",
+      //             "heavy"
+      //           ],
+      //           "x-enumTitles": [
+      //             "Slim",
+      //             "Average",
+      //             "Muscular",
+      //             "Heavy"
+      //           ],
+      //           "x-format": "radios-inline",
+      //           "x-grid": {
+      //             "columns": 12
+      //           },
+      //           "x-messages": {
+      //             "enum": "Select a recognized body type."
+      //           },
+      //           "default": "slim"
+      //         },
+      //         "description": {
+      //           "title": "Description",
+      //           "type": "string",
+      //           "description": "Describe your character's appearance",
+      //           "x-format": "textarea",
+      //           "x-grid": {
+      //             "columns": 12
+      //           },
+      //           "default": "A lean elf with sharp features and piercing blue eyes. Silver-blonde hair is kept in a loose braid, and a faded scar runs along the left cheek from an old encounter with a wyvern."
+      //         }
+      //       }
+      //     },
+      //     "attributes": {
+      //       "title": "Attributes",
+      //       "type": "object",
+      //       "x-format": "grid",
+      //       "properties": {
+      //         "strength": {
+      //           "title": "Strength",
+      //           "type": "integer",
+      //           "description": "Physical power and carrying capacity",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Strength cannot drop below 1.",
+      //             "maximum": "Mortal strength is capped at 20."
+      //           },
+      //           "default": 12
+      //         },
+      //         "dexterity": {
+      //           "title": "Dexterity",
+      //           "type": "integer",
+      //           "description": "Agility, reflexes, and balance",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Dexterity cannot drop below 1.",
+      //             "maximum": "Mortal dexterity is capped at 20."
+      //           },
+      //           "default": 17
+      //         },
+      //         "constitution": {
+      //           "title": "Constitution",
+      //           "type": "integer",
+      //           "description": "Health, stamina, and vital force",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Constitution cannot drop below 1.",
+      //             "maximum": "Mortal constitution is capped at 20."
+      //           },
+      //           "default": 10
+      //         },
+      //         "intelligence": {
+      //           "title": "Intelligence",
+      //           "type": "integer",
+      //           "description": "Mental acuity, recall, and reasoning",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Intelligence cannot drop below 1.",
+      //             "maximum": "Mortal intelligence is capped at 20."
+      //           },
+      //           "default": 14
+      //         },
+      //         "wisdom": {
+      //           "title": "Wisdom",
+      //           "type": "integer",
+      //           "description": "Perception, intuition, and insight",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Wisdom cannot drop below 1.",
+      //             "maximum": "Mortal wisdom is capped at 20."
+      //           },
+      //           "default": 15
+      //         },
+      //         "charisma": {
+      //           "title": "Charisma",
+      //           "type": "integer",
+      //           "description": "Force of personality and leadership",
+      //           "minimum": 1,
+      //           "maximum": 20,
+      //           "x-format": "range",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "minimum": "Charisma cannot drop below 1.",
+      //             "maximum": "Mortal charisma is capped at 20."
+      //           },
+      //           "default": 11
+      //         }
+      //       }
+      //     },
+      //     "skills": {
+      //       "title": "Skills",
+      //       "type": "object",
+      //       "properties": {
+      //         "combatSkills": {
+      //           "title": "Combat Skills",
+      //           "type": "array",
+      //           "description": "Proficiencies in martial combat",
+      //           "uniqueItems": true,
+      //           "items": {
+      //             "title": "Combat Skill",
+      //             "type": "string",
+      //             "enum": [
+      //               "swordsmanship",
+      //               "archery",
+      //               "shield-mastery",
+      //               "dual-wielding",
+      //               "martial-arts"
+      //             ]
+      //           },
+      //           "x-enumTitles": [
+      //             "Swordsmanship",
+      //             "Archery",
+      //             "Shield Mastery",
+      //             "Dual Wielding",
+      //             "Martial Arts"
+      //           ],
+      //           "x-messages": {
+      //             "uniqueItems": "You cannot master the same combat skill twice."
+      //           },
+      //           "default": [
+      //             "archery",
+      //             "dual-wielding"
+      //           ]
+      //         },
+      //         "magicSkills": {
+      //           "title": "Magic Skills",
+      //           "type": "array",
+      //           "description": "Schools of magic studied",
+      //           "uniqueItems": true,
+      //           "items": {
+      //             "title": "Magic Skill",
+      //             "type": "string",
+      //             "enum": [
+      //               "arcana",
+      //               "evocation",
+      //               "necromancy",
+      //               "illusion",
+      //               "enchantment"
+      //             ]
+      //           },
+      //           "x-enumTitles": [
+      //             "Arcana",
+      //             "Evocation",
+      //             "Necromancy",
+      //             "Illusion",
+      //             "Enchantment"
+      //           ],
+      //           "x-messages": {
+      //             "uniqueItems": "A mage cannot study the same school twice."
+      //           },
+      //           "default": [
+      //             "arcana",
+      //             "enchantment"
+      //           ]
+      //         },
+      //         "survivalSkills": {
+      //           "title": "Survival Skills",
+      //           "type": "array",
+      //           "description": "Wilderness and survival proficiencies",
+      //           "uniqueItems": true,
+      //           "x-format": "checkboxes-inline",
+      //           "items": {
+      //             "title": "Survival Skill",
+      //             "type": "string",
+      //             "enum": [
+      //               "tracking",
+      //               "herbalism",
+      //               "trapping",
+      //               "climbing",
+      //               "swimming"
+      //             ]
+      //           },
+      //           "x-enumTitles": [
+      //             "Tracking",
+      //             "Herbalism",
+      //             "Trapping",
+      //             "Climbing",
+      //             "Swimming"
+      //           ],
+      //           "x-messages": {
+      //             "uniqueItems": "Each survival skill can only be selected once."
+      //           },
+      //           "default": [
+      //             "tracking",
+      //             "herbalism",
+      //             "climbing"
+      //           ]
+      //         }
+      //       }
+      //     },
+      //     "equipment": {
+      //       "title": "Equipment",
+      //       "type": "array",
+      //       "x-format": "table-object",
+      //       "x-sortable": true,
+      //       "minItems": 1,
+      //       "x-messages": {
+      //         "minItems": "An adventurer must carry at least one item."
+      //       },
+      //       "default": [
+      //         {
+      //           "name": "Elvish Longbow",
+      //           "type": "weapon",
+      //           "weight": 1.5,
+      //           "equipped": true
+      //         },
+      //         {
+      //           "name": "Leather Armor",
+      //           "type": "armor",
+      //           "weight": 5,
+      //           "equipped": true
+      //         },
+      //         {
+      //           "name": "Healing Potion",
+      //           "type": "potion",
+      //           "weight": 0.5,
+      //           "equipped": false
+      //         },
+      //         {
+      //           "name": "Scroll of Identify",
+      //           "type": "scroll",
+      //           "weight": 0.1,
+      //           "equipped": false
+      //         }
+      //       ],
+      //       "items": {
+      //         "type": "object",
+      //         "title": "Item",
+      //         "properties": {
+      //           "name": {
+      //             "title": "Name",
+      //             "type": "string",
+      //             "default": "New Item"
+      //           },
+      //           "type": {
+      //             "title": "Type",
+      //             "type": "string",
+      //             "enum": [
+      //               "weapon",
+      //               "armor",
+      //               "potion",
+      //               "scroll",
+      //               "misc"
+      //             ],
+      //             "x-enumTitles": [
+      //               "Weapon",
+      //               "Armor",
+      //               "Potion",
+      //               "Scroll",
+      //               "Misc"
+      //             ],
+      //             "x-messages": {
+      //               "enum": "Choose a valid item category."
+      //             },
+      //             "default": "misc"
+      //           },
+      //           "weight": {
+      //             "title": "Weight (kg)",
+      //             "type": "number",
+      //             "minimum": 0,
+      //             "x-messages": {
+      //               "minimum": "An item cannot have negative weight."
+      //             },
+      //             "default": 1
+      //           },
+      //           "equipped": {
+      //             "title": "Equipped",
+      //             "type": "boolean",
+      //             "x-format": "checkbox",
+      //             "default": false
+      //           }
+      //         }
+      //       }
+      //     },
+      //     "spells": {
+      //       "title": "Spells",
+      //       "type": "array",
+      //       "x-format": "nav-horizontal",
+      //       "x-titleTemplate": "{{ i1 }}) {{ value.name }}",
+      //       "default": [
+      //         {
+      //           "name": "Entangle",
+      //           "school": "conjuration",
+      //           "level": 1,
+      //           "description": "Grasping weeds and vines sprout from the ground, restraining creatures in a 20-foot square.",
+      //           "damage": "",
+      //           "component": "verbal"
+      //         },
+      //         {
+      //           "name": "Hunter's Mark",
+      //           "school": "divination",
+      //           "level": 1,
+      //           "description": "You choose a creature you can see within range and mystically mark it as your quarry, dealing extra damage on hit.",
+      //           "damage": "1d6",
+      //           "component": "verbal"
+      //         },
+      //         {
+      //           "name": "Flame Arrow",
+      //           "school": "transmutation",
+      //           "level": 3,
+      //           "description": "You touch a quiver containing arrows or bolts, imbuing them with fire magic.",
+      //           "damage": "1d6 fire",
+      //           "component": "somatic"
+      //         }
+      //       ],
+      //       "items": {
+      //         "type": "object",
+      //         "title": "Spell",
+      //         "x-format": "grid",
+      //         "properties": {
+      //           "name": {
+      //             "title": "Spell Name",
+      //             "type": "string",
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "default": "New Spell"
+      //           },
+      //           "school": {
+      //             "title": "School",
+      //             "type": "string",
+      //             "enum": [
+      //               "abjuration",
+      //               "conjuration",
+      //               "divination",
+      //               "enchantment",
+      //               "evocation",
+      //               "illusion",
+      //               "necromancy",
+      //               "transmutation"
+      //             ],
+      //             "x-enumTitles": [
+      //               "Abjuration",
+      //               "Conjuration",
+      //               "Divination",
+      //               "Enchantment",
+      //               "Evocation",
+      //               "Illusion",
+      //               "Necromancy",
+      //               "Transmutation"
+      //             ],
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "x-messages": {
+      //               "enum": "Choose a recognized school of magic."
+      //             },
+      //             "default": "evocation"
+      //           },
+      //           "level": {
+      //             "title": "Spell Level",
+      //             "type": "integer",
+      //             "minimum": 0,
+      //             "maximum": 9,
+      //             "x-grid": {
+      //               "columns": 4
+      //             },
+      //             "x-messages": {
+      //               "minimum": "Cantrips start at level 0.",
+      //               "maximum": "The most powerful spells are level 9."
+      //             },
+      //             "default": 1
+      //           },
+      //           "damage": {
+      //             "title": "Damage",
+      //             "type": "string",
+      //             "description": "Damage dice (if any)",
+      //             "x-grid": {
+      //               "columns": 4
+      //             },
+      //             "default": ""
+      //           },
+      //           "component": {
+      //             "title": "Component",
+      //             "type": "string",
+      //             "enum": [
+      //               "verbal",
+      //               "somatic",
+      //               "material"
+      //             ],
+      //             "x-enumTitles": [
+      //               "Verbal",
+      //               "Somatic",
+      //               "Material"
+      //             ],
+      //             "x-format": "radios",
+      //             "x-grid": {
+      //               "columns": 4
+      //             },
+      //             "x-messages": {
+      //               "enum": "A spell requires Verbal, Somatic, or Material components."
+      //             },
+      //             "default": "verbal"
+      //           },
+      //           "description": {
+      //             "title": "Description",
+      //             "type": "string",
+      //             "x-format": "textarea",
+      //             "x-grid": {
+      //               "columns": 12
+      //             },
+      //             "default": "Describe the spell's effect"
+      //           }
+      //         }
+      //       }
+      //     },
+      //     "backstory": {
+      //       "title": "Backstory",
+      //       "type": "object",
+      //       "x-format": "grid",
+      //       "properties": {
+      //         "homeland": {
+      //           "title": "Homeland",
+      //           "type": "string",
+      //           "description": "Where your character hails from",
+      //           "enum": [
+      //             "silverwood-forest",
+      //             "iron-peaks",
+      //             "sunhaven",
+      //             "the-wild-steppes",
+      //             "crystal-coast",
+      //             "shadow-fen"
+      //           ],
+      //           "x-enumTitles": [
+      //             "Silverwood Forest",
+      //             "Iron Peaks",
+      //             "Sunhaven",
+      //             "The Wild Steppes",
+      //             "Crystal Coast",
+      //             "Shadow Fen"
+      //           ],
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-messages": {
+      //             "enum": "Choose a recognized homeland from the known world."
+      //           },
+      //           "default": "silverwood-forest"
+      //         },
+      //         "origin": {
+      //           "title": "Origin",
+      //           "type": "object",
+      //           "description": "Your character's social background",
+      //           "x-grid": {
+      //             "columns": 6
+      //           },
+      //           "x-discriminator": "originType",
+      //           "oneOf": [
+      //             {
+      //               "title": "Noble",
+      //               "x-switcherTitle": "Noble",
+      //               "type": "object",
+      //               "required": [
+      //                 "originType"
+      //               ],
+      //               "properties": {
+      //                 "originType": {
+      //                   "type": "string",
+      //                   "const": "noble",
+      //                   "default": "noble",
+      //                   "readOnly": true,
+      //                   "x-enforceConst": true
+      //                 },
+      //                 "house": {
+      //                   "title": "Noble House",
+      //                   "type": "string",
+      //                   "default": "House Oakenshield"
+      //                 },
+      //                 "title": {
+      //                   "title": "Title",
+      //                   "type": "string",
+      //                   "enum": [
+      //                     "lord",
+      //                     "lady",
+      //                     "baron",
+      //                     "duchess"
+      //                   ],
+      //                   "x-enumTitles": [
+      //                     "Lord",
+      //                     "Lady",
+      //                     "Baron",
+      //                     "Duchess"
+      //                   ],
+      //                   "x-messages": {
+      //                     "enum": "Choose a valid noble title."
+      //                   },
+      //                   "default": "lord"
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               "title": "Commoner",
+      //               "x-switcherTitle": "Commoner",
+      //               "type": "object",
+      //               "required": [
+      //                 "originType"
+      //               ],
+      //               "properties": {
+      //                 "originType": {
+      //                   "type": "string",
+      //                   "const": "commoner",
+      //                   "default": "commoner",
+      //                   "readOnly": true,
+      //                   "x-enforceConst": true
+      //                 },
+      //                 "trade": {
+      //                   "title": "Trade",
+      //                   "type": "string",
+      //                   "default": "Woodworker"
+      //                 },
+      //                 "village": {
+      //                   "title": "Village",
+      //                   "type": "string",
+      //                   "default": "Millhaven"
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               "title": "Outcast",
+      //               "x-switcherTitle": "Outcast",
+      //               "type": "object",
+      //               "required": [
+      //                 "originType"
+      //               ],
+      //               "properties": {
+      //                 "originType": {
+      //                   "type": "string",
+      //                   "const": "outcast",
+      //                   "default": "outcast",
+      //                   "readOnly": true,
+      //                   "x-enforceConst": true
+      //                 },
+      //                 "reason": {
+      //                   "title": "Reason for Exile",
+      //                   "type": "string",
+      //                   "x-format": "textarea",
+      //                   "default": "Falsely accused of a crime"
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               "title": "Wanderer",
+      //               "x-switcherTitle": "Wanderer",
+      //               "type": "object",
+      //               "required": [
+      //                 "originType"
+      //               ],
+      //               "properties": {
+      //                 "originType": {
+      //                   "type": "string",
+      //                   "const": "wanderer",
+      //                   "default": "wanderer",
+      //                   "readOnly": true,
+      //                   "x-enforceConst": true
+      //                 },
+      //                 "yearsOnRoad": {
+      //                   "title": "Years on the Road",
+      //                   "type": "integer",
+      //                   "minimum": 1,
+      //                   "maximum": 100,
+      //                   "x-messages": {
+      //                     "minimum": "Even a short journey counts as at least 1 year.",
+      //                     "maximum": "No wanderer has roamed for more than a century."
+      //                   },
+      //                   "default": 12
+      //                 },
+      //                 "companion": {
+      //                   "title": "Traveling Companion",
+      //                   "type": "string",
+      //                   "default": "A grey wolf named Ash"
+      //                 }
+      //               }
+      //             }
+      //           ],
+      //           "default": {
+      //             "originType": "noble",
+      //             "house": "House Oakenshield",
+      //             "title": "lord"
+      //           }
+      //         },
+      //         "lifeGoal": {
+      //           "title": "Life Goal",
+      //           "type": "string",
+      //           "description": "What drives your character forward",
+      //           "x-format": "textarea",
+      //           "x-grid": {
+      //             "columns": 12
+      //           },
+      //           "default": "To find the lost Grove of Eternity and restore the ancient bond between the elves and the forest spirits that once protected the realm."
+      //         },
+      //         "notableDeeds": {
+      //           "title": "Notable Deeds",
+      //           "type": "array",
+      //           "description": "Accomplishments and events of note",
+      //           "x-format": "table",
+      //           "x-sortable": true,
+      //           "x-grid": {
+      //             "columns": 12
+      //           },
+      //           "items": {
+      //             "title": "Deed",
+      //             "type": "string"
+      //           },
+      //           "default": [
+      //             "Slew the wyvern of Thornpass",
+      //             "Recovered the Silver Harp of Elendale",
+      //             "Guided refugees through the Darkwood safely"
+      //           ]
+      //         }
+      //       }
+      //     },
+      //     "party": {
+      //       "title": "Party",
+      //       "type": "array",
+      //       "x-format": "nav-horizontal",
+      //       "x-titleTemplate": "{{ value.name }}",
+      //       "default": [
+      //         {
+      //           "name": "Brenna Ironforge",
+      //           "role": "tank",
+      //           "level": 8,
+      //           "active": true
+      //         },
+      //         {
+      //           "name": "Miriel Duskwhisper",
+      //           "role": "healer",
+      //           "level": 6,
+      //           "active": true
+      //         },
+      //         {
+      //           "name": "Grok the Unyielding",
+      //           "role": "damage",
+      //           "level": 7,
+      //           "active": false
+      //         }
+      //       ],
+      //       "items": {
+      //         "type": "object",
+      //         "title": "Party Member",
+      //         "x-format": "grid",
+      //         "properties": {
+      //           "name": {
+      //             "title": "Name",
+      //             "type": "string",
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "default": "New Member"
+      //           },
+      //           "role": {
+      //             "title": "Role",
+      //             "type": "string",
+      //             "enum": [
+      //               "tank",
+      //               "healer",
+      //               "damage",
+      //               "support",
+      //               "scout"
+      //             ],
+      //             "x-enumTitles": [
+      //               "Tank",
+      //               "Healer",
+      //               "Damage",
+      //               "Support",
+      //               "Scout"
+      //             ],
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "x-messages": {
+      //               "enum": "Choose a valid party role."
+      //             },
+      //             "default": "damage"
+      //           },
+      //           "level": {
+      //             "title": "Level",
+      //             "type": "integer",
+      //             "minimum": 1,
+      //             "maximum": 20,
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "x-messages": {
+      //               "minimum": "Party members start at level 1.",
+      //               "maximum": "No mortal exceeds level 20."
+      //             },
+      //             "default": 1
+      //           },
+      //           "active": {
+      //             "title": "Status",
+      //             "type": "boolean",
+      //             "description": "Is this party member active or fallen?",
+      //             "x-format": "radios",
+      //             "x-enumTitles": [
+      //               "Fallen",
+      //               "Active"
+      //             ],
+      //             "x-grid": {
+      //               "columns": 6
+      //             },
+      //             "default": true
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
 
       const t1 = window.performance.now()
       this.editor = new Jedison.Create(options)

@@ -4052,8 +4052,7 @@ class EditorObject extends Editor {
   static resolves(schema) {
     return getSchemaType(schema) === "object";
   }
-  build() {
-    this.propertyActivators = {};
+  getObjectControlConfig() {
     let addProperty = true;
     const additionalProperties2 = getSchemaAdditionalProperties(this.instance.schema);
     if (isSet(additionalProperties2) && additionalProperties2 === false) {
@@ -4071,7 +4070,7 @@ class EditorObject extends Editor {
     if (isSet(schemaEnablePropertiesToggle)) {
       enablePropertiesToggle = schemaEnablePropertiesToggle;
     }
-    this.control = this.theme.getObjectControl({
+    return {
       title: this.getTitle(),
       description: this.getDescription(),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
@@ -4085,8 +4084,13 @@ class EditorObject extends Editor {
       editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.getOption("editJsonData"),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, "propertiesToggleContent") ?? this.instance.jedison.translator.translate("propertiesToggle"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
-      addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty")
-    });
+      addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty"),
+      isAccordion: false
+    };
+  }
+  build() {
+    this.propertyActivators = {};
+    this.control = this.theme.getObjectControl(this.getObjectControlConfig());
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
   announcePropertyAdded(propertyName, child) {
@@ -4523,6 +4527,32 @@ class EditorObjectNav extends EditorObject {
       this.theme.setTabPaneAttributes(child.ui.control.container, active, id);
       tabList.appendChild(tab.list);
       tabContent.appendChild(child.ui.control.container);
+      if (this.disabled || this.instance.isReadOnly()) {
+        child.ui.disable();
+      } else {
+        child.ui.enable();
+      }
+    });
+  }
+}
+class EditorObjectAccordion extends EditorObject {
+  static resolves(schema) {
+    return getSchemaType(schema) === "object" && getSchemaXOption(schema, "format") === "accordion";
+  }
+  getObjectControlConfig() {
+    return { ...super.getObjectControlConfig(), isAccordionProperties: true };
+  }
+  refreshEditors() {
+    this.control.childrenSlot.replaceChildren();
+    const accordionId = this.control.childrenSlot.id;
+    this.instance.children.forEach((child) => {
+      if (!child.isActive) return;
+      const schemaTitle = getSchemaTitle(child.schema);
+      const title = isSet(schemaTitle) ? schemaTitle : child.getKey();
+      const id = this.getIdFromPath(child.path);
+      const accordionItem = this.theme.getAccordionItem({ title, id, accordionId });
+      accordionItem.body.appendChild(child.ui.control.container);
+      this.control.childrenSlot.appendChild(accordionItem.container);
       if (this.disabled || this.instance.isReadOnly()) {
         child.ui.disable();
       } else {
@@ -6257,6 +6287,61 @@ class EditorStringAce extends EditorString {
     }
   }
 }
+class EditorStringFilepond extends EditorString {
+  static resolves(schema) {
+    const format2 = getSchemaXOption(schema, "format");
+    return isSet(format2) && format2 === "filepond" && window.FilePond && getSchemaType(schema) === "string";
+  }
+  build() {
+    this.control = this.theme.getInputControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      type: "file",
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    try {
+      const schemaFilepond = getSchemaXOption(this.instance.schema, "filepond") ?? {};
+      const settingsKey = schemaFilepond["x-settings"];
+      const settings = settingsKey && this.instance.jedison.getOption("settings")[settingsKey] ? this.instance.jedison.getOption("settings")[settingsKey] : {};
+      const filepondOptions = { ...schemaFilepond, ...settings };
+      this.hasServer = !!filepondOptions.server;
+      this.filepond = window.FilePond.create(this.control.input, filepondOptions);
+      this.filepond.on("processfile", (error, file) => {
+        if (error) return;
+        const serverIds = this.filepond.getFiles().filter((f) => f.serverId).map((f) => f.serverId);
+        this.instance.setValue(serverIds.join(", "), true, "user");
+      });
+      this.filepond.on("addfile", (error) => {
+        if (error || this.hasServer) return;
+        const names = this.filepond.getFiles().map((f) => f.filename).join(", ");
+        this.instance.setValue(names, true, "user");
+      });
+      this.filepond.on("removefile", () => {
+        if (this.hasServer) return;
+        const names = this.filepond.getFiles().map((f) => f.filename).join(", ");
+        this.instance.setValue(names, true, "user");
+      });
+    } catch (e) {
+      console.error("FilePond is not available or not loaded correctly.", e);
+    }
+  }
+  addEventListeners() {
+  }
+  refreshUI() {
+    if (!this.filepond) return;
+    this.refreshTemplates();
+    this.filepond.setOptions({ disabled: this.disabled });
+  }
+  destroy() {
+    if (this.filepond) {
+      this.filepond.destroy();
+    }
+    super.destroy();
+  }
+}
 class UiResolver {
   constructor(options) {
     this.customEditors = options.customEditors ?? [];
@@ -6281,6 +6366,7 @@ class UiResolver {
       EditorStringFlatpickr,
       EditorStringIMask,
       EditorStringAce,
+      EditorStringFilepond,
       EditorStringInput,
       EditorNumberIMask,
       EditorNumberRaty,
@@ -6291,6 +6377,7 @@ class UiResolver {
       EditorObjectGrid,
       EditorObjectCategories,
       EditorObjectNav,
+      EditorObjectAccordion,
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
@@ -7570,24 +7657,20 @@ class Theme {
         }
       });
     }
-    let collapsed = config.startCollapsed;
-    if (collapsed) {
-      toggle.setAttribute("aria-expanded", "false");
-    } else {
-      toggle.setAttribute("aria-expanded", "true");
-    }
     toggle.style.transition = "transform 0.1s ease";
-    if (collapsed) {
-      toggle.style.transform = "rotate(90deg)";
+    if (config.startCollapsed) {
+      toggle.classList.add("collapsed");
     }
-    toggle.addEventListener("click", () => {
-      if (collapsed) {
-        toggle.style.transform = "rotate(0deg)";
-      } else {
-        toggle.style.transform = "rotate(90deg)";
-      }
-      collapsed = !collapsed;
-    });
+    const syncState = () => {
+      const collapsed = toggle.classList.contains("collapsed");
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      toggle.style.transform = collapsed ? "rotate(90deg)" : "rotate(0deg)";
+    };
+    syncState();
+    if (this.useToggleEvents) {
+      toggle.addEventListener("click", () => toggle.classList.toggle("collapsed"));
+    }
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ["class"] });
     return toggle;
   }
   /**
@@ -7968,6 +8051,9 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive();
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = "accordion-" + config.id;
+    }
     const propertiesActivators = this.getPropertiesActivators();
     const info = this.getInfo(config.info);
     const description = this.getDescription({
@@ -8088,6 +8174,57 @@ class Theme {
       right,
       switcherSlot
     };
+  }
+  /**
+   * Returns an accordion item wrapping a child editor.
+   * Used by EditorObjectAccordionProperties to wrap each property.
+   */
+  getAccordionItem(config) {
+    const container = document.createElement("div");
+    container.classList.add("jedi-accordion-item");
+    const header = document.createElement("div");
+    header.classList.add("jedi-accordion-header");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.classList.add("jedi-accordion-toggle", "collapsed");
+    const chevron = document.createElement("i");
+    chevron.classList.add("jedi-accordion-chevron");
+    if (this.icons && this.icons["collapse"]) {
+      this.addIconClass(chevron, this.icons["collapse"]);
+    } else {
+      chevron.textContent = "▾";
+    }
+    chevron.style.display = "inline-block";
+    chevron.style.transition = "transform 0.1s ease";
+    chevron.style.marginRight = "0.5em";
+    toggle.appendChild(chevron);
+    toggle.appendChild(document.createTextNode(config.title));
+    const collapse = document.createElement("div");
+    collapse.classList.add("jedi-accordion-collapse");
+    collapse.style.display = "none";
+    const body = document.createElement("div");
+    body.classList.add("jedi-accordion-body");
+    const syncState = () => {
+      const collapsed = toggle.classList.contains("collapsed");
+      chevron.style.transform = collapsed ? "rotate(0deg)" : "rotate(-180deg)";
+    };
+    syncState();
+    if (this.useToggleEvents) {
+      toggle.addEventListener("click", () => {
+        if (collapse.style.display === "none") {
+          collapse.style.display = "block";
+        } else {
+          collapse.style.display = "none";
+        }
+        toggle.classList.toggle("collapsed");
+      });
+    }
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ["class"] });
+    header.appendChild(toggle);
+    collapse.appendChild(body);
+    container.appendChild(header);
+    container.appendChild(collapse);
+    return { container, header, toggle, collapse, body };
   }
   /**
    * Array control is a card containing multiple editors.
@@ -8361,7 +8498,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     });
     const description = this.getDescription({
       content: config.description,
@@ -8935,6 +9073,74 @@ class ThemeBootstrap3 extends Theme {
     }
     return collapse;
   }
+  getObjectControl(config) {
+    const control = super.getObjectControl(config);
+    if (config.isAccordion) {
+      const { childrenSlot } = control;
+      childrenSlot.classList.add("panel-group");
+      const accordionId = childrenSlot.id;
+      const originalAppendChild = childrenSlot.appendChild.bind(childrenSlot);
+      childrenSlot.appendChild = (child) => {
+        const collapse = child.querySelector(".collapse");
+        if (collapse) {
+          collapse.classList.remove("in");
+          collapse.classList.add("panel-collapse");
+        }
+        const collapseToggle = child.querySelector(".jedi-collapse-toggle");
+        if (collapseToggle) {
+          collapseToggle.setAttribute("data-parent", "#" + accordionId);
+        }
+        return originalAppendChild(child);
+      };
+    }
+    if (config.isAccordionProperties) {
+      control.childrenSlot.classList.add("panel-group");
+    }
+    return control;
+  }
+  getAccordionItem(config) {
+    const collapseId = config.id + "-acc-collapse";
+    const container = document.createElement("div");
+    container.classList.add("panel", "panel-default");
+    const header = document.createElement("div");
+    header.classList.add("panel-heading", "collapsed");
+    header.setAttribute("data-toggle", "collapse");
+    header.setAttribute("data-parent", "#" + config.accordionId);
+    header.setAttribute("href", "#" + collapseId);
+    header.style.cursor = "pointer";
+    const title = document.createElement("h4");
+    title.classList.add("panel-title");
+    const toggle = document.createElement("a");
+    const chevron = document.createElement("i");
+    chevron.classList.add("jedi-accordion-chevron");
+    if (this.icons && this.icons["collapse"]) {
+      this.addIconClass(chevron, this.icons["collapse"]);
+    } else {
+      chevron.textContent = "▾";
+    }
+    chevron.style.display = "inline-block";
+    chevron.style.transition = "transform 0.1s ease";
+    chevron.style.marginRight = "0.5em";
+    toggle.appendChild(chevron);
+    toggle.appendChild(document.createTextNode(config.title));
+    const collapse = document.createElement("div");
+    collapse.id = collapseId;
+    collapse.classList.add("panel-collapse", "collapse");
+    const syncState = () => {
+      const collapsed = header.classList.contains("collapsed");
+      chevron.style.transform = collapsed ? "rotate(-90deg)" : "rotate(0deg)";
+    };
+    syncState();
+    new MutationObserver(syncState).observe(header, { attributes: true, attributeFilter: ["class"] });
+    const body = document.createElement("div");
+    body.classList.add("panel-body", "p-0");
+    title.appendChild(toggle);
+    header.appendChild(title);
+    collapse.appendChild(body);
+    container.appendChild(header);
+    container.appendChild(collapse);
+    return { container, header, toggle, collapse, body };
+  }
   getJsonData(config) {
     const jsonData = super.getJsonData(config);
     jsonData.control.classList.add("form-group");
@@ -9301,6 +9507,69 @@ class ThemeBootstrap4 extends Theme {
       collapse.classList.add("show");
     }
     return collapse;
+  }
+  getObjectControl(config) {
+    const control = super.getObjectControl(config);
+    if (config.isAccordion) {
+      const { childrenSlot } = control;
+      const accordionId = childrenSlot.id;
+      const originalAppendChild = childrenSlot.appendChild.bind(childrenSlot);
+      childrenSlot.appendChild = (child) => {
+        const collapse = child.querySelector(".collapse");
+        if (collapse) {
+          collapse.classList.remove("show");
+          collapse.setAttribute("data-parent", "#" + accordionId);
+        }
+        return originalAppendChild(child);
+      };
+    }
+    if (config.isAccordionProperties) {
+      control.childrenSlot.classList.add("accordion", "pb-3");
+    }
+    return control;
+  }
+  getAccordionItem(config) {
+    const collapseId = config.id + "-acc-collapse";
+    const container = document.createElement("div");
+    container.classList.add("card", "mb-0");
+    const header = document.createElement("div");
+    header.classList.add("card-header", "p-0");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.classList.add("btn", "btn-link", "w-100", "text-left");
+    toggle.setAttribute("data-toggle", "collapse");
+    toggle.setAttribute("data-target", "#" + collapseId);
+    toggle.setAttribute("data-parent", "#" + config.accordionId);
+    toggle.classList.add("collapsed");
+    const chevron = document.createElement("i");
+    chevron.classList.add("jedi-accordion-chevron");
+    if (this.icons && this.icons["collapse"]) {
+      this.addIconClass(chevron, this.icons["collapse"]);
+    } else {
+      chevron.textContent = "▾";
+    }
+    chevron.style.display = "inline-block";
+    chevron.style.transition = "transform 0.1s ease";
+    chevron.style.marginRight = "0.5em";
+    toggle.appendChild(chevron);
+    toggle.appendChild(document.createTextNode(config.title));
+    const collapse = document.createElement("div");
+    collapse.id = collapseId;
+    collapse.classList.add("collapse");
+    collapse.setAttribute("data-parent", "#" + config.accordionId);
+    const syncState = () => {
+      const collapsed = toggle.classList.contains("collapsed");
+      chevron.style.transform = collapsed ? "rotate(-90deg)" : "rotate(0deg)";
+    };
+    syncState();
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ["class"] });
+    const body = document.createElement("div");
+    body.classList.add("card-body", "pb-0");
+    header.appendChild(toggle);
+    collapse.appendChild(body);
+    container.appendChild(header);
+    container.appendChild(collapse);
+    return { container, header, toggle, collapse, body };
   }
   getJsonData(config) {
     const jsonData = super.getJsonData(config);
@@ -9688,6 +9957,75 @@ class ThemeBootstrap5 extends Theme {
     }
     return collapse;
   }
+  getObjectControl(config) {
+    const control = super.getObjectControl(config);
+    if (config.isAccordion) {
+      const { childrenSlot } = control;
+      const accordionId = childrenSlot.id;
+      const originalAppendChild = childrenSlot.appendChild.bind(childrenSlot);
+      childrenSlot.appendChild = (child) => {
+        const collapse = child.querySelector(".collapse");
+        if (collapse) {
+          collapse.classList.remove("show");
+          collapse.setAttribute("data-bs-parent", "#" + accordionId);
+        }
+        return originalAppendChild(child);
+      };
+    }
+    if (config.isAccordionProperties) {
+      control.childrenSlot.classList.add("accordion", "pb-3");
+    }
+    return control;
+  }
+  getAccordionItem(config) {
+    const collapseId = config.id + "-acc-collapse";
+    const container = document.createElement("div");
+    container.classList.add("accordion-item");
+    const header = document.createElement("h2");
+    header.classList.add("accordion-header");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.classList.add("accordion-button", "collapsed");
+    toggle.setAttribute("data-bs-toggle", "collapse");
+    toggle.setAttribute("data-bs-target", "#" + collapseId);
+    toggle.setAttribute("data-bs-parent", "#" + config.accordionId);
+    toggle.classList.add("jedi-accordion-button");
+    if (!document.getElementById("jedi-accordion-button-style")) {
+      const style = document.createElement("style");
+      style.id = "jedi-accordion-button-style";
+      style.textContent = ".jedi-accordion-button::after { display: none !important; }";
+      document.head.appendChild(style);
+    }
+    const chevron = document.createElement("i");
+    chevron.classList.add("jedi-accordion-chevron");
+    if (this.icons && this.icons["collapse"]) {
+      this.addIconClass(chevron, this.icons["collapse"]);
+    } else {
+      chevron.textContent = "▾";
+    }
+    chevron.style.display = "inline-block";
+    chevron.style.transition = "transform 0.1s ease";
+    chevron.style.marginRight = "0.5em";
+    toggle.appendChild(chevron);
+    toggle.appendChild(document.createTextNode(config.title));
+    const collapse = document.createElement("div");
+    collapse.id = collapseId;
+    collapse.classList.add("accordion-collapse", "collapse");
+    collapse.setAttribute("data-bs-parent", "#" + config.accordionId);
+    const syncState = () => {
+      const collapsed = toggle.classList.contains("collapsed");
+      chevron.style.transform = collapsed ? "rotate(-90deg)" : "rotate(0deg)";
+    };
+    syncState();
+    new MutationObserver(syncState).observe(toggle, { attributes: true, attributeFilter: ["class"] });
+    const body = document.createElement("div");
+    body.classList.add("accordion-body", "pb-3");
+    header.appendChild(toggle);
+    collapse.appendChild(body);
+    container.appendChild(header);
+    container.appendChild(collapse);
+    return { container, header, toggle, collapse, body };
+  }
   getJsonData(config) {
     const jsonData = super.getJsonData(config);
     jsonData.control.classList.add("mb-3");
@@ -10066,6 +10404,7 @@ const index = {
   EditorObjectGrid,
   EditorObjectCategories,
   EditorObjectNav,
+  EditorObjectAccordion,
   EditorObject,
   EditorArrayChoices,
   EditorArrayNav,

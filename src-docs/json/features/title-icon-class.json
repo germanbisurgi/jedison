@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "title": "Title Icon Class",
+  "description": "The `x-titleIconClass` option adds an icon before the field label.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "x-titleIconClass": "fas fa-user",
+      "description": "Plain string input with a title icon."
+    },
+    "comments": {
+      "type": "string",
+      "title": "Comments",
+      "x-titleIconClass": "fas fa-comment",
+      "x-format": "textarea",
+      "description": "Textarea with a title icon."
+    }
+  }
+}

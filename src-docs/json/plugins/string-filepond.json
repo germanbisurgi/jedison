@@ -1,0 +1,9 @@
+{
+  "title": "FilePond",
+  "type": "string",
+  "description": "FilePond is a flexible and fun JavaScript file upload library.",
+  "x-format": "filepond",
+  "x-filepond": {
+    "allowMultiple": false
+  }
+}

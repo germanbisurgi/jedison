@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "title": "Object Accordion",
+  "x-format": "accordion",
+  "properties": {
+    "personal": {
+      "type": "object",
+      "title": "Personal Info",
+      "properties": {
+        "name": { "type": "string", "title": "Name" },
+        "age":  { "type": "integer", "title": "Age" }
+      }
+    },
+    "address": {
+      "type": "object",
+      "title": "Address",
+      "properties": {
+        "street": { "type": "string", "title": "Street" },
+        "city":   { "type": "string", "title": "City" }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes",
+      "x-format": "textarea"
+    }
+  }
+}

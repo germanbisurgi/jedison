@@ -1,3 +1,5 @@
+/* global MutationObserver */
+
 import Theme from './theme.js'
 import { isString } from '../helpers/utils.js'
 
@@ -34,6 +36,92 @@ class ThemeBootstrap3 extends Theme {
     }
 
     return collapse
+  }
+
+  getObjectControl (config) {
+    const control = super.getObjectControl(config)
+
+    if (config.isAccordion) {
+      const { childrenSlot } = control
+      childrenSlot.classList.add('panel-group')
+      const accordionId = childrenSlot.id
+      const originalAppendChild = childrenSlot.appendChild.bind(childrenSlot)
+      childrenSlot.appendChild = (child) => {
+        const collapse = child.querySelector('.collapse')
+        if (collapse) {
+          collapse.classList.remove('in')
+          collapse.classList.add('panel-collapse')
+        }
+        const collapseToggle = child.querySelector('.jedi-collapse-toggle')
+        if (collapseToggle) {
+          collapseToggle.setAttribute('data-parent', '#' + accordionId)
+        }
+        return originalAppendChild(child)
+      }
+    }
+
+    if (config.isAccordionProperties) {
+      control.childrenSlot.classList.add('panel-group')
+    }
+
+    return control
+  }
+
+  getAccordionItem (config) {
+    const collapseId = config.id + '-acc-collapse'
+
+    const container = document.createElement('div')
+    container.classList.add('panel', 'panel-default')
+
+    const header = document.createElement('div')
+    header.classList.add('panel-heading', 'collapsed')
+    header.setAttribute('data-toggle', 'collapse')
+    header.setAttribute('data-parent', '#' + config.accordionId)
+    header.setAttribute('href', '#' + collapseId)
+    header.style.cursor = 'pointer'
+
+    const title = document.createElement('h4')
+    title.classList.add('panel-title')
+
+    const toggle = document.createElement('a')
+
+    const chevron = document.createElement('i')
+    chevron.classList.add('jedi-accordion-chevron')
+    if (this.icons && this.icons['collapse']) {
+      this.addIconClass(chevron, this.icons['collapse'])
+    } else {
+      chevron.textContent = '▾'
+    }
+    chevron.style.display = 'inline-block'
+    chevron.style.transition = 'transform 0.1s ease'
+    chevron.style.marginRight = '0.5em'
+
+    toggle.appendChild(chevron)
+    toggle.appendChild(document.createTextNode(config.title))
+
+    const collapse = document.createElement('div')
+    collapse.id = collapseId
+    collapse.classList.add('panel-collapse', 'collapse')
+
+    const syncState = () => {
+      const collapsed = header.classList.contains('collapsed')
+      chevron.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)'
+    }
+
+    syncState()
+
+    new MutationObserver(syncState).observe(header, { attributes: true, attributeFilter: ['class'] })
+
+    const body = document.createElement('div')
+    body.classList.add('panel-body', 'p-0')
+
+    title.appendChild(toggle)
+    header.appendChild(title)
+    collapse.appendChild(body)
+    container.appendChild(header)
+    container.appendChild(collapse)
+
+    return { container, header, toggle, collapse, body }
   }
 
   getJsonData (config) {

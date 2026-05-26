@@ -1,5 +1,12 @@
 ### dev
 
+### 1.12.0
+
+- added filepond plugin editor
+- added accordion format
+- security updates
+- Fixed issue #50 (Icon doesn't display, depending on x-format)
+
 ### 1.11.2
 
 - security updates
