@@ -5521,6 +5521,7 @@ class EditorMultiple extends Editor {
     }
   }
   refreshUI() {
+    var _a;
     this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
@@ -5543,7 +5544,9 @@ class EditorMultiple extends Editor {
         infoContainer.after(this.control.switcher.container);
         this.control.header.style.display = "none";
       } else if (titleEl) {
-        titleEl.after(this.control.switcher.container);
+        const infoEl = (_a = childControl.info) == null ? void 0 : _a.container;
+        const anchor = infoEl && infoEl.parentNode ? infoEl : titleEl;
+        anchor.after(this.control.switcher.container);
         this.control.header.style.display = "none";
       }
     }
@@ -7541,6 +7544,7 @@ class Theme {
     legendText.classList.add("jedi-label");
     legendText.innerHTML = config.content;
     legendText.setAttribute("id", legendLabelId);
+    legendText.style.marginRight = "4px";
     dummyInput.setAttribute("aria-hidden", "true");
     dummyInput.setAttribute("type", "hidden");
     dummyInput.setAttribute("disabled", "");
@@ -8145,13 +8149,13 @@ class Theme {
     }
     container.appendChild(label);
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      container.appendChild(info.container);
     }
     container.appendChild(placeholder);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, placeholder, label, labelText, description, messages, actions };
+    return { container, placeholder, label, info, labelText, description, messages, actions };
   }
   /**
    * Object control is a card containing multiple editors.
@@ -8606,13 +8610,13 @@ class Theme {
     }
     container.appendChild(label);
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      container.appendChild(info.container);
     }
     container.appendChild(br);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, label, labelText, description, messages, actions };
+    return { container, label, info, labelText, description, messages, actions };
   }
   /**
    * A Textarea
@@ -8648,13 +8652,13 @@ class Theme {
     }
     container.appendChild(label);
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      container.appendChild(info.container);
     }
     container.appendChild(input);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, input, label, labelText, description, messages, actions };
+    return { container, input, label, info, labelText, description, messages, actions };
   }
   adaptForTableTextareaControl(control) {
     this.visuallyHidden(control.label);
@@ -8696,7 +8700,7 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      container.appendChild(info.container);
     }
     container.appendChild(input);
     container.appendChild(description);
@@ -8775,7 +8779,7 @@ class Theme {
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
-      legendText.appendChild(info.container);
+      legendText.after(info.container);
     }
     radioControls.forEach((radioControl, index2) => {
       fieldset.appendChild(radioControls[index2]);
@@ -8841,7 +8845,7 @@ class Theme {
     formGroup.appendChild(input);
     formGroup.appendChild(label);
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      formGroup.appendChild(info.container);
     }
     formGroup.appendChild(description);
     formGroup.appendChild(messages);
@@ -8905,7 +8909,7 @@ class Theme {
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
-      legendText.appendChild(info.container);
+      legendText.after(info.container);
     }
     checkboxControls.forEach((checkboxControl, index2) => {
       fieldset.appendChild(checkboxControls[index2]);
@@ -8973,7 +8977,7 @@ class Theme {
     }
     container.appendChild(label);
     if (isObject(config.info)) {
-      label.appendChild(info.container);
+      container.appendChild(info.container);
     }
     container.appendChild(input);
     container.appendChild(description);

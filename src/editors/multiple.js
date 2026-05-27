@@ -108,7 +108,9 @@ class EditorMultiple extends Editor {
         infoContainer.after(this.control.switcher.container)
         this.control.header.style.display = 'none'
       } else if (titleEl) {
-        titleEl.after(this.control.switcher.container)
+        const infoEl = childControl.info?.container
+        const anchor = (infoEl && infoEl.parentNode) ? infoEl : titleEl
+        anchor.after(this.control.switcher.container)
         this.control.header.style.display = 'none'
       }
     }

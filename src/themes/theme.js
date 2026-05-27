@@ -130,6 +130,7 @@ class Theme {
     legendText.classList.add('jedi-label')
     legendText.innerHTML = config.content
     legendText.setAttribute('id', legendLabelId)
+    legendText.style.marginRight = '4px'
 
     dummyInput.setAttribute('aria-hidden', 'true')
     dummyInput.setAttribute('type', 'hidden')
@@ -870,7 +871,7 @@ class Theme {
     container.appendChild(label)
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      container.appendChild(info.container)
     }
 
     container.appendChild(placeholder)
@@ -878,7 +879,7 @@ class Theme {
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, placeholder, label, labelText, description, messages, actions }
+    return { container, placeholder, label, info, labelText, description, messages, actions }
   }
 
   /**
@@ -1418,7 +1419,7 @@ class Theme {
     container.appendChild(label)
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      container.appendChild(info.container)
     }
 
     container.appendChild(br)
@@ -1426,7 +1427,7 @@ class Theme {
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, label, labelText, description, messages, actions }
+    return { container, label, info, labelText, description, messages, actions }
   }
 
   /**
@@ -1467,7 +1468,7 @@ class Theme {
     container.appendChild(label)
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      container.appendChild(info.container)
     }
 
     container.appendChild(input)
@@ -1475,7 +1476,7 @@ class Theme {
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, input, label, labelText, description, messages, actions }
+    return { container, input, label, info, labelText, description, messages, actions }
   }
 
   adaptForTableTextareaControl (control) {
@@ -1523,7 +1524,7 @@ class Theme {
     }
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      container.appendChild(info.container)
     }
 
     container.appendChild(input)
@@ -1624,7 +1625,7 @@ class Theme {
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
-      legendText.appendChild(info.container)
+      legendText.after(info.container)
     }
 
     radioControls.forEach((radioControl, index) => {
@@ -1699,7 +1700,7 @@ class Theme {
     formGroup.appendChild(label)
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      formGroup.appendChild(info.container)
     }
 
     formGroup.appendChild(description)
@@ -1778,7 +1779,7 @@ class Theme {
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
-      legendText.appendChild(info.container)
+      legendText.after(info.container)
     }
 
     checkboxControls.forEach((checkboxControl, index) => {
@@ -1858,7 +1859,7 @@ class Theme {
     container.appendChild(label)
 
     if (isObject(config.info)) {
-      label.appendChild(info.container)
+      container.appendChild(info.container)
     }
 
     container.appendChild(input)
