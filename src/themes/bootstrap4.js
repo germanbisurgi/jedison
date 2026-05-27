@@ -388,7 +388,7 @@ class ThemeBootstrap4 extends Theme {
 
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
-    control.trigger.classList.add('badge', 'badge-secondary')
+    control.trigger.classList.add('badge', 'badge-primary')
     control.dialogBody.classList.add('btn-group', 'btn-group-vertical', 'w-100')
     control.optionButtons.forEach(btn => {
       btn.classList.add('btn', 'btn-light')

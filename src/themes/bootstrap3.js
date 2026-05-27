@@ -379,7 +379,7 @@ class ThemeBootstrap3 extends Theme {
 
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
-    control.trigger.classList.add('label', 'label-default')
+    control.trigger.classList.add('label', 'label-primary')
     control.dialogBody.classList.add('btn-group-vertical')
     control.dialogBody.style.width = '100%'
     control.optionButtons.forEach(btn => {

@@ -9546,7 +9546,7 @@ class ThemeBootstrap3 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.trigger.classList.add("label", "label-default");
+    control.trigger.classList.add("label", "label-primary");
     control.dialogBody.classList.add("btn-group-vertical");
     control.dialogBody.style.width = "100%";
     control.optionButtons.forEach((btn) => {
@@ -10008,7 +10008,7 @@ class ThemeBootstrap4 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.trigger.classList.add("badge", "badge-secondary");
+    control.trigger.classList.add("badge", "badge-primary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
     control.optionButtons.forEach((btn) => {
       btn.classList.add("btn", "btn-light");
@@ -10482,7 +10482,7 @@ class ThemeBootstrap5 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.trigger.classList.add("badge", "bg-secondary");
+    control.trigger.classList.add("badge", "bg-primary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
     control.optionButtons.forEach((btn) => {
       btn.classList.add("btn", "btn-light");
