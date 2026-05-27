@@ -200,6 +200,7 @@ class Theme {
 
     if (config.titleIconClass) {
       this.addIconClass(icon, config.titleIconClass)
+      icon.style.marginRight = '4px'
     }
 
     dummyInput.setAttribute('aria-hidden', 'true')
@@ -208,7 +209,10 @@ class Theme {
     dummyInput.setAttribute('id', config.for)
     this.visuallyHidden(dummyInput)
 
-    label.appendChild(icon)
+    if (config.titleIconClass) {
+      label.appendChild(icon)
+    }
+    labelText.style.marginRight = '4px'
     label.appendChild(labelText)
     label.appendChild(dummyInput)
 
