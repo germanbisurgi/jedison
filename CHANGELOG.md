@@ -1,5 +1,9 @@
 ### dev
 
+### 1.12.1
+
+- Improved UI
+
 ### 1.12.0
 
 - added filepond plugin editor
