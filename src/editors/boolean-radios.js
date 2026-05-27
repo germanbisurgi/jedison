@@ -18,6 +18,7 @@ class EditorRadios extends EditorBoolean {
       titles: getSchemaXOption(this.instance.schema, 'enumTitles') || ['false', 'true'],
       id: this.getIdFromPath(this.instance.path),
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
+      titleIconClass: getSchemaXOption(this.instance.schema, 'titleIconClass'),
       inline: getSchemaXOption(this.instance.schema, 'format') === 'radios-inline',
       info: this.getInfo()
     })

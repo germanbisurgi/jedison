@@ -48,6 +48,7 @@ class Theme {
     const right = document.createElement('div')
     const legend = document.createElement('legend')
     const legendText = document.createElement('label')
+    const icon = document.createElement('i')
     const infoContainer = document.createElement('span')
     const dummyInput = document.createElement('input')
     const legendLabelId = 'legend-label-' + config.id
@@ -67,6 +68,13 @@ class Theme {
     legendText.setAttribute('id', legendLabelId)
     legendText.innerHTML = config.content
 
+    if (config.titleIconClass) {
+      this.addIconClass(icon, config.titleIconClass)
+      icon.style.marginRight = '4px'
+    }
+
+    legendText.style.marginRight = '4px'
+
     infoContainer.classList.add('jedi-editor-info-container')
     infoContainer.setAttribute('for', dummyInputId)
 
@@ -82,6 +90,9 @@ class Theme {
 
     legend.appendChild(left)
     legend.appendChild(right)
+    if (config.titleIconClass) {
+      left.appendChild(icon)
+    }
     left.appendChild(legendText)
     left.appendChild(infoContainer)
     legendText.appendChild(dummyInput)
@@ -108,6 +119,7 @@ class Theme {
     const legendLabelId = 'legend-label-' + config.id
     const legend = document.createElement('legend')
     const legendText = document.createElement('label')
+    const icon = document.createElement('i')
     const dummyInput = document.createElement('input')
 
     legend.classList.add('jedi-editor-legend')
@@ -125,10 +137,16 @@ class Theme {
 
     this.visuallyHidden(dummyInput)
 
+    if (config.titleIconClass) {
+      this.addIconClass(icon, config.titleIconClass)
+      icon.style.marginRight = '4px'
+      legend.appendChild(icon)
+    }
+
     legend.appendChild(legendText)
     legendText.appendChild(dummyInput)
 
-    return { legend, legendText }
+    return { legend, legendText, icon }
   }
 
   /**
@@ -150,12 +168,14 @@ class Theme {
 
     if (config.titleIconClass) {
       this.addIconClass(icon, config.titleIconClass)
+      icon.style.marginRight = '4px'
     }
 
     if (config.titleIconClass) {
       label.appendChild(icon)
     }
 
+    labelText.style.marginRight = '4px'
     label.appendChild(labelText)
 
     return { label, labelText, icon }
@@ -734,7 +754,6 @@ class Theme {
 
     info.setAttribute('href', '#')
     info.classList.add('jedi-info-button')
-    info.style.marginLeft = '4px'
 
     if (isObject(config.attributes)) {
       for (const [key, value] of Object.entries(config.attributes)) {
@@ -931,7 +950,8 @@ class Theme {
     const { legend, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
-      titleHidden: config.titleHidden
+      titleHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     })
 
     if (config?.info?.variant === 'modal') {
@@ -954,7 +974,9 @@ class Theme {
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
-      infoContainer.appendChild(info.container)
+      while (info.container.firstChild) {
+        infoContainer.appendChild(info.container.firstChild)
+      }
     }
 
     fieldset.appendChild(collapse)
@@ -1117,7 +1139,8 @@ class Theme {
     const { legend, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
-      titleHidden: config.titleHidden
+      titleHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     })
     const description = this.getDescription({
       content: config.description
@@ -1151,7 +1174,9 @@ class Theme {
     fieldset.appendChild(legend)
 
     if (isObject(config.info)) {
-      infoContainer.appendChild(info.container)
+      while (info.container.firstChild) {
+        infoContainer.appendChild(info.container.firstChild)
+      }
     }
 
     fieldset.appendChild(collapse)
@@ -1223,6 +1248,7 @@ class Theme {
       jsonData,
       legend,
       legendText,
+      infoContainer,
       switcherSlot,
       footerAddBtn,
       deleteAllBtn,
@@ -1541,7 +1567,8 @@ class Theme {
     const { legend, legendText } = this.getRadioLegend({
       content: config.title,
       id: config.id,
-      for: config.id
+      for: config.id,
+      titleIconClass: config.titleIconClass
     })
     const messages = this.getMessagesSlot({
       id: messagesId
@@ -1646,7 +1673,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     })
     const description = this.getDescription({
       content: config.description,
@@ -1695,7 +1723,8 @@ class Theme {
     const { legend, legendText } = this.getRadioLegend({
       content: config.title,
       id: config.id,
-      for: config.id
+      for: config.id,
+      titleIconClass: config.titleIconClass
     })
     const messages = this.getMessagesSlot({
       id: messagesId
@@ -1796,7 +1825,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     })
     const messages = this.getMessagesSlot({
       id: messagesId

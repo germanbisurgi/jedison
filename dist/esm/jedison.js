@@ -3370,6 +3370,7 @@ class EditorRadios extends EditorBoolean {
       titles: getSchemaXOption(this.instance.schema, "enumTitles") || ["false", "true"],
       id: this.getIdFromPath(this.instance.path),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
       inline: getSchemaXOption(this.instance.schema, "format") === "radios-inline",
       info: this.getInfo()
     });
@@ -3442,6 +3443,7 @@ class EditorBooleanCheckbox extends EditorBoolean {
       description: this.getDescription(),
       id: this.getIdFromPath(this.instance.path),
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
       info: this.getInfo()
     });
   }
@@ -4091,7 +4093,8 @@ class EditorObject extends Editor {
       propertiesToggleContent: getSchemaXOption(this.instance.schema, "propertiesToggleContent") ?? this.instance.jedison.translator.translate("propertiesToggle"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
       addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty"),
-      isAccordion: false
+      isAccordion: false,
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass")
     };
   }
   build() {
@@ -4595,7 +4598,8 @@ class EditorArray extends Editor {
       arrayDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
       arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAll") ?? this.instance.jedison.getOption("arrayFooterDeleteAll"),
       arrayFooterDeleteAllContent: getSchemaXOption(this.instance.schema, "arrayFooterDeleteAllContent") ?? this.instance.jedison.translator.translate("arrayDeleteAll"),
-      collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle")
+      collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass")
     });
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
@@ -5533,8 +5537,12 @@ class EditorMultiple extends Editor {
     }
     if (this.switcherInput === "modal") {
       const childControl = this.instance.activeInstance.ui.control;
+      const infoContainer = childControl.infoContainer;
       const titleEl = childControl.legendText || childControl.label;
-      if (titleEl) {
+      if (infoContainer) {
+        infoContainer.after(this.control.switcher.container);
+        this.control.header.style.display = "none";
+      } else if (titleEl) {
         titleEl.after(this.control.switcher.container);
         this.control.header.style.display = "none";
       }
@@ -7466,6 +7474,7 @@ class Theme {
     const right = document.createElement("div");
     const legend = document.createElement("legend");
     const legendText = document.createElement("label");
+    const icon = document.createElement("i");
     const infoContainer = document.createElement("span");
     const dummyInput = document.createElement("input");
     const legendLabelId = "legend-label-" + config.id;
@@ -7481,6 +7490,11 @@ class Theme {
     legendText.classList.add("jedi-legend");
     legendText.setAttribute("id", legendLabelId);
     legendText.innerHTML = config.content;
+    if (config.titleIconClass) {
+      this.addIconClass(icon, config.titleIconClass);
+      icon.style.marginRight = "4px";
+    }
+    legendText.style.marginRight = "4px";
     infoContainer.classList.add("jedi-editor-info-container");
     infoContainer.setAttribute("for", dummyInputId);
     dummyInput.setAttribute("aria-hidden", "true");
@@ -7492,6 +7506,9 @@ class Theme {
     }
     legend.appendChild(left);
     legend.appendChild(right);
+    if (config.titleIconClass) {
+      left.appendChild(icon);
+    }
     left.appendChild(legendText);
     left.appendChild(infoContainer);
     legendText.appendChild(dummyInput);
@@ -7515,6 +7532,7 @@ class Theme {
     const legendLabelId = "legend-label-" + config.id;
     const legend = document.createElement("legend");
     const legendText = document.createElement("label");
+    const icon = document.createElement("i");
     const dummyInput = document.createElement("input");
     legend.classList.add("jedi-editor-legend");
     legend.style.fontSize = "inherit";
@@ -7527,9 +7545,14 @@ class Theme {
     dummyInput.setAttribute("type", "hidden");
     dummyInput.setAttribute("disabled", "");
     this.visuallyHidden(dummyInput);
+    if (config.titleIconClass) {
+      this.addIconClass(icon, config.titleIconClass);
+      icon.style.marginRight = "4px";
+      legend.appendChild(icon);
+    }
     legend.appendChild(legendText);
     legendText.appendChild(dummyInput);
-    return { legend, legendText };
+    return { legend, legendText, icon };
   }
   /**
    * Represents a caption for the content of its parent fieldset
@@ -7547,10 +7570,12 @@ class Theme {
     }
     if (config.titleIconClass) {
       this.addIconClass(icon, config.titleIconClass);
+      icon.style.marginRight = "4px";
     }
     if (config.titleIconClass) {
       label.appendChild(icon);
     }
+    labelText.style.marginRight = "4px";
     label.appendChild(labelText);
     return { label, labelText, icon };
   }
@@ -8027,7 +8052,6 @@ class Theme {
     container.style.display = "inline-block";
     info.setAttribute("href", "#");
     info.classList.add("jedi-info-button");
-    info.style.marginLeft = "4px";
     if (isObject(config.attributes)) {
       for (const [key, value] of Object.entries(config.attributes)) {
         info.setAttribute(key, value);
@@ -8196,7 +8220,8 @@ class Theme {
     const { legend, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
-      titleHidden: config.titleHidden
+      titleHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     });
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
@@ -8213,7 +8238,9 @@ class Theme {
     }
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
-      infoContainer.appendChild(info.container);
+      while (info.container.firstChild) {
+        infoContainer.appendChild(info.container.firstChild);
+      }
     }
     fieldset.appendChild(collapse);
     collapse.appendChild(body);
@@ -8346,7 +8373,8 @@ class Theme {
     const { legend, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
-      titleHidden: config.titleHidden
+      titleHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     });
     const description = this.getDescription({
       content: config.description
@@ -8375,7 +8403,9 @@ class Theme {
     }
     fieldset.appendChild(legend);
     if (isObject(config.info)) {
-      infoContainer.appendChild(info.container);
+      while (info.container.firstChild) {
+        infoContainer.appendChild(info.container.firstChild);
+      }
     }
     fieldset.appendChild(collapse);
     collapse.appendChild(body);
@@ -8430,6 +8460,7 @@ class Theme {
       jsonData,
       legend,
       legendText,
+      infoContainer,
       switcherSlot,
       footerAddBtn,
       deleteAllBtn,
@@ -8699,7 +8730,8 @@ class Theme {
     const { legend, legendText } = this.getRadioLegend({
       content: config.title,
       id: config.id,
-      for: config.id
+      for: config.id,
+      titleIconClass: config.titleIconClass
     });
     const messages = this.getMessagesSlot({
       id: messagesId
@@ -8787,7 +8819,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     });
     const description = this.getDescription({
       content: config.description,
@@ -8828,7 +8861,8 @@ class Theme {
     const { legend, legendText } = this.getRadioLegend({
       content: config.title,
       id: config.id,
-      for: config.id
+      for: config.id,
+      titleIconClass: config.titleIconClass
     });
     const messages = this.getMessagesSlot({
       id: messagesId
@@ -8913,7 +8947,8 @@ class Theme {
     const { label, labelText } = this.getLabel({
       for: config.id,
       text: config.title,
-      visuallyHidden: config.titleHidden
+      visuallyHidden: config.titleHidden,
+      titleIconClass: config.titleIconClass
     });
     const messages = this.getMessagesSlot({
       id: messagesId
@@ -9316,13 +9351,14 @@ class ThemeBootstrap3 extends Theme {
   }
   getLegend(config) {
     const superLegend = super.getLegend(config);
-    const { legend } = superLegend;
+    const { legend, infoContainer } = superLegend;
     legend.classList.add("panel-heading");
     legend.classList.add("pull-left");
     legend.style.margin = "0";
     legend.style.display = "flex";
     legend.style.justifyContent = "space-between";
     legend.style.alignItems = "center";
+    infoContainer.style.marginRight = "4px";
     return superLegend;
   }
   getRadioLegend(config) {
@@ -9334,11 +9370,12 @@ class ThemeBootstrap3 extends Theme {
     return superRadioLegend;
   }
   getLabel(config) {
-    const labelObj = super.getLabel(config);
-    if (labelObj.icon.classList) {
-      labelObj.icon.style.marginRight = "5px";
-    }
-    return labelObj;
+    return super.getLabel(config);
+  }
+  getInfo(config = {}) {
+    const info = super.getInfo(config);
+    info.container.style.marginRight = "4px";
+    return info;
   }
   getCard() {
     const card = super.getCard();
@@ -9505,11 +9542,11 @@ class ThemeBootstrap3 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.container.style.marginLeft = "4px";
     control.trigger.classList.add("label", "label-default");
     control.dialogBody.classList.add("btn-group-vertical");
+    control.dialogBody.style.width = "100%";
     control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-default");
+      btn.classList.add("btn", "btn-default", "btn-block");
     });
     return control;
   }
@@ -9570,7 +9607,7 @@ class ThemeBootstrap3 extends Theme {
     tab.link.style.display = "flex";
     tab.link.style.alignItems = "center";
     tab.arrayActions.style.flexShrink = "0";
-    tab.arrayActions.style.whiteSpace = "nowrap";
+    tab.arrayActions.classList.add("text-nowrap");
     tab.text.style.flex = "1";
     tab.text.style.marginLeft = "5px";
     tab.text.style.marginRight = "5px";
@@ -9579,7 +9616,7 @@ class ThemeBootstrap3 extends Theme {
       if (warning) {
         tab.text.removeChild(warning);
         warning.style.flexShrink = "0";
-        warning.style.whiteSpace = "nowrap";
+        warning.classList.add("text-nowrap");
         tab.link.appendChild(warning);
       }
     }
@@ -9724,9 +9761,8 @@ class ThemeBootstrap4 extends Theme {
     } else {
       chevron.textContent = "▾";
     }
-    chevron.style.display = "inline-block";
+    chevron.classList.add("d-inline-block", "mr-2");
     chevron.style.transition = "transform 0.1s ease";
-    chevron.style.marginRight = "0.5em";
     toggle.appendChild(chevron);
     toggle.appendChild(document.createTextNode(config.title));
     const collapse = document.createElement("div");
@@ -9766,21 +9802,23 @@ class ThemeBootstrap4 extends Theme {
   }
   getLegend(config) {
     const superLegend = super.getLegend(config);
-    const { legend } = superLegend;
+    const { legend, infoContainer } = superLegend;
     legend.classList.add("card-header");
     legend.classList.add("d-flex");
     legend.classList.add("justify-content-between");
     legend.classList.add("align-items-center");
     legend.classList.add("float-left");
     legend.classList.add("py-2");
+    infoContainer.classList.add("mr-1");
     return superLegend;
   }
   getLabel(config) {
-    const labelObj = super.getLabel(config);
-    if (labelObj.icon.classList) {
-      labelObj.icon.classList.add("mr-1");
-    }
-    return labelObj;
+    return super.getLabel(config);
+  }
+  getInfo(config = {}) {
+    const info = super.getInfo(config);
+    info.container.classList.add("mr-1");
+    return info;
   }
   getCard() {
     const card = super.getCard();
@@ -9898,7 +9936,7 @@ class ThemeBootstrap4 extends Theme {
     super.adaptForTableRadiosControl(control, td);
     control.container.classList.remove("form-group");
     control.fieldset.classList.remove("card");
-    control.fieldset.style.marginBottom = "0";
+    control.fieldset.classList.add("mb-0");
   }
   getCheckboxesControl(config) {
     const control = super.getCheckboxesControl(config);
@@ -9966,18 +10004,17 @@ class ThemeBootstrap4 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.container.classList.add("ml-1");
     control.trigger.classList.add("badge", "badge-secondary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
     control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-secondary");
+      btn.classList.add("btn", "btn-light");
     });
     return control;
   }
   setSwitcherOptionActive(btn, active) {
     super.setSwitcherOptionActive(btn, active);
     btn.classList.toggle("btn-primary", active);
-    btn.classList.toggle("btn-secondary", !active);
+    btn.classList.toggle("btn-light", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -10097,7 +10134,6 @@ class ThemeBootstrap4 extends Theme {
     closeBtn.setAttribute("always-enabled", "");
     info.info.setAttribute("data-toggle", "modal");
     info.info.setAttribute("data-target", "#" + modalId);
-    info.container.classList.add("ml-1");
     modal.classList.add("modal");
     modal.classList.add("fade");
     modalDialog.classList.add("modal-dialog");
@@ -10199,9 +10235,8 @@ class ThemeBootstrap5 extends Theme {
     } else {
       chevron.textContent = "▾";
     }
-    chevron.style.display = "inline-block";
+    chevron.classList.add("d-inline-block", "me-2");
     chevron.style.transition = "transform 0.1s ease";
-    chevron.style.marginRight = "0.5em";
     toggle.appendChild(chevron);
     toggle.appendChild(document.createTextNode(config.title));
     const collapse = document.createElement("div");
@@ -10241,23 +10276,27 @@ class ThemeBootstrap5 extends Theme {
   }
   getLegend(config) {
     const superLegend = super.getLegend(config);
-    const { legend } = superLegend;
+    const { legend, infoContainer } = superLegend;
     legend.classList.add("card-header");
     legend.classList.add("d-flex");
     legend.classList.add("justify-content-between");
     legend.classList.add("align-items-center");
     legend.classList.add("py-2");
+    infoContainer.classList.add("me-1");
     return superLegend;
   }
   styleLegendWarning(span) {
-    span.classList.add("ms-1");
+    span.classList.add("me-1");
   }
   getLabel(config) {
     const labelObj = super.getLabel(config);
-    if (labelObj.icon.classList) {
-      labelObj.icon.classList.add("me-1");
-    }
+    labelObj.label.classList.add("mb-1");
     return labelObj;
+  }
+  getInfo(config = {}) {
+    const info = super.getInfo(config);
+    info.container.classList.add("me-1");
+    return info;
   }
   getCard() {
     const card = super.getCard();
@@ -10378,7 +10417,7 @@ class ThemeBootstrap5 extends Theme {
     super.adaptForTableRadiosControl(control, td);
     control.container.classList.remove("mb-3");
     control.fieldset.classList.remove("card");
-    control.fieldset.style.marginBottom = "0";
+    control.fieldset.classList.add("mb-0");
   }
   getCheckboxesControl(config) {
     const control = super.getCheckboxesControl(config);
@@ -10439,18 +10478,17 @@ class ThemeBootstrap5 extends Theme {
   }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
-    control.container.classList.add("ms-1");
     control.trigger.classList.add("badge", "bg-secondary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
     control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-secondary");
+      btn.classList.add("btn", "btn-light");
     });
     return control;
   }
   setSwitcherOptionActive(btn, active) {
     super.setSwitcherOptionActive(btn, active);
     btn.classList.toggle("btn-primary", active);
-    btn.classList.toggle("btn-secondary", !active);
+    btn.classList.toggle("btn-light", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -10567,7 +10605,6 @@ class ThemeBootstrap5 extends Theme {
     closeBtn.setAttribute("always-enabled", "");
     info.info.setAttribute("data-bs-toggle", "modal");
     info.info.setAttribute("data-bs-target", "#" + modalId);
-    info.container.classList.add("ms-1");
     modal.classList.add("modal");
     modal.classList.add("fade");
     modalDialog.classList.add("modal-dialog");

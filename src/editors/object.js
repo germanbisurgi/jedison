@@ -61,7 +61,8 @@ class EditorObject extends Editor {
       propertiesToggleContent: getSchemaXOption(this.instance.schema, 'propertiesToggleContent') ?? this.instance.jedison.translator.translate('propertiesToggle'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
       addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty'),
-      isAccordion: false
+      isAccordion: false,
+      titleIconClass: getSchemaXOption(this.instance.schema, 'titleIconClass')
     }
   }
 

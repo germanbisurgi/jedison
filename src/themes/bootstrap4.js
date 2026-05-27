@@ -87,9 +87,8 @@ class ThemeBootstrap4 extends Theme {
     } else {
       chevron.textContent = '▾'
     }
-    chevron.style.display = 'inline-block'
+    chevron.classList.add('d-inline-block', 'mr-2')
     chevron.style.transition = 'transform 0.1s ease'
-    chevron.style.marginRight = '0.5em'
 
     toggle.appendChild(chevron)
     toggle.appendChild(document.createTextNode(config.title))
@@ -140,24 +139,25 @@ class ThemeBootstrap4 extends Theme {
 
   getLegend (config) {
     const superLegend = super.getLegend(config)
-    const { legend } = superLegend
+    const { legend, infoContainer } = superLegend
     legend.classList.add('card-header')
     legend.classList.add('d-flex')
     legend.classList.add('justify-content-between')
     legend.classList.add('align-items-center')
     legend.classList.add('float-left')
     legend.classList.add('py-2')
+    infoContainer.classList.add('mr-1')
     return superLegend
   }
 
   getLabel (config) {
-    const labelObj = super.getLabel(config)
+    return super.getLabel(config)
+  }
 
-    if (labelObj.icon.classList) {
-      labelObj.icon.classList.add('mr-1')
-    }
-
-    return labelObj
+  getInfo (config = {}) {
+    const info = super.getInfo(config)
+    info.container.classList.add('mr-1')
+    return info
   }
 
   getCard () {
@@ -303,7 +303,7 @@ class ThemeBootstrap4 extends Theme {
     super.adaptForTableRadiosControl(control, td)
     control.container.classList.remove('form-group')
     control.fieldset.classList.remove('card')
-    control.fieldset.style.marginBottom = '0'
+    control.fieldset.classList.add('mb-0')
   }
 
   getCheckboxesControl (config) {
@@ -388,7 +388,6 @@ class ThemeBootstrap4 extends Theme {
 
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
-    control.container.classList.add('ml-1')
     control.trigger.classList.add('badge', 'badge-secondary')
     control.dialogBody.classList.add('btn-group', 'btn-group-vertical', 'w-100')
     control.optionButtons.forEach(btn => {
@@ -552,7 +551,6 @@ class ThemeBootstrap4 extends Theme {
     closeBtn.setAttribute('always-enabled', '')
     info.info.setAttribute('data-toggle', 'modal')
     info.info.setAttribute('data-target', '#' + modalId)
-    info.container.classList.add('ml-1')
     modal.classList.add('modal')
     modal.classList.add('fade')
     modalDialog.classList.add('modal-dialog')

@@ -102,8 +102,12 @@ class EditorMultiple extends Editor {
 
     if (this.switcherInput === 'modal') {
       const childControl = this.instance.activeInstance.ui.control
+      const infoContainer = childControl.infoContainer
       const titleEl = childControl.legendText || childControl.label
-      if (titleEl) {
+      if (infoContainer) {
+        infoContainer.after(this.control.switcher.container)
+        this.control.header.style.display = 'none'
+      } else if (titleEl) {
         titleEl.after(this.control.switcher.container)
         this.control.header.style.display = 'none'
       }

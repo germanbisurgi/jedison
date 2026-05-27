@@ -145,13 +145,14 @@ class ThemeBootstrap3 extends Theme {
 
   getLegend (config) {
     const superLegend = super.getLegend(config)
-    const { legend } = superLegend
+    const { legend, infoContainer } = superLegend
     legend.classList.add('panel-heading')
     legend.classList.add('pull-left')
     legend.style.margin = '0'
     legend.style.display = 'flex'
     legend.style.justifyContent = 'space-between'
     legend.style.alignItems = 'center'
+    infoContainer.style.marginRight = '4px'
     return superLegend
   }
 
@@ -165,13 +166,13 @@ class ThemeBootstrap3 extends Theme {
   }
 
   getLabel (config) {
-    const labelObj = super.getLabel(config)
+    return super.getLabel(config)
+  }
 
-    if (labelObj.icon.classList) {
-      labelObj.icon.style.marginRight = '5px'
-    }
-
-    return labelObj
+  getInfo (config = {}) {
+    const info = super.getInfo(config)
+    info.container.style.marginRight = '4px'
+    return info
   }
 
   getCard () {
@@ -378,7 +379,6 @@ class ThemeBootstrap3 extends Theme {
 
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
-    control.container.style.marginLeft = '4px'
     control.trigger.classList.add('label', 'label-default')
     control.dialogBody.classList.add('btn-group-vertical')
     control.dialogBody.style.width = '100%'
@@ -461,7 +461,7 @@ class ThemeBootstrap3 extends Theme {
 
     // Left: action buttons — don't shrink or wrap
     tab.arrayActions.style.flexShrink = '0'
-    tab.arrayActions.style.whiteSpace = 'nowrap'
+    tab.arrayActions.classList.add('text-nowrap')
 
     // Middle: text fills remaining space, can wrap
     tab.text.style.flex = '1'
@@ -474,7 +474,7 @@ class ThemeBootstrap3 extends Theme {
       if (warning) {
         tab.text.removeChild(warning)
         warning.style.flexShrink = '0'
-        warning.style.whiteSpace = 'nowrap'
+        warning.classList.add('text-nowrap')
         tab.link.appendChild(warning)
       }
     }

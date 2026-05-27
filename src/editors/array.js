@@ -41,7 +41,8 @@ class EditorArray extends Editor {
       arrayDeleteAllContent: getSchemaXOption(this.instance.schema, 'arrayDeleteAllContent') ?? this.instance.jedison.translator.translate('arrayDeleteAll'),
       arrayFooterDeleteAll: getSchemaXOption(this.instance.schema, 'arrayFooterDeleteAll') ?? this.instance.jedison.getOption('arrayFooterDeleteAll'),
       arrayFooterDeleteAllContent: getSchemaXOption(this.instance.schema, 'arrayFooterDeleteAllContent') ?? this.instance.jedison.translator.translate('arrayDeleteAll'),
-      collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle')
+      collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
+      titleIconClass: getSchemaXOption(this.instance.schema, 'titleIconClass')
     })
 
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)

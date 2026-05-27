@@ -3,6 +3,12 @@
   "type": "object",
   "additionalProperties": false,
   "x-enablePropertiesToggle": false,
+  "x-titleIconClass": "fas fa-cog",
+  "x-info": {
+    "variant": "modal",
+    "title": "### Info Button title",
+    "content": "Info button content"
+  },
   "properties": {
     "anyOfExample": {
       "title": "anyOf",
@@ -14,12 +20,20 @@
           "type": "object",
           "additionalProperties": false,
           "x-enablePropertiesToggle": false,
+          "x-titleIconClass": "fas fa-cog",
+          "x-info": {
+            "variant": "modal",
+            "title": "### Info Button title",
+            "content": "Info button content"
+          },
           "properties": {
             "name": {
-              "type": "string"
+              "type": "string",
+              "x-titleIconClass": "fas fa-cog"
             },
             "age": {
-              "type": "integer"
+              "type": "integer",
+              "x-titleIconClass": "fas fa-cog"
             }
           }
         },
@@ -28,12 +42,25 @@
           "type": "object",
           "additionalProperties": false,
           "x-enablePropertiesToggle": false,
+          "x-titleIconClass": "fas fa-cog",
           "properties": {
             "orgName": {
-              "type": "string"
+              "type": "string",
+              "x-titleIconClass": "fas fa-cog",
+              "x-info": {
+                "variant": "modal",
+                "title": "### Info Button title",
+                "content": "Info button content"
+              }
             },
             "employees": {
-              "type": "integer"
+              "type": "integer",
+              "x-titleIconClass": "fas fa-cog",
+              "x-info": {
+                "variant": "modal",
+                "title": "### Info Button title",
+                "content": "Info button content"
+              }
             }
           }
         }
@@ -43,6 +70,12 @@
       "title": "oneOf",
       "description": "x-switcherInput: modal with oneOf — two object schemas",
       "x-switcherInput": "modal",
+      "x-titleIconClass": "fas fa-cog",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      },
       "oneOf": [
         {
           "x-switcherTitle": "Circle",
@@ -51,7 +84,13 @@
           "x-enablePropertiesToggle": false,
           "properties": {
             "radius": {
-              "type": "number"
+              "type": "number",
+              "x-titleIconClass": "fas fa-cog",
+              "x-info": {
+                "variant": "modal",
+                "title": "### Info Button title",
+                "content": "Info button content"
+              }
             }
           }
         },
@@ -62,10 +101,12 @@
           "x-enablePropertiesToggle": false,
           "properties": {
             "width": {
-              "type": "number"
+              "type": "number",
+              "x-titleIconClass": "fas fa-cog"
             },
             "height": {
-              "type": "number"
+              "type": "number",
+              "x-titleIconClass": "fas fa-cog"
             }
           }
         }
@@ -79,12 +120,24 @@
         "string",
         "number",
         "boolean"
-      ]
+      ],
+      "x-titleIconClass": "fas fa-cog",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      }
     },
     "noTypeExample": {
       "title": "No type",
       "description": "x-switcherInput: modal with no type keyword — all seven types available",
-      "x-switcherInput": "modal"
+      "x-switcherInput": "modal",
+      "x-titleIconClass": "fas fa-cog",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      }
     }
   }
 }

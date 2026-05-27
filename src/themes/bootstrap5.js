@@ -93,9 +93,8 @@ class ThemeBootstrap5 extends Theme {
     } else {
       chevron.textContent = '▾'
     }
-    chevron.style.display = 'inline-block'
+    chevron.classList.add('d-inline-block', 'me-2')
     chevron.style.transition = 'transform 0.1s ease'
-    chevron.style.marginRight = '0.5em'
 
     toggle.appendChild(chevron)
     toggle.appendChild(document.createTextNode(config.title))
@@ -146,27 +145,30 @@ class ThemeBootstrap5 extends Theme {
 
   getLegend (config) {
     const superLegend = super.getLegend(config)
-    const { legend } = superLegend
+    const { legend, infoContainer } = superLegend
     legend.classList.add('card-header')
     legend.classList.add('d-flex')
     legend.classList.add('justify-content-between')
     legend.classList.add('align-items-center')
     legend.classList.add('py-2')
+    infoContainer.classList.add('me-1')
     return superLegend
   }
 
   styleLegendWarning (span) {
-    span.classList.add('ms-1')
+    span.classList.add('me-1')
   }
 
   getLabel (config) {
     const labelObj = super.getLabel(config)
-
-    if (labelObj.icon.classList) {
-      labelObj.icon.classList.add('me-1')
-    }
-
+    labelObj.label.classList.add('mb-1')
     return labelObj
+  }
+
+  getInfo (config = {}) {
+    const info = super.getInfo(config)
+    info.container.classList.add('me-1')
+    return info
   }
 
   getCard () {
@@ -316,7 +318,7 @@ class ThemeBootstrap5 extends Theme {
     super.adaptForTableRadiosControl(control, td)
     control.container.classList.remove('mb-3')
     control.fieldset.classList.remove('card')
-    control.fieldset.style.marginBottom = '0'
+    control.fieldset.classList.add('mb-0')
   }
 
   getCheckboxesControl (config) {
@@ -393,7 +395,6 @@ class ThemeBootstrap5 extends Theme {
 
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
-    control.container.classList.add('ms-1')
     control.trigger.classList.add('badge', 'bg-secondary')
     control.dialogBody.classList.add('btn-group', 'btn-group-vertical', 'w-100')
     control.optionButtons.forEach(btn => {
@@ -553,7 +554,6 @@ class ThemeBootstrap5 extends Theme {
     closeBtn.setAttribute('always-enabled', '')
     info.info.setAttribute('data-bs-toggle', 'modal')
     info.info.setAttribute('data-bs-target', '#' + modalId)
-    info.container.classList.add('ms-1')
     modal.classList.add('modal')
     modal.classList.add('fade')
     modalDialog.classList.add('modal-dialog')
