@@ -1,13 +1,31 @@
 {
-  "type": "object",
+  "description": "Define the configuration",
   "properties": {
-    "a": {
-      "title": "A",
+    "key": {
+      "description": "The name/key to be created",
+      "title": "Name/Key",
       "type": "string"
     },
-    "b": {
-      "title": "B",
+    "extract": {
+      "default": "",
+      "description": "Optional: A field from which to extract the value",
+      "title": "Field To Extract",
       "type": "string"
+    },
+    "default_value": {
+      "default": null,
+      "description": "Optional: Default value for an extracted value",
+      "title": "Default value",
+      "x-switcherInput": "modal",
+      "type": [
+        "null",
+        "number"
+      ]
     }
-  }
+  },
+  "required": [
+    "key"
+  ],
+  "title": "Model",
+  "type": "object"
 }

@@ -4,9 +4,6 @@
 
 - enforceConst true default
 - Validation: support multiple drafts
-- Validation: formats: https://json-schema.org/understanding-json-schema/reference/string#format
-- implement clearStoredEventListeners() in all editors that need event listener cleanup
-- object activators sort by property order
 - use super.refreshUI() in all editors
 - use editor methods and overrides in build configs
 - recursive collapse
@@ -22,9 +19,7 @@
 - info variant popover
 
 #### Theme Improvements
-- Themes: a theme option should be a string. to better handle config and config options and avoid duplication
-- Themes: refactor theme.getCollapseToggle
+- Themes: spectre
 - Themes: ionic
 - Themes: material
 - Themes: append descriptions if set and not hidden
-- Themes: type hidden description

@@ -2817,7 +2817,12 @@ class InstanceMultiple extends Instance {
       this.activeInstance.setValue(value, false, initiator);
     }
     this.activeInstance.children.forEach((child) => child.register());
-    this.setValue(this.activeInstance.getValueRaw(), true, initiator);
+    const newValue = this.activeInstance.getValueRaw();
+    const valueWillChange = different(this.value, newValue);
+    this.setValue(newValue, true, initiator);
+    if (!valueWillChange) {
+      this.emit("change", initiator);
+    }
   }
   onSetValue() {
     if (different(this.activeInstance.getValueRaw(), this.value)) {

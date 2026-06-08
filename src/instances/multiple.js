@@ -152,7 +152,15 @@ class InstanceMultiple extends Instance {
     }
 
     this.activeInstance.children.forEach((child) => child.register())
-    this.setValue(this.activeInstance.getValueRaw(), true, initiator)
+    const newValue = this.activeInstance.getValueRaw()
+    const valueWillChange = different(this.value, newValue)
+    this.setValue(newValue, true, initiator)
+
+    if (!valueWillChange) {
+      // setValue bailed out because value is identical (e.g., integer 0 vs number 0),
+      // but the active instance changed — emit 'change' to trigger refreshUI.
+      this.emit('change', initiator)
+    }
   }
 
   onSetValue () {

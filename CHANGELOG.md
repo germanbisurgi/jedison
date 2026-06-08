@@ -1,5 +1,9 @@
 ### dev
 
+### 1.12.2
+
+- fixed multiple switching between numeric instances issue
+
 ### 1.12.1
 
 - Improved UI
