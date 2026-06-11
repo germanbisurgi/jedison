@@ -2207,6 +2207,9 @@ class Editor {
   }
   adaptForTable() {
   }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontal(labelCol, inputCol) {
+  }
   /**
    * Adds attributes to generated html elements if specified in schema x-options
    */
@@ -3383,6 +3386,9 @@ class EditorRadios extends EditorBoolean {
   adaptForTable() {
     this.theme.adaptForTableRadiosControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalRadiosControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.radios.forEach((radio) => {
       radio.addEventListener("change", () => {
@@ -3427,6 +3433,9 @@ class EditorBooleanSelect extends EditorBoolean {
   adaptForTable() {
     this.theme.adaptForTableSelectControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
       const value = this.control.input.value === "true";
@@ -3454,6 +3463,9 @@ class EditorBooleanCheckbox extends EditorBoolean {
   }
   adaptForTable(td) {
     this.theme.adaptForTableCheckboxControl(this.control, td);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalCheckboxControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
@@ -3560,6 +3572,9 @@ class EditorStringRadios extends EditorString {
   adaptForTable() {
     this.theme.adaptForTableRadiosControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalRadiosControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.radios.forEach((radio) => {
       radio.addEventListener("change", () => {
@@ -3643,6 +3658,9 @@ class EditorStringSelect extends EditorString {
   adaptForTable() {
     this.theme.adaptForTableSelectControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
       this.instance.setValue(this.control.input.value, true, "user");
@@ -3681,6 +3699,9 @@ class EditorStringTextarea extends EditorString {
   adaptForTable() {
     this.theme.adaptForTableTextareaControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     const eventType = this.getValidationEventType();
     this.control.input.addEventListener(eventType, () => {
@@ -3714,6 +3735,9 @@ class EditorStringAwesomplete extends EditorString {
     } catch (e) {
       console.error("Awesomplete is not available or not loaded correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.control.input.addEventListener("awesomplete-selectcomplete", () => {
@@ -3756,6 +3780,9 @@ class EditorStringEmojiButton extends EditorString {
       position: "auto"
     }, emojiButtonOptions);
     this.emojiButton = new window.EmojiButton(options);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.emojiButton.on("emoji", (emoji) => {
@@ -3821,6 +3848,9 @@ class EditorStringInput extends EditorString {
   adaptForTable() {
     this.theme.adaptForTableInputControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     const eventType = this.getValidationEventType();
     this.control.input.addEventListener(eventType, () => {
@@ -3866,6 +3896,9 @@ class EditorNumberRadios extends EditorNumber {
   }
   adaptForTable() {
     this.theme.adaptForTableRadiosControl(this.control);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalRadiosControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.control.radios.forEach((radio) => {
@@ -3953,6 +3986,9 @@ class EditorNumberSelect extends EditorNumber {
   adaptForTable() {
     this.theme.adaptForTableSelectControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
       const value = this.sanitize(this.control.input.value);
@@ -3997,6 +4033,9 @@ class EditorNumberInput extends EditorNumber {
   }
   adaptForTable() {
     this.theme.adaptForTableInputControl(this.control);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     const eventType = this.getValidationEventType();
@@ -4104,7 +4143,9 @@ class EditorObject extends Editor {
   }
   build() {
     this.propertyActivators = {};
-    this.control = this.theme.getObjectControl(this.getObjectControlConfig());
+    const card = getSchemaXOption(this.instance.schema, "card") ?? this.instance.jedison.getOption("card");
+    const config = this.getObjectControlConfig();
+    this.control = card === false ? this.theme.getObjectControlFlat(config) : this.theme.getObjectControl(config);
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
   }
   announcePropertyAdded(propertyName, child) {
@@ -4125,6 +4166,9 @@ class EditorObject extends Editor {
     input.value = "";
     this.announcePropertyAdded(propertyName, child);
     postAction();
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalObjectControl(this.control, labelCol, inputCol, this.getTitle());
   }
   addEventListeners() {
     this.control.quickAddPropertyBtn.addEventListener("click", () => {
@@ -4575,6 +4619,25 @@ class EditorObjectAccordion extends EditorObject {
     });
   }
 }
+class EditorObjectHorizontal extends EditorObject {
+  static resolves(schema) {
+    return getSchemaType(schema) === "object" && getSchemaXOption(schema, "format") === "horizontal";
+  }
+  build() {
+    super.build();
+    this.theme.initHorizontalObject(this.control.container);
+  }
+  refreshEditors() {
+    const labelColumns = getSchemaXOption(this.instance.schema, "labelColumns");
+    const inputColumns = getSchemaXOption(this.instance.schema, "inputColumns");
+    super.refreshEditors();
+    this.instance.children.forEach((child) => {
+      if (child.isActive) {
+        child.ui.adaptForHorizontal(labelColumns, inputColumns);
+      }
+    });
+  }
+}
 class EditorArray extends Editor {
   static resolves(schema) {
     return getSchemaType(schema) === "array";
@@ -4622,6 +4685,9 @@ class EditorArray extends Editor {
     } else {
       doDeleteAll();
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalArrayControl(this.control, labelCol, inputCol, this.getTitle());
   }
   addEventListeners() {
     this.control.addBtn.addEventListener("click", () => {
@@ -5278,6 +5344,9 @@ class EditorArrayChoices extends Editor {
       console.error("Choices is not available or not loaded correctly.", e);
     }
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
       const value = this.choicesInstance.getValue(true);
@@ -5500,6 +5569,9 @@ class EditorMultiple extends Editor {
   adaptForTable(td) {
     this.theme.adaptForTableMultipleControl(this.control, td);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalMultipleControl(this.control, labelCol, inputCol, this.getTitle());
+  }
   addEventListeners() {
     if (this.switcherInput === "select") {
       this.control.switcher.input.addEventListener("change", () => {
@@ -5594,6 +5666,9 @@ class EditorNull extends Editor {
       info: this.getInfo()
     });
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   sanitize() {
     return null;
   }
@@ -5619,6 +5694,9 @@ class EditorStringSimpleMDE extends EditorString {
     } catch (e) {
       console.error("simpleMDE is not available or not loaded correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.simplemde.codemirror.on("blur", () => {
@@ -5673,6 +5751,9 @@ class EditorStringQuill extends EditorString {
     } catch (e) {
       console.error("Quill is not available or not loaded correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.quill.root.addEventListener("blur", () => {
@@ -5735,6 +5816,9 @@ class EditorStringJodit extends EditorString {
     } catch (e) {
       console.error("Jodit is not available or not loaded correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.jodit.events.on("change", () => {
@@ -5804,6 +5888,9 @@ class EditorStringPickr extends EditorString {
       console.error("Pickr is not available or not loaded correctly.", e);
     }
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
   }
   refreshUI() {
@@ -5850,6 +5937,9 @@ class EditorStringFlatpickr extends EditorString {
       console.error("Flatpickr is not available or not loaded correctly.", e);
     }
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
       this.instance.setValue(this.control.input.value, true, "user");
@@ -5891,6 +5981,9 @@ class EditorStringIMask extends EditorString {
     } catch (e) {
       console.error("IMask is not available or not loaded or configured correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.imask.on("accept", () => {
@@ -5939,6 +6032,9 @@ class EditorNumberIMask extends EditorNumber {
       console.error("IMask is not available or not loaded or configured correctly.", e);
     }
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.imask.on("accept", () => {
       const value = this.imask.typedValue;
@@ -5985,6 +6081,9 @@ class EditorNumberRaty extends EditorNumber {
     this.theme.visuallyHidden(this.control.label);
     this.theme.visuallyHidden(this.control.description);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   refreshDisabledState() {
     if (this.disabled || this.readOnly) {
       this.raty.readOnly(true);
@@ -6013,6 +6112,9 @@ class EditorAnyJson extends Editor {
     this.jsonErrorEl = document.createElement("div");
     this.jsonErrorEl.style.color = "red";
     this.control.container.appendChild(this.jsonErrorEl);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     this.control.input.addEventListener("change", () => {
@@ -6172,6 +6274,9 @@ class EditorArrayCheckboxes extends Editor {
   adaptForTable(td) {
     this.theme.adaptForTableCheckboxesControl(this.control, td);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalCheckboxesControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
@@ -6272,6 +6377,9 @@ class EditorNumberRange extends EditorNumber {
   adaptForTable() {
     this.theme.adaptForTableInputControl(this.control);
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
     this.control.input.addEventListener("input", () => {
       this.control.output.textContent = parseFloat(this.control.input.value);
@@ -6345,6 +6453,9 @@ class EditorStringAce extends EditorString {
     } catch (e) {
       console.error("Ace editor is not available or not loaded correctly.", e);
     }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
     if (!this.aceEditor) return;
@@ -6426,6 +6537,9 @@ class EditorStringFilepond extends EditorString {
       console.error("FilePond is not available or not loaded correctly.", e);
     }
   }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
   addEventListeners() {
   }
   refreshUI() {
@@ -6476,6 +6590,7 @@ class UiResolver {
       EditorObjectCategories,
       EditorObjectNav,
       EditorObjectAccordion,
+      EditorObjectHorizontal,
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
@@ -8308,6 +8423,140 @@ class Theme {
     };
   }
   /**
+   * Flat variant of getObjectControl — same interface but no fieldset/legend/collapse/panel-body.
+   * Children render directly in a plain container div.
+   */
+  getObjectControlFlat(config) {
+    var _a;
+    const container = document.createElement("div");
+    const actions = this.getActionsSlot();
+    const body = document.createElement("div");
+    const ariaLive = this.getPropertiesAriaLive();
+    const messages = this.getMessagesSlot();
+    const childrenSlot = this.getChildrenSlot();
+    const propertiesActivators = this.getPropertiesActivators();
+    const info = this.getInfo(config.info);
+    const description = this.getDescription({ content: config.description });
+    const jsonData = this.getJsonData({ id: "json-data-" + config.id });
+    const propertiesContainer = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
+    const propertiesToggle = this.getPropertiesToggle({
+      content: config.propertiesToggleContent,
+      id: "properties-slot-toggle-" + config.id,
+      icon: "properties",
+      propertiesContainer
+    });
+    const quickAddPropertyContainer = this.getQuickAddPropertySlot({ id: "quick-add-property-slot-" + config.id });
+    const quickAddPropertyControl = this.getInputControl({
+      type: "text",
+      id: "jedi-quick-add-property-input-" + config.id,
+      title: config.addPropertyContent
+    });
+    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: "add" });
+    const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
+      content: config.addPropertyContent,
+      icon: "add",
+      propertiesContainer: quickAddPropertyContainer
+    });
+    const collapse = document.createElement("div");
+    const collapseToggle = document.createElement("div");
+    const legend = document.createElement("div");
+    const legendText = null;
+    const infoContainer = document.createElement("div");
+    const right = document.createElement("div");
+    const switcherSlot = document.createElement("div");
+    switcherSlot.classList.add("jedi-switcher-slot");
+    if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
+      this.infoAsModal(info, config.id, config.info);
+    }
+    container.appendChild(propertiesContainer);
+    container.appendChild(quickAddPropertyContainer);
+    if (config.addProperty) {
+      quickAddPropertyContainer.appendChild(quickAddPropertyControl.container);
+      quickAddPropertyContainer.appendChild(quickAddPropertyBtn);
+    }
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog);
+    }
+    if (config.description) {
+      body.appendChild(description);
+    }
+    body.appendChild(messages);
+    if (config.readOnly === false) {
+      body.appendChild(switcherSlot);
+      body.appendChild(actions);
+    }
+    body.appendChild(childrenSlot);
+    container.appendChild(body);
+    if (config.editJsonData) {
+      actions.appendChild(jsonData.toggle);
+    }
+    if (config.addProperty) {
+      actions.appendChild(quickAddPropertyToggle);
+    }
+    if (config.enablePropertiesToggle) {
+      actions.appendChild(propertiesToggle);
+      propertiesContainer.appendChild(ariaLive);
+      propertiesContainer.appendChild(propertiesActivators);
+    }
+    if (config.enableCollapseToggle) {
+      actions.appendChild(collapseToggle);
+    }
+    return {
+      container,
+      collapse,
+      collapseToggle,
+      description,
+      body,
+      actions,
+      messages,
+      childrenSlot,
+      propertiesToggle,
+      jsonData,
+      propertiesContainer,
+      quickAddPropertyContainer,
+      quickAddPropertyControl,
+      quickAddPropertyBtn,
+      quickAddPropertyToggle,
+      ariaLive,
+      propertiesActivators,
+      legend,
+      legendText,
+      infoContainer,
+      right,
+      switcherSlot
+    };
+  }
+  // eslint-disable-next-line no-unused-vars
+  initHorizontalObject(container) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalInputControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalTextareaControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalSelectControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalCheckboxControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalRadiosControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalCheckboxesControl(control, labelCol, inputCol) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalArrayControl(control, labelCol, inputCol, title) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalObjectControl(control, labelCol, inputCol, title) {
+  }
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalMultipleControl(control, labelCol, inputCol, title) {
+  }
+  /**
    * Returns an accordion item wrapping a child editor.
    * Used by EditorObjectAccordionProperties to wrap each property.
    */
@@ -9302,6 +9551,81 @@ class ThemeBootstrap3 extends Theme {
     }
     return control;
   }
+  initHorizontalObject(container) {
+    container.classList.add("form-horizontal");
+  }
+  _adaptHorizontalControl(control, labelCol, inputCol) {
+    if (!control.label || control.label.classList.contains("control-label")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("form-group");
+    control.label.classList.add("control-label", `col-sm-${lc}`);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).filter((el) => el !== control.label).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalInputControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalTextareaControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalSelectControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalCheckboxControl(control, labelCol, inputCol) {
+    if (control.formGroup.parentElement !== control.container) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("form-group");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`, `col-sm-offset-${lc}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalRadiosControl(control, labelCol, inputCol) {
+    if (control.legend.parentElement !== control.fieldset) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("form-group");
+    control.legend.classList.add("control-label", `col-sm-${lc}`);
+    control.container.insertBefore(control.legend, control.fieldset);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    control.fieldset.replaceWith(wrapper);
+    wrapper.appendChild(control.fieldset);
+    control.fieldset.classList.remove("panel", "panel-default");
+  }
+  adaptForHorizontalCheckboxesControl(control, labelCol, inputCol) {
+    this.adaptForHorizontalRadiosControl(control, labelCol, inputCol);
+  }
+  _adaptHorizontalComplexControl(control, labelCol, inputCol, title) {
+    if (control.container.classList.contains("jedi-horizontal")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    const fakeLabel = document.createElement("label");
+    fakeLabel.classList.add("control-label", `col-sm-${lc}`);
+    fakeLabel.textContent = title || "";
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.classList.add("form-group", "jedi-horizontal");
+    control.container.appendChild(fakeLabel);
+    control.container.appendChild(wrapper);
+    if (control.legendText) {
+      control.legendText.style.display = "none";
+    }
+  }
+  adaptForHorizontalArrayControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalObjectControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalMultipleControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
   getAccordionItem(config) {
     const collapseId = config.id + "-acc-collapse";
     const container = document.createElement("div");
@@ -9753,6 +10077,77 @@ class ThemeBootstrap4 extends Theme {
       control.childrenSlot.classList.add("accordion", "pb-3");
     }
     return control;
+  }
+  _adaptHorizontalControl(control, labelCol, inputCol) {
+    if (!control.label || control.label.classList.contains("col-form-label")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    control.label.classList.add("col-form-label", `col-sm-${lc}`);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).filter((el) => el !== control.label).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalInputControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalTextareaControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalSelectControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalCheckboxControl(control, labelCol, inputCol) {
+    if (control.formGroup.parentElement !== control.container) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`, `offset-sm-${lc}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalRadiosControl(control, labelCol, inputCol) {
+    if (control.legend.parentElement !== control.fieldset) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    control.legend.classList.add("col-form-label", `col-sm-${lc}`);
+    control.container.insertBefore(control.legend, control.fieldset);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    control.fieldset.replaceWith(wrapper);
+    wrapper.appendChild(control.fieldset);
+  }
+  adaptForHorizontalCheckboxesControl(control, labelCol, inputCol) {
+    this.adaptForHorizontalRadiosControl(control, labelCol, inputCol);
+  }
+  _adaptHorizontalComplexControl(control, labelCol, inputCol, title) {
+    if (control.container.classList.contains("jedi-horizontal")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    const fakeLabel = document.createElement("label");
+    fakeLabel.classList.add("col-form-label", `col-sm-${lc}`);
+    fakeLabel.textContent = title || "";
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.classList.add("row", "jedi-horizontal");
+    control.container.appendChild(fakeLabel);
+    control.container.appendChild(wrapper);
+    if (control.legendText) {
+      control.legendText.style.display = "none";
+    }
+  }
+  adaptForHorizontalArrayControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalObjectControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalMultipleControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
   }
   getAccordionItem(config) {
     const collapseId = config.id + "-acc-collapse";
@@ -10222,6 +10617,77 @@ class ThemeBootstrap5 extends Theme {
     }
     return control;
   }
+  _adaptHorizontalControl(control, labelCol, inputCol) {
+    if (!control.label || control.label.classList.contains("col-form-label")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    control.label.classList.add("col-form-label", `col-sm-${lc}`);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).filter((el) => el !== control.label).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalInputControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalTextareaControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalSelectControl(control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol);
+  }
+  adaptForHorizontalCheckboxControl(control, labelCol, inputCol) {
+    if (control.formGroup.parentElement !== control.container) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`, `offset-sm-${lc}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.appendChild(wrapper);
+  }
+  adaptForHorizontalRadiosControl(control, labelCol, inputCol) {
+    if (control.legend.parentElement !== control.fieldset) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    control.container.classList.add("row");
+    control.legend.classList.add("col-form-label", `col-sm-${lc}`);
+    control.container.insertBefore(control.legend, control.fieldset);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    control.fieldset.replaceWith(wrapper);
+    wrapper.appendChild(control.fieldset);
+  }
+  adaptForHorizontalCheckboxesControl(control, labelCol, inputCol) {
+    this.adaptForHorizontalRadiosControl(control, labelCol, inputCol);
+  }
+  _adaptHorizontalComplexControl(control, labelCol, inputCol, title) {
+    if (control.container.classList.contains("jedi-horizontal")) return;
+    const lc = labelCol ?? 3;
+    const ic = inputCol ?? 6;
+    const fakeLabel = document.createElement("label");
+    fakeLabel.classList.add("col-form-label", `col-sm-${lc}`);
+    fakeLabel.textContent = title || "";
+    const wrapper = document.createElement("div");
+    wrapper.classList.add(`col-sm-${ic}`);
+    Array.from(control.container.children).forEach((el) => wrapper.appendChild(el));
+    control.container.classList.add("row", "jedi-horizontal");
+    control.container.appendChild(fakeLabel);
+    control.container.appendChild(wrapper);
+    if (control.legendText) {
+      control.legendText.style.display = "none";
+    }
+  }
+  adaptForHorizontalArrayControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalObjectControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
+  adaptForHorizontalMultipleControl(control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title);
+  }
   getAccordionItem(config) {
     const collapseId = config.id + "-acc-collapse";
     const container = document.createElement("div");
@@ -10671,6 +11137,7 @@ const index = {
   EditorObjectCategories,
   EditorObjectNav,
   EditorObjectAccordion,
+  EditorObjectHorizontal,
   EditorObject,
   EditorArrayChoices,
   EditorArrayNav,

@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "title": "Object without card",
+  "description": "Use x-card: false to remove the panel/card chrome from any object editor.",
+  "x-card": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Full name"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email",
+      "format": "email"
+    },
+    "message": {
+      "type": "string",
+      "title": "Message",
+      "x-format": "textarea"
+    },
+    "nested-with-card": {
+      "type": "object",
+      "title": "Nested object (with card)",
+      "properties": {
+        "city": {
+          "type": "string",
+          "title": "City"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country"
+        }
+      }
+    },
+    "nested-no-card": {
+      "type": "object",
+      "title": "Nested object (no card)",
+      "x-card": false,
+      "properties": {
+        "city": {
+          "type": "string",
+          "title": "City"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country"
+        }
+      }
+    }
+  }
+}

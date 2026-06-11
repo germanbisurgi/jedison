@@ -34,6 +34,10 @@ class EditorStringFlatpickr extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.input.addEventListener('change', () => {
       this.instance.setValue(this.control.input.value, true, 'user')

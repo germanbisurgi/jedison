@@ -56,6 +56,10 @@ class EditorStringPickr extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {}
 
   refreshUI () {

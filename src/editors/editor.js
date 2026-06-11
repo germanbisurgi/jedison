@@ -133,6 +133,9 @@ class Editor {
 
   adaptForTable () {}
 
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontal (labelCol, inputCol) {}
+
   /**
    * Adds attributes to generated html elements if specified in schema x-options
    */

@@ -66,6 +66,10 @@ class EditorArray extends Editor {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalArrayControl(this.control, labelCol, inputCol, this.getTitle())
+  }
+
   addEventListeners () {
     this.control.addBtn.addEventListener('click', () => {
       this.instance.addItem('user')

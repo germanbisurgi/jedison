@@ -67,6 +67,95 @@ class ThemeBootstrap3 extends Theme {
     return control
   }
 
+  initHorizontalObject (container) {
+    container.classList.add('form-horizontal')
+  }
+
+  _adaptHorizontalControl (control, labelCol, inputCol) {
+    if (!control.label || control.label.classList.contains('control-label')) return
+    const lc = labelCol ?? 3
+    const ic = inputCol ?? 6
+    control.container.classList.add('form-group')
+    control.label.classList.add('control-label', `col-sm-${lc}`)
+    const wrapper = document.createElement('div')
+    wrapper.classList.add(`col-sm-${ic}`)
+    Array.from(control.container.children)
+      .filter(el => el !== control.label)
+      .forEach(el => wrapper.appendChild(el))
+    control.container.appendChild(wrapper)
+  }
+
+  adaptForHorizontalInputControl (control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol)
+  }
+
+  adaptForHorizontalTextareaControl (control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol)
+  }
+
+  adaptForHorizontalSelectControl (control, labelCol, inputCol) {
+    this._adaptHorizontalControl(control, labelCol, inputCol)
+  }
+
+  adaptForHorizontalCheckboxControl (control, labelCol, inputCol) {
+    if (control.formGroup.parentElement !== control.container) return
+    const lc = labelCol ?? 3
+    const ic = inputCol ?? 6
+    control.container.classList.add('form-group')
+    const wrapper = document.createElement('div')
+    wrapper.classList.add(`col-sm-${ic}`, `col-sm-offset-${lc}`)
+    Array.from(control.container.children).forEach(el => wrapper.appendChild(el))
+    control.container.appendChild(wrapper)
+  }
+
+  adaptForHorizontalRadiosControl (control, labelCol, inputCol) {
+    if (control.legend.parentElement !== control.fieldset) return
+    const lc = labelCol ?? 3
+    const ic = inputCol ?? 6
+    control.container.classList.add('form-group')
+    control.legend.classList.add('control-label', `col-sm-${lc}`)
+    control.container.insertBefore(control.legend, control.fieldset)
+    const wrapper = document.createElement('div')
+    wrapper.classList.add(`col-sm-${ic}`)
+    control.fieldset.replaceWith(wrapper)
+    wrapper.appendChild(control.fieldset)
+    control.fieldset.classList.remove('panel', 'panel-default')
+  }
+
+  adaptForHorizontalCheckboxesControl (control, labelCol, inputCol) {
+    this.adaptForHorizontalRadiosControl(control, labelCol, inputCol)
+  }
+
+  _adaptHorizontalComplexControl (control, labelCol, inputCol, title) {
+    if (control.container.classList.contains('jedi-horizontal')) return
+    const lc = labelCol ?? 3
+    const ic = inputCol ?? 6
+    const fakeLabel = document.createElement('label')
+    fakeLabel.classList.add('control-label', `col-sm-${lc}`)
+    fakeLabel.textContent = title || ''
+    const wrapper = document.createElement('div')
+    wrapper.classList.add(`col-sm-${ic}`)
+    Array.from(control.container.children).forEach(el => wrapper.appendChild(el))
+    control.container.classList.add('form-group', 'jedi-horizontal')
+    control.container.appendChild(fakeLabel)
+    control.container.appendChild(wrapper)
+    if (control.legendText) {
+      control.legendText.style.display = 'none'
+    }
+  }
+
+  adaptForHorizontalArrayControl (control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title)
+  }
+
+  adaptForHorizontalObjectControl (control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title)
+  }
+
+  adaptForHorizontalMultipleControl (control, labelCol, inputCol, title) {
+    this._adaptHorizontalComplexControl(control, labelCol, inputCol, title)
+  }
+
   getAccordionItem (config) {
     const collapseId = config.id + '-acc-collapse'
 

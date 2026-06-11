@@ -41,6 +41,10 @@ class EditorStringTextarea extends EditorString {
     this.theme.adaptForTableTextareaControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     const eventType = this.getValidationEventType()
     this.control.input.addEventListener(eventType, () => {

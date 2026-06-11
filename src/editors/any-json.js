@@ -21,6 +21,10 @@ class EditorAnyJson extends Editor {
     this.control.container.appendChild(this.jsonErrorEl)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.input.addEventListener('change', () => {
       try {

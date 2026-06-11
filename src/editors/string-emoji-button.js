@@ -44,6 +44,10 @@ class EditorStringEmojiButton extends EditorString {
     this.emojiButton = new window.EmojiButton(options)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.emojiButton.on('emoji', emoji => {
       this.control.input.value = emoji

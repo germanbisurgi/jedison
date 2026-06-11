@@ -1,0 +1,330 @@
+{
+  "type": "object",
+  "title": "Horizontal form — all editors",
+  "description": "One example of every editor in horizontal layout. Plugin editors fall back to string-input if the plugin is not loaded.",
+  "x-format": "horizontal",
+  "x-card": false,
+  "x-labelColumns": 3,
+  "x-inputColumns": 6,
+  "properties": {
+    "string-input": {
+      "type": "string",
+      "title": "String input"
+    },
+    "string-textarea": {
+      "type": "string",
+      "title": "String textarea",
+      "x-format": "textarea"
+    },
+    "string-select": {
+      "type": "string",
+      "title": "String select",
+      "enum": ["option-a", "option-b", "option-c"],
+      "x-enumTitles": ["Option A", "Option B", "Option C"]
+    },
+    "string-radios": {
+      "type": "string",
+      "title": "String radios",
+      "enum": ["option-a", "option-b", "option-c"],
+      "x-enumTitles": ["Option A", "Option B", "Option C"],
+      "x-format": "radios"
+    },
+    "string-radios-inline": {
+      "type": "string",
+      "title": "String radios inline",
+      "enum": ["option-a", "option-b", "option-c"],
+      "x-enumTitles": ["Option A", "Option B", "Option C"],
+      "x-format": "radios-inline"
+    },
+    "string-ace": {
+      "type": "string",
+      "title": "String ace (plugin)",
+      "x-format": "ace"
+    },
+    "string-awesomplete": {
+      "type": "string",
+      "title": "String awesomplete (plugin)",
+      "x-format": "awesomplete",
+      "x-awesomplete": {
+        "list": ["Apple", "Apricot", "Banana", "Cherry", "Date"]
+      }
+    },
+    "string-emoji-button": {
+      "type": "string",
+      "title": "String emoji button (plugin)",
+      "x-format": "emojiButton"
+    },
+    "string-filepond": {
+      "type": "string",
+      "title": "String filepond (plugin)",
+      "x-format": "filepond"
+    },
+    "string-flatpickr": {
+      "type": "string",
+      "title": "String flatpickr (plugin)",
+      "x-format": "flatpickr"
+    },
+    "string-imask": {
+      "type": "string",
+      "title": "String imask (plugin)",
+      "x-format": "imask",
+      "x-imask": { "mask": "000-000-0000" }
+    },
+    "string-jodit": {
+      "type": "string",
+      "title": "String jodit (plugin)",
+      "x-format": "jodit"
+    },
+    "string-pickr": {
+      "type": "string",
+      "title": "String pickr (plugin)",
+      "x-format": "pickr",
+      "x-pickr": {
+        "theme": "classic",
+        "swatches": [
+          "#264653", "#2a9d8f", "#e9c46a", "#f4a261", "#e76f51",
+          "#d62828", "#023e8a", "#80b918"
+        ],
+        "components": {
+          "preview": true,
+          "opacity": true,
+          "hue": true,
+          "interaction": {
+            "hex": true,
+            "input": true,
+            "save": false
+          }
+        }
+      }
+    },
+    "string-quill": {
+      "type": "string",
+      "title": "String quill (plugin)",
+      "x-format": "quill"
+    },
+    "string-simplemde": {
+      "type": "string",
+      "title": "String simplemde (plugin)",
+      "x-format": "simplemde"
+    },
+    "integer-input": {
+      "type": "integer",
+      "title": "Integer input"
+    },
+    "number-input": {
+      "type": "number",
+      "title": "Number input"
+    },
+    "number-nullable": {
+      "type": "number",
+      "title": "Number nullable",
+      "x-format": "number-nullable"
+    },
+    "number-range": {
+      "type": "number",
+      "title": "Number range",
+      "minimum": 0,
+      "maximum": 100,
+      "x-format": "range"
+    },
+    "number-select": {
+      "type": "number",
+      "title": "Number select",
+      "enum": [1, 2, 3],
+      "x-enumTitles": ["One", "Two", "Three"]
+    },
+    "number-radios": {
+      "type": "number",
+      "title": "Number radios",
+      "enum": [1, 2, 3],
+      "x-enumTitles": ["One", "Two", "Three"],
+      "x-format": "radios"
+    },
+    "number-radios-inline": {
+      "type": "number",
+      "title": "Number radios inline",
+      "enum": [1, 2, 3],
+      "x-enumTitles": ["One", "Two", "Three"],
+      "x-format": "radios-inline"
+    },
+    "number-imask": {
+      "type": "number",
+      "title": "Number imask (plugin)",
+      "x-format": "imask"
+    },
+    "number-raty": {
+      "type": "number",
+      "title": "Number raty (plugin)",
+      "x-format": "raty",
+      "x-raty": {
+        "half": true,
+        "starType": "i"
+      }
+    },
+    "boolean-checkbox": {
+      "type": "boolean",
+      "title": "Boolean checkbox",
+      "x-format": "checkbox"
+    },
+    "boolean-radios": {
+      "type": "boolean",
+      "title": "Boolean radios",
+      "x-format": "radios",
+      "x-enumTitles": ["No", "Yes"]
+    },
+    "boolean-radios-inline": {
+      "type": "boolean",
+      "title": "Boolean radios inline",
+      "x-format": "radios-inline",
+      "x-enumTitles": ["No", "Yes"]
+    },
+    "boolean-select": {
+      "type": "boolean",
+      "title": "Boolean select",
+      "x-format": "select",
+      "x-enumTitles": ["No", "Yes"]
+    },
+    "null-field": {
+      "type": "null",
+      "title": "Null"
+    },
+    "any-json": {
+      "title": "Any (x-format: json)",
+      "x-format": "json"
+    },
+    "multiple-oneof": {
+      "title": "Multiple (oneOf)",
+      "oneOf": [
+        { "type": "string", "x-switcherTitle": "String" },
+        { "type": "number", "x-switcherTitle": "Number" },
+        { "type": "boolean", "x-switcherTitle": "Boolean" }
+      ]
+    },
+    "array-default": {
+      "type": "array",
+      "title": "Array (default)",
+      "minItems": 3,
+      "items": { "type": "string", "title": "Item" }
+    },
+    "array-checkboxes": {
+      "type": "array",
+      "title": "Array checkboxes",
+      "uniqueItems": true,
+      "minItems": 3,
+      "items": {
+        "type": "string",
+        "enum": ["option-a", "option-b", "option-c"],
+        "x-enumTitles": ["Option A", "Option B", "Option C"]
+      }
+    },
+    "array-table": {
+      "type": "array",
+      "title": "Array table",
+      "x-format": "table",
+      "minItems": 3,
+      "items": { "type": "string", "title": "Item" }
+    },
+    "array-table-object": {
+      "type": "array",
+      "title": "Array table-object",
+      "x-format": "table-object",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "age": { "type": "number", "title": "Age" },
+          "city": { "type": "string", "title": "City" }
+        }
+      }
+    },
+    "array-tuple": {
+      "type": "array",
+      "title": "Array tuple",
+      "x-format": "tuple",
+      "prefixItems": [
+        { "type": "string", "title": "First" },
+        { "type": "number", "title": "Second" },
+        { "type": "boolean", "title": "Third" }
+      ]
+    },
+    "array-nav": {
+      "type": "array",
+      "title": "Array nav",
+      "x-format": "nav-horizontal",
+      "minItems": 3,
+      "items": { "type": "string", "title": "Item" }
+    },
+    "array-choices": {
+      "type": "array",
+      "title": "Array choices (plugin)",
+      "x-format": "choices",
+      "uniqueItems": true,
+      "minItems": 3,
+      "items": {
+        "type": "string",
+        "enum": ["option-a", "option-b", "option-c"],
+        "x-enumTitles": ["Option A", "Option B", "Option C"]
+      }
+    },
+    "object-default": {
+      "type": "object",
+      "title": "Object (default)",
+      "properties": {
+        "first-name": { "type": "string", "title": "First name" },
+        "last-name": { "type": "string", "title": "Last name" },
+        "email": { "type": "string", "title": "Email" }
+      }
+    },
+    "object-no-card": {
+      "type": "object",
+      "title": "Object (no card)",
+      "x-card": false,
+      "properties": {
+        "first-name": { "type": "string", "title": "First name" },
+        "last-name": { "type": "string", "title": "Last name" },
+        "email": { "type": "string", "title": "Email" }
+      }
+    },
+    "object-grid": {
+      "type": "object",
+      "title": "Object grid",
+      "x-format": "grid",
+      "properties": {
+        "col-a": { "type": "string", "title": "Column A", "x-grid": { "columns": 4 } },
+        "col-b": { "type": "string", "title": "Column B", "x-grid": { "columns": 4 } },
+        "col-c": { "type": "string", "title": "Column C", "x-grid": { "columns": 4 } }
+      }
+    },
+    "object-accordion": {
+      "type": "object",
+      "title": "Object accordion",
+      "x-format": "accordion",
+      "properties": {
+        "first-name": { "type": "string", "title": "First name" },
+        "last-name": { "type": "string", "title": "Last name" },
+        "email": { "type": "string", "title": "Email" }
+      }
+    },
+    "object-nav": {
+      "type": "object",
+      "title": "Object nav",
+      "x-format": "nav-vertical",
+      "properties": {
+        "first-name": { "type": "string", "title": "First name" },
+        "last-name": { "type": "string", "title": "Last name" },
+        "email": { "type": "string", "title": "Email" }
+      }
+    },
+    "object-categories": {
+      "type": "object",
+      "title": "Object categories",
+      "x-format": "categories-vertical",
+      "properties": {
+        "first-name": { "type": "string", "title": "First name", "x-category": "Personal" },
+        "last-name": { "type": "string", "title": "Last name", "x-category": "Personal" },
+        "email": { "type": "string", "title": "Email", "x-category": "Contact" }
+      }
+    }
+  }
+}

@@ -87,6 +87,10 @@ class EditorNumberRange extends EditorNumber {
     this.theme.adaptForTableInputControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     // Update output on input
     this.control.input.addEventListener('input', () => {

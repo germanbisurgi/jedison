@@ -48,6 +48,10 @@ class EditorNumberInput extends EditorNumber {
     this.theme.adaptForTableInputControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     const eventType = this.getValidationEventType()
     this.control.input.addEventListener(eventType, () => {

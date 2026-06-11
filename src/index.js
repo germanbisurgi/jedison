@@ -27,6 +27,7 @@ import EditorObjectGrid from './editors/object-grid.js'
 import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObjectAccordion from './editors/object-accordion.js'
+import EditorObjectHorizontal from './editors/object-horizontal.js'
 import EditorObject from './editors/object.js'
 import EditorArrayChoices from './editors/array-choices.js'
 import EditorArrayNav from './editors/array-nav.js'
@@ -60,6 +61,7 @@ export default {
   EditorObjectCategories,
   EditorObjectNav,
   EditorObjectAccordion,
+  EditorObjectHorizontal,
   EditorObject,
   EditorArrayChoices,
   EditorArrayNav,

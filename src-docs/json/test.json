@@ -1,31 +1,439 @@
 {
-  "description": "Define the configuration",
+  "title": "Terminanfrage AMB Messe",
+  "description": "Buchen Sie Ihren persönlichen Beratungstermin auf der AMB 2025",
+  "type": "object",
+  "x-format": "horizontal",
+  "x-card": false,
+  "x-labelColumns": 3,
+  "x-inputColumns": 6,
   "properties": {
-    "key": {
-      "description": "The name/key to be created",
-      "title": "Name/Key",
-      "type": "string"
-    },
-    "extract": {
-      "default": "",
-      "description": "Optional: A field from which to extract the value",
-      "title": "Field To Extract",
-      "type": "string"
-    },
-    "default_value": {
-      "default": null,
-      "description": "Optional: Default value for an extracted value",
-      "title": "Default value",
-      "x-switcherInput": "modal",
-      "type": [
-        "null",
-        "number"
+    "fertigungsbereich": {
+    "title": "Worum geht es in Ihrer Fertigung?",
+      "x-propertyOrder": 3,
+      "type": "string",
+      "enum": [
+        "large-heavy",
+        "small-complex",
+        "4-5-axis",
+        "complete-machining",
+        "automation",
+        "cadcam",
+        "service",
+        "see-machine",
+        "other"
+      ],
+      "x-enumTitles": [
+        "Große oder schwere Werkstücke",
+        "Kleine, komplexe Präzisionsteile",
+        "4-Achs- oder 5-Achs-Bearbeitung",
+        "Komplettbearbeitung und/oder Drehen/Fräsen kombiniert",
+        "Automatisierung, Teilehandling, Palettenhandling oder Prozessverkettung",
+        "CAD/CAM, Simulation oder NC-Programmierung",
+        "Service, Ersatzteile, präventive Wartung oder Modernisierung einer bestehenden Maschine",
+        "Ich möchte eine konkrete Maschine auf der AMB sehen",
+        "Keiner der genannten Punkte, sondern:"
       ]
     }
   },
-  "required": [
-    "key"
-  ],
-  "title": "Model",
-  "type": "object"
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "large-heavy" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "aufgabeGrosseSchwere": {
+            "title": "Was beschreibt Ihre Aufgabe am besten?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "horizontal",
+              "vertikal",
+              "portal-gantry",
+              "dreh-schleifen",
+              "grosse-bauteile-genauigkeit",
+              "eigene-beschreibung"
+            ],
+            "x-enumTitles": [
+              "Horizontale Bearbeitung",
+              "Vertikale Bearbeitung",
+              "Portal- oder Gantry-Bearbeitung",
+              "Dreh- oder Schleifbearbeitung",
+              "Große Bauteile mit hohen Genauigkeitsanforderungen",
+              "Eigene Beschreibung"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich", "aufgabeGrosseSchwere"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "large-heavy" },
+          "aufgabeGrosseSchwere": { "type": "string", "const": "eigene-beschreibung" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "aufgabeGrosseSchwereText": {
+            "title": "Eigene Beschreibung",
+            "x-propertyOrder": 5,
+            "type": "string",
+            "x-format": "textarea"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "small-complex" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "anwendungsbereich": {
+            "title": "In welchem Bereich liegt Ihre Anwendung?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "medizintechnik",
+              "mikromechanik",
+              "uhren-luxus",
+              "kleine-praezisionsteile",
+              "eigene-beschreibung"
+            ],
+            "x-enumTitles": [
+              "Medizintechnik",
+              "Mikromechanik",
+              "Uhren / Luxusgüter",
+              "Kleine komplexe Präzisionsteile",
+              "Eigene Beschreibung"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "required": ["anwendungsbereich"],
+              "properties": {
+                "anwendungsbereich": { "type": "string", "const": "eigene-beschreibung" }
+              }
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "anwendungsbereichText": {
+                  "title": "Eigene Beschreibung",
+                  "x-propertyOrder": 5,
+                  "type": "string",
+                  "x-format": "textarea"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "4-5-axis" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "relevanzAchs": {
+            "title": "Was ist für Sie besonders relevant?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "4-achs",
+              "5-achs",
+              "ultrapraezision",
+              "paletten-werkstueck",
+              "spindelkonzept",
+              "eigene-beschreibung"
+            ],
+            "x-enumTitles": [
+              "4-Achs-Bearbeitung",
+              "5-Achs-Bearbeitung",
+              "Ultrapräzisionsbearbeitung (JIG-Boring)",
+              "Palettengröße / Werkstückgröße / Belademasse",
+              "Spindelkonzept",
+              "Eigene Beschreibung"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "required": ["relevanzAchs"],
+              "properties": {
+                "relevanzAchs": { "type": "string", "const": "eigene-beschreibung" }
+              }
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "relevanzAchsText": {
+                  "title": "Eigene Beschreibung",
+                  "x-propertyOrder": 5,
+                  "type": "string",
+                  "x-format": "textarea"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "complete-machining" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "komplettbearbeitungThema": {
+            "title": "Was möchten Sie besprechen?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "mehrere-schritte",
+              "fraesen-drehen",
+              "fertigbearbeitung",
+              "ruestzeiten",
+              "genauigkeit-umspannungen",
+              "eigene-beschreibung"
+            ],
+            "x-enumTitles": [
+              "Mehrere Bearbeitungsschritte in einem Prozess bündeln",
+              "Fräsen und Drehen kombinieren",
+              "Fertigbearbeitung inkl. sog. 6. Seite",
+              "Rüstzeiten reduzieren",
+              "Genauigkeit durch weniger Umspannungen verbessern",
+              "Eigene Beschreibung"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "required": ["komplettbearbeitungThema"],
+              "properties": {
+                "komplettbearbeitungThema": { "type": "string", "const": "eigene-beschreibung" }
+              }
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "komplettbearbeitungText": {
+                  "title": "Eigene Beschreibung",
+                  "x-propertyOrder": 5,
+                  "type": "string",
+                  "x-format": "textarea"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "automation" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "automatisierungFokus": {
+            "title": "Was steht im Vordergrund?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "paletten-automation",
+              "roboter-automation",
+              "stangen-teile",
+              "flexible-systeme",
+              "maschinenverkettung",
+              "software-industrie-4",
+              "auslastung-bestehend",
+              "eigene-beschreibung"
+            ],
+            "x-enumTitles": [
+              "Palettenautomation",
+              "Roboterautomation",
+              "Bearbeitung von Stangenmaterial / Teile-Handling",
+              "Flexible Fertigungssysteme",
+              "Maschinenverkettung",
+              "Software / Industrie 4.0 / IPS",
+              "Höhere Auslastung bestehender Anlagen",
+              "Eigene Beschreibung"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "required": ["automatisierungFokus"],
+              "properties": {
+                "automatisierungFokus": { "type": "string", "const": "eigene-beschreibung" }
+              }
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "automatisierungText": {
+                  "title": "Eigene Beschreibung",
+                  "x-propertyOrder": 5,
+                  "type": "string",
+                  "x-format": "textarea"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "cadcam" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "cadcamThema": {
+            "title": "Worum geht es?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "cadcam-programmierung",
+              "nc-programmierung",
+              "prozesssimulation",
+              "postprozessor",
+              "digitale-unterstuetzung",
+              "schulung-support",
+              "nicht-sicher"
+            ],
+            "x-enumTitles": [
+              "CAD/CAM-Programmierung",
+              "NC-Programmierung",
+              "Prozesssimulation / Kollisionsprüfung / Digitaler Zwilling",
+              "Postprozessor / Maschinenanbindung",
+              "Digitale Prozessunterstützung, z. B. RCS 8",
+              "Schulung oder Support",
+              "Ich bin nicht sicher"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "service" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "serviceThema": {
+            "title": "Worum geht es?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": [
+              "ersatzteile-service",
+              "retrofit-modernisierung",
+              "wartung-inspektion",
+              "training",
+              "produktionsunterstuetzung",
+              "noch-offen"
+            ],
+            "x-enumTitles": [
+              "Ersatzteile / Service",
+              "Retrofit / Modernisierung",
+              "Wartung / Inspektion",
+              "Training",
+              "Produktionsunterstützung",
+              "Noch offen"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "see-machine" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "maschinenInteresse": {
+            "title": "Welche Maschine interessiert Sie?",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "enum": ["heckert-x90", "bumotec-171", "beide"],
+            "x-enumTitles": ["Heckert X90", "Bumotec 171", "Beide"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "required": ["fertigungsbereich"],
+        "properties": {
+          "fertigungsbereich": { "type": "string", "const": "other" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "sonstigesText": {
+            "title": "Eigene Beschreibung",
+            "x-propertyOrder": 4,
+            "type": "string",
+            "x-format": "textarea"
+          }
+        }
+      }
+    }
+  ]
 }

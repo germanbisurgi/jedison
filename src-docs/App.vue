@@ -375,6 +375,8 @@ import embedSwitcher from './json/features/embed-switcher.json'
 import switcherModal from './json/features/switcher-modal.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
+import experimentalObjectNoCard from './json/experimental/object-no-card.json'
+import experimentalObjectHorizontal from './json/experimental/object-horizontal.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -557,7 +559,11 @@ export default {
           'issue/jodit-as-prop': joditAsProp,
           'issue/perf-checkbox': perfCheckbox,
           'issue/perf-oneOf': perfOneOf,
-        }
+        },
+        'Experimental': {
+          'experimental/object-no-card': experimentalObjectNoCard,
+          'experimental/object-horizontal': experimentalObjectHorizontal,
+        },
       },
       example: 'examples/character-creator',
       themes: [

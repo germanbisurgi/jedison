@@ -55,6 +55,10 @@ class EditorMultiple extends Editor {
     this.theme.adaptForTableMultipleControl(this.control, td)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalMultipleControl(this.control, labelCol, inputCol, this.getTitle())
+  }
+
   addEventListeners () {
     if (this.switcherInput === 'select') {
       this.control.switcher.input.addEventListener('change', () => {

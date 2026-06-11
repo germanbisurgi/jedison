@@ -41,6 +41,10 @@ class EditorStringIMask extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.imask.on('accept', () => {
       const value = this.useMaskedValue ? this.imask.value : this.imask.unmaskedValue

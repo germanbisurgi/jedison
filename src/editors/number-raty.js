@@ -47,6 +47,10 @@ class EditorNumberRaty extends EditorNumber {
     this.theme.visuallyHidden(this.control.description)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   refreshDisabledState () {
     if (this.disabled || this.readOnly) {
       this.raty.readOnly(true)

@@ -45,6 +45,10 @@ class EditorNumberIMask extends EditorNumber {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.imask.on('accept', () => {
       const value = this.imask.typedValue

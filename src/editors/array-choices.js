@@ -111,6 +111,10 @@ class EditorArrayChoices extends Editor {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.input.addEventListener('change', () => {
       const value = this.choicesInstance.getValue(true)

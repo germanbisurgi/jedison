@@ -1,5 +1,10 @@
 ## Todo
 
+### V2 braking
+
+- enforceConst true default
+- switcher input default (modal?)
+
 ### braking
 
 - enforceConst true default

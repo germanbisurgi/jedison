@@ -188,6 +188,10 @@ class EditorArrayCheckboxes extends Editor {
     this.theme.adaptForTableCheckboxesControl(this.control, td)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalCheckboxesControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.checkboxes.forEach((checkbox) => {
       checkbox.addEventListener('change', () => {

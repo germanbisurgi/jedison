@@ -75,6 +75,10 @@ class EditorNumberSelect extends EditorNumber {
     this.theme.adaptForTableSelectControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.input.addEventListener('change', () => {
       const value = this.sanitize(this.control.input.value)

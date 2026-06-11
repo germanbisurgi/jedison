@@ -68,7 +68,11 @@ class EditorObject extends Editor {
 
   build () {
     this.propertyActivators = {}
-    this.control = this.theme.getObjectControl(this.getObjectControlConfig())
+    const card = getSchemaXOption(this.instance.schema, 'card') ?? this.instance.jedison.getOption('card')
+    const config = this.getObjectControlConfig()
+    this.control = card === false
+      ? this.theme.getObjectControlFlat(config)
+      : this.theme.getObjectControl(config)
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2)
   }
 
@@ -91,6 +95,10 @@ class EditorObject extends Editor {
     input.value = ''
     this.announcePropertyAdded(propertyName, child)
     postAction()
+  }
+
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalObjectControl(this.control, labelCol, inputCol, this.getTitle())
   }
 
   addEventListeners () {

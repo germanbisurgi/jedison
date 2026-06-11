@@ -67,6 +67,10 @@ class EditorStringAce extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     if (!this.aceEditor) return
 

@@ -24,6 +24,10 @@ class EditorNull extends Editor {
     })
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   sanitize () {
     return null
   }

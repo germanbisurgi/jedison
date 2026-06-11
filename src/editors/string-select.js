@@ -74,6 +74,10 @@ class EditorStringSelect extends EditorString {
     this.theme.adaptForTableSelectControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.input.addEventListener('change', () => {
       this.instance.setValue(this.control.input.value, true, 'user')

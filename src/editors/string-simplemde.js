@@ -35,6 +35,10 @@ class EditorStringSimpleMDE extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalTextareaControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.simplemde.codemirror.on('blur', () => {
       const mdeText = this.simplemde.value()

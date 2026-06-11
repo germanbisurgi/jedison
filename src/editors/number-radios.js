@@ -32,6 +32,10 @@ class EditorNumberRadios extends EditorNumber {
     this.theme.adaptForTableRadiosControl(this.control)
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalRadiosControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.control.radios.forEach((radio) => {
       radio.addEventListener('change', () => {

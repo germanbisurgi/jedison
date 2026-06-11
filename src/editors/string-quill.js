@@ -34,6 +34,10 @@ class EditorStringQuill extends EditorString {
     }
   }
 
+  adaptForHorizontal (labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol)
+  }
+
   addEventListeners () {
     this.quill.root.addEventListener('blur', () => {
       const quillText = this.quill.getText()

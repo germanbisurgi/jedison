@@ -1048,6 +1048,155 @@ class Theme {
   }
 
   /**
+   * Flat variant of getObjectControl — same interface but no fieldset/legend/collapse/panel-body.
+   * Children render directly in a plain container div.
+   */
+  getObjectControlFlat (config) {
+    const container = document.createElement('div')
+    const actions = this.getActionsSlot()
+    const body = document.createElement('div')
+    const ariaLive = this.getPropertiesAriaLive()
+    const messages = this.getMessagesSlot()
+    const childrenSlot = this.getChildrenSlot()
+    const propertiesActivators = this.getPropertiesActivators()
+    const info = this.getInfo(config.info)
+    const description = this.getDescription({ content: config.description })
+    const jsonData = this.getJsonData({ id: 'json-data-' + config.id })
+    const propertiesContainer = this.getPropertiesSlot({ id: 'properties-slot-' + config.id })
+    const propertiesToggle = this.getPropertiesToggle({
+      content: config.propertiesToggleContent,
+      id: 'properties-slot-toggle-' + config.id,
+      icon: 'properties',
+      propertiesContainer: propertiesContainer
+    })
+    const quickAddPropertyContainer = this.getQuickAddPropertySlot({ id: 'quick-add-property-slot-' + config.id })
+    const quickAddPropertyControl = this.getInputControl({
+      type: 'text',
+      id: 'jedi-quick-add-property-input-' + config.id,
+      title: config.addPropertyContent
+    })
+    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: 'add' })
+    const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
+      content: config.addPropertyContent,
+      icon: 'add',
+      propertiesContainer: quickAddPropertyContainer
+    })
+
+    // Stubs for interface compatibility (not rendered as panel chrome)
+    const collapse = document.createElement('div')
+    const collapseToggle = document.createElement('div')
+    const legend = document.createElement('div')
+    const legendText = null
+    const infoContainer = document.createElement('div')
+    const right = document.createElement('div')
+    const switcherSlot = document.createElement('div')
+    switcherSlot.classList.add('jedi-switcher-slot')
+
+    if (config?.info?.variant === 'modal') {
+      this.infoAsModal(info, config.id, config.info)
+    }
+
+    container.appendChild(propertiesContainer)
+    container.appendChild(quickAddPropertyContainer)
+
+    if (config.addProperty) {
+      quickAddPropertyContainer.appendChild(quickAddPropertyControl.container)
+      quickAddPropertyContainer.appendChild(quickAddPropertyBtn)
+    }
+
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog)
+    }
+
+    if (config.description) {
+      body.appendChild(description)
+    }
+
+    body.appendChild(messages)
+
+    if (config.readOnly === false) {
+      body.appendChild(switcherSlot)
+      body.appendChild(actions)
+    }
+
+    body.appendChild(childrenSlot)
+    container.appendChild(body)
+
+    if (config.editJsonData) {
+      actions.appendChild(jsonData.toggle)
+    }
+
+    if (config.addProperty) {
+      actions.appendChild(quickAddPropertyToggle)
+    }
+
+    if (config.enablePropertiesToggle) {
+      actions.appendChild(propertiesToggle)
+      propertiesContainer.appendChild(ariaLive)
+      propertiesContainer.appendChild(propertiesActivators)
+    }
+
+    if (config.enableCollapseToggle) {
+      actions.appendChild(collapseToggle)
+    }
+
+    return {
+      container,
+      collapse,
+      collapseToggle,
+      description,
+      body,
+      actions,
+      messages,
+      childrenSlot,
+      propertiesToggle,
+      jsonData,
+      propertiesContainer,
+      quickAddPropertyContainer,
+      quickAddPropertyControl,
+      quickAddPropertyBtn,
+      quickAddPropertyToggle,
+      ariaLive,
+      propertiesActivators,
+      legend,
+      legendText,
+      infoContainer,
+      right,
+      switcherSlot
+    }
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  initHorizontalObject (container) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalInputControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalTextareaControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalSelectControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalCheckboxControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalRadiosControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalCheckboxesControl (control, labelCol, inputCol) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalArrayControl (control, labelCol, inputCol, title) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalObjectControl (control, labelCol, inputCol, title) {}
+
+  // eslint-disable-next-line no-unused-vars
+  adaptForHorizontalMultipleControl (control, labelCol, inputCol, title) {}
+
+  /**
    * Returns an accordion item wrapping a child editor.
    * Used by EditorObjectAccordionProperties to wrap each property.
    */
