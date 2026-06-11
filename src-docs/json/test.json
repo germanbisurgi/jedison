@@ -1,7 +1,6 @@
 {
-  "title": "Terminanfrage AMB Messe",
-  "description": "Buchen Sie Ihren persönlichen Beratungstermin auf der AMB 2025",
   "type": "object",
+  "x-titleHidden": true,
   "x-format": "horizontal",
   "x-card": false,
   "x-labelColumns": 3,

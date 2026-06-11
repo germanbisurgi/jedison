@@ -8459,34 +8459,54 @@ class Theme {
     });
     const collapse = document.createElement("div");
     const collapseToggle = document.createElement("div");
-    const legend = document.createElement("div");
-    const legendText = null;
     const infoContainer = document.createElement("div");
-    const right = document.createElement("div");
     const switcherSlot = document.createElement("div");
     switcherSlot.classList.add("jedi-switcher-slot");
+    const legend = document.createElement("div");
+    legend.classList.add("jedi-editor-legend");
+    legend.style.display = "flex";
+    legend.style.justifyContent = "space-between";
+    legend.style.alignItems = "center";
+    const left = document.createElement("div");
+    left.classList.add("jedi-editor-legend-left");
+    const right = document.createElement("div");
+    right.classList.add("jedi-editor-legend-right");
+    right.style.display = "flex";
+    right.style.alignItems = "center";
+    legend.appendChild(left);
+    legend.appendChild(right);
+    const legendText = document.createElement("label");
+    legendText.classList.add("jedi-title", "jedi-legend");
+    legendText.textContent = config.title || "";
+    if (config.titleHidden) {
+      this.visuallyHidden(legendText);
+    }
+    left.appendChild(legendText);
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
-    container.appendChild(propertiesContainer);
-    container.appendChild(quickAddPropertyContainer);
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog);
+    }
+    const innerWrapper = document.createElement("div");
+    innerWrapper.appendChild(legend);
+    innerWrapper.appendChild(propertiesContainer);
+    innerWrapper.appendChild(quickAddPropertyContainer);
+    container.appendChild(innerWrapper);
     if (config.addProperty) {
       quickAddPropertyContainer.appendChild(quickAddPropertyControl.container);
       quickAddPropertyContainer.appendChild(quickAddPropertyBtn);
-    }
-    if (config.editJsonData) {
-      container.appendChild(jsonData.dialog);
     }
     if (config.description) {
       body.appendChild(description);
     }
     body.appendChild(messages);
     if (config.readOnly === false) {
-      body.appendChild(switcherSlot);
-      body.appendChild(actions);
+      right.appendChild(switcherSlot);
+      right.appendChild(actions);
     }
     body.appendChild(childrenSlot);
-    container.appendChild(body);
+    innerWrapper.appendChild(body);
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
     }
@@ -8523,7 +8543,8 @@ class Theme {
       legendText,
       infoContainer,
       right,
-      switcherSlot
+      switcherSlot,
+      innerWrapper
     };
   }
   // eslint-disable-next-line no-unused-vars
