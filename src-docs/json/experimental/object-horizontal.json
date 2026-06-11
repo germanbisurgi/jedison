@@ -4,8 +4,8 @@
   "description": "One example of every editor in horizontal layout. Plugin editors fall back to string-input if the plugin is not loaded.",
   "x-format": "horizontal",
   "x-card": false,
-  "x-labelColumns": 3,
-  "x-inputColumns": 6,
+  "x-labelColumns": 4,
+  "x-inputColumns": 8,
   "properties": {
     "string-input": {
       "type": "string",
