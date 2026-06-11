@@ -1,5 +1,10 @@
 ### dev
 
+### 1.12.3
+
+- Added object horizontal editor (experimental)
+- Added `x-card'`option (experimental)
+
 ### 1.12.2
 
 - fixed multiple switching between numeric instances issue
