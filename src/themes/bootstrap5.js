@@ -67,7 +67,7 @@ class ThemeBootstrap5 extends Theme {
     const lc = labelCol ?? 3
     const ic = inputCol ?? 6
     control.container.classList.add('row')
-    control.label.classList.add('col-form-label', `col-sm-${lc}`)
+    control.label.classList.add('col-form-label', 'text-sm-end', `col-sm-${lc}`)
     const wrapper = document.createElement('div')
     wrapper.classList.add(`col-sm-${ic}`)
     Array.from(control.container.children)
@@ -104,7 +104,7 @@ class ThemeBootstrap5 extends Theme {
     const lc = labelCol ?? 3
     const ic = inputCol ?? 6
     control.container.classList.add('row')
-    control.legend.classList.add('col-form-label', `col-sm-${lc}`)
+    control.legend.classList.add('col-form-label', 'text-sm-end', `col-sm-${lc}`)
     control.container.insertBefore(control.legend, control.fieldset)
     const wrapper = document.createElement('div')
     wrapper.classList.add(`col-sm-${ic}`)
@@ -121,7 +121,7 @@ class ThemeBootstrap5 extends Theme {
     const lc = labelCol ?? 3
     const ic = inputCol ?? 6
     const fakeLabel = document.createElement('label')
-    fakeLabel.classList.add('col-form-label', `col-sm-${lc}`)
+    fakeLabel.classList.add('col-form-label', 'text-sm-end', `col-sm-${lc}`)
     fakeLabel.textContent = title || ''
     const wrapper = document.createElement('div')
     wrapper.classList.add(`col-sm-${ic}`)
