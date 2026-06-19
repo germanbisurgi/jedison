@@ -1,0 +1,23 @@
+{
+  "title": "Switcher type labels",
+  "type": "object",
+  "x-info": {
+    "variant": "modal",
+    "title": "### switcherTypeLabels",
+    "content": "Overrides the default type names shown in the multiple-type switcher.\n\nWorks as a **jedison option** (applies globally to all switchers):\n\n```js\njedison({\n  switcherTypeLabels: {\n    'String': 'Text',\n    'Boolean': 'Toggle',\n    'Null': 'None'\n  }\n})\n```\n\nOr as an **x-option on the schema field** (applies only to that field):\n\n```json\n{\n  \"x-switcherTypeLabels\": {\n    \"String\": \"Text\",\n    \"Boolean\": \"Toggle\",\n    \"Null\": \"None\"\n  }\n}\n```\n\nKeys are the **default label names** (`String`, `Boolean`, `Integer`, `Number`, `Array`, `Object`, `Null`). Only matched keys are replaced; unmatched labels remain unchanged."
+  },
+  "properties": {
+    "something": {
+      "title": "Something",
+      "x-switcherTypeLabels": {
+        "String": "Abc",
+        "Boolean": "T/F",
+        "Integer": "123",
+        "Number": "1.23",
+        "Array": "[...]",
+        "Object": "{...}",
+        "Null": "None"
+      }
+    }
+  }
+}

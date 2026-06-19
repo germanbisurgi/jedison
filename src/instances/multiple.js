@@ -6,7 +6,8 @@ import {
   isObject,
   different,
   clone,
-  mergeDeep
+  mergeDeep,
+  hasOwn
 } from '../helpers/utils.js'
 import {
   getSchemaAnyOf, getSchemaDescription,
@@ -105,6 +106,13 @@ class InstanceMultiple extends Instance {
       this.switcherOptionsLabels = [
         'String', 'Boolean', 'Integer', 'Number', 'Array', 'Object', 'Null'
       ]
+    }
+
+    const switcherTypeLabels = getSchemaXOption(this.schema, 'switcherTypeLabels') ?? this.jedison.getOption('switcherTypeLabels')
+    if (switcherTypeLabels && typeof switcherTypeLabels === 'object') {
+      this.switcherOptionsLabels = this.switcherOptionsLabels.map(
+        label => hasOwn(switcherTypeLabels, label) ? switcherTypeLabels[label] : label
+      )
     }
 
     this.schemas.forEach((schema) => {

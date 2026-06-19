@@ -375,6 +375,7 @@ import embedSwitcher from './json/features/embed-switcher.json'
 import switcherModal from './json/features/switcher-modal.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
+import switcherTypeLabels from './json/features/switcher-type-labels.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
 import experimentalObjectHorizontal from './json/experimental/object-horizontal.json'
 import {isSet} from "../src/helpers/utils.js"
@@ -483,6 +484,7 @@ export default {
           'features/switcher-modal': switcherModal,
           'features/navigate-to': navigateTo,
           'features/title-icon-class': titleIconClass,
+          'features/switcher-type-labels': switcherTypeLabels,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,
@@ -2017,6 +2019,7 @@ aside {
   position: sticky;
   top: 1rem;
   max-height: calc(100vh - 2rem);
-  overflow-y: auto;
+  overflow-y: scroll;
+  padding-right: 30px;
 }
 </style>
