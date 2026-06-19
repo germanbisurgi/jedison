@@ -3,6 +3,7 @@
 ### 1.13.0
 
 - added `switcherTypeLabels` option and `x-switcherTypeLabels` x-option to override the default type names displayed in the multiple-type switcher
+- security updates
 
 ### 1.12.3
 

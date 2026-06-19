@@ -2786,6 +2786,12 @@ class InstanceMultiple extends Instance {
         "Null"
       ];
     }
+    const switcherTypeLabels = getSchemaXOption(this.schema, "switcherTypeLabels") ?? this.jedison.getOption("switcherTypeLabels");
+    if (switcherTypeLabels && typeof switcherTypeLabels === "object") {
+      this.switcherOptionsLabels = this.switcherOptionsLabels.map(
+        (label) => hasOwn(switcherTypeLabels, label) ? switcherTypeLabels[label] : label
+      );
+    }
     this.schemas.forEach((schema) => {
       const instance = this.jedison.createInstance({
         jedison: this.jedison,
@@ -6956,7 +6962,8 @@ class Jedison extends EventEmitter {
       enforceEnum: true,
       subErrors: false,
       debug: false,
-      audacity: true
+      audacity: true,
+      switcherTypeLabels: {}
     }, options);
     this.rootName = "#";
     this.pathSeparator = "/";
