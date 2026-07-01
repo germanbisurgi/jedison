@@ -28,6 +28,7 @@ import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObjectAccordion from './editors/object-accordion.js'
 import EditorObjectHorizontal from './editors/object-horizontal.js'
+import EditorObjectRadios from './editors/object-radios.js'
 import EditorObject from './editors/object.js'
 import EditorArrayChoices from './editors/array-choices.js'
 import EditorArrayNav from './editors/array-nav.js'
@@ -62,6 +63,7 @@ export default {
   EditorObjectNav,
   EditorObjectAccordion,
   EditorObjectHorizontal,
+  EditorObjectRadios,
   EditorObject,
   EditorArrayChoices,
   EditorArrayNav,

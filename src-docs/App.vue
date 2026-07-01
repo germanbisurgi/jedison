@@ -246,6 +246,7 @@ import objectGridBreakpoints from './json/editors/object-grid-breakpoints.json'
 import objectNavVertical from './json/editors/object-nav-vertical.json'
 import objectNavHorizontal from './json/editors/object-nav-horizontal.json'
 import objectAccordion from './json/editors/object-accordion.json'
+import objectRadios from './json/editors/object-radios.json'
 import objectCategoriesVertical from './json/editors/object-categories-vertical.json'
 import objectCategoriesHorizontal from './json/editors/object-categories-horizontal.json'
 import objectCategoriesCategoryOrder from './json/editors/object-categories-categoryOrder.json'
@@ -437,6 +438,7 @@ export default {
           'editors/object-nav-vertical': objectNavVertical,
           'editors/object-nav-horizontal': objectNavHorizontal,
           'editors/object-accordion': objectAccordion,
+          'editors/object-radios': objectRadios,
           'editors/object-categories-vertical': objectCategoriesVertical,
           'editors/object-categories-horizontal': objectCategoriesHorizontal,
           'editors/object-categories-categoryOrder': objectCategoriesCategoryOrder,

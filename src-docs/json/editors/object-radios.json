@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "title": "Quick Survey",
+  "description": "Object radios allow selecting object enum values via radio buttons.",
+  "x-info": {
+    "variant": "modal",
+    "title": "### Info Button title",
+    "content": "Info button content"
+  },
+  "properties": {
+    "q1": {
+      "type": "object",
+      "title": "How did you hear about us?",
+      "x-format": "radios",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      },
+      "x-enumTitles": [
+        "Social media",
+        "A friend or colleague",
+        "Online search",
+        "Advertisement"
+      ],
+      "enum": [
+        { "source": "social_media", "score": 4 },
+        { "source": "referral", "score": 5 },
+        { "source": "search", "score": 3 },
+        { "source": "ad", "score": 2 }
+      ],
+      "default": { "source": "social_media", "score": 4 }
+    },
+    "q2": {
+      "type": "object",
+      "title": "How satisfied are you with our service?",
+      "x-format": "radios",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      },
+      "x-enumTitles": [
+        "Very satisfied",
+        "Satisfied",
+        "Neutral",
+        "Dissatisfied"
+      ],
+      "enum": [
+        { "rating": "very_satisfied", "score": 4 },
+        { "rating": "satisfied", "score": 3 },
+        { "rating": "neutral", "score": 2 },
+        { "rating": "dissatisfied", "score": 1 }
+      ],
+      "default": { "rating": "very_satisfied", "score": 4 }
+    },
+    "q3": {
+      "type": "object",
+      "title": "Would you recommend us? (inline)",
+      "x-format": "radios-inline",
+      "x-info": {
+        "variant": "modal",
+        "title": "### Info Button title",
+        "content": "Info button content"
+      },
+      "x-enumTitles": [
+        "Definitely",
+        "Probably",
+        "Not sure",
+        "No"
+      ],
+      "enum": [
+        { "nps": "promoter", "score": 3 },
+        { "nps": "likely", "score": 2 },
+        { "nps": "passive", "score": 1 },
+        { "nps": "detractor", "score": 0 }
+      ],
+      "default": { "nps": "promoter", "score": 3 }
+    }
+  }
+}

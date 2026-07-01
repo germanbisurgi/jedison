@@ -16,6 +16,7 @@ import EditorObjectCategories from './editors/object-categories.js'
 import EditorObjectNav from './editors/object-nav.js'
 import EditorObjectAccordion from './editors/object-accordion.js'
 import EditorObjectHorizontal from './editors/object-horizontal.js'
+import EditorObjectRadios from './editors/object-radios.js'
 import EditorObject from './editors/object.js'
 import EditorArrayTuple from './editors/array-tuple.js'
 import EditorArrayTable from './editors/array-table.js'
@@ -78,6 +79,7 @@ class UiResolver {
       EditorObjectNav,
       EditorObjectAccordion,
       EditorObjectHorizontal,
+      EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
