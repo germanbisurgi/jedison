@@ -4644,6 +4644,59 @@ class EditorObjectHorizontal extends EditorObject {
     });
   }
 }
+class EditorObjectRadios extends Editor {
+  static resolves(schema) {
+    const format2 = getSchemaXOption(schema, "format");
+    return getSchemaType(schema) === "object" && (format2 === "radios" || format2 === "radios-inline") && isSet(getSchemaEnum(schema));
+  }
+  build() {
+    const enumValues = getSchemaEnum(this.instance.schema);
+    const enumTitles = getSchemaXOption(this.instance.schema, "enumTitles") || enumValues.map((v) => JSON.stringify(v));
+    const inline = getSchemaXOption(this.instance.schema, "format") === "radios-inline";
+    this.control = this.theme.getRadiosControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values: enumTitles,
+      titles: enumTitles,
+      id: this.getIdFromPath(this.instance.path),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      inline,
+      info: this.getInfo()
+    });
+    this.control.radios.forEach((radio, index2) => {
+      radio._enumValue = enumValues[index2];
+    });
+  }
+  addEventListeners() {
+    this.control.radios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        this.instance.setValue(radio._enumValue, true, "user");
+      });
+    });
+  }
+  refreshUI() {
+    this.refreshDisabledState();
+    const currentValue = this.instance.getValue();
+    this.control.radios.forEach((radio) => {
+      radio.checked = equal(radio._enumValue, currentValue);
+    });
+  }
+  setAriaInvalid(invalid) {
+    this.control.radios.forEach((radio) => {
+      if (invalid) {
+        radio.setAttribute("aria-invalid", "true");
+      } else {
+        radio.removeAttribute("aria-invalid");
+      }
+    });
+  }
+  adaptForTable() {
+    this.theme.adaptForTableRadiosControl(this.control);
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalRadiosControl(this.control, labelCol, inputCol);
+  }
+}
 class EditorArray extends Editor {
   static resolves(schema) {
     return getSchemaType(schema) === "array";
@@ -6597,6 +6650,7 @@ class UiResolver {
       EditorObjectNav,
       EditorObjectAccordion,
       EditorObjectHorizontal,
+      EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
       EditorArrayCheckboxes,
@@ -11166,6 +11220,7 @@ const index = {
   EditorObjectNav,
   EditorObjectAccordion,
   EditorObjectHorizontal,
+  EditorObjectRadios,
   EditorObject,
   EditorArrayChoices,
   EditorArrayNav,

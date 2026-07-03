@@ -2010,18 +2010,3 @@ export default {
   }
 }
 </script>
-
-<style>
-.layout-row {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-aside {
-  position: sticky;
-  top: 1rem;
-  max-height: calc(100vh - 2rem);
-  overflow-y: scroll;
-  padding-right: 30px;
-}
-</style>
