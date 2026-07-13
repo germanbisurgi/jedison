@@ -7909,6 +7909,7 @@ class Theme {
         config.propertiesContainer.close();
       } else {
         config.propertiesContainer.showModal();
+        config.propertiesContainer.focus();
       }
     });
     return toggle;
@@ -8087,6 +8088,11 @@ class Theme {
    * Group for property activators
    */
   getPropertiesGroup(config = {}) {
+    if (config.accordion && config.name) {
+      const id = "jedi-prop-group-" + config.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const item = this.getAccordionItem({ title: config.name, id });
+      return { container: item.container, group: item.body, name: item.toggle };
+    }
     const container = document.createElement("div");
     container.classList.add("jedi-properties-group-container");
     const group = document.createElement("div");
@@ -8267,7 +8273,8 @@ class Theme {
     dialog.classList.add("jedi-modal-dialog");
     dialog.style.border = "1px solid #6c757d";
     dialog.style.borderRadius = "4px";
-    dialog.style.minWidth = "200px";
+    dialog.style.minWidth = "400px";
+    dialog.style.maxWidth = "90vw";
     return dialog;
   }
   /**

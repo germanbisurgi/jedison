@@ -1,4 +1,7 @@
-### dev
+### 1.14.0
+
+- Added object radios editor
+- Larger dialogs
 
 ### 1.13.0
 
