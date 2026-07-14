@@ -477,6 +477,13 @@ class ThemeBootstrap5 extends Theme {
     return control
   }
 
+  getSwitcherSelectInline (config) {
+    const control = super.getSwitcherSelectInline(config)
+    control.container.classList.add('mb-1')
+    control.input.classList.add('form-select', 'form-select-sm')
+    return control
+  }
+
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
     control.trigger.classList.add('badge', 'bg-primary')

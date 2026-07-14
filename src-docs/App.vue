@@ -374,6 +374,7 @@ import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
 import embedSwitcher from './json/features/embed-switcher.json'
 import switcherModal from './json/features/switcher-modal.json'
+import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
@@ -484,6 +485,7 @@ export default {
           'features/nav-warning': navWarning,
           'features/embed-switcher': embedSwitcher,
           'features/switcher-modal': switcherModal,
+          'features/switcher-select-inline': switcherSelectInline,
           'features/navigate-to': navigateTo,
           'features/title-icon-class': titleIconClass,
           'features/switcher-type-labels': switcherTypeLabels,
@@ -595,7 +597,8 @@ export default {
         'select',
         'radios',
         'radios-inline',
-        'modal'
+        'modal',
+        'select-inline'
       ],
       languageOptions: [
         'en',

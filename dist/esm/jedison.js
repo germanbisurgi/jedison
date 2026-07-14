@@ -5655,6 +5655,12 @@ class EditorMultiple extends Editor {
         });
       });
     }
+    if (this.switcherInput === "select-inline") {
+      this.control.switcher.input.addEventListener("change", () => {
+        const index2 = Number(this.control.switcher.input.value);
+        this.instance.switchInstance(index2, void 0, "user");
+      });
+    }
   }
   refreshUI() {
     var _a;
@@ -5672,7 +5678,7 @@ class EditorMultiple extends Editor {
         this.control.header.appendChild(this.control.switcher.container);
       }
     }
-    if (this.switcherInput === "modal") {
+    if (this.switcherInput === "modal" || this.switcherInput === "select-inline") {
       const childControl = this.instance.activeInstance.ui.control;
       const infoContainer = childControl.infoContainer;
       const titleEl = childControl.legendText || childControl.label;
@@ -5687,6 +5693,9 @@ class EditorMultiple extends Editor {
       }
     }
     if (this.switcherInput === "select") {
+      this.control.switcher.input.value = this.instance.index;
+    }
+    if (this.switcherInput === "select-inline") {
       this.control.switcher.input.value = this.instance.index;
     }
     if (this.switcherInput === "radios" || this.switcherInput === "radios-inline") {
@@ -8851,7 +8860,7 @@ class Theme {
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
     const randomId = generateRandomID(5);
-    const knownSwitchers = ["select", "radios", "radios-inline", "modal"];
+    const knownSwitchers = ["select", "radios", "radios-inline", "modal", "select-inline"];
     const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : "select";
     let switcher;
     if (switcherType === "select") {
@@ -8881,6 +8890,14 @@ class Theme {
     }
     if (switcherType === "modal") {
       switcher = this.getSwitcherModal({
+        values: config.switcherOptionValues,
+        titles: config.switcherOptionsLabels,
+        id: config.id + "-switcher-" + randomId,
+        readOnly: config.readOnly
+      });
+    }
+    if (switcherType === "select-inline") {
+      switcher = this.getSwitcherSelectInline({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
         id: config.id + "-switcher-" + randomId,
@@ -9403,6 +9420,31 @@ class Theme {
   }
   setSwitcherOptionActive(btn, active) {
     btn.classList.toggle("jedi-switcher-option-active", active);
+  }
+  /**
+   * Compact inline <select> to switch between multiple editors options (no dialog)
+   */
+  getSwitcherSelectInline(config) {
+    const container = document.createElement("span");
+    const input = document.createElement("select");
+    container.classList.add("jedi-switcher-select-inline");
+    container.style.display = "inline-block";
+    input.classList.add("jedi-switcher-select-inline-input");
+    input.style.width = "auto";
+    input.setAttribute("aria-label", "Switch type");
+    if (config.readOnly) {
+      input.setAttribute("disabled", "");
+    }
+    config.values.forEach((value, index2) => {
+      const option = document.createElement("option");
+      option.setAttribute("value", value);
+      if (config.titles && config.titles[index2]) {
+        option.textContent = config.titles[index2];
+      }
+      input.appendChild(option);
+    });
+    container.appendChild(input);
+    return { container, input };
   }
   /**
    * Another type of error message container used for more complex editors like
@@ -9966,6 +10008,12 @@ class ThemeBootstrap3 extends Theme {
     control.input.classList.add("input-sm");
     return control;
   }
+  getSwitcherSelectInline(config) {
+    const control = super.getSwitcherSelectInline(config);
+    control.container.style.marginBottom = "5px";
+    control.input.classList.add("input-sm");
+    return control;
+  }
   getSwitcherModal(config) {
     const control = super.getSwitcherModal(config);
     control.trigger.classList.add("label", "label-primary");
@@ -10497,6 +10545,12 @@ class ThemeBootstrap4 extends Theme {
   getSwitcherSelect(config) {
     const control = super.getSwitcherSelect(config);
     control.input.classList.add("form-control-sm");
+    return control;
+  }
+  getSwitcherSelectInline(config) {
+    const control = super.getSwitcherSelectInline(config);
+    control.container.classList.add("mb-2");
+    control.input.classList.add("form-control", "form-control-sm");
     return control;
   }
   getSwitcherModal(config) {
@@ -11042,6 +11096,12 @@ class ThemeBootstrap5 extends Theme {
   getSwitcherSelect(config) {
     const control = super.getSwitcherSelect(config);
     control.input.classList.add("form-select-sm");
+    return control;
+  }
+  getSwitcherSelectInline(config) {
+    const control = super.getSwitcherSelectInline(config);
+    control.container.classList.add("mb-1");
+    control.input.classList.add("form-select", "form-select-sm");
     return control;
   }
   getSwitcherModal(config) {

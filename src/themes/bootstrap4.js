@@ -470,6 +470,13 @@ class ThemeBootstrap4 extends Theme {
     return control
   }
 
+  getSwitcherSelectInline (config) {
+    const control = super.getSwitcherSelectInline(config)
+    control.container.classList.add('mb-2')
+    control.input.classList.add('form-control', 'form-control-sm')
+    return control
+  }
+
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
     control.trigger.classList.add('badge', 'badge-primary')

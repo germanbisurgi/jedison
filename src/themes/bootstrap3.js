@@ -466,6 +466,13 @@ class ThemeBootstrap3 extends Theme {
     return control
   }
 
+  getSwitcherSelectInline (config) {
+    const control = super.getSwitcherSelectInline(config)
+    control.container.style.marginBottom = '5px'
+    control.input.classList.add('input-sm')
+    return control
+  }
+
   getSwitcherModal (config) {
     const control = super.getSwitcherModal(config)
     control.trigger.classList.add('label', 'label-primary')

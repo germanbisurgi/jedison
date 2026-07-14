@@ -1,3 +1,7 @@
+### 1.15.0
+
+- Added `switcherInput: 'select-inline'` option
+
 ### 1.14.0
 
 - Added object radios editor

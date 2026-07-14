@@ -1484,7 +1484,7 @@ class Theme {
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
     const randomId = generateRandomID(5)
-    const knownSwitchers = ['select', 'radios', 'radios-inline', 'modal']
+    const knownSwitchers = ['select', 'radios', 'radios-inline', 'modal', 'select-inline']
     const switcherType = knownSwitchers.includes(config.switcher) ? config.switcher : 'select'
 
     let switcher
@@ -1518,6 +1518,15 @@ class Theme {
 
     if (switcherType === 'modal') {
       switcher = this.getSwitcherModal({
+        values: config.switcherOptionValues,
+        titles: config.switcherOptionsLabels,
+        id: config.id + '-switcher' + '-' + randomId,
+        readOnly: config.readOnly
+      })
+    }
+
+    if (switcherType === 'select-inline') {
+      switcher = this.getSwitcherSelectInline({
         values: config.switcherOptionValues,
         titles: config.switcherOptionsLabels,
         id: config.id + '-switcher' + '-' + randomId,
@@ -2142,6 +2151,38 @@ class Theme {
 
   setSwitcherOptionActive (btn, active) {
     btn.classList.toggle('jedi-switcher-option-active', active)
+  }
+
+  /**
+   * Compact inline <select> to switch between multiple editors options (no dialog)
+   */
+  getSwitcherSelectInline (config) {
+    const container = document.createElement('span')
+    const input = document.createElement('select')
+
+    container.classList.add('jedi-switcher-select-inline')
+    container.style.display = 'inline-block'
+
+    input.classList.add('jedi-switcher-select-inline-input')
+    input.style.width = 'auto'
+    input.setAttribute('aria-label', 'Switch type')
+
+    if (config.readOnly) {
+      input.setAttribute('disabled', '')
+    }
+
+    config.values.forEach((value, index) => {
+      const option = document.createElement('option')
+      option.setAttribute('value', value)
+      if (config.titles && config.titles[index]) {
+        option.textContent = config.titles[index]
+      }
+      input.appendChild(option)
+    })
+
+    container.appendChild(input)
+
+    return { container, input }
   }
 
   /**

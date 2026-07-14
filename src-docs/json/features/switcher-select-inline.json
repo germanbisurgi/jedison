@@ -1,0 +1,90 @@
+{
+  "title": "Select Inline Switcher",
+  "type": "object",
+  "additionalProperties": false,
+  "x-enablePropertiesToggle": false,
+  "properties": {
+    "anyOfExample": {
+      "title": "anyOf",
+      "description": "x-switcherInput: select-inline with anyOf — two object schemas",
+      "x-switcherInput": "select-inline",
+      "anyOf": [
+        {
+          "x-switcherTitle": "Person",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "age": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Organization",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "orgName": {
+              "type": "string"
+            },
+            "employees": {
+              "type": "integer"
+            }
+          }
+        }
+      ]
+    },
+    "oneOfExample": {
+      "title": "oneOf",
+      "description": "x-switcherInput: select-inline with oneOf — two object schemas",
+      "x-switcherInput": "select-inline",
+      "oneOf": [
+        {
+          "x-switcherTitle": "Circle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "radius": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Rectangle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "typeArrayExample": {
+      "title": "Type array",
+      "description": "x-switcherInput: select-inline with type: [string, number, boolean] — switcher label is the type name",
+      "x-switcherInput": "select-inline",
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ]
+    },
+    "noTypeExample": {
+      "title": "No type",
+      "description": "x-switcherInput: select-inline with no type keyword — all seven types available",
+      "x-switcherInput": "select-inline"
+    }
+  }
+}

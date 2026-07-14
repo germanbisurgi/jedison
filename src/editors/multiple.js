@@ -85,6 +85,13 @@ class EditorMultiple extends Editor {
         })
       })
     }
+
+    if (this.switcherInput === 'select-inline') {
+      this.control.switcher.input.addEventListener('change', () => {
+        const index = Number(this.control.switcher.input.value)
+        this.instance.switchInstance(index, undefined, 'user')
+      })
+    }
   }
 
   refreshUI () {
@@ -104,7 +111,7 @@ class EditorMultiple extends Editor {
       }
     }
 
-    if (this.switcherInput === 'modal') {
+    if (this.switcherInput === 'modal' || this.switcherInput === 'select-inline') {
       const childControl = this.instance.activeInstance.ui.control
       const infoContainer = childControl.infoContainer
       const titleEl = childControl.legendText || childControl.label
@@ -120,6 +127,10 @@ class EditorMultiple extends Editor {
     }
 
     if (this.switcherInput === 'select') {
+      this.control.switcher.input.value = this.instance.index
+    }
+
+    if (this.switcherInput === 'select-inline') {
       this.control.switcher.input.value = this.instance.index
     }
 
