@@ -322,7 +322,7 @@
         "allOf": {
           "title": "All of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },
@@ -332,7 +332,7 @@
         "anyOf": {
           "title": "Any of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },
@@ -374,7 +374,7 @@
         "oneOf": {
           "title": "One of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },

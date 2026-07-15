@@ -180,8 +180,12 @@ class ThemeBootstrap5 extends Theme {
     chevron.classList.add('d-inline-block', 'me-2')
     chevron.style.transition = 'transform 0.1s ease'
 
+    const titleSpan = document.createElement('span')
+    titleSpan.classList.add('me-1')
+    titleSpan.textContent = config.title
+
     toggle.appendChild(chevron)
-    toggle.appendChild(document.createTextNode(config.title))
+    toggle.appendChild(titleSpan)
 
     const collapse = document.createElement('div')
     collapse.id = collapseId

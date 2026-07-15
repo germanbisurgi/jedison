@@ -17,8 +17,33 @@ class EditorObjectAccordion extends EditorObject {
     return { ...super.getObjectControlConfig(), isAccordionProperties: true }
   }
 
+  refreshAccordionWarnings () {
+    if (!this.accordionToggles) return
+    const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+    const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+
+    this.instance.children.forEach((child) => {
+      if (!child.isActive) return
+      const toggle = this.accordionToggles[child.getKey()]
+      if (!toggle) return
+
+      const existing = toggle.querySelector('.jedi-legend-warning')
+      if (existing) existing.parentNode.removeChild(existing)
+
+      if (navWarning && child.hasNestedValidationErrors()) {
+        const warning = document.createElement('span')
+        warning.classList.add('jedi-legend-warning')
+        warning.textContent = '⚠'
+        if (navWarningMessage) warning.setAttribute('title', navWarningMessage)
+        this.theme.styleLegendWarning(warning)
+        toggle.appendChild(warning)
+      }
+    })
+  }
+
   refreshEditors () {
     this.control.childrenSlot.replaceChildren()
+    this.accordionToggles = {}
     const accordionId = this.control.childrenSlot.id
 
     this.instance.children.forEach((child) => {
@@ -31,6 +56,7 @@ class EditorObjectAccordion extends EditorObject {
       const accordionItem = this.theme.getAccordionItem({ title, id, accordionId })
       accordionItem.body.appendChild(child.ui.control.container)
       this.control.childrenSlot.appendChild(accordionItem.container)
+      this.accordionToggles[child.getKey()] = accordionItem.toggle
 
       if (this.disabled || this.instance.isReadOnly()) {
         child.ui.disable()
@@ -38,6 +64,13 @@ class EditorObjectAccordion extends EditorObject {
         child.ui.enable()
       }
     })
+
+    this.refreshAccordionWarnings()
+  }
+
+  showValidationErrors (errors, force = false) {
+    super.showValidationErrors(errors, force)
+    this.refreshAccordionWarnings()
   }
 }
 

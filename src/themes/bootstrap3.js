@@ -185,8 +185,12 @@ class ThemeBootstrap3 extends Theme {
     chevron.style.transition = 'transform 0.1s ease'
     chevron.style.marginRight = '0.5em'
 
+    const titleSpan = document.createElement('span')
+    titleSpan.style.marginRight = '0.5em'
+    titleSpan.textContent = config.title
+
     toggle.appendChild(chevron)
-    toggle.appendChild(document.createTextNode(config.title))
+    toggle.appendChild(titleSpan)
 
     const collapse = document.createElement('div')
     collapse.id = collapseId
