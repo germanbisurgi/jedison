@@ -1067,6 +1067,11 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive()
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
+
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = 'accordion-' + config.id
+    }
+
     const propertiesActivators = this.getPropertiesActivators()
     const info = this.getInfo(config.info)
     const description = this.getDescription({ content: config.description })
@@ -1131,8 +1136,6 @@ class Theme {
 
     const innerWrapper = document.createElement('div')
     innerWrapper.appendChild(legend)
-    innerWrapper.appendChild(propertiesContainer)
-    innerWrapper.appendChild(quickAddPropertyContainer)
     container.appendChild(innerWrapper)
 
     if (config.addProperty) {
@@ -1153,6 +1156,8 @@ class Theme {
 
     body.appendChild(childrenSlot)
     innerWrapper.appendChild(body)
+    innerWrapper.appendChild(propertiesContainer)
+    innerWrapper.appendChild(quickAddPropertyContainer)
 
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle)

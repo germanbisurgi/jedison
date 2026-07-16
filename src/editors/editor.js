@@ -77,6 +77,15 @@ class Editor {
   static resolves (schema) {}
 
   /**
+   * Whether this editor already renders a heading for each of its children
+   * (e.g. an accordion toggle or a nav tab label), so a child editor can
+   * skip drawing its own duplicate heading/panel when embedded here.
+   */
+  static providesChildHeading () {
+    return false
+  }
+
+  /**
    * Initializes the editor
    */
   init () {

@@ -3,7 +3,6 @@
   "description": "Array of unique values wich item types can be string, number or integer",
   "type": "array",
   "uniqueItems": true,
-  "x-sortable": true,
   "items": {
     "type": "string",
     "enum": [

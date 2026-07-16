@@ -289,7 +289,7 @@ export function combineDeep (target, ...sources) {
     Object.keys(source).forEach((key) => {
       if (UNSAFE_KEYS.has(key)) return
       if (isObject(source[key])) {
-        if (!target[key]) {
+        if (!isObject(target[key])) {
           Object.assign(target, {
             [key]: {}
           })
@@ -297,7 +297,7 @@ export function combineDeep (target, ...sources) {
         combineDeep(target[key], source[key])
       } else if (Array.isArray(source[key])) {
         // Handle array merging here
-        if (!target[key]) {
+        if (!Array.isArray(target[key])) {
           target[key] = []
         }
         target[key].push(...source[key])

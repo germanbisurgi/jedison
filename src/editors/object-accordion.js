@@ -13,6 +13,10 @@ class EditorObjectAccordion extends EditorObject {
     return getSchemaType(schema) === 'object' && getSchemaXOption(schema, 'format') === 'accordion'
   }
 
+  static providesChildHeading () {
+    return true
+  }
+
   getObjectControlConfig () {
     return { ...super.getObjectControlConfig(), isAccordionProperties: true }
   }

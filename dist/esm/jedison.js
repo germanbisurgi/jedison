@@ -148,14 +148,14 @@ function combineDeep(target, ...sources) {
     Object.keys(source).forEach((key) => {
       if (UNSAFE_KEYS.has(key)) return;
       if (isObject(source[key])) {
-        if (!target[key]) {
+        if (!isObject(target[key])) {
           Object.assign(target, {
             [key]: {}
           });
         }
         combineDeep(target[key], source[key]);
       } else if (Array.isArray(source[key])) {
-        if (!target[key]) {
+        if (!Array.isArray(target[key])) {
           target[key] = [];
         }
         target[key].push(...source[key]);
@@ -2159,6 +2159,14 @@ class Editor {
   static resolves(schema) {
   }
   /**
+   * Whether this editor already renders a heading for each of its children
+   * (e.g. an accordion toggle or a nav tab label), so a child editor can
+   * skip drawing its own duplicate heading/panel when embedded here.
+   */
+  static providesChildHeading() {
+    return false;
+  }
+  /**
    * Initializes the editor
    */
   init() {
@@ -4131,7 +4139,7 @@ class EditorObject extends Editor {
     return {
       title: this.getTitle(),
       description: this.getDescription(),
-      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden") ?? this.isEmbeddedInParentChrome(),
       id: this.getIdFromPath(this.instance.path),
       enablePropertiesToggle,
       addProperty,
@@ -4147,9 +4155,20 @@ class EditorObject extends Editor {
       titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass")
     };
   }
+  isEmbeddedInParentChrome() {
+    var _a;
+    const autoFlat = getSchemaXOption(this.instance.schema, "autoFlat") ?? this.instance.jedison.getOption("autoFlat");
+    if (!autoFlat) return false;
+    const parentInstance = this.instance.parent;
+    if (!parentInstance) return false;
+    const ParentEditorClass = this.instance.jedison.uiResolver.getClass(parentInstance.schema);
+    return !!((_a = ParentEditorClass == null ? void 0 : ParentEditorClass.providesChildHeading) == null ? void 0 : _a.call(ParentEditorClass));
+  }
   build() {
     this.propertyActivators = {};
-    const card = getSchemaXOption(this.instance.schema, "card") ?? this.instance.jedison.getOption("card");
+    const explicitCard = getSchemaXOption(this.instance.schema, "card");
+    const globalCard = this.instance.jedison.getOption("card");
+    const card = explicitCard ?? (this.isEmbeddedInParentChrome() ? false : globalCard);
     const config = this.getObjectControlConfig();
     this.control = card === false ? this.theme.getObjectControlFlat(config) : this.theme.getObjectControl(config);
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
@@ -4520,6 +4539,9 @@ class EditorObjectNav extends EditorObject {
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "object" && hasNavFormat;
   }
+  static providesChildHeading() {
+    return true;
+  }
   init() {
     super.init();
     this.activeTabIndex = 0;
@@ -4605,6 +4627,9 @@ class EditorObjectNav extends EditorObject {
 class EditorObjectAccordion extends EditorObject {
   static resolves(schema) {
     return getSchemaType(schema) === "object" && getSchemaXOption(schema, "format") === "accordion";
+  }
+  static providesChildHeading() {
+    return true;
   }
   getObjectControlConfig() {
     return { ...super.getObjectControlConfig(), isAccordionProperties: true };
@@ -5473,6 +5498,9 @@ class EditorArrayNav extends EditorArray {
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "array" && hasNavFormat;
   }
+  static providesChildHeading() {
+    return true;
+  }
   navigateTo(path) {
     const nextChildPath = this.getNextChildPath(path);
     if (nextChildPath) {
@@ -6332,37 +6360,24 @@ class EditorArrayCheckboxes extends Editor {
     const values = this.getEnumSourceValues();
     const schemaItems = this.instance.schema.items || {};
     const titles = getSchemaXOption(schemaItems, "enumTitles") || values;
-    const id = this.getIdFromPath(this.instance.path);
-    const messagesId = id + "-messages";
-    const descriptionId = id + "-description";
-    const describedBy = messagesId + " " + descriptionId;
     this.control.checkboxControls.forEach((cc) => {
       if (cc.parentNode) cc.parentNode.removeChild(cc);
     });
-    this.control.checkboxes = [];
-    this.control.labels = [];
-    this.control.checkboxControls = [];
-    this.control.labelTexts = [];
-    values.forEach((value, index2) => {
-      const checkboxId = id + "-" + index2;
-      const checkboxControl = document.createElement("div");
-      const checkbox = document.createElement("input");
-      const label = document.createElement("label");
-      const labelText = document.createElement("span");
-      checkbox.setAttribute("type", "checkbox");
-      checkbox.setAttribute("id", checkboxId);
-      checkbox.setAttribute("name", id);
-      checkbox.setAttribute("value", value);
-      checkbox.setAttribute("aria-describedby", describedBy);
-      label.setAttribute("for", checkboxId);
-      labelText.textContent = titles && titles[index2] !== void 0 ? titles[index2] : value;
-      checkboxControl.appendChild(checkbox);
-      checkboxControl.appendChild(label);
-      label.appendChild(labelText);
-      this.control.checkboxes.push(checkbox);
-      this.control.labels.push(label);
-      this.control.labelTexts.push(labelText);
-      this.control.checkboxControls.push(checkboxControl);
+    const rebuilt = this.theme.getCheckboxesControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values,
+      titles,
+      id: this.getIdFromPath(this.instance.path),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      inline: getSchemaXOption(this.instance.schema, "format") === "checkboxes-inline",
+      info: this.getInfo()
+    });
+    this.control.checkboxes = rebuilt.checkboxes;
+    this.control.labels = rebuilt.labels;
+    this.control.labelTexts = rebuilt.labelTexts;
+    this.control.checkboxControls = rebuilt.checkboxControls;
+    this.control.checkboxControls.forEach((checkboxControl) => {
       this.control.fieldset.insertBefore(checkboxControl, this.control.description);
     });
     this.addDragHandles();
@@ -7012,6 +7027,7 @@ class Jedison extends EventEmitter {
       editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
+      autoFlat: false,
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
@@ -7336,6 +7352,20 @@ class Jedison extends EventEmitter {
           node.not = combineDeep({}, nodeClone, node.not);
         }
       });
+    }
+    if (this.isEditor) {
+      const schemaTypeArray = getSchemaType(config.schema);
+      if (isArray(schemaTypeArray)) {
+        const inferTypeSource = getSchemaXOption(config.schema, "inferType");
+        if (isSet(inferTypeSource)) {
+          const siblingPath = resolveInstancePath(config.path, inferTypeSource);
+          const siblingInstance = this.getInstance(siblingPath);
+          const siblingValue = siblingInstance ? siblingInstance.getValue() : void 0;
+          if (isSet(siblingValue) && schemaTypeArray.includes(siblingValue)) {
+            config.schema = { ...config.schema, type: siblingValue };
+          }
+        }
+      }
     }
     const schemaOneOf = getSchemaOneOf(config.schema);
     const schemaAnyOf = getSchemaAnyOf(config.schema);
@@ -8541,6 +8571,9 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive();
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = "accordion-" + config.id;
+    }
     const propertiesActivators = this.getPropertiesActivators();
     const info = this.getInfo(config.info);
     const description = this.getDescription({ content: config.description });
@@ -8597,8 +8630,6 @@ class Theme {
     }
     const innerWrapper = document.createElement("div");
     innerWrapper.appendChild(legend);
-    innerWrapper.appendChild(propertiesContainer);
-    innerWrapper.appendChild(quickAddPropertyContainer);
     container.appendChild(innerWrapper);
     if (config.addProperty) {
       quickAddPropertyContainer.appendChild(quickAddPropertyControl.container);
@@ -8614,6 +8645,8 @@ class Theme {
     }
     body.appendChild(childrenSlot);
     innerWrapper.appendChild(body);
+    innerWrapper.appendChild(propertiesContainer);
+    innerWrapper.appendChild(quickAddPropertyContainer);
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
     }
