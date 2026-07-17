@@ -1,4 +1,4 @@
-import { combineDeep, compileTemplate, isObject, isSet, pathToAttribute } from '../helpers/utils.js'
+import { combineDeep, compileTemplate, filterAttributes, isArray, isObject, isSet, isString, pathToAttribute } from '../helpers/utils.js'
 import { getSchemaDescription, getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -58,6 +58,7 @@ class Editor {
     this.addEventListeners()
     this.setVisibility()
     this.setContainerAttributes()
+    this.appendSchemaButtons()
     this.refreshUI()
 
     const alwaysShowErrors = this.instance.jedison.getOption('showErrors') === 'always' || getSchemaXOption(this.instance.schema, 'showErrors') === 'always'
@@ -123,6 +124,97 @@ class Editor {
         }
       }
     }
+  }
+
+  /**
+   * Renders schema-defined action buttons (the `x-buttons` keyword) into the
+   * editor container. Works for every editor because it lives on the base
+   * class, next to setAttributes()/setContainerAttributes(). Both `x-buttons`
+   * and `x-options.buttons` spellings resolve through getSchemaXOption().
+   *
+   * Security decisions from issue #62:
+   * - The label is HTML sanitized through the existing DOMPurify pipeline
+   *   (purifyContent(), decision 9c / F6) before being handed to the theme.
+   * - The `attributes` bag is filtered against an allowlist (filterAttributes(),
+   *   decision 6a / F1); `always-enabled` / `always-disabled` are intentionally
+   *   allowed (decision 6b, trusted-schema stance).
+   * - Each button emits a `jedison:<name>` event on the root Jedison instance
+   *   through the internal EventEmitter (decision 1c / 2), carrying a live
+   *   payload `{ jedison, editor, path }` (decision 8). Consumers subscribe with
+   *   `jedison.on('jedison:<name>', ({ jedison, editor, path }) => ...)`. The
+   *   listener map is private to the instance, so the payload is not exposed to
+   *   unrelated scripts on the page (F3 contained).
+   * - Click listeners are registered through storedEventListeners so destroy()
+   *   cleans them up.
+   */
+  appendSchemaButtons () {
+    const buttons = getSchemaXOption(this.instance.schema, 'buttons')
+
+    if (!isArray(buttons)) {
+      return
+    }
+
+    const debug = this.instance.jedison.getOption('debug')
+    const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
+
+    buttons.forEach((config) => {
+      if (!isObject(config)) {
+        if (debug) {
+          console.warn('Jedison: x-buttons entry is not an object and was skipped.', config)
+        }
+        return
+      }
+
+      // Label: HTML sanitized through the existing DOMPurify pipeline (decision 9c / F6).
+      const rawLabel = isString(config.label) ? config.label : ''
+      const label = this.purifyEnabled ? this.purifyContent(rawLabel, domPurifyOptions) : rawLabel
+
+      // Attributes: allowlist-filtered (decision 6a / F1). __proto__ etc. never pass the allowlist (F5).
+      const attributes = filterAttributes(config.attributes, {
+        onDrop: (key) => {
+          if (debug) {
+            console.warn(`Jedison: x-buttons attribute "${key}" is not allowlisted and was dropped.`)
+          }
+        }
+      })
+
+      const button = this.theme.getXButton({ label, attributes })
+
+      this.control.container.appendChild(button)
+
+      const eventName = (isObject(config.event) && isString(config.event.name)) ? config.event.name : null
+
+      if (!eventName) {
+        if (debug) {
+          console.warn('Jedison: x-buttons entry has no event.name; button renders but dispatches nothing.', config)
+        }
+        return
+      }
+
+      const handler = () => {
+        const jedison = this.instance.jedison
+
+        if (!jedison) {
+          return
+        }
+
+        // Emit on the root Jedison instance (decision 1c, root only). The
+        // payload is a single context object passed positionally.
+        jedison.emit('jedison:' + eventName, {
+          jedison,
+          editor: this,
+          path: this.instance.path
+        })
+      }
+
+      button.addEventListener('click', handler)
+
+      this.storedEventListeners.push({
+        element: button,
+        eventType: 'click',
+        handler
+      })
+    })
   }
 
   /**

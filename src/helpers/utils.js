@@ -247,6 +247,71 @@ export function getType (value) {
 }
 
 /**
+ * Default allowlist of exact attribute names accepted from a schema-supplied
+ * attribute bag (e.g. x-buttons `attributes`). Everything else is dropped.
+ * @type {string[]}
+ */
+export const DEFAULT_ATTRIBUTE_ALLOWLIST = [
+  'id',
+  'class',
+  'title',
+  'name',
+  'value',
+  'disabled',
+  'always-enabled',
+  'always-disabled'
+]
+
+/**
+ * Attribute name prefixes accepted in addition to the exact allowlist.
+ * @type {string[]}
+ */
+export const DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES = ['aria-', 'data-']
+
+/**
+ * Filters a schema-supplied attribute bag against an allowlist. Only keys that
+ * either match the exact allowlist (case-insensitive) or start with one of the
+ * allowed prefixes are kept; everything else (event handlers like `on*`,
+ * `style`, `formaction`, unsafe keys like `__proto__`, ...) is dropped. This is
+ * the shared helper referenced by the x-buttons security decisions and is meant
+ * to be retrofitted onto x-inputAttributes / x-containerAttributes later.
+ * @param {object} attributes - The raw attribute bag from the schema
+ * @param {object} [options] - Options
+ * @param {string[]} [options.allowlist] - Exact attribute names to keep
+ * @param {string[]} [options.allowedPrefixes] - Name prefixes to keep
+ * @param {function} [options.onDrop] - Called with each dropped attribute name
+ * @return {object} A new object containing only the allowed attributes
+ */
+export function filterAttributes (attributes, options = {}) {
+  const {
+    allowlist = DEFAULT_ATTRIBUTE_ALLOWLIST,
+    allowedPrefixes = DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES,
+    onDrop
+  } = options
+
+  const result = {}
+
+  if (!isObject(attributes)) {
+    return result
+  }
+
+  const allowed = new Set(allowlist.map((name) => name.toLowerCase()))
+
+  for (const [key, value] of Object.entries(attributes)) {
+    const normalizedKey = key.trim().toLowerCase()
+    const isAllowed = allowed.has(normalizedKey) || allowedPrefixes.some((prefix) => normalizedKey.startsWith(prefix))
+
+    if (isAllowed) {
+      result[key] = value
+    } else if (typeof onDrop === 'function') {
+      onDrop(key)
+    }
+  }
+
+  return result
+}
+
+/**
  * Merges objects
  * @param {object} target - The target object
  * @param {object[]} sources - Objects to be merged into the target object
