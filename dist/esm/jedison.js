@@ -7027,7 +7027,7 @@ class Jedison extends EventEmitter {
       editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
-      autoFlat: false,
+      autoFlat: true,
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
@@ -7695,6 +7695,36 @@ class Theme {
     this.btnContents = true;
     this.btnIcons = true;
     this.init();
+    this.injectDialogLayoutStyles();
+  }
+  /**
+   * Injects a one-time stylesheet so dialogs use available width instead of
+   * growing tall: property lists flow into responsive columns, and the
+   * scrollable content wrapper is capped so long lists don't exceed the viewport
+   */
+  injectDialogLayoutStyles() {
+    const id = "jedi-dialog-layout-style";
+    if (document.getElementById(id)) {
+      return;
+    }
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      .jedi-properties-group,
+      .jedi-accordion-body {
+        column-width: 220px;
+        column-gap: 1.5rem;
+      }
+      .jedi-properties-group > div,
+      .jedi-accordion-body > div {
+        break-inside: avoid;
+      }
+      .jedi-modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+    `;
+    document.head.appendChild(style);
   }
   /**
    * Inits some instance properties
@@ -8046,12 +8076,15 @@ class Theme {
     const html = this.getDialog();
     html.classList.add("jedi-properties-slot");
     html.setAttribute("id", config.id);
+    const content = document.createElement("div");
+    content.classList.add("jedi-modal-content");
+    html.appendChild(content);
     html.addEventListener("click", (event) => {
       if (event.target === html) {
         html.close();
       }
     });
-    return html;
+    return { dialog: html, content };
   }
   getQuickAddPropertySlot(config) {
     const html = this.getDialog();
@@ -8344,6 +8377,7 @@ class Theme {
     dialog.style.borderRadius = "4px";
     dialog.style.minWidth = "400px";
     dialog.style.maxWidth = "90vw";
+    dialog.style.width = "min(90vw, 720px)";
     return dialog;
   }
   /**
@@ -8443,7 +8477,7 @@ class Theme {
     const jsonData = this.getJsonData({
       id: "json-data-" + config.id
     });
-    const propertiesContainer = this.getPropertiesSlot({
+    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({
       id: "properties-slot-" + config.id
     });
     const propertiesToggle = this.getPropertiesToggle({
@@ -8528,8 +8562,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContainer.appendChild(ariaLive);
-      propertiesContainer.appendChild(propertiesActivators);
+      propertiesContent.appendChild(ariaLive);
+      propertiesContent.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
@@ -8578,7 +8612,7 @@ class Theme {
     const info = this.getInfo(config.info);
     const description = this.getDescription({ content: config.description });
     const jsonData = this.getJsonData({ id: "json-data-" + config.id });
-    const propertiesContainer = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
+    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
     const propertiesToggle = this.getPropertiesToggle({
       content: config.propertiesToggleContent,
       id: "properties-slot-toggle-" + config.id,
@@ -8655,8 +8689,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContainer.appendChild(ariaLive);
-      propertiesContainer.appendChild(propertiesActivators);
+      propertiesContent.appendChild(ariaLive);
+      propertiesContent.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);

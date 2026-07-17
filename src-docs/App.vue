@@ -891,47 +891,76 @@ export default {
       }
 
 
-      // options.data = {
-      //   "$id": "https://example.com/complex-object.schema.json",
-      //   "$schema": "https://json-schema.org/draft/2020-12/schema",
-      //   "title": "Complex Object",
-      //   "type": "object",
-      //   "properties": {
-      //     "name": {
-      //       "type": "string"
-      //     },
-      //     "age": {
-      //       "type": "integer",
-      //       "minimum": 0
-      //     },
-      //     "address": {
-      //       "type": "object",
-      //       "properties": {
-      //         "street": {
-      //           "type": "string"
-      //         },
-      //         "city": {
-      //           "type": "string"
-      //         },
-      //         "state": {
-      //           "type": "string"
-      //         },
-      //         "postalCode": {
-      //           "type": "string",
-      //           "pattern": "\\d{5}"
-      //         }
-      //       },
-      //       "required": ["street", "city", "state", "postalCode"]
-      //     },
-      //     "hobbies": {
-      //       "type": "array",
-      //       "items": {
-      //         "type": "string"
-      //       }
-      //     }
-      //   },
-      //   "required": ["name", "age"]
-      // }
+    //   options.data = {
+    //   "$schema": "https://json-schema.org/draft-07/schema",
+    //       "type": "object",
+    //       "properties": {
+    //     "person": {
+    //       "type": "object",
+    //           "description": "Personal information",
+    //           "properties": {
+    //         "firstName": {
+    //           "type": "string",
+    //               "description": "First name of the person"
+    //         },
+    //         "lastName": {
+    //           "type": "string",
+    //               "description": "Last name of the person"
+    //         },
+    //         "age": {
+    //           "type": "number",
+    //               "description": "Age in years"
+    //         },
+    //         "isEmployed": {
+    //           "type": "boolean",
+    //               "description": "Whether the person is currently employed"
+    //         }
+    //       },
+    //       "required": [
+    //         "firstName",
+    //         "lastName"
+    //       ]
+    //     },
+    //     "address": {
+    //       "type": "object",
+    //           "description": "Address information",
+    //           "properties": {
+    //         "street": {
+    //           "type": "string",
+    //               "description": "Street address"
+    //         },
+    //         "city": {
+    //           "type": "string",
+    //               "description": "City name"
+    //         },
+    //         "zipCode": {
+    //           "type": "string",
+    //               "description": "Postal/ZIP code"
+    //         }
+    //       }
+    //     },
+    //     "hobbies": {
+    //       "type": "array",
+    //           "description": "List of hobbies",
+    //           "items": {
+    //         "type": "object",
+    //             "properties": {
+    //           "name": {
+    //             "type": "string",
+    //                 "description": "Name of the hobby"
+    //           },
+    //           "yearsExperience": {
+    //             "type": "number",
+    //                 "description": "Years of experience"
+    //           }
+    //         }
+    //       }
+    //     }
+    //   },
+    //   "required": [
+    //     "person"
+    //   ]
+    // }
 
 
 
