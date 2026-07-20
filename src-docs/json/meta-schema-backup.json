@@ -3,8 +3,15 @@
   "x-titleHidden": true,
   "$defs": {
     "schema": {
+      "x-format": "categories-horizontal",
       "x-deactivateNonRequired": true,
       "x-enablePropertiesToggle": true,
+      "x-categoryOrder": [
+        "Validation",
+        "Annotations",
+        "Composition",
+        "Options"
+      ],
       "additionalProperties": {
         "$ref": "#/$defs/schema",
         "x-propGroup": "Object"
@@ -24,11 +31,12 @@
             "null"
           ],
           "x-format": "radios-inline",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "const": {
           "title": "Const",
-          "x-inferType": "type",
+          "description": "A single fixed value this schema must equal.",
           "type": [
             "object",
             "array",
@@ -38,46 +46,40 @@
             "boolean",
             "null"
           ],
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "enum": {
           "title": "Enum",
+          "description": "List of allowed values.",
           "type": "array",
           "minItems": 1,
-          "items": {
-            "x-inferType": "../type",
-            "type": [
-              "object",
-              "array",
-              "string",
-              "number",
-              "integer",
-              "boolean",
-              "null"
-            ]
-          },
           "uniqueItems": true,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "title": {
           "title": "Title",
           "type": "string",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "description": {
           "title": "Description",
           "type": "string",
           "x-format": "textarea",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "format": {
           "title": "Format",
+          "description": "Semantic string format (e.g. \"email\", \"date\", \"uri\").",
           "type": "string",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "default": {
           "title": "Default",
-          "x-inferType": "type",
           "type": [
             "null",
             "boolean",
@@ -87,141 +89,153 @@
             "string",
             "integer"
           ],
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "readOnly": {
           "title": "Read-only",
           "type": "boolean",
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "$schema": {
           "title": "$schema",
           "type": "string",
           "format": "uri",
-          "enum": [
-            "http://json-schema.org/draft-04/schema#",
-            "http://json-schema.org/draft-06/schema#",
-            "http://json-schema.org/draft-07/schema#",
-            "https://json-schema.org/draft-07/schema",
-            "https://json-schema.org/draft/2019-09/schema",
-            "https://json-schema.org/draft/2020-12/schema"
-          ],
-          "x-propGroup": "Annotations"
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "$id": {
           "title": "$id",
           "type": "string",
           "format": "uri",
-          "x-propGroup": "Annotations"
-        },
-        "$defs": {
-          "title": "$defs",
-          "x-propGroup": "Composition",
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/schema"
-          }
+          "x-propGroup": "Annotations",
+          "x-category": "Annotations"
         },
         "maxLength": {
           "title": "Max length",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "minLength": {
           "title": "Min length",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "pattern": {
           "title": "Pattern",
+          "description": "Regular expression the value must match.",
           "type": "string",
           "format": "regex",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "exclusiveMaximum": {
           "title": "Exclusive maximum",
           "type": "number",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "exclusiveMinimum": {
           "title": "Exclusive minimum",
           "type": "number",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "maximum": {
           "title": "Maximum",
           "type": "number",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "minimum": {
           "title": "Minimum",
           "type": "number",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "multipleOf": {
           "title": "Multiple of",
+          "description": "Value must be a multiple of this number.",
           "type": "number",
           "exclusiveMinimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "contains": {
           "$ref": "#/$defs/schema",
           "title": "Contains",
+          "description": "At least one array item must match this schema.",
           "x-propGroup": "Validation",
+          "x-category": "Validation",
           "x-enableCollapseToggle": true,
           "x-startCollapsed": true
         },
         "items": {
           "$ref": "#/$defs/schema",
           "title": "Items",
-          "x-propGroup": "Validation"
+          "description": "Schema each array item must match.",
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "maxContains": {
           "title": "Max contains",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "maxItems": {
           "title": "Max items",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "minContains": {
           "title": "Min contains",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "minItems": {
           "title": "Min items",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "prefixItems": {
           "title": "Prefix items",
+          "description": "Tuple of schemas, one per fixed array position.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "uniqueItems": {
           "title": "Unique items",
           "type": "boolean",
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "additionalProperties": {
           "$ref": "#/$defs/schema",
           "title": "Additional properties",
-          "x-propGroup": "Validation"
+          "description": "Schema that keys not listed in \"properties\" must match.",
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "dependentRequired": {
           "title": "Dependent required",
+          "description": "Maps a property name to other properties required when it is present.",
           "type": "object",
           "additionalProperties": {
             "type": "array",
@@ -235,7 +249,8 @@
               "addChoices": true
             }
           },
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "dependentSchemas": {
           "title": "Dependent schemas",
@@ -245,45 +260,53 @@
             "x-enableCollapseToggle": true,
             "x-startCollapsed": true
           },
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "maxProperties": {
           "title": "Max properties",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "minProperties": {
           "title": "Min properties",
           "type": "integer",
           "minimum": 0,
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "patternProperties": {
           "title": "Pattern properties",
+          "description": "Maps a regular expression to the schema keys matching it must satisfy.",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/schema",
             "x-enableCollapseToggle": true,
             "x-startCollapsed": true
           },
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "properties": {
-          "title": "Properties ",
+          "title": "Properties",
           "type": "object",
+          "x-format": "accordion",
           "additionalProperties": {
             "$ref": "#/$defs/schema",
-            "x-propGroup": "Object",
-            "x-startCollapsed": true
+            "x-propGroup": "Object"
           },
-          "x-propGroup": "Validation"
+          "x-propGroup": "Validation",
+          "x-category": "Validation"
         },
         "required": {
-          "title": "Required",
-          "x-format": "checkboxes-inline",
+          "title": "Required properties",
+          "description": "Property names that must be present.",
+          "x-format": "checkboxes",
           "x-enumSource": "properties",
           "x-propGroup": "Validation",
+          "x-category": "Validation",
           "type": "array",
           "uniqueItems": true,
           "items": {
@@ -293,30 +316,34 @@
         "$ref": {
           "title": "$ref",
           "type": "string",
-          "x-propGroup": "Composition"
+          "x-propGroup": "Composition",
+          "x-category": "Composition"
         },
         "allOf": {
           "title": "All of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Composition"
+          "x-propGroup": "Composition",
+          "x-category": "Composition"
         },
         "anyOf": {
           "title": "Any of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Composition"
+          "x-propGroup": "Composition",
+          "x-category": "Composition"
         },
         "if": {
           "$ref": "#/$defs/schema",
           "title": "If",
           "x-propGroup": "Composition",
+          "x-category": "Composition",
           "x-enableCollapseToggle": true,
           "x-startCollapsed": true
         },
@@ -324,6 +351,7 @@
           "$ref": "#/$defs/schema",
           "title": "Then",
           "x-propGroup": "Composition",
+          "x-category": "Composition",
           "x-enableCollapseToggle": true,
           "x-startCollapsed": true
         },
@@ -331,6 +359,7 @@
           "$ref": "#/$defs/schema",
           "title": "Else",
           "x-propGroup": "Composition",
+          "x-category": "Composition",
           "x-enableCollapseToggle": true,
           "x-startCollapsed": true
         },
@@ -338,41 +367,49 @@
           "$ref": "#/$defs/schema",
           "title": "Not",
           "x-propGroup": "Composition",
+          "x-category": "Composition",
           "x-enableCollapseToggle": true,
           "x-startCollapsed": true
         },
         "oneOf": {
           "title": "One of",
           "type": "array",
-          "x-format": "nav-horizontal",
+          "x-format": "nav-vertical",
           "items": {
             "$ref": "#/$defs/schema"
           },
-          "x-propGroup": "Composition"
+          "x-propGroup": "Composition",
+          "x-category": "Composition"
         },
         "x-format": {
           "title": "x-format",
+          "description": "Overrides the default editor used for this schema node.",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "string"
         },
         "x-titleIconClass": {
           "title": "x-titleIconClass",
           "type": "string",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "x-category": "Options"
         },
         "x-titleTemplate": {
           "title": "x-titleTemplate",
           "type": "string",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "x-category": "Options"
         },
         "x-switcherTitle": {
           "title": "x-switcherTitle",
           "type": "string",
-          "x-propGroup": "Options"
+          "x-propGroup": "Options",
+          "x-category": "Options"
         },
         "x-grid": {
           "title": "x-grid",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "object",
           "properties": {
             "columns": {
@@ -392,6 +429,7 @@
         "x-messages": {
           "title": "x-messages",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -400,6 +438,7 @@
         "x-enumTitles": {
           "title": "x-enumTitles",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "x-format": "table",
           "type": "array",
           "items": {
@@ -409,69 +448,50 @@
         "x-titleHidden": {
           "title": "x-titleHidden",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-enableCollapseToggle": {
           "title": "x-enableCollapseToggle",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-startCollapsed": {
           "title": "x-startCollapsed",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-sortable": {
           "title": "x-sortable",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-showErrors": {
           "title": "x-showErrors",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-deactivateNonRequired": {
           "title": "x-deactivateNonRequired",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-assertFormat": {
           "title": "x-assertFormat",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "boolean"
         },
         "x-discriminator": {
           "title": "x-discriminator",
           "x-propGroup": "Options",
+          "x-category": "Options",
           "type": "string"
-        },
-        "x-buttons": {
-          "x-propGroup": "Options",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string"
-              },
-              "event": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  }
-                },
-                "required": ["name"]
-              },
-              "attributes": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
-              }
-            }
-          }
         }
       }
     }

@@ -1,438 +1,552 @@
 {
-  "type": "object",
+  "$ref": "#/$defs/schema",
   "x-titleHidden": true,
-  "x-format": "horizontal",
-  "x-card": false,
-  "x-labelColumns": 3,
-  "x-inputColumns": 6,
-  "properties": {
-    "fertigungsbereich": {
-    "title": "Worum geht es in Ihrer Fertigung?",
-      "x-propertyOrder": 3,
-      "type": "string",
-      "enum": [
-        "large-heavy",
-        "small-complex",
-        "4-5-axis",
-        "complete-machining",
-        "automation",
-        "cadcam",
-        "service",
-        "see-machine",
-        "other"
-      ],
-      "x-enumTitles": [
-        "Große oder schwere Werkstücke",
-        "Kleine, komplexe Präzisionsteile",
-        "4-Achs- oder 5-Achs-Bearbeitung",
-        "Komplettbearbeitung und/oder Drehen/Fräsen kombiniert",
-        "Automatisierung, Teilehandling, Palettenhandling oder Prozessverkettung",
-        "CAD/CAM, Simulation oder NC-Programmierung",
-        "Service, Ersatzteile, präventive Wartung oder Modernisierung einer bestehenden Maschine",
-        "Ich möchte eine konkrete Maschine auf der AMB sehen",
-        "Keiner der genannten Punkte, sondern:"
-      ]
+  "$defs": {
+    "schema": {
+      "x-deactivateNonRequired": true,
+      "x-enablePropertiesToggle": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/schema",
+        "x-propGroup": "Object"
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "object"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "default": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "if": {
+          "properties": {
+            "type": {
+              "const": "array"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "default": {
+              "type": "array"
+            }
+          }
+        },
+        "else": {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "string"
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "number"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "default": {
+                  "type": "number"
+                }
+              }
+            },
+            "else": {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "integer"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "default": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "else": {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "boolean"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "default": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "else": {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "null"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "default": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "object",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "array",
+            "null"
+          ],
+          "x-format": "radios-inline",
+          "x-propGroup": "Validation"
+        },
+        "const": {
+          "title": "Const",
+          "description": "A single fixed value this schema must equal.",
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ],
+          "x-propGroup": "Validation"
+        },
+        "enum": {
+          "title": "Enum",
+          "description": "List of allowed values.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-propGroup": "Validation"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string",
+          "x-propGroup": "Annotations"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-format": "textarea",
+          "x-propGroup": "Annotations"
+        },
+        "format": {
+          "title": "Format",
+          "description": "Semantic string format (e.g. \"email\", \"date\", \"uri\").",
+          "type": "string",
+          "x-propGroup": "Annotations"
+        },
+        "default": {
+          "title": "Default",
+          "type": [
+            "null",
+            "boolean",
+            "object",
+            "array",
+            "number",
+            "string",
+            "integer"
+          ],
+          "x-propGroup": "Annotations"
+        },
+        "readOnly": {
+          "title": "Read-only",
+          "type": "boolean",
+          "x-propGroup": "Annotations"
+        },
+        "$schema": {
+          "title": "$schema",
+          "type": "string",
+          "format": "uri",
+          "x-propGroup": "Annotations"
+        },
+        "$id": {
+          "title": "$id",
+          "type": "string",
+          "format": "uri",
+          "x-propGroup": "Annotations"
+        },
+        "$defs": {
+          "title": "$defs",
+          "x-propGroup": "Composition",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema"
+          }
+        },
+        "maxLength": {
+          "title": "Max length",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "minLength": {
+          "title": "Min length",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "description": "Regular expression the value must match.",
+          "type": "string",
+          "format": "regex",
+          "x-propGroup": "Validation"
+        },
+        "exclusiveMaximum": {
+          "title": "Exclusive maximum",
+          "type": "number",
+          "x-propGroup": "Validation"
+        },
+        "exclusiveMinimum": {
+          "title": "Exclusive minimum",
+          "type": "number",
+          "x-propGroup": "Validation"
+        },
+        "maximum": {
+          "title": "Maximum",
+          "type": "number",
+          "x-propGroup": "Validation"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number",
+          "x-propGroup": "Validation"
+        },
+        "multipleOf": {
+          "title": "Multiple of",
+          "description": "Value must be a multiple of this number.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "contains": {
+          "$ref": "#/$defs/schema",
+          "title": "Contains",
+          "description": "At least one array item must match this schema.",
+          "x-propGroup": "Validation",
+          "x-enableCollapseToggle": true,
+          "x-startCollapsed": true
+        },
+        "items": {
+          "$ref": "#/$defs/schema",
+          "title": "Items",
+          "description": "Schema each array item must match.",
+          "x-propGroup": "Validation"
+        },
+        "maxContains": {
+          "title": "Max contains",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "maxItems": {
+          "title": "Max items",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "minContains": {
+          "title": "Min contains",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "minItems": {
+          "title": "Min items",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "prefixItems": {
+          "title": "Prefix items",
+          "description": "Tuple of schemas, one per fixed array position.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Validation"
+        },
+        "uniqueItems": {
+          "title": "Unique items",
+          "type": "boolean",
+          "x-propGroup": "Validation"
+        },
+        "additionalProperties": {
+          "$ref": "#/$defs/schema",
+          "title": "Additional properties",
+          "description": "Schema that keys not listed in \"properties\" must match.",
+          "x-propGroup": "Validation"
+        },
+        "dependentRequired": {
+          "title": "Dependent required",
+          "description": "Maps a property name to other properties required when it is present.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "title": "property",
+              "type": "string"
+            },
+            "x-format": "choices",
+            "x-choicesOptions": {
+              "addChoices": true
+            }
+          },
+          "x-propGroup": "Validation"
+        },
+        "dependentSchemas": {
+          "title": "Dependent schemas",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema",
+            "x-enableCollapseToggle": true,
+            "x-startCollapsed": true
+          },
+          "x-propGroup": "Validation"
+        },
+        "maxProperties": {
+          "title": "Max properties",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "minProperties": {
+          "title": "Min properties",
+          "type": "integer",
+          "minimum": 0,
+          "x-propGroup": "Validation"
+        },
+        "patternProperties": {
+          "title": "Pattern properties",
+          "description": "Maps a regular expression to the schema keys matching it must satisfy.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema",
+            "x-enableCollapseToggle": true,
+            "x-startCollapsed": true
+          },
+          "x-propGroup": "Validation"
+        },
+        "properties": {
+          "title": "Properties ",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema",
+            "x-propGroup": "Object"
+          },
+          "x-propGroup": "Validation"
+        },
+        "required": {
+          "title": "Required",
+          "description": "Property names that must be present.",
+          "x-format": "checkboxes",
+          "x-enumSource": "properties",
+          "x-propGroup": "Validation",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "$ref": {
+          "title": "$ref",
+          "type": "string",
+          "x-propGroup": "Composition"
+        },
+        "allOf": {
+          "title": "All of",
+          "type": "array",
+          "x-format": "nav-horizontal",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Composition"
+        },
+        "anyOf": {
+          "title": "Any of",
+          "type": "array",
+          "x-format": "nav-horizontal",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Composition"
+        },
+        "if": {
+          "$ref": "#/$defs/schema",
+          "title": "If",
+          "x-propGroup": "Composition",
+          "x-enableCollapseToggle": true,
+          "x-startCollapsed": true
+        },
+        "then": {
+          "$ref": "#/$defs/schema",
+          "title": "Then",
+          "x-propGroup": "Composition",
+          "x-enableCollapseToggle": true,
+          "x-startCollapsed": true
+        },
+        "else": {
+          "$ref": "#/$defs/schema",
+          "title": "Else",
+          "x-propGroup": "Composition",
+          "x-enableCollapseToggle": true,
+          "x-startCollapsed": true
+        },
+        "not": {
+          "$ref": "#/$defs/schema",
+          "title": "Not",
+          "x-propGroup": "Composition",
+          "x-enableCollapseToggle": true,
+          "x-startCollapsed": true
+        },
+        "oneOf": {
+          "title": "One of",
+          "type": "array",
+          "x-format": "nav-horizontal",
+          "items": {
+            "$ref": "#/$defs/schema"
+          },
+          "x-propGroup": "Composition"
+        },
+        "x-format": {
+          "title": "x-format",
+          "description": "Overrides the default editor used for this schema node.",
+          "x-propGroup": "Options",
+          "type": "string"
+        },
+        "x-titleIconClass": {
+          "title": "x-titleIconClass",
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-titleTemplate": {
+          "title": "x-titleTemplate",
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-switcherTitle": {
+          "title": "x-switcherTitle",
+          "type": "string",
+          "x-propGroup": "Options"
+        },
+        "x-grid": {
+          "title": "x-grid",
+          "x-propGroup": "Options",
+          "type": "object",
+          "properties": {
+            "columns": {
+              "title": "Columns",
+              "type": "number"
+            },
+            "offset": {
+              "title": "Offset",
+              "type": "number"
+            },
+            "newRow": {
+              "title": "Start new row",
+              "type": "boolean"
+            }
+          }
+        },
+        "x-messages": {
+          "title": "x-messages",
+          "x-propGroup": "Options",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "x-enumTitles": {
+          "title": "x-enumTitles",
+          "x-propGroup": "Options",
+          "x-format": "table",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x-titleHidden": {
+          "title": "x-titleHidden",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-enableCollapseToggle": {
+          "title": "x-enableCollapseToggle",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-startCollapsed": {
+          "title": "x-startCollapsed",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-sortable": {
+          "title": "x-sortable",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-showErrors": {
+          "title": "x-showErrors",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-deactivateNonRequired": {
+          "title": "x-deactivateNonRequired",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-assertFormat": {
+          "title": "x-assertFormat",
+          "x-propGroup": "Options",
+          "type": "boolean"
+        },
+        "x-discriminator": {
+          "title": "x-discriminator",
+          "x-propGroup": "Options",
+          "type": "string"
+        }
+      }
     }
-  },
-  "allOf": [
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "large-heavy" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "aufgabeGrosseSchwere": {
-            "title": "Was beschreibt Ihre Aufgabe am besten?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "horizontal",
-              "vertikal",
-              "portal-gantry",
-              "dreh-schleifen",
-              "grosse-bauteile-genauigkeit",
-              "eigene-beschreibung"
-            ],
-            "x-enumTitles": [
-              "Horizontale Bearbeitung",
-              "Vertikale Bearbeitung",
-              "Portal- oder Gantry-Bearbeitung",
-              "Dreh- oder Schleifbearbeitung",
-              "Große Bauteile mit hohen Genauigkeitsanforderungen",
-              "Eigene Beschreibung"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich", "aufgabeGrosseSchwere"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "large-heavy" },
-          "aufgabeGrosseSchwere": { "type": "string", "const": "eigene-beschreibung" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "aufgabeGrosseSchwereText": {
-            "title": "Eigene Beschreibung",
-            "x-propertyOrder": 5,
-            "type": "string",
-            "x-format": "textarea"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "small-complex" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "anwendungsbereich": {
-            "title": "In welchem Bereich liegt Ihre Anwendung?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "medizintechnik",
-              "mikromechanik",
-              "uhren-luxus",
-              "kleine-praezisionsteile",
-              "eigene-beschreibung"
-            ],
-            "x-enumTitles": [
-              "Medizintechnik",
-              "Mikromechanik",
-              "Uhren / Luxusgüter",
-              "Kleine komplexe Präzisionsteile",
-              "Eigene Beschreibung"
-            ]
-          }
-        },
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "required": ["anwendungsbereich"],
-              "properties": {
-                "anwendungsbereich": { "type": "string", "const": "eigene-beschreibung" }
-              }
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "anwendungsbereichText": {
-                  "title": "Eigene Beschreibung",
-                  "x-propertyOrder": 5,
-                  "type": "string",
-                  "x-format": "textarea"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "4-5-axis" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "relevanzAchs": {
-            "title": "Was ist für Sie besonders relevant?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "4-achs",
-              "5-achs",
-              "ultrapraezision",
-              "paletten-werkstueck",
-              "spindelkonzept",
-              "eigene-beschreibung"
-            ],
-            "x-enumTitles": [
-              "4-Achs-Bearbeitung",
-              "5-Achs-Bearbeitung",
-              "Ultrapräzisionsbearbeitung (JIG-Boring)",
-              "Palettengröße / Werkstückgröße / Belademasse",
-              "Spindelkonzept",
-              "Eigene Beschreibung"
-            ]
-          }
-        },
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "required": ["relevanzAchs"],
-              "properties": {
-                "relevanzAchs": { "type": "string", "const": "eigene-beschreibung" }
-              }
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "relevanzAchsText": {
-                  "title": "Eigene Beschreibung",
-                  "x-propertyOrder": 5,
-                  "type": "string",
-                  "x-format": "textarea"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "complete-machining" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "komplettbearbeitungThema": {
-            "title": "Was möchten Sie besprechen?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "mehrere-schritte",
-              "fraesen-drehen",
-              "fertigbearbeitung",
-              "ruestzeiten",
-              "genauigkeit-umspannungen",
-              "eigene-beschreibung"
-            ],
-            "x-enumTitles": [
-              "Mehrere Bearbeitungsschritte in einem Prozess bündeln",
-              "Fräsen und Drehen kombinieren",
-              "Fertigbearbeitung inkl. sog. 6. Seite",
-              "Rüstzeiten reduzieren",
-              "Genauigkeit durch weniger Umspannungen verbessern",
-              "Eigene Beschreibung"
-            ]
-          }
-        },
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "required": ["komplettbearbeitungThema"],
-              "properties": {
-                "komplettbearbeitungThema": { "type": "string", "const": "eigene-beschreibung" }
-              }
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "komplettbearbeitungText": {
-                  "title": "Eigene Beschreibung",
-                  "x-propertyOrder": 5,
-                  "type": "string",
-                  "x-format": "textarea"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "automation" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "automatisierungFokus": {
-            "title": "Was steht im Vordergrund?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "paletten-automation",
-              "roboter-automation",
-              "stangen-teile",
-              "flexible-systeme",
-              "maschinenverkettung",
-              "software-industrie-4",
-              "auslastung-bestehend",
-              "eigene-beschreibung"
-            ],
-            "x-enumTitles": [
-              "Palettenautomation",
-              "Roboterautomation",
-              "Bearbeitung von Stangenmaterial / Teile-Handling",
-              "Flexible Fertigungssysteme",
-              "Maschinenverkettung",
-              "Software / Industrie 4.0 / IPS",
-              "Höhere Auslastung bestehender Anlagen",
-              "Eigene Beschreibung"
-            ]
-          }
-        },
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "required": ["automatisierungFokus"],
-              "properties": {
-                "automatisierungFokus": { "type": "string", "const": "eigene-beschreibung" }
-              }
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "automatisierungText": {
-                  "title": "Eigene Beschreibung",
-                  "x-propertyOrder": 5,
-                  "type": "string",
-                  "x-format": "textarea"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "cadcam" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "cadcamThema": {
-            "title": "Worum geht es?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "cadcam-programmierung",
-              "nc-programmierung",
-              "prozesssimulation",
-              "postprozessor",
-              "digitale-unterstuetzung",
-              "schulung-support",
-              "nicht-sicher"
-            ],
-            "x-enumTitles": [
-              "CAD/CAM-Programmierung",
-              "NC-Programmierung",
-              "Prozesssimulation / Kollisionsprüfung / Digitaler Zwilling",
-              "Postprozessor / Maschinenanbindung",
-              "Digitale Prozessunterstützung, z. B. RCS 8",
-              "Schulung oder Support",
-              "Ich bin nicht sicher"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "service" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "serviceThema": {
-            "title": "Worum geht es?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": [
-              "ersatzteile-service",
-              "retrofit-modernisierung",
-              "wartung-inspektion",
-              "training",
-              "produktionsunterstuetzung",
-              "noch-offen"
-            ],
-            "x-enumTitles": [
-              "Ersatzteile / Service",
-              "Retrofit / Modernisierung",
-              "Wartung / Inspektion",
-              "Training",
-              "Produktionsunterstützung",
-              "Noch offen"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "see-machine" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "maschinenInteresse": {
-            "title": "Welche Maschine interessiert Sie?",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "enum": ["heckert-x90", "bumotec-171", "beide"],
-            "x-enumTitles": ["Heckert X90", "Bumotec 171", "Beide"]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "type": "object",
-        "required": ["fertigungsbereich"],
-        "properties": {
-          "fertigungsbereich": { "type": "string", "const": "other" }
-        }
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "sonstigesText": {
-            "title": "Eigene Beschreibung",
-            "x-propertyOrder": 4,
-            "type": "string",
-            "x-format": "textarea"
-          }
-        }
-      }
-    }
-  ]
+  }
 }

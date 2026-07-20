@@ -16,6 +16,7 @@ class EditorObjectCategories extends EditorObject {
   init () {
     super.init()
     this.activeCategoryName = null
+    this.userSelectedCategory = false
   }
 
   navigateTo (path) {
@@ -36,6 +37,7 @@ class EditorObjectCategories extends EditorObject {
           categoryName = defaultLabel
         }
         this.activeCategoryName = categoryName
+        this.userSelectedCategory = true
         this.refreshUI()
       }
     }
@@ -98,11 +100,6 @@ class EditorObjectCategories extends EditorObject {
       categoriesMap.get(categoryName).children.push(child)
     })
 
-    // Resolve active category
-    if (!categoriesMap.has(this.activeCategoryName)) {
-      this.activeCategoryName = categoriesMap.keys().next().value
-    }
-
     // Sort categories based on x-categoryOrder
     const categoryOrder = getSchemaXOption(this.instance.schema, 'categoryOrder')
     const allNames = Array.from(categoriesMap.keys())
@@ -113,6 +110,13 @@ class EditorObjectCategories extends EditorObject {
       const specifiedFirst = categoryOrder.filter(name => categoriesMap.has(name))
       const unspecified = allNames.filter(name => !categoryOrder.includes(name))
       orderedCategoryNames = [...specifiedFirst, ...unspecified]
+    }
+
+    // Resolve active category (respecting x-categoryOrder, so the first displayed tab is also the default active one).
+    // Keep re-deferring to the top of x-categoryOrder until the user explicitly picks a tab, since categories can
+    // gain their first active child after the initial render (e.g. once example data finishes loading).
+    if (!this.userSelectedCategory || !categoriesMap.has(this.activeCategoryName)) {
+      this.activeCategoryName = orderedCategoryNames[0]
     }
 
     orderedCategoryNames.forEach((categoryName) => {
@@ -132,6 +136,7 @@ class EditorObjectCategories extends EditorObject {
 
       tab.list.addEventListener('click', () => {
         this.activeCategoryName = categoryName
+        this.userSelectedCategory = true
       })
 
       const pane = document.createElement('div')

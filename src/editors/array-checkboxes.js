@@ -136,46 +136,31 @@ class EditorArrayCheckboxes extends Editor {
     const values = this.getEnumSourceValues()
     const schemaItems = this.instance.schema.items || {}
     const titles = getSchemaXOption(schemaItems, 'enumTitles') || values
-    const id = this.getIdFromPath(this.instance.path)
-    const messagesId = id + '-messages'
-    const descriptionId = id + '-description'
-    const describedBy = messagesId + ' ' + descriptionId
 
     this.control.checkboxControls.forEach(cc => {
       if (cc.parentNode) cc.parentNode.removeChild(cc)
     })
 
-    this.control.checkboxes = []
-    this.control.labels = []
-    this.control.checkboxControls = []
-    this.control.labelTexts = []
+    // Rebuild items through the theme (same call as build()) instead of
+    // hand-rolling plain DOM, so theme-specific styling (e.g. Bootstrap's
+    // form-check classes, checkboxes-inline) is preserved on refresh.
+    const rebuilt = this.theme.getCheckboxesControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values: values,
+      titles: titles,
+      id: this.getIdFromPath(this.instance.path),
+      titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
+      inline: getSchemaXOption(this.instance.schema, 'format') === 'checkboxes-inline',
+      info: this.getInfo()
+    })
 
-    values.forEach((value, index) => {
-      const checkboxId = id + '-' + index
-      const checkboxControl = document.createElement('div')
-      const checkbox = document.createElement('input')
-      const label = document.createElement('label')
-      const labelText = document.createElement('span')
+    this.control.checkboxes = rebuilt.checkboxes
+    this.control.labels = rebuilt.labels
+    this.control.labelTexts = rebuilt.labelTexts
+    this.control.checkboxControls = rebuilt.checkboxControls
 
-      checkbox.setAttribute('type', 'checkbox')
-      checkbox.setAttribute('id', checkboxId)
-      checkbox.setAttribute('name', id)
-      checkbox.setAttribute('value', value)
-      checkbox.setAttribute('aria-describedby', describedBy)
-
-      label.setAttribute('for', checkboxId)
-
-      labelText.textContent = (titles && titles[index] !== undefined) ? titles[index] : value
-
-      checkboxControl.appendChild(checkbox)
-      checkboxControl.appendChild(label)
-      label.appendChild(labelText)
-
-      this.control.checkboxes.push(checkbox)
-      this.control.labels.push(label)
-      this.control.labelTexts.push(labelText)
-      this.control.checkboxControls.push(checkboxControl)
-
+    this.control.checkboxControls.forEach((checkboxControl) => {
       this.control.fieldset.insertBefore(checkboxControl, this.control.description)
     })
 

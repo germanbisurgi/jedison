@@ -14,6 +14,10 @@ class EditorArrayNav extends EditorArray {
     return getSchemaType(schema) === 'array' && hasNavFormat
   }
 
+  static providesChildHeading () {
+    return true
+  }
+
   navigateTo (path) {
     const nextChildPath = this.getNextChildPath(path)
     if (nextChildPath) {

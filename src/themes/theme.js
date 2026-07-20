@@ -1110,6 +1110,11 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive()
     const messages = this.getMessagesSlot()
     const childrenSlot = this.getChildrenSlot()
+
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = 'accordion-' + config.id
+    }
+
     const propertiesActivators = this.getPropertiesActivators()
     const info = this.getInfo(config.info)
     const description = this.getDescription({ content: config.description })
@@ -1174,8 +1179,6 @@ class Theme {
 
     const innerWrapper = document.createElement('div')
     innerWrapper.appendChild(legend)
-    innerWrapper.appendChild(propertiesContainer)
-    innerWrapper.appendChild(quickAddPropertyContainer)
     container.appendChild(innerWrapper)
 
     if (config.addProperty) {
@@ -1196,6 +1199,8 @@ class Theme {
 
     body.appendChild(childrenSlot)
     innerWrapper.appendChild(body)
+    innerWrapper.appendChild(propertiesContainer)
+    innerWrapper.appendChild(quickAddPropertyContainer)
 
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle)
@@ -1298,8 +1303,12 @@ class Theme {
     chevron.style.transition = 'transform 0.1s ease'
     chevron.style.marginRight = '0.5em'
 
+    const titleSpan = document.createElement('span')
+    titleSpan.style.marginRight = '0.5em'
+    titleSpan.textContent = config.title
+
     toggle.appendChild(chevron)
-    toggle.appendChild(document.createTextNode(config.title))
+    toggle.appendChild(titleSpan)
 
     const collapse = document.createElement('div')
     collapse.classList.add('jedi-accordion-collapse')

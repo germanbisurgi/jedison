@@ -148,14 +148,14 @@ function combineDeep(target, ...sources) {
     Object.keys(source).forEach((key) => {
       if (UNSAFE_KEYS.has(key)) return;
       if (isObject(source[key])) {
-        if (!target[key]) {
+        if (!isObject(target[key])) {
           Object.assign(target, {
             [key]: {}
           });
         }
         combineDeep(target[key], source[key]);
       } else if (Array.isArray(source[key])) {
-        if (!target[key]) {
+        if (!Array.isArray(target[key])) {
           target[key] = [];
         }
         target[key].push(...source[key]);
@@ -2159,6 +2159,14 @@ class Editor {
   static resolves(schema) {
   }
   /**
+   * Whether this editor already renders a heading for each of its children
+   * (e.g. an accordion toggle or a nav tab label), so a child editor can
+   * skip drawing its own duplicate heading/panel when embedded here.
+   */
+  static providesChildHeading() {
+    return false;
+  }
+  /**
    * Initializes the editor
    */
   init() {
@@ -4131,7 +4139,7 @@ class EditorObject extends Editor {
     return {
       title: this.getTitle(),
       description: this.getDescription(),
-      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden") ?? this.isEmbeddedInParentChrome(),
       id: this.getIdFromPath(this.instance.path),
       enablePropertiesToggle,
       addProperty,
@@ -4147,9 +4155,20 @@ class EditorObject extends Editor {
       titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass")
     };
   }
+  isEmbeddedInParentChrome() {
+    var _a;
+    const autoFlat = getSchemaXOption(this.instance.schema, "autoFlat") ?? this.instance.jedison.getOption("autoFlat");
+    if (!autoFlat) return false;
+    const parentInstance = this.instance.parent;
+    if (!parentInstance) return false;
+    const ParentEditorClass = this.instance.jedison.uiResolver.getClass(parentInstance.schema);
+    return !!((_a = ParentEditorClass == null ? void 0 : ParentEditorClass.providesChildHeading) == null ? void 0 : _a.call(ParentEditorClass));
+  }
   build() {
     this.propertyActivators = {};
-    const card = getSchemaXOption(this.instance.schema, "card") ?? this.instance.jedison.getOption("card");
+    const explicitCard = getSchemaXOption(this.instance.schema, "card");
+    const globalCard = this.instance.jedison.getOption("card");
+    const card = explicitCard ?? (this.isEmbeddedInParentChrome() ? false : globalCard);
     const config = this.getObjectControlConfig();
     this.control = card === false ? this.theme.getObjectControlFlat(config) : this.theme.getObjectControl(config);
     this.control.jsonData.input.value = JSON.stringify(this.instance.getValue(), null, 2);
@@ -4400,6 +4419,7 @@ class EditorObjectCategories extends EditorObject {
   init() {
     super.init();
     this.activeCategoryName = null;
+    this.userSelectedCategory = false;
   }
   navigateTo(path) {
     const nextChildPath = this.getNextChildPath(path);
@@ -4419,6 +4439,7 @@ class EditorObjectCategories extends EditorObject {
           categoryName = defaultLabel;
         }
         this.activeCategoryName = categoryName;
+        this.userSelectedCategory = true;
         this.refreshUI();
       }
     }
@@ -4469,9 +4490,6 @@ class EditorObjectCategories extends EditorObject {
       }
       categoriesMap.get(categoryName).children.push(child);
     });
-    if (!categoriesMap.has(this.activeCategoryName)) {
-      this.activeCategoryName = categoriesMap.keys().next().value;
-    }
     const categoryOrder = getSchemaXOption(this.instance.schema, "categoryOrder");
     const allNames = Array.from(categoriesMap.keys());
     let orderedCategoryNames = allNames;
@@ -4479,6 +4497,9 @@ class EditorObjectCategories extends EditorObject {
       const specifiedFirst = categoryOrder.filter((name) => categoriesMap.has(name));
       const unspecified = allNames.filter((name) => !categoryOrder.includes(name));
       orderedCategoryNames = [...specifiedFirst, ...unspecified];
+    }
+    if (!this.userSelectedCategory || !categoriesMap.has(this.activeCategoryName)) {
+      this.activeCategoryName = orderedCategoryNames[0];
     }
     orderedCategoryNames.forEach((categoryName) => {
       const category = categoriesMap.get(categoryName);
@@ -4494,6 +4515,7 @@ class EditorObjectCategories extends EditorObject {
       });
       tab.list.addEventListener("click", () => {
         this.activeCategoryName = categoryName;
+        this.userSelectedCategory = true;
       });
       const pane = document.createElement("div");
       this.theme.setTabPaneAttributes(pane, active, id);
@@ -4516,6 +4538,9 @@ class EditorObjectNav extends EditorObject {
     const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "object" && hasNavFormat;
+  }
+  static providesChildHeading() {
+    return true;
   }
   init() {
     super.init();
@@ -4603,11 +4628,35 @@ class EditorObjectAccordion extends EditorObject {
   static resolves(schema) {
     return getSchemaType(schema) === "object" && getSchemaXOption(schema, "format") === "accordion";
   }
+  static providesChildHeading() {
+    return true;
+  }
   getObjectControlConfig() {
     return { ...super.getObjectControlConfig(), isAccordionProperties: true };
   }
+  refreshAccordionWarnings() {
+    if (!this.accordionToggles) return;
+    const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+    const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+    this.instance.children.forEach((child) => {
+      if (!child.isActive) return;
+      const toggle = this.accordionToggles[child.getKey()];
+      if (!toggle) return;
+      const existing = toggle.querySelector(".jedi-legend-warning");
+      if (existing) existing.parentNode.removeChild(existing);
+      if (navWarning && child.hasNestedValidationErrors()) {
+        const warning = document.createElement("span");
+        warning.classList.add("jedi-legend-warning");
+        warning.textContent = "⚠";
+        if (navWarningMessage) warning.setAttribute("title", navWarningMessage);
+        this.theme.styleLegendWarning(warning);
+        toggle.appendChild(warning);
+      }
+    });
+  }
   refreshEditors() {
     this.control.childrenSlot.replaceChildren();
+    this.accordionToggles = {};
     const accordionId = this.control.childrenSlot.id;
     this.instance.children.forEach((child) => {
       if (!child.isActive) return;
@@ -4617,12 +4666,18 @@ class EditorObjectAccordion extends EditorObject {
       const accordionItem = this.theme.getAccordionItem({ title, id, accordionId });
       accordionItem.body.appendChild(child.ui.control.container);
       this.control.childrenSlot.appendChild(accordionItem.container);
+      this.accordionToggles[child.getKey()] = accordionItem.toggle;
       if (this.disabled || this.instance.isReadOnly()) {
         child.ui.disable();
       } else {
         child.ui.enable();
       }
     });
+    this.refreshAccordionWarnings();
+  }
+  showValidationErrors(errors, force = false) {
+    super.showValidationErrors(errors, force);
+    this.refreshAccordionWarnings();
   }
 }
 class EditorObjectHorizontal extends EditorObject {
@@ -5442,6 +5497,9 @@ class EditorArrayNav extends EditorArray {
     const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "array" && hasNavFormat;
+  }
+  static providesChildHeading() {
+    return true;
   }
   navigateTo(path) {
     const nextChildPath = this.getNextChildPath(path);
@@ -6302,37 +6360,24 @@ class EditorArrayCheckboxes extends Editor {
     const values = this.getEnumSourceValues();
     const schemaItems = this.instance.schema.items || {};
     const titles = getSchemaXOption(schemaItems, "enumTitles") || values;
-    const id = this.getIdFromPath(this.instance.path);
-    const messagesId = id + "-messages";
-    const descriptionId = id + "-description";
-    const describedBy = messagesId + " " + descriptionId;
     this.control.checkboxControls.forEach((cc) => {
       if (cc.parentNode) cc.parentNode.removeChild(cc);
     });
-    this.control.checkboxes = [];
-    this.control.labels = [];
-    this.control.checkboxControls = [];
-    this.control.labelTexts = [];
-    values.forEach((value, index2) => {
-      const checkboxId = id + "-" + index2;
-      const checkboxControl = document.createElement("div");
-      const checkbox = document.createElement("input");
-      const label = document.createElement("label");
-      const labelText = document.createElement("span");
-      checkbox.setAttribute("type", "checkbox");
-      checkbox.setAttribute("id", checkboxId);
-      checkbox.setAttribute("name", id);
-      checkbox.setAttribute("value", value);
-      checkbox.setAttribute("aria-describedby", describedBy);
-      label.setAttribute("for", checkboxId);
-      labelText.textContent = titles && titles[index2] !== void 0 ? titles[index2] : value;
-      checkboxControl.appendChild(checkbox);
-      checkboxControl.appendChild(label);
-      label.appendChild(labelText);
-      this.control.checkboxes.push(checkbox);
-      this.control.labels.push(label);
-      this.control.labelTexts.push(labelText);
-      this.control.checkboxControls.push(checkboxControl);
+    const rebuilt = this.theme.getCheckboxesControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values,
+      titles,
+      id: this.getIdFromPath(this.instance.path),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      inline: getSchemaXOption(this.instance.schema, "format") === "checkboxes-inline",
+      info: this.getInfo()
+    });
+    this.control.checkboxes = rebuilt.checkboxes;
+    this.control.labels = rebuilt.labels;
+    this.control.labelTexts = rebuilt.labelTexts;
+    this.control.checkboxControls = rebuilt.checkboxControls;
+    this.control.checkboxControls.forEach((checkboxControl) => {
       this.control.fieldset.insertBefore(checkboxControl, this.control.description);
     });
     this.addDragHandles();
@@ -6982,6 +7027,7 @@ class Jedison extends EventEmitter {
       editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
+      autoFlat: true,
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
@@ -7306,6 +7352,20 @@ class Jedison extends EventEmitter {
           node.not = combineDeep({}, nodeClone, node.not);
         }
       });
+    }
+    if (this.isEditor) {
+      const schemaTypeArray = getSchemaType(config.schema);
+      if (isArray(schemaTypeArray)) {
+        const inferTypeSource = getSchemaXOption(config.schema, "inferType");
+        if (isSet(inferTypeSource)) {
+          const siblingPath = resolveInstancePath(config.path, inferTypeSource);
+          const siblingInstance = this.getInstance(siblingPath);
+          const siblingValue = siblingInstance ? siblingInstance.getValue() : void 0;
+          if (isSet(siblingValue) && schemaTypeArray.includes(siblingValue)) {
+            config.schema = { ...config.schema, type: siblingValue };
+          }
+        }
+      }
     }
     const schemaOneOf = getSchemaOneOf(config.schema);
     const schemaAnyOf = getSchemaAnyOf(config.schema);
@@ -7635,6 +7695,36 @@ class Theme {
     this.btnContents = true;
     this.btnIcons = true;
     this.init();
+    this.injectDialogLayoutStyles();
+  }
+  /**
+   * Injects a one-time stylesheet so dialogs use available width instead of
+   * growing tall: property lists flow into responsive columns, and the
+   * scrollable content wrapper is capped so long lists don't exceed the viewport
+   */
+  injectDialogLayoutStyles() {
+    const id = "jedi-dialog-layout-style";
+    if (document.getElementById(id)) {
+      return;
+    }
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      .jedi-properties-group,
+      .jedi-accordion-body {
+        column-width: 220px;
+        column-gap: 1.5rem;
+      }
+      .jedi-properties-group > div,
+      .jedi-accordion-body > div {
+        break-inside: avoid;
+      }
+      .jedi-modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+    `;
+    document.head.appendChild(style);
   }
   /**
    * Inits some instance properties
@@ -7986,12 +8076,15 @@ class Theme {
     const html = this.getDialog();
     html.classList.add("jedi-properties-slot");
     html.setAttribute("id", config.id);
+    const content = document.createElement("div");
+    content.classList.add("jedi-modal-content");
+    html.appendChild(content);
     html.addEventListener("click", (event) => {
       if (event.target === html) {
         html.close();
       }
     });
-    return html;
+    return { dialog: html, content };
   }
   getQuickAddPropertySlot(config) {
     const html = this.getDialog();
@@ -8284,6 +8377,7 @@ class Theme {
     dialog.style.borderRadius = "4px";
     dialog.style.minWidth = "400px";
     dialog.style.maxWidth = "90vw";
+    dialog.style.width = "min(90vw, 720px)";
     return dialog;
   }
   /**
@@ -8383,7 +8477,7 @@ class Theme {
     const jsonData = this.getJsonData({
       id: "json-data-" + config.id
     });
-    const propertiesContainer = this.getPropertiesSlot({
+    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({
       id: "properties-slot-" + config.id
     });
     const propertiesToggle = this.getPropertiesToggle({
@@ -8468,8 +8562,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContainer.appendChild(ariaLive);
-      propertiesContainer.appendChild(propertiesActivators);
+      propertiesContent.appendChild(ariaLive);
+      propertiesContent.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
@@ -8511,11 +8605,14 @@ class Theme {
     const ariaLive = this.getPropertiesAriaLive();
     const messages = this.getMessagesSlot();
     const childrenSlot = this.getChildrenSlot();
+    if (config.isAccordion || config.isAccordionProperties) {
+      childrenSlot.id = "accordion-" + config.id;
+    }
     const propertiesActivators = this.getPropertiesActivators();
     const info = this.getInfo(config.info);
     const description = this.getDescription({ content: config.description });
     const jsonData = this.getJsonData({ id: "json-data-" + config.id });
-    const propertiesContainer = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
+    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
     const propertiesToggle = this.getPropertiesToggle({
       content: config.propertiesToggleContent,
       id: "properties-slot-toggle-" + config.id,
@@ -8567,8 +8664,6 @@ class Theme {
     }
     const innerWrapper = document.createElement("div");
     innerWrapper.appendChild(legend);
-    innerWrapper.appendChild(propertiesContainer);
-    innerWrapper.appendChild(quickAddPropertyContainer);
     container.appendChild(innerWrapper);
     if (config.addProperty) {
       quickAddPropertyContainer.appendChild(quickAddPropertyControl.container);
@@ -8584,6 +8679,8 @@ class Theme {
     }
     body.appendChild(childrenSlot);
     innerWrapper.appendChild(body);
+    innerWrapper.appendChild(propertiesContainer);
+    innerWrapper.appendChild(quickAddPropertyContainer);
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
     }
@@ -8592,8 +8689,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContainer.appendChild(ariaLive);
-      propertiesContainer.appendChild(propertiesActivators);
+      propertiesContent.appendChild(ariaLive);
+      propertiesContent.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
@@ -8676,8 +8773,11 @@ class Theme {
     chevron.style.display = "inline-block";
     chevron.style.transition = "transform 0.1s ease";
     chevron.style.marginRight = "0.5em";
+    const titleSpan = document.createElement("span");
+    titleSpan.style.marginRight = "0.5em";
+    titleSpan.textContent = config.title;
     toggle.appendChild(chevron);
-    toggle.appendChild(document.createTextNode(config.title));
+    toggle.appendChild(titleSpan);
     const collapse = document.createElement("div");
     collapse.classList.add("jedi-accordion-collapse");
     collapse.style.display = "none";
@@ -9780,8 +9880,11 @@ class ThemeBootstrap3 extends Theme {
     chevron.style.display = "inline-block";
     chevron.style.transition = "transform 0.1s ease";
     chevron.style.marginRight = "0.5em";
+    const titleSpan = document.createElement("span");
+    titleSpan.style.marginRight = "0.5em";
+    titleSpan.textContent = config.title;
     toggle.appendChild(chevron);
-    toggle.appendChild(document.createTextNode(config.title));
+    toggle.appendChild(titleSpan);
     const collapse = document.createElement("div");
     collapse.id = collapseId;
     collapse.classList.add("panel-collapse", "collapse");
@@ -10308,8 +10411,11 @@ class ThemeBootstrap4 extends Theme {
     }
     chevron.classList.add("d-inline-block", "mr-2");
     chevron.style.transition = "transform 0.1s ease";
+    const titleSpan = document.createElement("span");
+    titleSpan.classList.add("mr-1");
+    titleSpan.textContent = config.title;
     toggle.appendChild(chevron);
-    toggle.appendChild(document.createTextNode(config.title));
+    toggle.appendChild(titleSpan);
     const collapse = document.createElement("div");
     collapse.id = collapseId;
     collapse.classList.add("collapse");
@@ -10859,8 +10965,11 @@ class ThemeBootstrap5 extends Theme {
     }
     chevron.classList.add("d-inline-block", "me-2");
     chevron.style.transition = "transform 0.1s ease";
+    const titleSpan = document.createElement("span");
+    titleSpan.classList.add("me-1");
+    titleSpan.textContent = config.title;
     toggle.appendChild(chevron);
-    toggle.appendChild(document.createTextNode(config.title));
+    toggle.appendChild(titleSpan);
     const collapse = document.createElement("div");
     collapse.id = collapseId;
     collapse.classList.add("accordion-collapse", "collapse");

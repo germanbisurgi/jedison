@@ -12,7 +12,8 @@ import {
   clone, combineDeep,
   isArray, isObject,
   isSet,
-  notSet
+  notSet,
+  resolveInstancePath
 } from './helpers/utils.js'
 import {
   getSchemaAnyOf,
@@ -47,6 +48,7 @@ class Jedison extends EventEmitter {
       editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
+      autoFlat: false,
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
@@ -485,6 +487,27 @@ class Jedison extends EventEmitter {
           node.not = combineDeep({}, nodeClone, node.not)
         }
       })
+    }
+
+    // x-inferType: resolve a multi-type schema's type from another field's
+    // current value before the InstanceMultiple decision below, so an inferred
+    // field is built directly as its concrete single-type Instance/Editor.
+    // Takes a relative path to the source field (e.g. "type" for a direct
+    // sibling, "../type" for a schema nested one level deeper like an array's
+    // `items`), resolved the same way x-enumSource resolves its source path.
+    if (this.isEditor) {
+      const schemaTypeArray = getSchemaType(config.schema)
+      if (isArray(schemaTypeArray)) {
+        const inferTypeSource = getSchemaXOption(config.schema, 'inferType')
+        if (isSet(inferTypeSource)) {
+          const siblingPath = resolveInstancePath(config.path, inferTypeSource)
+          const siblingInstance = this.getInstance(siblingPath)
+          const siblingValue = siblingInstance ? siblingInstance.getValue() : undefined
+          if (isSet(siblingValue) && schemaTypeArray.includes(siblingValue)) {
+            config.schema = { ...config.schema, type: siblingValue }
+          }
+        }
+      }
     }
 
     const schemaOneOf = getSchemaOneOf(config.schema)

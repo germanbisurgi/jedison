@@ -14,6 +14,10 @@ class EditorObjectNav extends EditorObject {
     return getSchemaType(schema) === 'object' && hasNavFormat
   }
 
+  static providesChildHeading () {
+    return true
+  }
+
   init () {
     super.init()
     this.activeTabIndex = 0

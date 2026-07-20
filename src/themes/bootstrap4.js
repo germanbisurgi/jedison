@@ -174,8 +174,12 @@ class ThemeBootstrap4 extends Theme {
     chevron.classList.add('d-inline-block', 'mr-2')
     chevron.style.transition = 'transform 0.1s ease'
 
+    const titleSpan = document.createElement('span')
+    titleSpan.classList.add('mr-1')
+    titleSpan.textContent = config.title
+
     toggle.appendChild(chevron)
-    toggle.appendChild(document.createTextNode(config.title))
+    toggle.appendChild(titleSpan)
 
     const collapse = document.createElement('div')
     collapse.id = collapseId

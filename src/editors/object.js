@@ -49,7 +49,7 @@ class EditorObject extends Editor {
     return {
       title: this.getTitle(),
       description: this.getDescription(),
-      titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
+      titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden') ?? this.isEmbeddedInParentChrome(),
       id: this.getIdFromPath(this.instance.path),
       enablePropertiesToggle: enablePropertiesToggle,
       addProperty: addProperty,
@@ -66,9 +66,20 @@ class EditorObject extends Editor {
     }
   }
 
+  isEmbeddedInParentChrome () {
+    const autoFlat = getSchemaXOption(this.instance.schema, 'autoFlat') ?? this.instance.jedison.getOption('autoFlat')
+    if (!autoFlat) return false
+    const parentInstance = this.instance.parent
+    if (!parentInstance) return false
+    const ParentEditorClass = this.instance.jedison.uiResolver.getClass(parentInstance.schema)
+    return !!ParentEditorClass?.providesChildHeading?.()
+  }
+
   build () {
     this.propertyActivators = {}
-    const card = getSchemaXOption(this.instance.schema, 'card') ?? this.instance.jedison.getOption('card')
+    const explicitCard = getSchemaXOption(this.instance.schema, 'card')
+    const globalCard = this.instance.jedison.getOption('card')
+    const card = explicitCard ?? (this.isEmbeddedInParentChrome() ? false : globalCard)
     const config = this.getObjectControlConfig()
     this.control = card === false
       ? this.theme.getObjectControlFlat(config)
