@@ -378,6 +378,7 @@ import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
+import xButtons from './json/features/x-buttons.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
 import experimentalObjectHorizontal from './json/experimental/object-horizontal.json'
 import {isSet} from "../src/helpers/utils.js"
@@ -489,6 +490,7 @@ export default {
           'features/navigate-to': navigateTo,
           'features/title-icon-class': titleIconClass,
           'features/switcher-type-labels': switcherTypeLabels,
+          'features/x-buttons': xButtons,
           'parsing/json-patch': jsonPatch,
           'parsing/allOf-refs': allOfRefs,
           'parsing/allOf-if-then': allOfIfThen,
@@ -1854,6 +1856,19 @@ export default {
       window.editor = this.editor
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
+
+      // x-buttons feature demo (playground only): react to the events the
+      // features/x-buttons schema emits. Harmless for other schemas.
+      const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup']
+      events.forEach((name) => {
+        this.editor.on('jedison:' + name, ({ editor, path }) => {
+          console.log('jedison:' + name, { path })
+          if (name === 'detectCity') editor.instance.setValue('Stuttgart')
+          if (name === 'insertTemplate') editor.instance.setValue('Dear customer, thank you for your message.')
+          if (name === 'clearComment') editor.instance.setValue('')
+          if (name === 'zipLookup') editor.instance.setValue({ ...editor.instance.getValue(), city: 'Stuttgart' })
+        })
+      })
     },
     editorChangeHandler() {
       const errors = this.editor.getErrors()

@@ -21,8 +21,32 @@ class EventEmitter {
     callbacks.push(callback)
   }
 
-  off (name) {
-    this.listeners.delete(name)
+  /**
+   * Removes event listeners for a named event.
+   * @public
+   * @param {string} name - The name of the event
+   * @param {function} [callback] - When given, only this specific callback is
+   * removed; when omitted, all listeners for the event are removed.
+   */
+  off (name, callback) {
+    if (typeof callback !== 'function') {
+      this.listeners.delete(name)
+      return
+    }
+
+    const callbacks = this.listeners.get(name)
+
+    if (!callbacks) {
+      return
+    }
+
+    const remaining = callbacks.filter((cb) => cb !== callback)
+
+    if (remaining.length === 0) {
+      this.listeners.delete(name)
+    } else {
+      this.listeners.set(name, remaining)
+    }
   }
 
   /**

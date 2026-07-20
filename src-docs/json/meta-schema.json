@@ -337,6 +337,33 @@
         "x-discriminator": {
           "x-propGroup": "Options",
           "type": "string"
+        },
+        "x-buttons": {
+          "x-propGroup": "Options",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "event": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name"]
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     }

@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "title": "x-buttons",
+  "description": "The `x-buttons` keyword adds schema-defined action buttons to any editor without becoming part of the data model. Each button emits a `jedison:<name>` event on the instance; subscribe with `instance.on('jedison:<name>', ({ jedison, editor, path }) => { ... })`. Open the browser console to see emitted events.",
+  "properties": {
+    "city": {
+      "type": "string",
+      "title": "City",
+      "description": "String editor with a single button. The label is sanitized HTML, so it can carry an icon.",
+      "x-buttons": [
+        {
+          "label": "<i class=\"fas fa-location-dot\"></i> Detect city",
+          "event": {
+            "name": "detectCity"
+          },
+          "attributes": {
+            "class": "my-custom-button",
+            "data-analytics": "detect-city"
+          }
+        }
+      ]
+    },
+    "comment": {
+      "type": "string",
+      "x-format": "textarea",
+      "title": "Comment",
+      "description": "Multiple buttons on one editor.",
+      "x-buttons": [
+        {
+          "label": "Insert template",
+          "event": {
+            "name": "insertTemplate"
+          }
+        },
+        {
+          "label": "Clear",
+          "event": {
+            "name": "clearComment"
+          }
+        }
+      ]
+    },
+    "address": {
+      "type": "object",
+      "title": "Address",
+      "description": "Buttons also work on container editors. A lookup button that fills several child fields.",
+      "properties": {
+        "zip": {
+          "type": "string",
+          "title": "ZIP"
+        },
+        "city": {
+          "type": "string",
+          "title": "City"
+        }
+      },
+      "x-buttons": [
+        {
+          "label": "Lookup by ZIP",
+          "event": {
+            "name": "zipLookup"
+          }
+        }
+      ]
+    }
+  }
+}

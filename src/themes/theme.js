@@ -647,6 +647,49 @@ class Theme {
     return button
   }
 
+  /**
+   * A schema-defined action button (x-buttons keyword).
+   *
+   * This method only renders: the label is expected to be already sanitized by
+   * the editor (Editor.purifyContent(), decision 9c) and the attributes are
+   * expected to be already filtered against the allowlist by the editor
+   * (utils.filterAttributes(), decision 6a). The theme does not sanitize or
+   * filter. No theme styling is applied, only the unstyled `jedi-x-button` hook
+   * class (decision 4).
+   * @param {object} config - Button config
+   * @param {string} [config.label] - Pre-sanitized HTML label
+   * @param {object} [config.attributes] - Pre-filtered HTML attributes
+   * @return {HTMLButtonElement}
+   */
+  getXButton (config = {}) {
+    const button = document.createElement('button')
+    const label = document.createElement('span')
+
+    button.classList.add('jedi-x-button')
+    button.setAttribute('type', 'button')
+
+    label.classList.add('jedi-x-button-label')
+    // config.label is pre-sanitized HTML (decision 9c); safe to assign as innerHTML.
+    label.innerHTML = config.label ?? ''
+    button.appendChild(label)
+
+    const attributes = isObject(config.attributes) ? config.attributes : {}
+
+    for (const [key, value] of Object.entries(attributes)) {
+      if (key === 'class') {
+        String(value).split(' ').forEach((cls) => {
+          if (cls) {
+            button.classList.add(cls)
+          }
+        })
+      } else {
+        button.setAttribute(key, value)
+      }
+    }
+
+    return button
+  }
+
   getAddPropertyButton (config) {
     const html = this.getButton(config)
     html.classList.add('jedi-add-property-btn')
