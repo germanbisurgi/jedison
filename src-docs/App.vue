@@ -372,7 +372,6 @@ import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
-import embedSwitcher from './json/features/embed-switcher.json'
 import switcherModal from './json/features/switcher-modal.json'
 import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
@@ -484,7 +483,6 @@ export default {
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
           'features/nav-warning': navWarning,
-          'features/embed-switcher': embedSwitcher,
           'features/switcher-modal': switcherModal,
           'features/switcher-select-inline': switcherSelectInline,
           'features/navigate-to': navigateTo,

@@ -319,6 +319,27 @@ class Theme {
   }
 
   /**
+   * Wrapper used by EditorMultiple to embed an inline switcher next to a control's title
+   */
+  getSwitcherSlot () {
+    const html = document.createElement('span')
+    html.classList.add('jedi-switcher-slot')
+    return html
+  }
+
+  /**
+   * Per-owner wrapper inside a switcherSlot — lets more than one EditorMultiple
+   * embed a switcher into the same slot (e.g. nested anyOf/oneOf) without one
+   * overwriting the other.
+   */
+  getSwitcherOwner () {
+    const html = document.createElement('span')
+    html.classList.add('jedi-switcher-owner')
+    html.style.marginInlineStart = '0.25rem'
+    return html
+  }
+
+  /**
    * Wrapper for error messages
    */
   getMessagesSlot (config = {}) {
@@ -920,6 +941,8 @@ class Theme {
       id: messagesId
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     if (config?.info?.variant === 'modal') {
       this.infoAsModal(info, config.id, config.info)
     }
@@ -930,12 +953,13 @@ class Theme {
       container.appendChild(info.container)
     }
 
+    container.appendChild(switcherSlot)
     container.appendChild(placeholder)
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, placeholder, label, info, labelText, description, messages, actions }
+    return { container, placeholder, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   /**
@@ -1004,7 +1028,7 @@ class Theme {
       propertiesContainer: quickAddPropertyContainer
     })
     const fieldset = this.getFieldset()
-    const { legend, infoContainer, legendText, right } = this.getLegend({
+    const { legend, left, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden,
@@ -1045,11 +1069,10 @@ class Theme {
 
     body.appendChild(messages)
 
-    const switcherSlot = document.createElement('div')
-    switcherSlot.classList.add('jedi-switcher-slot')
+    const switcherSlot = this.getSwitcherSlot()
+    left.appendChild(switcherSlot)
 
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot)
       right.appendChild(actions)
     }
 
@@ -1143,8 +1166,7 @@ class Theme {
     const collapse = document.createElement('div')
     const collapseToggle = document.createElement('div')
     const infoContainer = document.createElement('div')
-    const switcherSlot = document.createElement('div')
-    switcherSlot.classList.add('jedi-switcher-slot')
+    const switcherSlot = this.getSwitcherSlot()
 
     // Header row mirrors card legend structure so buttons have a visual anchor
     const legend = document.createElement('div')
@@ -1168,6 +1190,7 @@ class Theme {
       this.visuallyHidden(legendText)
     }
     left.appendChild(legendText)
+    left.appendChild(switcherSlot)
 
     if (config?.info?.variant === 'modal') {
       this.infoAsModal(info, config.id, config.info)
@@ -1193,7 +1216,6 @@ class Theme {
     body.appendChild(messages)
 
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot)
       right.appendChild(actions)
     }
 
@@ -1375,7 +1397,7 @@ class Theme {
 
     const fieldset = this.getFieldset()
     const info = this.getInfo(config.info)
-    const { legend, legendText, infoContainer, right } = this.getLegend({
+    const { legend, left, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden,
@@ -1427,11 +1449,10 @@ class Theme {
 
     body.appendChild(messages)
 
-    const switcherSlot = document.createElement('div')
-    switcherSlot.classList.add('jedi-switcher-slot')
+    const switcherSlot = this.getSwitcherSlot()
+    left.appendChild(switcherSlot)
 
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot)
       right.appendChild(actions)
     }
 
@@ -1659,6 +1680,8 @@ class Theme {
       id: descriptionId
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     if (config?.info?.variant === 'modal') {
       this.infoAsModal(info, config.id, config.info)
     }
@@ -1669,12 +1692,13 @@ class Theme {
       container.appendChild(info.container)
     }
 
+    container.appendChild(switcherSlot)
     container.appendChild(br)
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, label, info, labelText, description, messages, actions }
+    return { container, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   /**
@@ -1703,6 +1727,8 @@ class Theme {
       id: messagesId
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     input.setAttribute('aria-describedby', describedBy)
     input.setAttribute('id', config.id)
     input.setAttribute('name', config.id)
@@ -1718,12 +1744,13 @@ class Theme {
       container.appendChild(info.container)
     }
 
+    container.appendChild(switcherSlot)
     container.appendChild(input)
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, input, label, info, labelText, description, messages, actions }
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   adaptForTableTextareaControl (control) {
@@ -1758,6 +1785,8 @@ class Theme {
       id: messagesId
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     input.setAttribute('aria-describedby', describedBy)
     input.setAttribute('type', config.type)
     input.setAttribute('id', config.id)
@@ -1774,12 +1803,13 @@ class Theme {
       container.appendChild(info.container)
     }
 
+    container.appendChild(switcherSlot)
     container.appendChild(input)
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, input, label, info, labelText, description, messages, actions }
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   getInputRangeControl (config) {
@@ -1868,8 +1898,11 @@ class Theme {
       labels.push(label)
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     container.appendChild(fieldset)
     fieldset.appendChild(legend)
+    legend.appendChild(switcherSlot)
 
     if (isObject(config.info)) {
       legendText.after(info.container)
@@ -1896,7 +1929,8 @@ class Theme {
       labelTexts,
       radioControls,
       description,
-      messages
+      messages,
+      switcherSlot
     }
   }
 
@@ -1937,6 +1971,8 @@ class Theme {
     input.setAttribute('name', config.id)
     input.setAttribute('aria-describedby', describedBy)
 
+    const switcherSlot = this.getSwitcherSlot()
+
     if (config?.info?.variant === 'modal') {
       this.infoAsModal(info, config.id, config.info)
     }
@@ -1950,10 +1986,11 @@ class Theme {
       formGroup.appendChild(info.container)
     }
 
+    formGroup.appendChild(switcherSlot)
     formGroup.appendChild(description)
     formGroup.appendChild(messages)
 
-    return { container, formGroup, input, label, info, labelText, description, messages, actions }
+    return { container, formGroup, input, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   adaptForTableCheckboxControl (control, td) {
@@ -2022,8 +2059,11 @@ class Theme {
       this.infoAsModal(info, config.id, config.info)
     }
 
+    const switcherSlot = this.getSwitcherSlot()
+
     container.appendChild(fieldset)
     fieldset.appendChild(legend)
+    legend.appendChild(switcherSlot)
 
     if (isObject(config.info)) {
       legendText.after(info.container)
@@ -2049,7 +2089,8 @@ class Theme {
       labelTexts,
       checkboxControls,
       description,
-      messages
+      messages,
+      switcherSlot
     }
   }
 
@@ -2099,6 +2140,8 @@ class Theme {
       input.appendChild(option)
     })
 
+    const switcherSlot = this.getSwitcherSlot()
+
     if (config?.info?.variant === 'modal') {
       this.infoAsModal(info, config.id, config.info)
     }
@@ -2109,12 +2152,13 @@ class Theme {
       container.appendChild(info.container)
     }
 
+    container.appendChild(switcherSlot)
     container.appendChild(input)
     container.appendChild(description)
     container.appendChild(messages)
     container.appendChild(actions)
 
-    return { container, input, label, info, labelText, description, messages, actions }
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot }
   }
 
   adaptForTableSelectControl (control) {

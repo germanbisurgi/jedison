@@ -32,6 +32,13 @@ class EditorIfThenElse extends Editor {
     this.control.childrenSlot.innerHTML = ''
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container)
 
+    // An if/then/else node has no anchor of its own (its header/legend is
+    // never mounted) — forward switcherSlot to whatever control the active
+    // branch actually renders, so an ancestor Multiple/IfThenElse embeds its
+    // switcher there instead of it floating above the branch editor.
+    // Recomputed on every refresh since the active branch can change.
+    this.control.switcherSlot = this.instance.activeInstance.ui.control.switcherSlot
+
     if (this.disabled || this.instance.isReadOnly()) {
       this.instance.activeInstance.ui.disable()
     } else {

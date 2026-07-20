@@ -185,6 +185,11 @@ export function getSchemaXOption (schema, option) {
     return schema['x-options'][option]
   }
 
+  if (option === 'switcherInput' && schema['x-embedSwitcher'] === true) {
+    console.warn('Jedison: schema option "x-embedSwitcher" is deprecated. Use "x-switcherInput: \'select-inline\'" instead.')
+    return 'select-inline'
+  }
+
   // Fall back to deprecated names
   for (const alias of getAliasesFor(option)) {
     const xAlias = 'x-' + alias

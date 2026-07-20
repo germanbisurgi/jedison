@@ -1,3 +1,11 @@
+### 1.16.0
+
+- Added `x-buttons` keyword for schema-defined action buttons
+- Fixed switcher disappearing/floating above the editor when embedded (`select-inline`/`modal`) into an `if/then/else` branch or a nested `anyOf`/`oneOf`
+- Nested `anyOf`/`oneOf` switchers now stack instead of overwriting each other
+- Object/array switcher now sits next to the title, consistent with other editors
+- Deprecated `x-embedSwitcher` in favor of `x-switcherInput: "select-inline"`
+
 ### 1.15.0
 
 - Added `switcherInput: 'select-inline'` option

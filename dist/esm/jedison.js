@@ -460,6 +460,10 @@ function getSchemaXOption(schema, option) {
   if (schema["x-options"] && isSet(schema["x-options"][option])) {
     return schema["x-options"][option];
   }
+  if (option === "switcherInput" && schema["x-embedSwitcher"] === true) {
+    console.warn(`Jedison: schema option "x-embedSwitcher" is deprecated. Use "x-switcherInput: 'select-inline'" instead.`);
+    return "select-inline";
+  }
   for (const alias of getAliasesFor(option)) {
     const xAlias = "x-" + alias;
     if (isSet(schema[xAlias])) {
@@ -2623,6 +2627,7 @@ class EditorIfThenElse extends Editor {
     this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
+    this.control.switcherSlot = this.instance.activeInstance.ui.control.switcherSlot;
     if (this.disabled || this.instance.isReadOnly()) {
       this.instance.activeInstance.ui.disable();
     } else {
@@ -5762,7 +5767,7 @@ class EditorMultiple extends Editor {
   }
   build() {
     this.switcherInput = getSchemaXOption(this.instance.schema, "switcherInput") ?? this.instance.jedison.getOption("switcherInput");
-    this.embedSwitcher = getSchemaXOption(this.instance.schema, "embedSwitcher") ?? this.instance.jedison.getOption("embedSwitcher");
+    this.embedSwitcher = this.instance.jedison.getOption("embedSwitcher");
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
       id: this.getIdFromPath(this.instance.path),
@@ -5774,6 +5779,7 @@ class EditorMultiple extends Editor {
     if (this.embedSwitcher) {
       this.control.header.style.display = "none";
     }
+    this.switcherWrapper = this.theme.getSwitcherOwner();
     this.instance.on("change", (initiator) => {
       if (initiator === "api") return;
       const jedison = this.instance.jedison;
@@ -5828,33 +5834,20 @@ class EditorMultiple extends Editor {
     }
   }
   refreshUI() {
-    var _a;
     this.refreshDisabledState();
     this.control.childrenSlot.innerHTML = "";
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
-    if (this.embedSwitcher) {
-      const slot = this.instance.activeInstance.ui.control.switcherSlot;
+    const slot = this.instance.activeInstance.ui.control.switcherSlot;
+    this.control.switcherSlot = slot;
+    if (this.embedSwitcher || this.switcherInput === "modal" || this.switcherInput === "select-inline") {
       if (slot) {
-        slot.innerHTML = "";
-        slot.appendChild(this.control.switcher.container);
+        this.switcherWrapper.innerHTML = "";
+        this.switcherWrapper.appendChild(this.control.switcher.container);
+        this.insertBySwitcherDepth(slot, this.switcherWrapper, this.getNestedSwitcherDepth(this.instance.activeInstance));
         this.control.header.style.display = "none";
       } else {
         this.control.header.style.display = "";
         this.control.header.appendChild(this.control.switcher.container);
-      }
-    }
-    if (this.switcherInput === "modal" || this.switcherInput === "select-inline") {
-      const childControl = this.instance.activeInstance.ui.control;
-      const infoContainer = childControl.infoContainer;
-      const titleEl = childControl.legendText || childControl.label;
-      if (infoContainer) {
-        infoContainer.after(this.control.switcher.container);
-        this.control.header.style.display = "none";
-      } else if (titleEl) {
-        const infoEl = (_a = childControl.info) == null ? void 0 : _a.container;
-        const anchor = infoEl && infoEl.parentNode ? infoEl : titleEl;
-        anchor.after(this.control.switcher.container);
-        this.control.header.style.display = "none";
       }
     }
     if (this.switcherInput === "select") {
@@ -5883,6 +5876,23 @@ class EditorMultiple extends Editor {
   }
   getErrorFeedback(config) {
     return this.theme.getAlert(config);
+  }
+  // Counts how many EditorMultiple owners sit between `instance` and the real
+  // leaf control, so stacked switchers in a shared slot can be ordered
+  // outer-first instead of shuffling with every refresh.
+  getNestedSwitcherDepth(instance) {
+    if (!instance || !instance.activeInstance) return 0;
+    const childDepth = this.getNestedSwitcherDepth(instance.activeInstance);
+    return instance.ui.switcherWrapper ? childDepth + 1 : childDepth;
+  }
+  insertBySwitcherDepth(slot, wrapper, depth) {
+    wrapper.dataset.switcherDepth = depth;
+    const sibling = Array.from(slot.children).find((child) => Number(child.dataset.switcherDepth) < depth);
+    if (sibling) {
+      slot.insertBefore(wrapper, sibling);
+    } else {
+      slot.appendChild(wrapper);
+    }
   }
 }
 class EditorNull extends Editor {
@@ -8054,6 +8064,25 @@ class Theme {
     return html;
   }
   /**
+   * Wrapper used by EditorMultiple to embed an inline switcher next to a control's title
+   */
+  getSwitcherSlot() {
+    const html = document.createElement("span");
+    html.classList.add("jedi-switcher-slot");
+    return html;
+  }
+  /**
+   * Per-owner wrapper inside a switcherSlot — lets more than one EditorMultiple
+   * embed a switcher into the same slot (e.g. nested anyOf/oneOf) without one
+   * overwriting the other.
+   */
+  getSwitcherOwner() {
+    const html = document.createElement("span");
+    html.classList.add("jedi-switcher-owner");
+    html.style.marginInlineStart = "0.25rem";
+    return html;
+  }
+  /**
    * Wrapper for error messages
    */
   getMessagesSlot(config = {}) {
@@ -8548,6 +8577,7 @@ class Theme {
     const messages = this.getMessagesSlot({
       id: messagesId
     });
+    const switcherSlot = this.getSwitcherSlot();
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
@@ -8555,11 +8585,12 @@ class Theme {
     if (isObject(config.info)) {
       container.appendChild(info.container);
     }
+    container.appendChild(switcherSlot);
     container.appendChild(placeholder);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, placeholder, label, info, labelText, description, messages, actions };
+    return { container, placeholder, label, info, labelText, description, messages, actions, switcherSlot };
   }
   /**
    * Object control is a card containing multiple editors.
@@ -8625,7 +8656,7 @@ class Theme {
       propertiesContainer: quickAddPropertyContainer
     });
     const fieldset = this.getFieldset();
-    const { legend, infoContainer, legendText, right } = this.getLegend({
+    const { legend, left, infoContainer, legendText, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden,
@@ -8656,10 +8687,9 @@ class Theme {
       body.appendChild(description);
     }
     body.appendChild(messages);
-    const switcherSlot = document.createElement("div");
-    switcherSlot.classList.add("jedi-switcher-slot");
+    const switcherSlot = this.getSwitcherSlot();
+    left.appendChild(switcherSlot);
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot);
       right.appendChild(actions);
     }
     body.appendChild(childrenSlot);
@@ -8743,8 +8773,7 @@ class Theme {
     const collapse = document.createElement("div");
     const collapseToggle = document.createElement("div");
     const infoContainer = document.createElement("div");
-    const switcherSlot = document.createElement("div");
-    switcherSlot.classList.add("jedi-switcher-slot");
+    const switcherSlot = this.getSwitcherSlot();
     const legend = document.createElement("div");
     legend.classList.add("jedi-editor-legend");
     legend.style.display = "flex";
@@ -8765,6 +8794,7 @@ class Theme {
       this.visuallyHidden(legendText);
     }
     left.appendChild(legendText);
+    left.appendChild(switcherSlot);
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
@@ -8783,7 +8813,6 @@ class Theme {
     }
     body.appendChild(messages);
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot);
       right.appendChild(actions);
     }
     body.appendChild(childrenSlot);
@@ -8939,7 +8968,7 @@ class Theme {
     const footer = this.getArrayFooter();
     const fieldset = this.getFieldset();
     const info = this.getInfo(config.info);
-    const { legend, legendText, infoContainer, right } = this.getLegend({
+    const { legend, left, legendText, infoContainer, right } = this.getLegend({
       content: config.title,
       id: config.id,
       titleHidden: config.titleHidden,
@@ -8982,10 +9011,9 @@ class Theme {
       body.appendChild(description);
     }
     body.appendChild(messages);
-    const switcherSlot = document.createElement("div");
-    switcherSlot.classList.add("jedi-switcher-slot");
+    const switcherSlot = this.getSwitcherSlot();
+    left.appendChild(switcherSlot);
     if (config.readOnly === false) {
-      right.appendChild(switcherSlot);
       right.appendChild(actions);
     }
     actions.appendChild(btnGroup);
@@ -9178,6 +9206,7 @@ class Theme {
       content: config.description,
       id: descriptionId
     });
+    const switcherSlot = this.getSwitcherSlot();
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
@@ -9185,11 +9214,12 @@ class Theme {
     if (isObject(config.info)) {
       container.appendChild(info.container);
     }
+    container.appendChild(switcherSlot);
     container.appendChild(br);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, label, info, labelText, description, messages, actions };
+    return { container, label, info, labelText, description, messages, actions, switcherSlot };
   }
   /**
    * A Textarea
@@ -9216,6 +9246,7 @@ class Theme {
     const messages = this.getMessagesSlot({
       id: messagesId
     });
+    const switcherSlot = this.getSwitcherSlot();
     input.setAttribute("aria-describedby", describedBy);
     input.setAttribute("id", config.id);
     input.setAttribute("name", config.id);
@@ -9227,11 +9258,12 @@ class Theme {
     if (isObject(config.info)) {
       container.appendChild(info.container);
     }
+    container.appendChild(switcherSlot);
     container.appendChild(input);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, input, label, info, labelText, description, messages, actions };
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot };
   }
   adaptForTableTextareaControl(control) {
     this.visuallyHidden(control.label);
@@ -9263,6 +9295,7 @@ class Theme {
     const messages = this.getMessagesSlot({
       id: messagesId
     });
+    const switcherSlot = this.getSwitcherSlot();
     input.setAttribute("aria-describedby", describedBy);
     input.setAttribute("type", config.type);
     input.setAttribute("id", config.id);
@@ -9275,11 +9308,12 @@ class Theme {
     if (isObject(config.info)) {
       container.appendChild(info.container);
     }
+    container.appendChild(switcherSlot);
     container.appendChild(input);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, input, label, info, labelText, description, messages, actions };
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot };
   }
   getInputRangeControl(config) {
     const control = this.getInputControl(config);
@@ -9349,8 +9383,10 @@ class Theme {
       radios.push(radio);
       labels.push(label);
     });
+    const switcherSlot = this.getSwitcherSlot();
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
+    legend.appendChild(switcherSlot);
     if (isObject(config.info)) {
       legendText.after(info.container);
     }
@@ -9373,7 +9409,8 @@ class Theme {
       labelTexts,
       radioControls,
       description,
-      messages
+      messages,
+      switcherSlot
     };
   }
   adaptForTableRadiosControl(control) {
@@ -9410,6 +9447,7 @@ class Theme {
     input.setAttribute("id", config.id);
     input.setAttribute("name", config.id);
     input.setAttribute("aria-describedby", describedBy);
+    const switcherSlot = this.getSwitcherSlot();
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
@@ -9420,9 +9458,10 @@ class Theme {
     if (isObject(config.info)) {
       formGroup.appendChild(info.container);
     }
+    formGroup.appendChild(switcherSlot);
     formGroup.appendChild(description);
     formGroup.appendChild(messages);
-    return { container, formGroup, input, label, info, labelText, description, messages, actions };
+    return { container, formGroup, input, label, info, labelText, description, messages, actions, switcherSlot };
   }
   adaptForTableCheckboxControl(control, td) {
     this.visuallyHidden(control.label);
@@ -9479,8 +9518,10 @@ class Theme {
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
+    const switcherSlot = this.getSwitcherSlot();
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
+    legend.appendChild(switcherSlot);
     if (isObject(config.info)) {
       legendText.after(info.container);
     }
@@ -9502,7 +9543,8 @@ class Theme {
       labelTexts,
       checkboxControls,
       description,
-      messages
+      messages,
+      switcherSlot
     };
   }
   adaptForTableCheckboxesControl(control, td) {
@@ -9545,6 +9587,7 @@ class Theme {
       }
       input.appendChild(option);
     });
+    const switcherSlot = this.getSwitcherSlot();
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
@@ -9552,11 +9595,12 @@ class Theme {
     if (isObject(config.info)) {
       container.appendChild(info.container);
     }
+    container.appendChild(switcherSlot);
     container.appendChild(input);
     container.appendChild(description);
     container.appendChild(messages);
     container.appendChild(actions);
-    return { container, input, label, info, labelText, description, messages, actions };
+    return { container, input, label, info, labelText, description, messages, actions, switcherSlot };
   }
   adaptForTableSelectControl(control) {
     this.visuallyHidden(control.label);

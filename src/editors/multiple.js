@@ -16,7 +16,7 @@ class EditorMultiple extends Editor {
 
   build () {
     this.switcherInput = getSchemaXOption(this.instance.schema, 'switcherInput') ?? this.instance.jedison.getOption('switcherInput')
-    this.embedSwitcher = getSchemaXOption(this.instance.schema, 'embedSwitcher') ?? this.instance.jedison.getOption('embedSwitcher')
+    this.embedSwitcher = this.instance.jedison.getOption('embedSwitcher')
     this.control = this.theme.getMultipleControl({
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),
       id: this.getIdFromPath(this.instance.path),
@@ -29,6 +29,11 @@ class EditorMultiple extends Editor {
     if (this.embedSwitcher) {
       this.control.header.style.display = 'none'
     }
+
+    // Owns exactly one wrapper for its own switcher inside a (possibly shared)
+    // switcherSlot, so a nested Multiple embedding into the same slot doesn't
+    // wipe this one out — see refreshUI().
+    this.switcherWrapper = this.theme.getSwitcherOwner()
 
     this.instance.on('change', (initiator) => {
       if (initiator === 'api') return
@@ -99,30 +104,22 @@ class EditorMultiple extends Editor {
     this.control.childrenSlot.innerHTML = ''
     this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container)
 
-    if (this.embedSwitcher) {
-      const slot = this.instance.activeInstance.ui.control.switcherSlot
+    // Recomputed on every refresh (not just once at build), since the active
+    // branch — and therefore which real leaf control this resolves to — can
+    // change: this is what an ancestor Multiple/IfThenElse reads to embed its
+    // own switcher, drilling transparently through this node.
+    const slot = this.instance.activeInstance.ui.control.switcherSlot
+    this.control.switcherSlot = slot
+
+    if (this.embedSwitcher || this.switcherInput === 'modal' || this.switcherInput === 'select-inline') {
       if (slot) {
-        slot.innerHTML = ''
-        slot.appendChild(this.control.switcher.container)
+        this.switcherWrapper.innerHTML = ''
+        this.switcherWrapper.appendChild(this.control.switcher.container)
+        this.insertBySwitcherDepth(slot, this.switcherWrapper, this.getNestedSwitcherDepth(this.instance.activeInstance))
         this.control.header.style.display = 'none'
       } else {
         this.control.header.style.display = ''
         this.control.header.appendChild(this.control.switcher.container)
-      }
-    }
-
-    if (this.switcherInput === 'modal' || this.switcherInput === 'select-inline') {
-      const childControl = this.instance.activeInstance.ui.control
-      const infoContainer = childControl.infoContainer
-      const titleEl = childControl.legendText || childControl.label
-      if (infoContainer) {
-        infoContainer.after(this.control.switcher.container)
-        this.control.header.style.display = 'none'
-      } else if (titleEl) {
-        const infoEl = childControl.info?.container
-        const anchor = (infoEl && infoEl.parentNode) ? infoEl : titleEl
-        anchor.after(this.control.switcher.container)
-        this.control.header.style.display = 'none'
       }
     }
 
@@ -157,6 +154,25 @@ class EditorMultiple extends Editor {
 
   getErrorFeedback (config) {
     return this.theme.getAlert(config)
+  }
+
+  // Counts how many EditorMultiple owners sit between `instance` and the real
+  // leaf control, so stacked switchers in a shared slot can be ordered
+  // outer-first instead of shuffling with every refresh.
+  getNestedSwitcherDepth (instance) {
+    if (!instance || !instance.activeInstance) return 0
+    const childDepth = this.getNestedSwitcherDepth(instance.activeInstance)
+    return instance.ui.switcherWrapper ? childDepth + 1 : childDepth
+  }
+
+  insertBySwitcherDepth (slot, wrapper, depth) {
+    wrapper.dataset.switcherDepth = depth
+    const sibling = Array.from(slot.children).find((child) => Number(child.dataset.switcherDepth) < depth)
+    if (sibling) {
+      slot.insertBefore(wrapper, sibling)
+    } else {
+      slot.appendChild(wrapper)
+    }
   }
 }
 
