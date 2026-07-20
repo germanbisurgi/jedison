@@ -279,14 +279,12 @@ export const DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES = ['aria-', 'data-']
  * @param {object} [options] - Options
  * @param {string[]} [options.allowlist] - Exact attribute names to keep
  * @param {string[]} [options.allowedPrefixes] - Name prefixes to keep
- * @param {function} [options.onDrop] - Called with each dropped attribute name
  * @return {object} A new object containing only the allowed attributes
  */
 export function filterAttributes (attributes, options = {}) {
   const {
     allowlist = DEFAULT_ATTRIBUTE_ALLOWLIST,
-    allowedPrefixes = DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES,
-    onDrop
+    allowedPrefixes = DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES
   } = options
 
   const result = {}
@@ -303,8 +301,6 @@ export function filterAttributes (attributes, options = {}) {
 
     if (isAllowed) {
       result[key] = value
-    } else if (typeof onDrop === 'function') {
-      onDrop(key)
     }
   }
 

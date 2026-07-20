@@ -892,80 +892,6 @@ export default {
         }
       }
 
-
-    //   options.data = {
-    //   "$schema": "https://json-schema.org/draft-07/schema",
-    //       "type": "object",
-    //       "properties": {
-    //     "person": {
-    //       "type": "object",
-    //           "description": "Personal information",
-    //           "properties": {
-    //         "firstName": {
-    //           "type": "string",
-    //               "description": "First name of the person"
-    //         },
-    //         "lastName": {
-    //           "type": "string",
-    //               "description": "Last name of the person"
-    //         },
-    //         "age": {
-    //           "type": "number",
-    //               "description": "Age in years"
-    //         },
-    //         "isEmployed": {
-    //           "type": "boolean",
-    //               "description": "Whether the person is currently employed"
-    //         }
-    //       },
-    //       "required": [
-    //         "firstName",
-    //         "lastName"
-    //       ]
-    //     },
-    //     "address": {
-    //       "type": "object",
-    //           "description": "Address information",
-    //           "properties": {
-    //         "street": {
-    //           "type": "string",
-    //               "description": "Street address"
-    //         },
-    //         "city": {
-    //           "type": "string",
-    //               "description": "City name"
-    //         },
-    //         "zipCode": {
-    //           "type": "string",
-    //               "description": "Postal/ZIP code"
-    //         }
-    //       }
-    //     },
-    //     "hobbies": {
-    //       "type": "array",
-    //           "description": "List of hobbies",
-    //           "items": {
-    //         "type": "object",
-    //             "properties": {
-    //           "name": {
-    //             "type": "string",
-    //                 "description": "Name of the hobby"
-    //           },
-    //           "yearsExperience": {
-    //             "type": "number",
-    //                 "description": "Years of experience"
-    //           }
-    //         }
-    //       }
-    //     }
-    //   },
-    //   "required": [
-    //     "person"
-    //   ]
-    // }
-
-
-
       const t1 = window.performance.now()
       this.editor = new Jedison.Create(options)
       const t2 = window.performance.now()
@@ -974,8 +900,6 @@ export default {
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
 
-      // x-buttons feature demo (playground only): react to the events the
-      // features/x-buttons schema emits. Harmless for other schemas.
       const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup']
       events.forEach((name) => {
         this.editor.on('jedison:' + name, ({ editor, path }) => {

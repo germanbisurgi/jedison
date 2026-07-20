@@ -116,6 +116,36 @@ function getType(value) {
   }
   return type2;
 }
+const DEFAULT_ATTRIBUTE_ALLOWLIST = [
+  "id",
+  "class",
+  "title",
+  "name",
+  "value",
+  "disabled",
+  "always-enabled",
+  "always-disabled"
+];
+const DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES = ["aria-", "data-"];
+function filterAttributes(attributes, options = {}) {
+  const {
+    allowlist = DEFAULT_ATTRIBUTE_ALLOWLIST,
+    allowedPrefixes = DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES
+  } = options;
+  const result = {};
+  if (!isObject(attributes)) {
+    return result;
+  }
+  const allowed = new Set(allowlist.map((name) => name.toLowerCase()));
+  for (const [key, value] of Object.entries(attributes)) {
+    const normalizedKey = key.trim().toLowerCase();
+    const isAllowed = allowed.has(normalizedKey) || allowedPrefixes.some((prefix) => normalizedKey.startsWith(prefix));
+    if (isAllowed) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
 const UNSAFE_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "prototype"]);
 function mergeDeep(target, ...sources) {
   if (!sources.length) return target;
@@ -1778,8 +1808,28 @@ class EventEmitter {
     }
     callbacks.push(callback);
   }
-  off(name) {
-    this.listeners.delete(name);
+  /**
+   * Removes event listeners for a named event.
+   * @public
+   * @param {string} name - The name of the event
+   * @param {function} [callback] - When given, only this specific callback is
+   * removed; when omitted, all listeners for the event are removed.
+   */
+  off(name, callback) {
+    if (typeof callback !== "function") {
+      this.listeners.delete(name);
+      return;
+    }
+    const callbacks = this.listeners.get(name);
+    if (!callbacks) {
+      return;
+    }
+    const remaining = callbacks.filter((cb) => cb !== callback);
+    if (remaining.length === 0) {
+      this.listeners.delete(name);
+    } else {
+      this.listeners.set(name, remaining);
+    }
   }
   /**
    * Triggers the callback function of a named event listener
@@ -2145,6 +2195,7 @@ class Editor {
     this.addEventListeners();
     this.setVisibility();
     this.setContainerAttributes();
+    this.appendSchemaButtons();
     this.refreshUI();
     const alwaysShowErrors = this.instance.jedison.getOption("showErrors") === "always" || getSchemaXOption(this.instance.schema, "showErrors") === "always";
     if (alwaysShowErrors) {
@@ -2207,6 +2258,62 @@ class Editor {
         }
       }
     }
+  }
+  /**
+   * Renders schema-defined action buttons (the `x-buttons` keyword) into the
+   * editor container. Works for every editor because it lives on the base
+   * class, next to setAttributes()/setContainerAttributes(). Both `x-buttons`
+   * and `x-options.buttons` spellings resolve through getSchemaXOption().
+   *
+   * Security decisions from issue #62:
+   * - The label is HTML sanitized through the existing DOMPurify pipeline
+   *   (purifyContent(), decision 9c / F6) before being handed to the theme.
+   * - The `attributes` bag is filtered against an allowlist (filterAttributes(),
+   *   decision 6a / F1); `always-enabled` / `always-disabled` are intentionally
+   *   allowed (decision 6b, trusted-schema stance).
+   * - Each button emits a `jedison:<name>` event on the root Jedison instance
+   *   through the internal EventEmitter (decision 1c / 2), carrying a live
+   *   payload `{ jedison, editor, path }` (decision 8). Consumers subscribe with
+   *   `jedison.on('jedison:<name>', ({ jedison, editor, path }) => ...)`. The
+   *   listener map is private to the instance, so the payload is not exposed to
+   *   unrelated scripts on the page (F3 contained).
+   * - Click listeners are registered through storedEventListeners so destroy()
+   *   cleans them up.
+   */
+  appendSchemaButtons() {
+    const buttons = getSchemaXOption(this.instance.schema, "buttons");
+    if (!isArray(buttons)) {
+      return;
+    }
+    const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
+    buttons.forEach((config) => {
+      if (!isObject(config)) {
+        return;
+      }
+      const rawLabel = isString(config.label) ? config.label : "";
+      const label = this.purifyEnabled ? this.purifyContent(rawLabel, domPurifyOptions) : rawLabel;
+      const attributes = filterAttributes(config.attributes);
+      const button = this.theme.getXButton({ label, attributes });
+      this.control.container.appendChild(button);
+      const eventName = isObject(config.event) && isString(config.event.name) ? config.event.name : null;
+      if (!eventName) {
+        return;
+      }
+      const handler = () => {
+        const jedison = this.instance.jedison;
+        jedison.emit("jedison:" + eventName, {
+          jedison,
+          editor: this,
+          path: this.instance.path
+        });
+      };
+      button.addEventListener("click", handler);
+      this.storedEventListeners.push({
+        element: button,
+        eventType: "click",
+        handler
+      });
+    });
   }
   /**
    * Builds the editor control and appends it to the editor container
@@ -7027,7 +7134,7 @@ class Jedison extends EventEmitter {
       editJsonData: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
-      autoFlat: true,
+      autoFlat: false,
       btnContents: true,
       btnIcons: true,
       arrayDelete: true,
@@ -7695,36 +7802,6 @@ class Theme {
     this.btnContents = true;
     this.btnIcons = true;
     this.init();
-    this.injectDialogLayoutStyles();
-  }
-  /**
-   * Injects a one-time stylesheet so dialogs use available width instead of
-   * growing tall: property lists flow into responsive columns, and the
-   * scrollable content wrapper is capped so long lists don't exceed the viewport
-   */
-  injectDialogLayoutStyles() {
-    const id = "jedi-dialog-layout-style";
-    if (document.getElementById(id)) {
-      return;
-    }
-    const style = document.createElement("style");
-    style.id = id;
-    style.textContent = `
-      .jedi-properties-group,
-      .jedi-accordion-body {
-        column-width: 220px;
-        column-gap: 1.5rem;
-      }
-      .jedi-properties-group > div,
-      .jedi-accordion-body > div {
-        break-inside: avoid;
-      }
-      .jedi-modal-content {
-        max-height: 85vh;
-        overflow-y: auto;
-      }
-    `;
-    document.head.appendChild(style);
   }
   /**
    * Inits some instance properties
@@ -8076,15 +8153,12 @@ class Theme {
     const html = this.getDialog();
     html.classList.add("jedi-properties-slot");
     html.setAttribute("id", config.id);
-    const content = document.createElement("div");
-    content.classList.add("jedi-modal-content");
-    html.appendChild(content);
     html.addEventListener("click", (event) => {
       if (event.target === html) {
         html.close();
       }
     });
-    return { dialog: html, content };
+    return html;
   }
   getQuickAddPropertySlot(config) {
     const html = this.getDialog();
@@ -8243,6 +8317,42 @@ class Theme {
     button.appendChild(text);
     return button;
   }
+  /**
+   * A schema-defined action button (x-buttons keyword).
+   *
+   * This method only renders: the label is expected to be already sanitized by
+   * the editor (Editor.purifyContent(), decision 9c) and the attributes are
+   * expected to be already filtered against the allowlist by the editor
+   * (utils.filterAttributes(), decision 6a). The theme does not sanitize or
+   * filter. No theme styling is applied, only the unstyled `jedi-x-button` hook
+   * class (decision 4).
+   * @param {object} config - Button config
+   * @param {string} [config.label] - Pre-sanitized HTML label
+   * @param {object} [config.attributes] - Pre-filtered HTML attributes
+   * @return {HTMLButtonElement}
+   */
+  getXButton(config = {}) {
+    const button = document.createElement("button");
+    const label = document.createElement("span");
+    button.classList.add("jedi-x-button");
+    button.setAttribute("type", "button");
+    label.classList.add("jedi-x-button-label");
+    label.innerHTML = config.label ?? "";
+    button.appendChild(label);
+    const attributes = isObject(config.attributes) ? config.attributes : {};
+    for (const [key, value] of Object.entries(attributes)) {
+      if (key === "class") {
+        String(value).split(" ").forEach((cls) => {
+          if (cls) {
+            button.classList.add(cls);
+          }
+        });
+      } else {
+        button.setAttribute(key, value);
+      }
+    }
+    return button;
+  }
   getAddPropertyButton(config) {
     const html = this.getButton(config);
     html.classList.add("jedi-add-property-btn");
@@ -8377,7 +8487,6 @@ class Theme {
     dialog.style.borderRadius = "4px";
     dialog.style.minWidth = "400px";
     dialog.style.maxWidth = "90vw";
-    dialog.style.width = "min(90vw, 720px)";
     return dialog;
   }
   /**
@@ -8477,7 +8586,7 @@ class Theme {
     const jsonData = this.getJsonData({
       id: "json-data-" + config.id
     });
-    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({
+    const propertiesContainer = this.getPropertiesSlot({
       id: "properties-slot-" + config.id
     });
     const propertiesToggle = this.getPropertiesToggle({
@@ -8562,8 +8671,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContent.appendChild(ariaLive);
-      propertiesContent.appendChild(propertiesActivators);
+      propertiesContainer.appendChild(ariaLive);
+      propertiesContainer.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
@@ -8612,7 +8721,7 @@ class Theme {
     const info = this.getInfo(config.info);
     const description = this.getDescription({ content: config.description });
     const jsonData = this.getJsonData({ id: "json-data-" + config.id });
-    const { dialog: propertiesContainer, content: propertiesContent } = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
+    const propertiesContainer = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
     const propertiesToggle = this.getPropertiesToggle({
       content: config.propertiesToggleContent,
       id: "properties-slot-toggle-" + config.id,
@@ -8689,8 +8798,8 @@ class Theme {
     }
     if (config.enablePropertiesToggle) {
       actions.appendChild(propertiesToggle);
-      propertiesContent.appendChild(ariaLive);
-      propertiesContent.appendChild(propertiesActivators);
+      propertiesContainer.appendChild(ariaLive);
+      propertiesContainer.appendChild(propertiesActivators);
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);

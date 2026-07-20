@@ -163,29 +163,17 @@ class Editor {
       return
     }
 
-    const debug = this.instance.jedison.getOption('debug')
     const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
 
     buttons.forEach((config) => {
       if (!isObject(config)) {
-        if (debug) {
-          console.warn('Jedison: x-buttons entry is not an object and was skipped.', config)
-        }
         return
       }
 
-      // Label: HTML sanitized through the existing DOMPurify pipeline (decision 9c / F6).
       const rawLabel = isString(config.label) ? config.label : ''
       const label = this.purifyEnabled ? this.purifyContent(rawLabel, domPurifyOptions) : rawLabel
 
-      // Attributes: allowlist-filtered (decision 6a / F1). __proto__ etc. never pass the allowlist (F5).
-      const attributes = filterAttributes(config.attributes, {
-        onDrop: (key) => {
-          if (debug) {
-            console.warn(`Jedison: x-buttons attribute "${key}" is not allowlisted and was dropped.`)
-          }
-        }
-      })
+      const attributes = filterAttributes(config.attributes)
 
       const button = this.theme.getXButton({ label, attributes })
 
@@ -194,21 +182,12 @@ class Editor {
       const eventName = (isObject(config.event) && isString(config.event.name)) ? config.event.name : null
 
       if (!eventName) {
-        if (debug) {
-          console.warn('Jedison: x-buttons entry has no event.name; button renders but dispatches nothing.', config)
-        }
         return
       }
 
       const handler = () => {
         const jedison = this.instance.jedison
 
-        if (!jedison) {
-          return
-        }
-
-        // Emit on the root Jedison instance (decision 1c, root only). The
-        // payload is a single context object passed positionally.
         jedison.emit('jedison:' + eventName, {
           jedison,
           editor: this,
