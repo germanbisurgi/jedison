@@ -164,12 +164,14 @@ class EditorArrayTableObject extends EditorArray {
         child.children.forEach((grandchild) => {
           const td = this.theme.getTableDefinition()
           grandchild.ui.adaptForTable(td)
+          grandchild.ui.control.info?.container?.remove() // info lives once in the header (#64)
           td.appendChild(grandchild.ui.control.container)
           tbodyRow.appendChild(td)
         })
       } else {
         const td = this.theme.getTableDefinition()
         child.ui.adaptForTable(td)
+        child.ui.control.info?.container?.remove() // info lives once in the header (#64)
         td.appendChild(child.ui.control.container)
         tbodyRow.appendChild(td)
       }

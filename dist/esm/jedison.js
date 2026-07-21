@@ -5261,6 +5261,7 @@ class EditorArrayTable extends EditorArray {
       table.thead.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
+      var _a, _b;
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
@@ -5283,6 +5284,7 @@ class EditorArrayTable extends EditorArray {
       }
       const td = this.theme.getTableDefinition();
       child.ui.adaptForTable(child, td);
+      (_b = (_a = child.ui.control.info) == null ? void 0 : _a.container) == null ? void 0 : _b.remove();
       td.appendChild(child.ui.control.container);
       tbodyRow.appendChild(td);
       if (arrayButtonsPosition === "right") {
@@ -5411,6 +5413,7 @@ class EditorArrayTableObject extends EditorArray {
       table.thead.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
+      var _a, _b;
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
@@ -5433,14 +5436,17 @@ class EditorArrayTableObject extends EditorArray {
       }
       if (child.children.length) {
         child.children.forEach((grandchild) => {
+          var _a2, _b2;
           const td = this.theme.getTableDefinition();
           grandchild.ui.adaptForTable(td);
+          (_b2 = (_a2 = grandchild.ui.control.info) == null ? void 0 : _a2.container) == null ? void 0 : _b2.remove();
           td.appendChild(grandchild.ui.control.container);
           tbodyRow.appendChild(td);
         });
       } else {
         const td = this.theme.getTableDefinition();
         child.ui.adaptForTable(td);
+        (_b = (_a = child.ui.control.info) == null ? void 0 : _a.container) == null ? void 0 : _b.remove();
         td.appendChild(child.ui.control.container);
         tbodyRow.appendChild(td);
       }

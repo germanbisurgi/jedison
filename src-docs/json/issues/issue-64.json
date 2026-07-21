@@ -1,0 +1,41 @@
+{
+  "title": "Issue 64 - x-info modal not duplicated per row",
+  "description": "In table-object arrays the x-info button/modal must appear once in the column header, not again in every row cell.",
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 3,
+  "x-format": "table-object",
+  "default": [
+    {
+      "field-a": "value a",
+      "field-b": "value b"
+    },
+    {
+      "field-a": "value a2",
+      "field-b": "value b2"
+    }
+  ],
+  "items": {
+    "type": "object",
+    "properties": {
+      "field-a": {
+        "type": "string",
+        "title": "Field A",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info A",
+          "content": "Info content for Field A"
+        }
+      },
+      "field-b": {
+        "type": "string",
+        "title": "Field B",
+        "x-info": {
+          "variant": "modal",
+          "title": "### Info B",
+          "content": "Info content for Field B"
+        }
+      }
+    }
+  }
+}

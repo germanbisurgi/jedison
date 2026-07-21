@@ -140,6 +140,7 @@ class EditorArrayTable extends EditorArray {
       // child
       const td = this.theme.getTableDefinition()
       child.ui.adaptForTable(child, td)
+      child.ui.control.info?.container?.remove() // info lives once in the header (#64)
       td.appendChild(child.ui.control.container)
       tbodyRow.appendChild(td)
 
