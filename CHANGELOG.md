@@ -1,3 +1,8 @@
+### 1.16.2
+
+- The whole editor header (title/legend) is now clickable to toggle collapse, not just the toggle button
+- security updates
+
 ### 1.16.1
 
 - Fixed `x-info` modal button being duplicated in every row of `table`/`table-object` arrays; the info button now appears only once, in the column header

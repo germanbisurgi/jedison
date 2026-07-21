@@ -8182,6 +8182,23 @@ class Theme {
     return toggle;
   }
   /**
+   * Makes the whole editor header (legend) toggle the collapse, so users can
+   * click the title or empty header area instead of only the small toggle
+   * button. Clicks on interactive header items (buttons, links, form controls,
+   * actions and switcher slots) are ignored so they keep their own behavior.
+   */
+  makeHeaderClickable(legend, collapseToggle) {
+    legend.style.cursor = "pointer";
+    legend.addEventListener("click", (event) => {
+      if (event.target.closest(
+        "button, a, input, select, textarea, [contenteditable], .jedi-actions-slot, .jedi-switcher-slot"
+      )) {
+        return;
+      }
+      collapseToggle.click();
+    });
+  }
+  /**
    * Container for properties editing elements like property activators
    */
   getPropertiesSlot(config) {
@@ -8712,6 +8729,7 @@ class Theme {
     }
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
+      this.makeHeaderClickable(legend, collapseToggle);
     }
     return {
       container,
@@ -9035,6 +9053,7 @@ class Theme {
     body.appendChild(childrenSlot);
     if (config.enableCollapseToggle) {
       actions.appendChild(collapseToggle);
+      this.makeHeaderClickable(legend, collapseToggle);
     }
     const showFooter = (config.arrayFooterAdd === true || config.arrayFooterDeleteAll === true) && config.readOnly === false;
     if (showFooter) {
