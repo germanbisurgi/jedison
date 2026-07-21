@@ -1,3 +1,7 @@
+### 1.16.1
+
+- Fixed `x-info` modal button being duplicated in every row of `table`/`table-object` arrays; the info button now appears only once, in the column header
+
 ### 1.16.0
 
 - Added `x-buttons` keyword for schema-defined action buttons
