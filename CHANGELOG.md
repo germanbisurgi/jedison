@@ -1,3 +1,10 @@
+### 1.17.0
+
+- Added `applyOverlay` helper: apply an OpenAPI-Overlay-style document (ordered `update`/`remove` actions targeted by a JSONPath subset) to layer presentation directives (`x-format`, `x-hidden`, …) onto a schema without editing the source
+- Fixed issue #65: with `nav-horizontal`/`nav-vertical` and `if/then` conditions, toggling a field no longer resets the active tab to the first one
+- Fixed nav tabs losing a manual tab click when it coincided with a field edit; tabs now render in place instead of rebuilding the whole tab DOM on every change
+- security updates
+
 ### 1.16.2
 
 - The whole editor header (title/legend) is now clickable to toggle collapse, not just the toggle button
