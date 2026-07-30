@@ -44,6 +44,7 @@
           "title": "Enum",
           "type": "array",
           "minItems": 1,
+          "x-format": "table",
           "items": {
             "x-inferType": "../type",
             "type": [
@@ -373,19 +374,29 @@
         "x-grid": {
           "title": "x-grid",
           "x-propGroup": "Options",
+          "x-format": "grid",
           "type": "object",
           "properties": {
             "columns": {
               "title": "Columns",
-              "type": "number"
+              "type": "number",
+              "x-grid": {
+                "columns": 4
+              }
             },
             "offset": {
               "title": "Offset",
-              "type": "number"
+              "type": "number",
+              "x-grid": {
+                "columns": 4
+              }
             },
             "newRow": {
               "title": "Start new row",
-              "type": "boolean"
+              "type": "boolean",
+              "x-grid": {
+                "columns": 4
+              }
             }
           }
         },

@@ -1,164 +1,154 @@
 {
-  "title": "allOf conditional breaks select-inline switcher",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "additionalProperties": false,
+  "x-showErrors": "never",
+  "required": [
+    "interface",
+    "service"
+  ],
+  "x-format": "nav-horizontal",
   "properties": {
-    "item": {
-      "title": "Item",
-      "x-switcherInput": "select-inline",
-      "anyOf": [
-        {
-          "x-switcherTitle": "Branch A",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "type": "string",
-              "const": "a"
-            },
-            "label": {
-              "type": "string"
-            }
-          }
-        },
-        {
-          "x-switcherTitle": "Branch B",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "type": "string",
-              "const": "b"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "x",
-                "y"
-              ]
-            },
-            "foo": {
-              "type": "string"
-            },
-            "bar": {
-              "type": "string"
-            }
-          },
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "mode": {
-                    "const": "x"
-                  }
-                }
-              },
-              "then": {
-                "required": [
-                  "foo"
-                ]
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "mode": {
-                    "const": "y"
-                  }
-                }
-              },
-              "then": {
-                "required": [
-                  "bar"
-                ]
-              }
-            }
-          ]
+    "service": {
+      "type": "object",
+      "title": "Service Attributes",
+      "required": [
+        "bgpenabled"
+      ],
+      "x-objectAdd": false,
+      "properties": {
+        "bgpenabled": {
+          "type": "boolean",
+          "x-format": "checkbox",
+          "title": "BGP?"
         }
-      ]
+      }
     },
-    "nested": {
-      "title": "Nested",
-      "x-switcherInput": "select-inline",
-      "anyOf": [
-        {
-          "x-switcherTitle": "Branch A",
-          "type": ["string", "integer"],
-          "x-switcherInput": "select-inline"
-        },
-        {
-          "x-switcherTitle": "Branch B",
-          "type": ["boolean", "number"],
-          "x-switcherInput": "select-inline"
+    "interface": {
+      "type": "object",
+      "title": "Interface",
+      "x-objectAdd": false,
+      "required": [
+        "ipv6enabled"
+      ],
+      "properties": {
+        "ipv6enabled": {
+          "type": "boolean",
+          "x-format": "checkbox",
+          "title": "Enable IPv6"
         }
-      ]
-    },
-    "nestedModal": {
-      "title": "Nested Modal",
-      "x-switcherInput": "modal",
-      "anyOf": [
-        {
-          "x-switcherTitle": "Branch A",
-          "type": ["string", "integer"],
-          "x-switcherInput": "modal"
-        },
-        {
-          "x-switcherTitle": "Branch B",
-          "type": ["boolean", "number"],
-          "x-switcherInput": "modal"
-        }
-      ]
-    },
-    "nestedMixed": {
-      "title": "Nested Mixed",
-      "x-switcherInput": "select-inline",
-      "anyOf": [
-        {
-          "x-switcherTitle": "Branch A",
-          "type": ["string", "integer"],
-          "x-switcherInput": "modal"
-        },
-        {
-          "x-switcherTitle": "Branch B",
-          "type": ["boolean", "number"],
-          "x-switcherInput": "modal"
-        }
-      ]
-    },
-    "anyof": {
-      "title": "Any Of",
-      "x-info": {
-        "variant": "modal",
-        "title": "### Info Button title",
-        "content": "Info button content"
-      },
-      "anyOf": [
-        {
-          "type": "array",
-          "x-switcherTitle": "Array",
-          "x-info": {
-            "variant": "modal",
-            "title": "### Info Button title",
-            "content": "Info button content"
-          }
-        },
-        {
-          "type": "object",
-          "x-switcherTitle": "Object",
-          "x-info": {
-            "variant": "modal",
-            "title": "### Info Button title",
-            "content": "Info button content"
-          }
-        },
-        {
-          "type": "null",
-          "x-switcherTitle": "Null",
-          "x-info": {
-            "variant": "modal",
-            "title": "### Info Button title",
-            "content": "Info button content"
-          }
-        }
-      ]
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "interface": {
+            "properties": {
+              "ipv6enabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "ipv6enabled"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "interface": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "service": {
+            "properties": {
+              "bgpenabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "bgpenabled"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "bgp": {
+            "type": "object",
+            "x-objectAdd": false,
+            "title": "BGP",
+            "required": [
+              "test"
+            ],
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "bgp"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "service": {
+            "properties": {
+              "bgpenabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "bgpenabled"
+            ]
+          },
+          "interface": {
+            "properties": {
+              "ipv6enabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "ipv6enabled"
+            ]
+          }
+        },
+        "required": [
+          "service",
+          "interface"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bgp": {
+            "properties": {
+              "test2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test2"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

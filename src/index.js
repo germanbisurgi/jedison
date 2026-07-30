@@ -37,6 +37,7 @@ import EditorMultiple from './editors/multiple.js'
 import EditorIfThenElse from './editors/if-then-else.js'
 import EditorNull from './editors/null.js'
 import Editor from './editors/editor.js'
+import { applyOverlay } from './helpers/overlay.js'
 
 export default {
   Schema,
@@ -77,5 +78,6 @@ export default {
   ThemeBootstrap5,
   RefParser,
   Create,
-  SchemaGenerator
+  SchemaGenerator,
+  applyOverlay
 }

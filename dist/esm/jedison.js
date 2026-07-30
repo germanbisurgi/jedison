@@ -96,7 +96,7 @@ function isBoolean(value) {
 function isArray(value) {
   return Array.isArray(value);
 }
-function isObject(value) {
+function isObject$1(value) {
   return !isNull(value) && !isArray(value) && typeof value === "object";
 }
 function getType(value) {
@@ -111,7 +111,7 @@ function getType(value) {
     type2 = "array";
   } else if (isNull(value)) {
     type2 = "null";
-  } else if (isObject(value)) {
+  } else if (isObject$1(value)) {
     type2 = "object";
   }
   return type2;
@@ -133,7 +133,7 @@ function filterAttributes(attributes, options = {}) {
     allowedPrefixes = DEFAULT_ATTRIBUTE_ALLOWED_PREFIXES
   } = options;
   const result = {};
-  if (!isObject(attributes)) {
+  if (!isObject$1(attributes)) {
     return result;
   }
   const allowed = new Set(allowlist.map((name) => name.toLowerCase()));
@@ -150,10 +150,10 @@ const UNSAFE_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "protot
 function mergeDeep(target, ...sources) {
   if (!sources.length) return target;
   const source = sources.shift();
-  if (isObject(target) && isObject(source)) {
+  if (isObject$1(target) && isObject$1(source)) {
     Object.keys(source).forEach((key) => {
       if (UNSAFE_KEYS.has(key)) return;
-      if (isObject(source[key])) {
+      if (isObject$1(source[key])) {
         if (!target[key]) {
           Object.assign(target, {
             [key]: {}
@@ -174,11 +174,11 @@ function combineDeep(target, ...sources) {
   const source = sources.shift();
   if (Array.isArray(target) && Array.isArray(source)) {
     target.push(...source);
-  } else if (isObject(target) && isObject(source)) {
+  } else if (isObject$1(target) && isObject$1(source)) {
     Object.keys(source).forEach((key) => {
       if (UNSAFE_KEYS.has(key)) return;
-      if (isObject(source[key])) {
-        if (!isObject(target[key])) {
+      if (isObject$1(source[key])) {
+        if (!isObject$1(target[key])) {
           Object.assign(target, {
             [key]: {}
           });
@@ -201,8 +201,8 @@ function combineDeep(target, ...sources) {
 const overwriteExistingProperties = (obj1, obj2) => {
   Object.keys(obj2).forEach((key) => {
     if (key in obj1) {
-      if (isSet(obj1[key]) && isSet(obj2[key]) && (isObject(obj1[key]) && isObject(obj2[key]) || isArray(obj1[key]) && isArray(obj2[key]) || isString(obj1[key]) && isString(obj2[key]) || isNumber(obj1[key]) && isNumber(obj2[key]) || isBoolean(obj1[key]) && isBoolean(obj2[key]) || isNull(obj1[key]) && isNull(obj2[key]))) {
-        if (isObject(obj1[key]) && isObject(obj2[key])) {
+      if (isSet(obj1[key]) && isSet(obj2[key]) && (isObject$1(obj1[key]) && isObject$1(obj2[key]) || isArray(obj1[key]) && isArray(obj2[key]) || isString(obj1[key]) && isString(obj2[key]) || isNumber(obj1[key]) && isNumber(obj2[key]) || isBoolean(obj1[key]) && isBoolean(obj2[key]) || isNull(obj1[key]) && isNull(obj2[key]))) {
+        if (isObject$1(obj1[key]) && isObject$1(obj2[key])) {
           overwriteExistingProperties(obj1[key], obj2[key]);
         } else {
           obj1[key] = obj2[key];
@@ -302,7 +302,7 @@ const Utils = {
   isString,
   isBoolean,
   isArray,
-  isObject,
+  isObject: isObject$1,
   getType,
   mergeDeep,
   combineDeep,
@@ -330,10 +330,10 @@ function getSchemaSchema(schema) {
   return isString(schema.$schema) ? clone(schema.$schema) : void 0;
 }
 function getSchemaAdditionalProperties(schema) {
-  return isObject(schema.additionalProperties) || isBoolean(schema.additionalProperties) ? clone(schema.additionalProperties) : void 0;
+  return isObject$1(schema.additionalProperties) || isBoolean(schema.additionalProperties) ? clone(schema.additionalProperties) : void 0;
 }
 function getSchemaPropertyNames(schema) {
-  return isObject(schema.propertyNames) || isBoolean(schema.propertyNames) ? clone(schema.propertyNames) : void 0;
+  return isObject$1(schema.propertyNames) || isBoolean(schema.propertyNames) ? clone(schema.propertyNames) : void 0;
 }
 function getSchemaAllOf(schema) {
   return isArray(schema.allOf) ? clone(schema.allOf) : void 0;
@@ -345,22 +345,22 @@ function getSchemaConst(schema) {
   return clone(schema.const);
 }
 function getSchemaContains(schema) {
-  return isObject(schema.contains) || isBoolean(schema.contains) ? clone(schema.contains) : void 0;
+  return isObject$1(schema.contains) || isBoolean(schema.contains) ? clone(schema.contains) : void 0;
 }
 function getSchemaDefault(schema) {
   return clone(schema.default);
 }
 function getSchemaDependentRequired(schema) {
-  return isObject(schema.dependentRequired) ? clone(schema.dependentRequired) : void 0;
+  return isObject$1(schema.dependentRequired) ? clone(schema.dependentRequired) : void 0;
 }
 function getSchemaDependentSchemas(schema) {
-  return isObject(schema.dependentSchemas) ? clone(schema.dependentSchemas) : void 0;
+  return isObject$1(schema.dependentSchemas) ? clone(schema.dependentSchemas) : void 0;
 }
 function getSchemaDescription(schema) {
   return isString(schema.description) ? clone(schema.description) : void 0;
 }
 function getSchemaElse(schema) {
-  return isObject(schema.else) || isBoolean(schema.else) ? clone(schema.else) : void 0;
+  return isObject$1(schema.else) || isBoolean(schema.else) ? clone(schema.else) : void 0;
 }
 function getSchemaEnum(schema) {
   if (isArray(schema.enum) && schema.enum.length > 0) {
@@ -378,7 +378,7 @@ function getSchemaFormat(schema) {
   return isString(schema.format) ? clone(schema.format) : void 0;
 }
 function getSchemaIf(schema) {
-  if (isObject(schema.if)) {
+  if (isObject$1(schema.if)) {
     return clone(schema.if);
   }
   if (isBoolean(schema.if)) {
@@ -387,7 +387,7 @@ function getSchemaIf(schema) {
   return void 0;
 }
 function getSchemaItems(schema) {
-  return isObject(schema.items) || isBoolean(schema.items) ? clone(schema.items) : void 0;
+  return isObject$1(schema.items) || isBoolean(schema.items) ? clone(schema.items) : void 0;
 }
 function getSchemaMaximum(schema) {
   return isNumber(schema.maximum) ? clone(schema.maximum) : void 0;
@@ -450,7 +450,7 @@ function getSchemaMultipleOf(schema) {
   return void 0;
 }
 function getSchemaNot(schema) {
-  return isObject(schema.not) || isBoolean(schema.not) ? clone(schema.not) : void 0;
+  return isObject$1(schema.not) || isBoolean(schema.not) ? clone(schema.not) : void 0;
 }
 function getSchemaXOption(schema, option) {
   const xOption = "x-" + option;
@@ -481,13 +481,13 @@ function getSchemaPattern(schema) {
   return isString(schema.pattern) ? clone(schema.pattern) : void 0;
 }
 function getSchemaPatternProperties(schema) {
-  return isObject(schema.patternProperties) ? clone(schema.patternProperties) : void 0;
+  return isObject$1(schema.patternProperties) ? clone(schema.patternProperties) : void 0;
 }
 function getSchemaPrefixItems(schema) {
   return isArray(schema.prefixItems) ? clone(schema.prefixItems) : void 0;
 }
 function getSchemaProperties(schema) {
-  return isObject(schema.properties) ? clone(schema.properties) : void 0;
+  return isObject$1(schema.properties) ? clone(schema.properties) : void 0;
 }
 function getSchemaReadOnly(schema) {
   return isBoolean(schema.readOnly) ? clone(schema.readOnly) : void 0;
@@ -496,7 +496,7 @@ function getSchemaRequired(schema) {
   return isArray(schema.required) ? [...new Set(schema.required)] : void 0;
 }
 function getSchemaThen(schema) {
-  return isObject(schema.then) || isBoolean(schema.then) ? clone(schema.then) : void 0;
+  return isObject$1(schema.then) || isBoolean(schema.then) ? clone(schema.then) : void 0;
 }
 function getSchemaTitle(schema) {
   return isString(schema.title) ? clone(schema.title) : void 0;
@@ -795,7 +795,7 @@ function items(context) {
         constraint: "items",
         messages: [context.translator.translate("errorItems")]
       });
-    } else if (isObject(items2)) {
+    } else if (isObject$1(items2)) {
       const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
       context.value.slice(prefixItemsSchemasCount).forEach((itemValue, i) => {
         const index2 = prefixItemsSchemasCount + i;
@@ -863,7 +863,7 @@ function maxLength(context) {
 function maxProperties(context) {
   const errors = [];
   const maxProperties2 = getSchemaMaxProperties(context.schema);
-  if (isObject(context.value) && isSet(maxProperties2)) {
+  if (isObject$1(context.value) && isSet(maxProperties2)) {
     const propertiesCount = Object.keys(context.value).length;
     const invalid = propertiesCount > maxProperties2;
     if (invalid) {
@@ -924,7 +924,7 @@ function minItems(context) {
 function minProperties(context) {
   const errors = [];
   const minProperties2 = getSchemaMinProperties(context.schema);
-  if (isObject(context.value) && isSet(minProperties2)) {
+  if (isObject$1(context.value) && isSet(minProperties2)) {
     const propertiesCount = Object.keys(context.value).length;
     const invalid = propertiesCount < minProperties2;
     if (invalid) {
@@ -1076,7 +1076,7 @@ function pattern(context) {
 function patternProperties(context) {
   let errors = [];
   const patternProperties2 = getSchemaPatternProperties(context.schema);
-  if (isObject(context.value) && isSet(patternProperties2)) {
+  if (isObject$1(context.value) && isSet(patternProperties2)) {
     Object.keys(context.value).forEach((propertyName) => {
       Object.keys(patternProperties2).forEach((pattern2) => {
         const regexp = new RegExp(pattern2);
@@ -1102,7 +1102,7 @@ function properties(context) {
   const invalidProperties = [];
   const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
   const propertySubErrors = [];
-  if (isObject(context.value) && isSet(schemaProperties)) {
+  if (isObject$1(context.value) && isSet(schemaProperties)) {
     Object.keys(schemaProperties).forEach((propertyName) => {
       if (hasOwn(context.value, propertyName)) {
         const propertySchema = schemaProperties[propertyName];
@@ -1140,7 +1140,7 @@ function properties(context) {
 function required(context) {
   const errors = [];
   const required2 = getSchemaRequired(context.schema);
-  if (isObject(context.value) && isSet(required2)) {
+  if (isObject$1(context.value) && isSet(required2)) {
     const missingProperties = [];
     const keys = Object.keys(context.value);
     required2.forEach((key) => {
@@ -1177,7 +1177,7 @@ function type(context) {
       integer: (value) => isInteger(value),
       boolean: (value) => isBoolean(value),
       array: (value) => isArray(value),
-      object: (value) => isObject(value),
+      object: (value) => isObject$1(value),
       null: (value) => isNull(value)
     };
     let valid = true;
@@ -1232,7 +1232,7 @@ function uniqueItems(context) {
     let hasDuplicatedItems = false;
     for (let i = 0; i < context.value.length; i++) {
       let item = context.value[i];
-      if (isObject(item)) {
+      if (isObject$1(item)) {
         item = sortObject(item);
       }
       const itemStringified = JSON.stringify(item);
@@ -1262,7 +1262,7 @@ function additionalProperties(context) {
   const schemaAdditionalProperties = getSchemaAdditionalProperties(context.schema);
   const schemaPatternProperties = getSchemaPatternProperties(context.schema);
   const schemaProperties = getSchemaProperties(context.schema);
-  if (isObject(context.value) && isSet(schemaAdditionalProperties)) {
+  if (isObject$1(context.value) && isSet(schemaAdditionalProperties)) {
     const properties2 = schemaProperties || {};
     const additionalProperties2 = schemaAdditionalProperties;
     const patternProperties2 = schemaPatternProperties || {};
@@ -1282,7 +1282,7 @@ function additionalProperties(context) {
               compileTemplate(context.translator.translate("errorAdditionalProperties"), { property })
             ]
           });
-        } else if (isObject(additionalProperties2)) {
+        } else if (isObject$1(additionalProperties2)) {
           const additionalPropertyErrors = context.validator.getErrors(context.value[property], additionalProperties2, property, context.path + "/" + property).map((error) => ({
             type: "error",
             path: `${context.path}.${property}`,
@@ -1405,7 +1405,7 @@ function contains(context) {
 function dependentRequired(context) {
   const errors = [];
   const dependentRequired2 = getSchemaDependentRequired(context.schema);
-  if (isObject(context.value) && isSet(dependentRequired2)) {
+  if (isObject$1(context.value) && isSet(dependentRequired2)) {
     let missingProperties = [];
     Object.keys(dependentRequired2).forEach((key) => {
       if (isSet(context.value[key])) {
@@ -1436,7 +1436,7 @@ function dependentRequired(context) {
 function dependentSchemas(context) {
   let errors = [];
   const dependentSchemas2 = getSchemaDependentSchemas(context.schema);
-  if (isObject(context.value) && isSet(dependentSchemas2)) {
+  if (isObject$1(context.value) && isSet(dependentSchemas2)) {
     Object.keys(dependentSchemas2).forEach((key) => {
       if (isSet(context.value[key])) {
         const dependentSchema = dependentSchemas2[key];
@@ -1573,7 +1573,7 @@ function unevaluatedProperties(context) {
   const schemaAllOf = getSchemaAllOf(context.schema);
   const schemaAnyOf = getSchemaAnyOf(context.schema);
   const schemaOneOf = getSchemaOneOf(context.schema);
-  if (isObject(context.value) && isSet(schemaUnevaluatedProperties)) {
+  if (isObject$1(context.value) && isSet(schemaUnevaluatedProperties)) {
     let properties2 = isSet(schemaProperties) ? schemaProperties : {};
     const unevaluatedProperties2 = schemaUnevaluatedProperties;
     const patternProperties2 = schemaPatternProperties;
@@ -1612,7 +1612,7 @@ function unevaluatedProperties(context) {
             ]
           });
         }
-        if (!definedInPatternProperty && isObject(unevaluatedProperties2) && !hasOwn(properties2, property)) {
+        if (!definedInPatternProperty && isObject$1(unevaluatedProperties2) && !hasOwn(properties2, property)) {
           const unevaluatedPropertiesErrors = context.validator.getErrors(context.value[property], unevaluatedProperties2, property, context.path + "/" + property).map((error) => {
             return {
               type: "error",
@@ -1665,7 +1665,7 @@ const draft201909 = {
 function propertyNames(context) {
   const errors = [];
   const schemaPropertyNames = getSchemaPropertyNames(context.schema);
-  if (isObject(context.value) && isSet(schemaPropertyNames)) {
+  if (isObject$1(context.value) && isSet(schemaPropertyNames)) {
     Object.keys(context.value).forEach((propertyName) => {
       const invalid = context.validator.getErrors(propertyName, schemaPropertyNames, propertyName, context.path).length > 0;
       if (invalid) {
@@ -1748,7 +1748,7 @@ class Validator {
         path
       }];
     }
-    if (this.refParser && isObject(schema) && hasOwn(schema, "$ref")) {
+    if (this.refParser && isObject$1(schema) && hasOwn(schema, "$ref")) {
       schema = this.refParser.expand(schema);
     }
     const allConstraints = { ...this.draft, ...this.constraints };
@@ -1770,7 +1770,7 @@ class Validator {
     }
     const schemaOptionsMessages = getSchemaXOption(schema, "messages");
     if (isSet(schemaOptionsMessages)) {
-      if (isObject(schemaOptionsMessages)) {
+      if (isObject$1(schemaOptionsMessages)) {
         schemaErrors.forEach((schemaError) => {
           var _a, _b;
           const schemaMessageListedByLanguage = (_b = schemaOptionsMessages == null ? void 0 : schemaOptionsMessages[(_a = this.translator) == null ? void 0 : _a.language]) == null ? void 0 : _b[schemaError == null ? void 0 : schemaError.constraint];
@@ -2250,7 +2250,7 @@ class Editor {
     this.control.container.setAttribute("data-path", this.instance.path);
     this.control.container.setAttribute("data-type", getSchemaType(this.instance.schema));
     const schemaContainerAttributes = getSchemaXOption(this.instance.schema, "containerAttributes");
-    if (isSet(schemaContainerAttributes) && isObject(schemaContainerAttributes)) {
+    if (isSet(schemaContainerAttributes) && isObject$1(schemaContainerAttributes)) {
       for (const [key, value] of Object.entries(schemaContainerAttributes)) {
         if (key === "class") {
           const classes = value.split(" ");
@@ -2291,7 +2291,7 @@ class Editor {
     }
     const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
     buttons.forEach((config) => {
-      if (!isObject(config)) {
+      if (!isObject$1(config)) {
         return;
       }
       const rawLabel = isString(config.label) ? config.label : "";
@@ -2299,7 +2299,7 @@ class Editor {
       const attributes = filterAttributes(config.attributes);
       const button = this.theme.getXButton({ label, attributes });
       this.control.container.appendChild(button);
-      const eventName = isObject(config.event) && isString(config.event.name) ? config.event.name : null;
+      const eventName = isObject$1(config.event) && isString(config.event.name) ? config.event.name : null;
       if (!eventName) {
         return;
       }
@@ -2336,7 +2336,7 @@ class Editor {
     const input = this.control.input;
     if (isSet(input)) {
       const inputAttributes = getSchemaXOption(this.instance.schema, "inputAttributes");
-      if (isObject(inputAttributes)) {
+      if (isObject$1(inputAttributes)) {
         for (const [key, value] of Object.entries(inputAttributes)) {
           input.setAttribute(key, value);
         }
@@ -2701,7 +2701,7 @@ class InstanceIfThenElse extends Instance {
     this.activeInstance.register();
     this.instances.forEach((instance, index2) => {
       instance.off("notifyParent");
-      if (instance.children && isObject(value)) {
+      if (instance.children && isObject$1(value)) {
         instance.children.forEach((child) => {
           const shouldUpdateValue = child.isMultiple && hasOwn(value, child.getKey());
           if (shouldUpdateValue) {
@@ -2711,7 +2711,7 @@ class InstanceIfThenElse extends Instance {
       }
       const startingValue = this.instanceStartingValues[index2];
       let instanceValue = value;
-      if (isObject(startingValue) && isObject(value)) {
+      if (isObject$1(startingValue) && isObject$1(value)) {
         if (indexChanged && initiator !== "api") {
           instanceValue = overwriteExistingProperties(startingValue, withoutIf);
         } else {
@@ -2743,7 +2743,7 @@ class InstanceIfThenElse extends Instance {
   }
   getWithoutIfValueFromValue(value) {
     let withoutIf = this.instanceWithoutIf.getValue();
-    if (isObject(withoutIf) && isObject(value)) {
+    if (isObject$1(withoutIf) && isObject$1(value)) {
       withoutIf = overwriteExistingProperties(withoutIf, value);
       return withoutIf;
     }
@@ -2964,7 +2964,7 @@ class InstanceMultiple extends Instance {
    */
   getFittestIndex(value) {
     const discriminator = getSchemaXOption(this.schema, "discriminator");
-    if (isSet(discriminator) && isObject(value)) {
+    if (isSet(discriminator) && isObject$1(value)) {
       const propName = isString(discriminator) ? discriminator : discriminator.propertyName;
       const discriminatorValue = value[propName];
       if (isSet(discriminatorValue)) {
@@ -3222,7 +3222,7 @@ class InstanceObject extends Instance {
     const wasRefreshing = this.refreshingInstances;
     this.refreshingInstances = true;
     const value = this.getValue();
-    if (!isObject(value)) {
+    if (!isObject$1(value)) {
       this.refreshingInstances = wasRefreshing;
       return;
     }
@@ -3264,7 +3264,7 @@ class InstanceObject extends Instance {
 class InstanceArray extends Instance {
   prepare() {
     this.schemaItems = getSchemaItems(this.schema);
-    if (isObject(this.schemaItems) && this.jedison.refParser && this.jedison.refParser.hasRef(this.schemaItems) && !this.schemaItems["x-recursive"]) {
+    if (isObject$1(this.schemaItems) && this.jedison.refParser && this.jedison.refParser.hasRef(this.schemaItems) && !this.schemaItems["x-recursive"]) {
       this.schemaItems = this.jedison.refParser.expand(this.schemaItems);
       this.schema.items = this.schemaItems;
     }
@@ -3637,7 +3637,7 @@ class EditorStringRadios extends EditorString {
   getEnumSourceValues() {
     if (this.enumSourceValues !== void 0) {
       if (isArray(this.enumSourceValues)) return this.enumSourceValues;
-      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
       return [];
     }
     return getSchemaEnum(this.instance.schema) || [];
@@ -3750,7 +3750,7 @@ class EditorStringSelect extends EditorString {
   getEnumSourceValues() {
     if (this.enumSourceValues !== void 0) {
       if (isArray(this.enumSourceValues)) return this.enumSourceValues;
-      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
       return [];
     }
     return getSchemaEnum(this.instance.schema) || [];
@@ -4078,7 +4078,7 @@ class EditorNumberSelect extends EditorNumber {
   getEnumSourceValues() {
     if (this.enumSourceValues !== void 0) {
       if (isArray(this.enumSourceValues)) return this.enumSourceValues;
-      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
       return [];
     }
     return getSchemaEnum(this.instance.schema) || [];
@@ -4330,7 +4330,7 @@ class EditorObject extends Editor {
     });
   }
   sanitize(value) {
-    if (isObject(value)) {
+    if (isObject$1(value)) {
       return value;
     }
     return {};
@@ -5524,7 +5524,7 @@ class EditorArrayChoices extends Editor {
   getEnumSourceValues() {
     if (this.enumSourceValues !== void 0) {
       if (isArray(this.enumSourceValues)) return this.enumSourceValues;
-      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
       return [];
     }
     return this.instance.schema.items && this.instance.schema.items.enum || [];
@@ -6416,7 +6416,7 @@ class EditorArrayCheckboxes extends Editor {
   getEnumSourceValues() {
     if (this.enumSourceValues !== void 0) {
       if (isArray(this.enumSourceValues)) return this.enumSourceValues;
-      if (isObject(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
       return [];
     }
     return getSchemaEnum(this.instance.schema.items) || [];
@@ -7366,7 +7366,7 @@ class Jedison extends EventEmitter {
     this.hiddenInput.setAttribute("name", "json");
     this.hiddenInput.removeAttribute("aria-describedby");
     this.hiddenInput.removeAttribute("aria-hidden", "true");
-    if (this.options.hiddenInputAttributes && isObject(this.options.hiddenInputAttributes)) {
+    if (this.options.hiddenInputAttributes && isObject$1(this.options.hiddenInputAttributes)) {
       Object.keys(this.options.hiddenInputAttributes).forEach((attr) => {
         this.hiddenInput.setAttribute(attr, this.options.hiddenInputAttributes[attr]);
       });
@@ -7469,7 +7469,7 @@ class Jedison extends EventEmitter {
         }
       });
       this.walker.traverse(config.schema, (node) => {
-        if (node.not && isObject(node.not)) {
+        if (node.not && isObject$1(node.not)) {
           const nodeClone = clone(node);
           delete nodeClone.not;
           node.not = combineDeep({}, nodeClone, node.not);
@@ -8391,7 +8391,7 @@ class Theme {
     label.classList.add("jedi-x-button-label");
     label.innerHTML = config.label ?? "";
     button.appendChild(label);
-    const attributes = isObject(config.attributes) ? config.attributes : {};
+    const attributes = isObject$1(config.attributes) ? config.attributes : {};
     for (const [key, value] of Object.entries(attributes)) {
       if (key === "class") {
         String(value).split(" ").forEach((cls) => {
@@ -8511,7 +8511,7 @@ class Theme {
     container.style.display = "inline-block";
     info.setAttribute("href", "#");
     info.classList.add("jedi-info-button");
-    if (isObject(config.attributes)) {
+    if (isObject$1(config.attributes)) {
       for (const [key, value] of Object.entries(config.attributes)) {
         info.setAttribute(key, value);
       }
@@ -8605,7 +8605,7 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     container.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       container.appendChild(info.container);
     }
     container.appendChild(switcherSlot);
@@ -8699,7 +8699,7 @@ class Theme {
       container.appendChild(jsonData.dialog);
     }
     fieldset.appendChild(legend);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       while (info.container.firstChild) {
         infoContainer.appendChild(info.container.firstChild);
       }
@@ -9024,7 +9024,7 @@ class Theme {
       container.appendChild(jsonData.dialog);
     }
     fieldset.appendChild(legend);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       while (info.container.firstChild) {
         infoContainer.appendChild(info.container.firstChild);
       }
@@ -9236,7 +9236,7 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     container.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       container.appendChild(info.container);
     }
     container.appendChild(switcherSlot);
@@ -9280,7 +9280,7 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     container.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       container.appendChild(info.container);
     }
     container.appendChild(switcherSlot);
@@ -9330,7 +9330,7 @@ class Theme {
     if (((_a = config == null ? void 0 : config.info) == null ? void 0 : _a.variant) === "modal") {
       this.infoAsModal(info, config.id, config.info);
     }
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       container.appendChild(info.container);
     }
     container.appendChild(switcherSlot);
@@ -9412,7 +9412,7 @@ class Theme {
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
     legend.appendChild(switcherSlot);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       legendText.after(info.container);
     }
     radioControls.forEach((radioControl, index2) => {
@@ -9480,7 +9480,7 @@ class Theme {
     container.appendChild(actions);
     formGroup.appendChild(input);
     formGroup.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       formGroup.appendChild(info.container);
     }
     formGroup.appendChild(switcherSlot);
@@ -9547,7 +9547,7 @@ class Theme {
     container.appendChild(fieldset);
     fieldset.appendChild(legend);
     legend.appendChild(switcherSlot);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       legendText.after(info.container);
     }
     checkboxControls.forEach((checkboxControl, index2) => {
@@ -9617,7 +9617,7 @@ class Theme {
       this.infoAsModal(info, config.id, config.info);
     }
     container.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       container.appendChild(info.container);
     }
     container.appendChild(switcherSlot);
@@ -10799,7 +10799,7 @@ class ThemeBootstrap4 extends Theme {
     container.appendChild(formGroup);
     formGroup.appendChild(input);
     formGroup.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       label.appendChild(info.container);
     }
     container.appendChild(description);
@@ -11355,7 +11355,7 @@ class ThemeBootstrap5 extends Theme {
     container.appendChild(formGroup);
     formGroup.appendChild(input);
     formGroup.appendChild(label);
-    if (isObject(config.info)) {
+    if (isObject$1(config.info)) {
       label.appendChild(info.container);
     }
     container.appendChild(description);
@@ -11549,6 +11549,225 @@ class ThemeBootstrap5 extends Theme {
     element.classList.remove("visually-hidden");
   }
 }
+function isObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function isContainer(value) {
+  return value !== null && typeof value === "object";
+}
+function unsupported(path, detail) {
+  throw new Error(`Jedison: unsupported JSONPath "${path}" — ${detail}. Supported: $, .name, ['name'], [n], *, and .. (no filters, slices, or functions).`);
+}
+function splitUnion(content) {
+  const parts = [];
+  let current = "";
+  let quote = null;
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    if (quote) {
+      if (char === quote) quote = null;
+      current += char;
+    } else if (char === "'" || char === '"') {
+      quote = char;
+      current += char;
+    } else if (char === ",") {
+      parts.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  parts.push(current);
+  return parts;
+}
+function parseBracket(content, path) {
+  const trimmed = content.trim();
+  if (trimmed === "*") {
+    return [{ type: "wildcard" }];
+  }
+  if (trimmed.includes("?")) unsupported(path, "filter expressions are not supported");
+  if (trimmed.includes("(")) unsupported(path, "function extensions are not supported");
+  return splitUnion(trimmed).map((raw) => {
+    const part = raw.trim();
+    if (part.startsWith("'") && part.endsWith("'") || part.startsWith('"') && part.endsWith('"')) {
+      return { type: "name", value: part.slice(1, -1) };
+    }
+    if (/^-?\d+$/.test(part)) {
+      return { type: "index", value: parseInt(part, 10) };
+    }
+    if (part.includes(":")) unsupported(path, "array slices are not supported");
+    unsupported(path, `cannot parse selector "${part}"`);
+  });
+}
+function tokenize(path) {
+  if (typeof path !== "string" || path[0] !== "$") {
+    unsupported(path, 'must start with "$"');
+  }
+  const steps = [];
+  let i = 1;
+  const readName = () => {
+    const start = i;
+    while (i < path.length && path[i] !== "." && path[i] !== "[") i++;
+    const name = path.slice(start, i);
+    if (name === "") unsupported(path, 'empty name after "."');
+    if (name.includes("(")) unsupported(path, "function extensions are not supported");
+    return name;
+  };
+  const readDotSelector = (descendant) => {
+    if (path[i] === "*") {
+      i++;
+      steps.push({ descendant, selectors: [{ type: "wildcard" }] });
+    } else {
+      steps.push({ descendant, selectors: [{ type: "name", value: readName() }] });
+    }
+  };
+  const readBracket = (descendant) => {
+    i++;
+    let content = "";
+    let quote = null;
+    while (i < path.length && (quote || path[i] !== "]")) {
+      const char = path[i];
+      if (quote) {
+        if (char === quote) quote = null;
+      } else if (char === "'" || char === '"') {
+        quote = char;
+      }
+      content += char;
+      i++;
+    }
+    if (path[i] !== "]") unsupported(path, 'unterminated "["');
+    i++;
+    steps.push({ descendant, selectors: parseBracket(content, path) });
+  };
+  while (i < path.length) {
+    if (path[i] === "." && path[i + 1] === ".") {
+      i += 2;
+      if (path[i] === "[") readBracket(true);
+      else readDotSelector(true);
+    } else if (path[i] === ".") {
+      i++;
+      readDotSelector(false);
+    } else if (path[i] === "[") {
+      readBracket(false);
+    } else {
+      unsupported(path, `unexpected character "${path[i]}"`);
+    }
+  }
+  return steps;
+}
+function withDescendants(nodeRef) {
+  const list = [nodeRef];
+  const walk = (container) => {
+    if (Array.isArray(container)) {
+      container.forEach((value, index2) => {
+        list.push({ parent: container, key: index2, value });
+        walk(value);
+      });
+    } else if (isObject(container)) {
+      Object.keys(container).forEach((key) => {
+        list.push({ parent: container, key, value: container[key] });
+        walk(container[key]);
+      });
+    }
+  };
+  walk(nodeRef.value);
+  return list;
+}
+function applySelector(container, selector, out) {
+  if (!isContainer(container)) return;
+  if (selector.type === "wildcard") {
+    if (Array.isArray(container)) {
+      container.forEach((value, index2) => out.push({ parent: container, key: index2, value }));
+    } else {
+      Object.keys(container).forEach((key) => out.push({ parent: container, key, value: container[key] }));
+    }
+    return;
+  }
+  if (selector.type === "name") {
+    if (isObject(container) && Object.prototype.hasOwnProperty.call(container, selector.value)) {
+      out.push({ parent: container, key: selector.value, value: container[selector.value] });
+    }
+    return;
+  }
+  if (selector.type === "index") {
+    if (Array.isArray(container)) {
+      const index2 = selector.value < 0 ? container.length + selector.value : selector.value;
+      if (index2 >= 0 && index2 < container.length) {
+        out.push({ parent: container, key: index2, value: container[index2] });
+      }
+    }
+  }
+}
+function selectNodes(root, path) {
+  const steps = tokenize(path);
+  let current = [{ parent: null, key: null, value: root }];
+  for (const step of steps) {
+    const bases = step.descendant ? current.flatMap(withDescendants) : current;
+    const next = [];
+    for (const node of bases) {
+      for (const selector of step.selectors) {
+        applySelector(node.value, selector, next);
+      }
+    }
+    current = next;
+  }
+  return current;
+}
+function applyUpdate(nodeRef, update) {
+  const { parent, key, value } = nodeRef;
+  const incoming = clone(update);
+  if (isArray(value)) {
+    if (isArray(incoming)) value.push(...incoming);
+    else value.push(incoming);
+    return;
+  }
+  if (isObject$1(value) && isObject$1(incoming)) {
+    combineDeep(value, incoming);
+    return;
+  }
+  if (parent === null) {
+    throw new Error("Jedison: overlay cannot replace the root schema with a non-object update.");
+  }
+  parent[key] = incoming;
+}
+function applyRemove(nodes) {
+  if (nodes.some((node) => node.parent === null)) {
+    throw new Error("Jedison: overlay cannot remove the root schema.");
+  }
+  nodes.filter((node) => node.parent && !isArray(node.parent)).forEach((node) => {
+    delete node.parent[node.key];
+  });
+  const arrayGroups = /* @__PURE__ */ new Map();
+  nodes.filter((node) => isArray(node.parent)).forEach((node) => {
+    if (!arrayGroups.has(node.parent)) arrayGroups.set(node.parent, []);
+    arrayGroups.get(node.parent).push(node.key);
+  });
+  arrayGroups.forEach((indices, array) => {
+    indices.sort((a, b) => b - a).forEach((index2) => array.splice(index2, 1));
+  });
+}
+function applyOverlay(schema, overlay) {
+  const result = clone(schema);
+  if (overlay === null || typeof overlay === "undefined") {
+    return result;
+  }
+  if (!isObject$1(overlay) || !isArray(overlay.actions)) {
+    throw new Error('Jedison: overlay must be an object with an "actions" array.');
+  }
+  overlay.actions.forEach((action, index2) => {
+    if (!isObject$1(action) || typeof action.target !== "string") {
+      throw new Error(`Jedison: overlay action ${index2} must be an object with a string "target".`);
+    }
+    const nodes = selectNodes(result, action.target);
+    if (nodes.length === 0) return;
+    if (action.remove === true) {
+      applyRemove(nodes);
+    } else if (typeof action.update !== "undefined") {
+      nodes.forEach((node) => applyUpdate(node, action.update));
+    }
+  });
+  return result;
+}
 const index = {
   Schema,
   Utils,
@@ -11588,7 +11807,8 @@ const index = {
   ThemeBootstrap5,
   RefParser,
   Create: Jedison,
-  SchemaGenerator
+  SchemaGenerator,
+  applyOverlay
 };
 export {
   index as default
