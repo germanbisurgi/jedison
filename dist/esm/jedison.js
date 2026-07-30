@@ -2517,6 +2517,20 @@ class Editor {
     }
     return schemaInfo;
   }
+  // Per-path view state on the shared root, so it survives an editor being
+  // rebuilt or replaced (e.g. an if/then/else branch swap).
+  getPersistentState(key, fallback) {
+    const pathState = this.instance.jedison.persistentState[this.instance.path];
+    const value = isSet(pathState) ? pathState[key] : void 0;
+    return isSet(value) ? value : fallback;
+  }
+  setPersistentState(key, value) {
+    const store = this.instance.jedison.persistentState;
+    if (!isSet(store[this.instance.path])) {
+      store[this.instance.path] = {};
+    }
+    store[this.instance.path][key] = value;
+  }
   refreshLegendWarning() {
   }
   /**
@@ -2625,8 +2639,11 @@ class EditorIfThenElse extends Editor {
   }
   refreshUI() {
     this.refreshDisabledState();
-    this.control.childrenSlot.innerHTML = "";
-    this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
+    const activeContainer = this.instance.activeInstance.ui.control.container;
+    if (this.control.childrenSlot.firstChild !== activeContainer) {
+      this.control.childrenSlot.innerHTML = "";
+      this.control.childrenSlot.appendChild(activeContainer);
+    }
     this.control.switcherSlot = this.instance.activeInstance.ui.control.switcherSlot;
     if (this.disabled || this.instance.isReadOnly()) {
       this.instance.activeInstance.ui.disable();
@@ -4657,6 +4674,12 @@ class EditorObjectNav extends EditorObject {
   init() {
     super.init();
     this.activeTabIndex = 0;
+    this.navTabs = /* @__PURE__ */ new Map();
+  }
+  // Persisted so the tab survives an if/then/else branch swap (issue #65).
+  setActiveTabIndex(index2) {
+    this.activeTabIndex = index2;
+    this.setPersistentState("activeTab", index2);
   }
   isChildVisible(child) {
     if (!child.isActive) return false;
@@ -4671,7 +4694,7 @@ class EditorObjectNav extends EditorObject {
   }
   ensureActiveTabIsVisible(visibleIndices) {
     if (!visibleIndices.includes(this.activeTabIndex)) {
-      this.activeTabIndex = visibleIndices[0] ?? 0;
+      this.setActiveTabIndex(visibleIndices[0] ?? 0);
     }
   }
   navigateTo(path) {
@@ -4679,16 +4702,13 @@ class EditorObjectNav extends EditorObject {
     if (nextChildPath) {
       const childIndex = this.instance.children.findIndex((c) => c.path === nextChildPath);
       if (childIndex !== -1) {
-        this.activeTabIndex = childIndex;
+        this.setActiveTabIndex(childIndex);
         this.refreshUI();
       }
     }
     super.navigateTo(path);
   }
-  refreshEditors() {
-    while (this.control.childrenSlot.firstChild) {
-      this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild);
-    }
+  buildNavShell() {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
@@ -4697,41 +4717,83 @@ class EditorObjectNav extends EditorObject {
     const row = this.theme.getRow();
     const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
     const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
-    const tabContent = this.theme.getTabContent();
-    const tabList = this.theme.getTabList({
-      variant
-    });
-    this.control.childrenSlot.appendChild(row);
+    this.navTabContent = this.theme.getTabContent();
+    this.navTabList = this.theme.getTabList({ variant });
     row.appendChild(tabListCol);
     row.appendChild(tabContentCol);
-    tabListCol.appendChild(tabList);
-    tabContentCol.appendChild(tabContent);
+    tabListCol.appendChild(this.navTabList);
+    tabContentCol.appendChild(this.navTabContent);
+    this.control.childrenSlot.appendChild(row);
+  }
+  createTab(child) {
+    const tab = this.theme.getTab({
+      title: this.getChildTitle(child),
+      id: this.getIdFromPath(child.path)
+    });
+    tab.list.addEventListener("click", () => {
+      this.setActiveTabIndex(this.instance.children.indexOf(child));
+    });
+    return tab;
+  }
+  getChildTitle(child) {
+    const schemaTitle = getSchemaTitle(child.schema);
+    return isSet(schemaTitle) ? schemaTitle : child.getKey();
+  }
+  updateTab(tab, child, active) {
+    tab.list.classList.toggle("active", active);
+    tab.link.classList.toggle("active", active);
+    tab.text.textContent = this.getChildTitle(child);
+    const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
+    const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
+    const hasErrors = navWarning && child.hasNestedValidationErrors();
+    const existing = tab.link.querySelector(".jedi-nav-warning");
+    if (existing) existing.parentNode.removeChild(existing);
+    if (hasErrors) {
+      const warning = document.createElement("span");
+      warning.classList.add("jedi-nav-warning");
+      warning.textContent = "⚠ ";
+      tab.link.appendChild(warning);
+      if (navWarningMessage) tab.list.setAttribute("title", navWarningMessage);
+    } else {
+      tab.list.removeAttribute("title");
+    }
+  }
+  refreshEditors() {
+    this.activeTabIndex = this.getPersistentState("activeTab", this.activeTabIndex);
+    if (!this.navTabContent) this.buildNavShell();
     const visibleIndices = this.getVisibleChildIndices();
     this.ensureActiveTabIsVisible(visibleIndices);
+    const currentPaths = new Set(this.instance.children.map((child) => child.path));
     this.instance.children.forEach((child, index2) => {
-      if (!this.isChildVisible(child)) return;
+      let tab = this.navTabs.get(child.path);
+      if (!this.isChildVisible(child)) {
+        if (tab && tab.list.parentNode) tab.list.parentNode.removeChild(tab.list);
+        if (child.ui.control.container.parentNode === this.navTabContent) {
+          this.navTabContent.removeChild(child.ui.control.container);
+        }
+        return;
+      }
+      if (!tab) {
+        tab = this.createTab(child);
+        this.navTabs.set(child.path, tab);
+      }
       const active = index2 === this.activeTabIndex;
-      const id = this.getIdFromPath(child.path);
-      const schemaTitle = getSchemaTitle(child.schema);
-      const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
-      const navWarningMessage = getSchemaXOption(this.instance.schema, "navWarningMessage");
-      const tab = this.theme.getTab({
-        hasErrors: navWarning && child.hasNestedValidationErrors(),
-        navWarningMessage,
-        title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
-        id,
-        active
-      });
-      tab.list.addEventListener("click", () => {
-        this.activeTabIndex = index2;
-      });
-      this.theme.setTabPaneAttributes(child.ui.control.container, active, id);
-      tabList.appendChild(tab.list);
-      tabContent.appendChild(child.ui.control.container);
+      this.updateTab(tab, child, active);
+      this.theme.setTabPaneAttributes(child.ui.control.container, active, this.getIdFromPath(child.path));
+      if (tab.list.parentNode !== this.navTabList) this.navTabList.appendChild(tab.list);
+      if (child.ui.control.container.parentNode !== this.navTabContent) {
+        this.navTabContent.appendChild(child.ui.control.container);
+      }
       if (this.disabled || this.instance.isReadOnly()) {
         child.ui.disable();
       } else {
         child.ui.enable();
+      }
+    });
+    this.navTabs.forEach((tab, path) => {
+      if (!currentPaths.has(path)) {
+        if (tab.list.parentNode) tab.list.parentNode.removeChild(tab.list);
+        this.navTabs.delete(path);
       }
     });
   }
@@ -4872,6 +4934,11 @@ class EditorArray extends Editor {
     super.init();
     this.activeItemIndex = 0;
   }
+  // Persisted so EditorArrayNav's item survives an if/then/else swap (issue #65).
+  setActiveItemIndex(index2) {
+    this.activeItemIndex = index2;
+    this.setPersistentState("activeItem", index2);
+  }
   build() {
     this.control = this.theme.getArrayControl({
       title: this.getTitle(),
@@ -4987,7 +5054,7 @@ class EditorArray extends Editor {
       const globalConfirm = this.instance.jedison.getOption("arrayDeleteConfirm");
       const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm;
       const doDelete = () => {
-        this.activeItemIndex = clamp(index2 - 1, 0, this.instance.value.length - 1);
+        this.setActiveItemIndex(clamp(index2 - 1, 0, this.instance.value.length - 1));
         this.instance.deleteItem(index2, "user");
       };
       if (shouldConfirm) {
@@ -5000,16 +5067,16 @@ class EditorArray extends Editor {
     });
     moveUpBtn.addEventListener("click", () => {
       const toIndex = index2 - 1;
-      this.activeItemIndex = toIndex;
+      this.setActiveItemIndex(toIndex);
       this.instance.move(index2, toIndex, "user");
     });
     moveDownBtn.addEventListener("click", () => {
       const toIndex = index2 + 1;
-      this.activeItemIndex = toIndex;
+      this.setActiveItemIndex(toIndex);
       this.instance.move(index2, toIndex, "user");
     });
     addAfterBtn.addEventListener("click", () => {
-      this.activeItemIndex = index2 + 1;
+      this.setActiveItemIndex(index2 + 1);
       this.instance.addItemAfter(index2, "user");
     });
     if (index2 === 0) {
@@ -5624,7 +5691,7 @@ class EditorArrayNav extends EditorArray {
     if (nextChildPath) {
       const childIndex = this.instance.children.findIndex((c) => c.path === nextChildPath);
       if (childIndex !== -1) {
-        this.activeItemIndex = childIndex;
+        this.setActiveItemIndex(childIndex);
         this.refreshUI();
       }
     }
@@ -5632,28 +5699,33 @@ class EditorArrayNav extends EditorArray {
   }
   addEventListeners() {
     this.control.addBtn.addEventListener("click", () => {
-      this.activeItemIndex = this.instance.value.length;
+      this.setActiveItemIndex(this.instance.value.length);
       this.instance.addItem("user");
     });
     this.control.footerAddBtn.addEventListener("click", () => {
-      this.activeItemIndex = this.instance.value.length;
+      this.setActiveItemIndex(this.instance.value.length);
       this.instance.addItem("user");
     });
     if (this.control.deleteAllBtn) {
       this.control.deleteAllBtn.addEventListener("click", () => {
-        this.activeItemIndex = 0;
+        this.setActiveItemIndex(0);
         this.deleteAllItems();
       });
     }
     if (this.control.footerDeleteAllBtn) {
       this.control.footerDeleteAllBtn.addEventListener("click", () => {
-        this.activeItemIndex = 0;
+        this.setActiveItemIndex(0);
         this.deleteAllItems();
       });
     }
     this.addJsonDataEventListeners();
   }
   refreshUI() {
+    this.activeItemIndex = this.getPersistentState("activeItem", this.activeItemIndex);
+    const lastIndex = this.instance.children.length - 1;
+    if (this.activeItemIndex > lastIndex) {
+      this.setActiveItemIndex(lastIndex < 0 ? 0 : lastIndex);
+    }
     this.control.childrenSlot.innerHTML = "";
     this.clearStoredEventListeners();
     const format2 = getSchemaXOption(this.instance.schema, "format");
@@ -5714,7 +5786,7 @@ class EditorArrayNav extends EditorArray {
       });
       arrayActions.appendChild(btnGroup);
       const clickHandler = () => {
-        this.activeItemIndex = index2;
+        this.setActiveItemIndex(index2);
       };
       list.addEventListener("click", clickHandler);
       this.storedEventListeners.push({
@@ -5757,7 +5829,7 @@ class EditorArrayNav extends EditorArray {
         handle: ".jedi-array-drag",
         disabled: this.disabled || this.readOnly,
         onEnd: (evt) => {
-          this.activeItemIndex = evt.newIndex;
+          this.setActiveItemIndex(evt.newIndex);
           this.instance.move(evt.oldIndex, evt.newIndex);
         }
       });
@@ -5841,8 +5913,11 @@ class EditorMultiple extends Editor {
   }
   refreshUI() {
     this.refreshDisabledState();
-    this.control.childrenSlot.innerHTML = "";
-    this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container);
+    const activeContainer = this.instance.activeInstance.ui.control.container;
+    if (this.control.childrenSlot.firstChild !== activeContainer) {
+      this.control.childrenSlot.innerHTML = "";
+      this.control.childrenSlot.appendChild(activeContainer);
+    }
     const slot = this.instance.activeInstance.ui.control.switcherSlot;
     this.control.switcherSlot = slot;
     if (this.embedSwitcher || this.switcherInput === "modal" || this.switcherInput === "select-inline") {
@@ -7201,6 +7276,7 @@ class Jedison extends EventEmitter {
     this.pathSeparator = "/";
     this.instances = /* @__PURE__ */ new Map();
     this.root = null;
+    this.persistentState = {};
     this.translator = new Translator({
       language: this.options.language,
       translations: this.options.translations
