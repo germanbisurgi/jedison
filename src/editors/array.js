@@ -21,6 +21,12 @@ class EditorArray extends Editor {
     this.activeItemIndex = 0
   }
 
+  // Persisted so EditorArrayNav's item survives an if/then/else swap (issue #65).
+  setActiveItemIndex (index) {
+    this.activeItemIndex = index
+    this.setPersistentState('activeItem', index)
+  }
+
   build () {
     this.control = this.theme.getArrayControl({
       title: this.getTitle(),
@@ -162,7 +168,7 @@ class EditorArray extends Editor {
       const shouldConfirm = isSet(schemaConfirm) ? schemaConfirm : globalConfirm
 
       const doDelete = () => {
-        this.activeItemIndex = clamp((index - 1), 0, (this.instance.value.length - 1))
+        this.setActiveItemIndex(clamp((index - 1), 0, (this.instance.value.length - 1)))
         this.instance.deleteItem(index, 'user')
       }
 
@@ -177,18 +183,18 @@ class EditorArray extends Editor {
 
     moveUpBtn.addEventListener('click', () => {
       const toIndex = index - 1
-      this.activeItemIndex = toIndex
+      this.setActiveItemIndex(toIndex)
       this.instance.move(index, toIndex, 'user')
     })
 
     moveDownBtn.addEventListener('click', () => {
       const toIndex = index + 1
-      this.activeItemIndex = toIndex
+      this.setActiveItemIndex(toIndex)
       this.instance.move(index, toIndex, 'user')
     })
 
     addAfterBtn.addEventListener('click', () => {
-      this.activeItemIndex = index + 1
+      this.setActiveItemIndex(index + 1)
       this.instance.addItemAfter(index, 'user')
     })
 

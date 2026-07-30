@@ -21,6 +21,15 @@ class EditorObjectNav extends EditorObject {
   init () {
     super.init()
     this.activeTabIndex = 0
+    // Tab elements are cached by child path and reused across refreshes so a
+    // re-render never tears down the tab a user may be clicking (issue #65).
+    this.navTabs = new Map()
+  }
+
+  // Persisted so the tab survives an if/then/else branch swap (issue #65).
+  setActiveTabIndex (index) {
+    this.activeTabIndex = index
+    this.setPersistentState('activeTab', index)
   }
 
   isChildVisible (child) {
@@ -38,7 +47,7 @@ class EditorObjectNav extends EditorObject {
 
   ensureActiveTabIsVisible (visibleIndices) {
     if (!visibleIndices.includes(this.activeTabIndex)) {
-      this.activeTabIndex = visibleIndices[0] ?? 0
+      this.setActiveTabIndex(visibleIndices[0] ?? 0)
     }
   }
 
@@ -47,18 +56,14 @@ class EditorObjectNav extends EditorObject {
     if (nextChildPath) {
       const childIndex = this.instance.children.findIndex(c => c.path === nextChildPath)
       if (childIndex !== -1) {
-        this.activeTabIndex = childIndex
+        this.setActiveTabIndex(childIndex)
         this.refreshUI()
       }
     }
     super.navigateTo(path)
   }
 
-  refreshEditors () {
-    while (this.control.childrenSlot.firstChild) {
-      this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild)
-    }
-
+  buildNavShell () {
     const format = getSchemaXOption(this.instance.schema, 'format')
     const formatParts = format.split('-')
     const variant = formatParts[1]
@@ -67,51 +72,106 @@ class EditorObjectNav extends EditorObject {
     const row = this.theme.getRow()
     const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns)
     const tabContentCol = this.theme.getCol(12, 12, (12 - navColumns), (12 - navColumns))
-    const tabContent = this.theme.getTabContent()
-    const tabList = this.theme.getTabList({
-      variant: variant
-    })
 
-    this.control.childrenSlot.appendChild(row)
+    this.navTabContent = this.theme.getTabContent()
+    this.navTabList = this.theme.getTabList({ variant: variant })
+
     row.appendChild(tabListCol)
     row.appendChild(tabContentCol)
-    tabListCol.appendChild(tabList)
-    tabContentCol.appendChild(tabContent)
+    tabListCol.appendChild(this.navTabList)
+    tabContentCol.appendChild(this.navTabContent)
+    this.control.childrenSlot.appendChild(row)
+  }
+
+  createTab (child) {
+    const tab = this.theme.getTab({
+      title: this.getChildTitle(child),
+      id: this.getIdFromPath(child.path)
+    })
+
+    // Resolve the index at click time so reordering can't stale it.
+    tab.list.addEventListener('click', () => {
+      this.setActiveTabIndex(this.instance.children.indexOf(child))
+    })
+
+    return tab
+  }
+
+  getChildTitle (child) {
+    const schemaTitle = getSchemaTitle(child.schema)
+    return isSet(schemaTitle) ? schemaTitle : child.getKey()
+  }
+
+  updateTab (tab, child, active) {
+    tab.list.classList.toggle('active', active)
+    tab.link.classList.toggle('active', active)
+    tab.text.textContent = this.getChildTitle(child)
+
+    const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
+    const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
+    const hasErrors = navWarning && child.hasNestedValidationErrors()
+
+    const existing = tab.link.querySelector('.jedi-nav-warning')
+    if (existing) existing.parentNode.removeChild(existing)
+
+    if (hasErrors) {
+      const warning = document.createElement('span')
+      warning.classList.add('jedi-nav-warning')
+      warning.textContent = '⚠ '
+      tab.link.appendChild(warning)
+      if (navWarningMessage) tab.list.setAttribute('title', navWarningMessage)
+    } else {
+      tab.list.removeAttribute('title')
+    }
+  }
+
+  refreshEditors () {
+    this.activeTabIndex = this.getPersistentState('activeTab', this.activeTabIndex)
+
+    if (!this.navTabContent) this.buildNavShell()
 
     const visibleIndices = this.getVisibleChildIndices()
     this.ensureActiveTabIsVisible(visibleIndices)
 
+    const currentPaths = new Set(this.instance.children.map((child) => child.path))
+
     this.instance.children.forEach((child, index) => {
-      if (!this.isChildVisible(child)) return
+      let tab = this.navTabs.get(child.path)
+
+      if (!this.isChildVisible(child)) {
+        if (tab && tab.list.parentNode) tab.list.parentNode.removeChild(tab.list)
+        if (child.ui.control.container.parentNode === this.navTabContent) {
+          this.navTabContent.removeChild(child.ui.control.container)
+        }
+        return
+      }
+
+      if (!tab) {
+        tab = this.createTab(child)
+        this.navTabs.set(child.path, tab)
+      }
 
       const active = index === this.activeTabIndex
-      const id = this.getIdFromPath(child.path)
-      const schemaTitle = getSchemaTitle(child.schema)
+      this.updateTab(tab, child, active)
+      this.theme.setTabPaneAttributes(child.ui.control.container, active, this.getIdFromPath(child.path))
 
-      const navWarning = getSchemaXOption(this.instance.schema, 'navWarning') ?? true
-      const navWarningMessage = getSchemaXOption(this.instance.schema, 'navWarningMessage')
-
-      const tab = this.theme.getTab({
-        hasErrors: navWarning && child.hasNestedValidationErrors(),
-        navWarningMessage: navWarningMessage,
-        title: isSet(schemaTitle) ? schemaTitle : child.getKey(),
-        id: id,
-        active: active
-      })
-
-      tab.list.addEventListener('click', () => {
-        this.activeTabIndex = index
-      })
-
-      this.theme.setTabPaneAttributes(child.ui.control.container, active, id)
-
-      tabList.appendChild(tab.list)
-      tabContent.appendChild(child.ui.control.container)
+      if (tab.list.parentNode !== this.navTabList) this.navTabList.appendChild(tab.list)
+      if (child.ui.control.container.parentNode !== this.navTabContent) {
+        this.navTabContent.appendChild(child.ui.control.container)
+      }
 
       if (this.disabled || this.instance.isReadOnly()) {
         child.ui.disable()
       } else {
         child.ui.enable()
+      }
+    })
+
+    // Drop cached tabs whose child no longer exists (e.g. removed property).
+    this.navTabs.forEach((tab, path) => {
+      if (!currentPaths.has(path)) {
+        if (tab.list.parentNode) tab.list.parentNode.removeChild(tab.list)
+        this.navTabs.delete(path)
       }
     })
   }

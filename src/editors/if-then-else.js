@@ -29,8 +29,15 @@ class EditorIfThenElse extends Editor {
 
   refreshUI () {
     this.refreshDisabledState()
-    this.control.childrenSlot.innerHTML = ''
-    this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container)
+
+    // Only swap the mounted branch when it actually changed. Re-appending the
+    // same container on every refresh would tear down the active branch's DOM
+    // (e.g. a nav's tabs) mid-interaction and eat clicks (issue #65).
+    const activeContainer = this.instance.activeInstance.ui.control.container
+    if (this.control.childrenSlot.firstChild !== activeContainer) {
+      this.control.childrenSlot.innerHTML = ''
+      this.control.childrenSlot.appendChild(activeContainer)
+    }
 
     // An if/then/else node has no anchor of its own (its header/legend is
     // never mounted) — forward switcherSlot to whatever control the active

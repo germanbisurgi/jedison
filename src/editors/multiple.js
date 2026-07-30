@@ -101,8 +101,14 @@ class EditorMultiple extends Editor {
 
   refreshUI () {
     this.refreshDisabledState()
-    this.control.childrenSlot.innerHTML = ''
-    this.control.childrenSlot.appendChild(this.instance.activeInstance.ui.control.container)
+
+    // Only swap the mounted branch when it actually changed, so re-rendering
+    // doesn't tear down the active branch's DOM mid-interaction (issue #65).
+    const activeContainer = this.instance.activeInstance.ui.control.container
+    if (this.control.childrenSlot.firstChild !== activeContainer) {
+      this.control.childrenSlot.innerHTML = ''
+      this.control.childrenSlot.appendChild(activeContainer)
+    }
 
     // Recomputed on every refresh (not just once at build), since the active
     // branch — and therefore which real leaf control this resolves to — can

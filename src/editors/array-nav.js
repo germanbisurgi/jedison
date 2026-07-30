@@ -23,7 +23,7 @@ class EditorArrayNav extends EditorArray {
     if (nextChildPath) {
       const childIndex = this.instance.children.findIndex(c => c.path === nextChildPath)
       if (childIndex !== -1) {
-        this.activeItemIndex = childIndex
+        this.setActiveItemIndex(childIndex)
         this.refreshUI()
       }
     }
@@ -32,25 +32,25 @@ class EditorArrayNav extends EditorArray {
 
   addEventListeners () {
     this.control.addBtn.addEventListener('click', () => {
-      this.activeItemIndex = this.instance.value.length
+      this.setActiveItemIndex(this.instance.value.length)
       this.instance.addItem('user')
     })
 
     this.control.footerAddBtn.addEventListener('click', () => {
-      this.activeItemIndex = this.instance.value.length
+      this.setActiveItemIndex(this.instance.value.length)
       this.instance.addItem('user')
     })
 
     if (this.control.deleteAllBtn) {
       this.control.deleteAllBtn.addEventListener('click', () => {
-        this.activeItemIndex = 0
+        this.setActiveItemIndex(0)
         this.deleteAllItems()
       })
     }
 
     if (this.control.footerDeleteAllBtn) {
       this.control.footerDeleteAllBtn.addEventListener('click', () => {
-        this.activeItemIndex = 0
+        this.setActiveItemIndex(0)
         this.deleteAllItems()
       })
     }
@@ -59,6 +59,14 @@ class EditorArrayNav extends EditorArray {
   }
 
   refreshUI () {
+    this.activeItemIndex = this.getPersistentState('activeItem', this.activeItemIndex)
+
+    // Clamp: a persisted index can outrun a branch with fewer items.
+    const lastIndex = this.instance.children.length - 1
+    if (this.activeItemIndex > lastIndex) {
+      this.setActiveItemIndex(lastIndex < 0 ? 0 : lastIndex)
+    }
+
     this.control.childrenSlot.innerHTML = ''
 
     this.clearStoredEventListeners()
@@ -138,7 +146,7 @@ class EditorArrayNav extends EditorArray {
       arrayActions.appendChild(btnGroup)
 
       const clickHandler = () => {
-        this.activeItemIndex = index
+        this.setActiveItemIndex(index)
       }
 
       list.addEventListener('click', clickHandler)
@@ -192,7 +200,7 @@ class EditorArrayNav extends EditorArray {
         handle: '.jedi-array-drag',
         disabled: this.disabled || this.readOnly,
         onEnd: (evt) => {
-          this.activeItemIndex = evt.newIndex
+          this.setActiveItemIndex(evt.newIndex)
           this.instance.move(evt.oldIndex, evt.newIndex)
         }
       })

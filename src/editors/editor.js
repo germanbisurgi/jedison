@@ -449,6 +449,24 @@ class Editor {
     return schemaInfo
   }
 
+  // Per-path view state on the shared root, so it survives an editor being
+  // rebuilt or replaced (e.g. an if/then/else branch swap).
+  getPersistentState (key, fallback) {
+    const pathState = this.instance.jedison.persistentState[this.instance.path]
+    const value = isSet(pathState) ? pathState[key] : undefined
+    return isSet(value) ? value : fallback
+  }
+
+  setPersistentState (key, value) {
+    const store = this.instance.jedison.persistentState
+
+    if (!isSet(store[this.instance.path])) {
+      store[this.instance.path] = {}
+    }
+
+    store[this.instance.path][key] = value
+  }
+
   refreshLegendWarning () {}
 
   /**

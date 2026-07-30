@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue 65 - nav tab focus must survive an if/then branch swap",
+  "description": "With x-format nav-horizontal and allOf/if-then conditions, toggling a checkbox in one tab must not reset the active tab to the first one. Check BGP? on Service Attributes, switch to the Interface tab, then check Enable IPv6 - the Interface tab must stay active.",
+  "type": "object",
+  "x-showErrors": "never",
+  "required": [
+    "interface",
+    "service"
+  ],
+  "x-format": "nav-horizontal",
+  "properties": {
+    "service": {
+      "type": "object",
+      "title": "Service Attributes",
+      "required": [
+        "bgpenabled"
+      ],
+      "x-objectAdd": false,
+      "properties": {
+        "bgpenabled": {
+          "type": "boolean",
+          "x-format": "checkbox",
+          "title": "BGP?"
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "title": "Interface",
+      "x-objectAdd": false,
+      "required": [
+        "ipv6enabled"
+      ],
+      "properties": {
+        "ipv6enabled": {
+          "type": "boolean",
+          "x-format": "checkbox",
+          "title": "Enable IPv6"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "interface": {
+            "type": "object",
+            "properties": {
+              "ipv6enabled": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "ipv6enabled"
+            ]
+          }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "interface": {
+            "type": "object",
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "object",
+            "properties": {
+              "bgpenabled": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "bgpenabled"
+            ]
+          }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "bgp": {
+            "type": "object",
+            "x-objectAdd": false,
+            "title": "BGP",
+            "required": [
+              "test"
+            ],
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "bgp"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "object",
+            "properties": {
+              "bgpenabled": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "bgpenabled"
+            ]
+          },
+          "interface": {
+            "type": "object",
+            "properties": {
+              "ipv6enabled": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "ipv6enabled"
+            ]
+          }
+        },
+        "required": [
+          "service",
+          "interface"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "bgp": {
+            "type": "object",
+            "properties": {
+              "test2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test2"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

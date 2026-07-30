@@ -121,6 +121,12 @@ class Jedison extends EventEmitter {
     this.root = null
 
     /**
+     * Per-path store for editor view state that must survive a rebuild.
+     * @type {object}
+     */
+    this.persistentState = {}
+
+    /**
      * The Validator instance used to translate UI texts and error messages
      * @type {Translator}
      */
