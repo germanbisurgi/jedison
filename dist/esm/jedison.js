@@ -10127,7 +10127,7 @@ function createElement(tag, attributes = {}, children = []) {
     } else if (key === "dataset") {
       Object.assign(node.dataset, value);
     } else if (key.startsWith("on")) {
-      node.addEventListener(key.slice(2), value);
+      node.addEventListener(key.slice(2).toLowerCase(), value);
     } else {
       node.setAttribute(key, value);
     }
@@ -10691,6 +10691,69 @@ class NodeEditor {
     return select;
   }
 }
+class JsonEditor {
+  /**
+   * @param {object} options
+   * @param {object|boolean} options.schema - Initial schema to seed the textarea
+   * @param {Function} options.onChange - (schema) => void, called with the parsed schema
+   * @param {number} [options.delay] - Debounce delay in ms (default 300)
+   */
+  constructor({ schema, onChange, delay = 300 }) {
+    this.onChange = onChange;
+    this.delay = delay;
+    this.timer = null;
+    this.errorEl = null;
+    this.textarea = createElement("textarea", {
+      class: "jedi-sb-json",
+      rows: 30,
+      spellcheck: false,
+      style: { width: "100%", fontFamily: "monospace", fontSize: "12px", minHeight: "60vh" }
+    });
+    this.textarea.addEventListener("input", () => {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => this.parse(), this.delay);
+    });
+    this.sync(schema);
+  }
+  render() {
+    const formatBtn = btn("Format", () => this.format(), { class: "jedi-sb-format-btn" });
+    this.errorEl = createElement("div", { class: "jedi-sb-json-error", style: { color: "#b02a37", fontSize: "12px" } });
+    return createElement("div", { class: "jedi-sb-text-editor", style: { display: "flex", flexDirection: "column", gap: "8px" } }, [
+      createElement("div", { style: { display: "flex", justifyContent: "flex-end" } }, [formatBtn]),
+      this.textarea,
+      this.errorEl
+    ]);
+  }
+  parse() {
+    try {
+      const parsed = JSON.parse(this.textarea.value);
+      this.setError("");
+      this.onChange(parsed);
+      return parsed;
+    } catch (error) {
+      this.setError(`Invalid JSON: ${error.message}`);
+      return void 0;
+    }
+  }
+  format() {
+    const parsed = this.parse();
+    if (parsed !== void 0) {
+      this.textarea.value = JSON.stringify(parsed, null, 2);
+    }
+  }
+  sync(schema) {
+    this.textarea.value = JSON.stringify(schema, null, 2);
+  }
+  setError(message) {
+    if (this.errorEl) {
+      this.errorEl.textContent = message;
+    }
+  }
+  destroy() {
+    clearTimeout(this.timer);
+    this.timer = null;
+  }
+}
 function detectDraft(schema) {
   if (isObject$1(schema) && typeof schema.$schema === "string") {
     const draft = DRAFTS.find((d) => d.value === schema.$schema);
@@ -10703,6 +10766,7 @@ class SchemaBuilder extends EventEmitter {
    * @param {object} options
    * @param {HTMLElement} options.container - Where the builder UI is rendered
    * @param {object|boolean} [options.schema] - Initial schema
+   * @param {string} [options.view] - Editor style: 'text' (default) or 'visual'
    * @param {Theme} [options.theme] - Theme used for the form preview
    * @param {string} [options.draft] - JSON Schema draft uri
    * @param {number} [options.maxDepth] - Maximum nesting depth (default 20)
@@ -10715,6 +10779,7 @@ class SchemaBuilder extends EventEmitter {
     this.draft = options.draft || detectDraft(options.schema);
     this.maxDepth = options.maxDepth ?? 20;
     this.previewOptions = options.preview || {};
+    this.view = options.view === "visual" ? "visual" : "text";
     this.schema = clone(options.schema);
     if (!isObject$1(this.schema)) {
       this.schema = { type: "object", properties: {} };
@@ -10723,6 +10788,8 @@ class SchemaBuilder extends EventEmitter {
     this.preview = null;
     this.previewTimer = null;
     this.expandedProps = {};
+    this.jsonEditor = null;
+    this.jsonEditing = false;
     this.render();
     this.notifyChange();
   }
@@ -10767,6 +10834,9 @@ class SchemaBuilder extends EventEmitter {
     this.validate();
     this.updateStatus();
     this.emit("change", clone(this.schema));
+    if (this.jsonEditor && !this.jsonEditing) {
+      this.jsonEditor.sync(this.schema);
+    }
     clearTimeout(this.previewTimer);
     this.previewTimer = setTimeout(() => {
       this.renderPreview();
@@ -10819,6 +10889,10 @@ class SchemaBuilder extends EventEmitter {
     }, [label]);
   }
   renderEditorPane() {
+    if (this.view !== "visual") {
+      this.ensureTextEditor();
+      return;
+    }
     if (!this.builderPane) return;
     this.builderPane.innerHTML = "";
     const editor = new NodeEditor({
@@ -10840,6 +10914,18 @@ class SchemaBuilder extends EventEmitter {
       renderNodeEditor: this.renderNodeEditor
     });
     this.builderPane.appendChild(editor.render());
+  }
+  ensureTextEditor() {
+    if (this.jsonEditor || !this.builderPane) return;
+    this.jsonEditor = new JsonEditor({
+      schema: this.schema,
+      onChange: (parsed) => {
+        this.jsonEditing = true;
+        this.setSchema(parsed);
+        this.jsonEditing = false;
+      }
+    });
+    this.builderPane.appendChild(this.jsonEditor.render());
   }
   renderNodeEditor(schema, path, depth) {
     if (depth > this.maxDepth) {
@@ -11011,6 +11097,10 @@ class SchemaBuilder extends EventEmitter {
    */
   destroy() {
     clearTimeout(this.previewTimer);
+    if (this.jsonEditor) {
+      this.jsonEditor.destroy();
+      this.jsonEditor = null;
+    }
     if (this.preview) {
       this.preview.destroy();
       this.preview = null;

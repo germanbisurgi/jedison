@@ -35,7 +35,7 @@ afterEach(() => {
 
 describe('SchemaBuilder — rendering', () => {
   it('renders toolbar, builder and preview panes into the container', () => {
-    new SchemaBuilder({ container, schema: validSchema() })
+    new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
     expect(container.querySelector('.jedi-sb-toolbar')).toBeTruthy()
     expect(container.querySelector('.jedi-sb-builder-pane')).toBeTruthy()
     expect(container.querySelector('.jedi-sb-preview-pane')).toBeTruthy()
@@ -158,6 +158,85 @@ describe('SchemaBuilder — destroy', () => {
     builder.destroy()
     expect(container.children.length).toBe(0)
     expect(builder.container).toBeUndefined()
+    expect(() => jest.advanceTimersByTime(300)).not.toThrow()
+  })
+})
+
+describe('SchemaBuilder — text editor view', () => {
+  const jsonTextarea = (builder) => builder.builderPane.querySelector('.jedi-sb-json')
+  const setJson = (builder, text) => {
+    jsonTextarea(builder).value = text
+    jsonTextarea(builder).dispatchEvent(new Event('input', { bubbles: true }))
+  }
+
+  it('renders a text editor with the schema JSON by default', () => {
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    expect(jsonTextarea(builder)).toBeTruthy()
+    expect(container.querySelector('.jedi-sb-node-editor')).toBeNull()
+    expect(JSON.parse(jsonTextarea(builder).value)).toEqual(validSchema())
+  })
+
+  it('renders the structured editor for view: "visual"', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    expect(jsonTextarea(builder)).toBeNull()
+    expect(container.querySelector('.jedi-sb-node-editor')).toBeTruthy()
+  })
+
+  it('updates the schema and preview from valid JSON input', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    const next = { type: 'object', properties: { email: { type: 'string', format: 'email' } } }
+    setJson(builder, JSON.stringify(next))
+    jest.advanceTimersByTime(300)
+    expect(builder.getSchema()).toEqual(next)
+    expect(jsonTextarea(builder).value).toBe(JSON.stringify(next))
+    jest.advanceTimersByTime(300)
+    expect(builder.preview).toBeInstanceOf(Create)
+  })
+
+  it('keeps the raw text as typed after a valid parse', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    const raw = '{\n  "type": "string"\n}'
+    setJson(builder, raw)
+    jest.advanceTimersByTime(300)
+    expect(builder.getSchema()).toEqual({ type: 'string' })
+    expect(jsonTextarea(builder).value).toBe(raw)
+  })
+
+  it('shows an error and leaves the schema unchanged for invalid JSON', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    setJson(builder, '{ type: "string" }')
+    jest.advanceTimersByTime(300)
+    expect(builder.getSchema()).toEqual(validSchema())
+    expect(container.querySelector('.jedi-sb-json-error').textContent).toMatch(/Invalid JSON/)
+    expect(builder.statusBadge.textContent).toBe('✓ Valid')
+  })
+
+  it('prettifies the JSON with the Format button', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    const minified = JSON.stringify(validSchema())
+    setJson(builder, minified)
+    jest.advanceTimersByTime(300)
+    expect(jsonTextarea(builder).value).toBe(minified)
+    container.querySelector('.jedi-sb-format-btn').click()
+    expect(jsonTextarea(builder).value).toBe(JSON.stringify(validSchema(), null, 2))
+  })
+
+  it('updates the text editor when setSchema is called externally', () => {
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    builder.setSchema({ type: 'boolean' })
+    expect(jsonTextarea(builder).value).toBe(JSON.stringify({ type: 'boolean' }, null, 2))
+  })
+
+  it('destroys cleanly with a pending JSON debounce', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, schema: validSchema() })
+    setJson(builder, '{ broken')
+    builder.destroy()
+    expect(container.children.length).toBe(0)
     expect(() => jest.advanceTimersByTime(300)).not.toThrow()
   })
 })

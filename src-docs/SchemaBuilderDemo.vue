@@ -1,5 +1,17 @@
 <template>
   <div>
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <div class="form-group mb-0">
+          <label for="builder-view"><code>view</code></label>
+          <select class="form-control" id="builder-view" v-model="view" @change="initBuilder()">
+            <option value="visual">visual</option>
+            <option value="text">text</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="btn-group mb-3">
       <button
         v-for="(preset, name) in presets"
@@ -14,7 +26,7 @@
 
     <div ref="container"></div>
 
-    <div class="form-group mb-3">
+    <div v-if="view === 'visual'" class="form-group mb-3">
       <label for="builder-json"><code>schema</code> (live)</label>
       <textarea
         ref="json"
@@ -36,6 +48,7 @@ export default {
   data() {
     return {
       builder: null,
+      view: 'visual',
       presets: {
         Contact: {
           title: 'Contact',
@@ -88,12 +101,7 @@ export default {
     }
   },
   mounted() {
-    this.builder = new SchemaBuilder({
-      container: this.$refs.container,
-      schema: this.presets.Contact
-    })
-    this.builder.on('change', () => this.syncJson())
-    this.syncJson()
+    this.initBuilder()
   },
   beforeUnmount() {
     if (this.builder) {
@@ -102,11 +110,26 @@ export default {
     }
   },
   methods: {
+    initBuilder() {
+      if (this.builder) {
+        this.builder.destroy()
+        this.builder = null
+      }
+      this.builder = new SchemaBuilder({
+        container: this.$refs.container,
+        view: this.view,
+        schema: this.presets.Contact
+      })
+      this.builder.on('change', () => this.syncJson())
+      this.syncJson()
+    },
     loadPreset(name) {
       this.builder.setSchema(this.presets[name])
     },
     syncJson() {
-      this.$refs.json.value = JSON.stringify(this.builder.getSchema(), null, 2)
+      if (this.$refs.json) {
+        this.$refs.json.value = JSON.stringify(this.builder.getSchema(), null, 2)
+      }
     }
   }
 }

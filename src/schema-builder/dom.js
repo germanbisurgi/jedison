@@ -10,7 +10,7 @@ export function createElement (tag, attributes = {}, children = []) {
     } else if (key === 'dataset') {
       Object.assign(node.dataset, value)
     } else if (key.startsWith('on')) {
-      node.addEventListener(key.slice(2), value)
+      node.addEventListener(key.slice(2).toLowerCase(), value)
     } else {
       node.setAttribute(key, value)
     }

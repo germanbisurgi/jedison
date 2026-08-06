@@ -6,6 +6,7 @@ import { clone, isObject } from '../helpers/utils.js'
 import { DRAFTS } from './schema-keywords.js'
 import { validateSchema } from './validator.js'
 import NodeEditor from './node-editor.js'
+import JsonEditor from './json-editor.js'
 import { createElement } from './dom.js'
 
 function detectDraft (schema) {
@@ -17,9 +18,10 @@ function detectDraft (schema) {
 }
 
 /**
- * A visual JSON Schema builder. It edits a schema object through structured
- * controls and previews the resulting Jedison form. Data entry is fully
- * ignored — the preview is rendered read-only.
+ * A JSON Schema builder. It edits a schema object either through a plain
+ * text JSON editor (the default) or structured controls, and previews the
+ * resulting Jedison form. Data entry is fully ignored — the preview is
+ * rendered read-only.
  *
  * @extends EventEmitter
  */
@@ -28,6 +30,7 @@ class SchemaBuilder extends EventEmitter {
    * @param {object} options
    * @param {HTMLElement} options.container - Where the builder UI is rendered
    * @param {object|boolean} [options.schema] - Initial schema
+   * @param {string} [options.view] - Editor style: 'text' (default) or 'visual'
    * @param {Theme} [options.theme] - Theme used for the form preview
    * @param {string} [options.draft] - JSON Schema draft uri
    * @param {number} [options.maxDepth] - Maximum nesting depth (default 20)
@@ -41,6 +44,7 @@ class SchemaBuilder extends EventEmitter {
     this.draft = options.draft || detectDraft(options.schema)
     this.maxDepth = options.maxDepth ?? 20
     this.previewOptions = options.preview || {}
+    this.view = options.view === 'visual' ? 'visual' : 'text'
 
     this.schema = clone(options.schema)
     if (!isObject(this.schema)) {
@@ -51,6 +55,8 @@ class SchemaBuilder extends EventEmitter {
     this.preview = null
     this.previewTimer = null
     this.expandedProps = {}
+    this.jsonEditor = null
+    this.jsonEditing = false
 
     this.render()
     this.notifyChange()
@@ -103,6 +109,10 @@ class SchemaBuilder extends EventEmitter {
     this.updateStatus()
 
     this.emit('change', clone(this.schema))
+
+    if (this.jsonEditor && !this.jsonEditing) {
+      this.jsonEditor.sync(this.schema)
+    }
 
     clearTimeout(this.previewTimer)
     this.previewTimer = setTimeout(() => {
@@ -168,6 +178,11 @@ class SchemaBuilder extends EventEmitter {
   }
 
   renderEditorPane () {
+    if (this.view !== 'visual') {
+      this.ensureTextEditor()
+      return
+    }
+
     if (!this.builderPane) return
 
     this.builderPane.innerHTML = ''
@@ -192,6 +207,21 @@ class SchemaBuilder extends EventEmitter {
     })
 
     this.builderPane.appendChild(editor.render())
+  }
+
+  ensureTextEditor () {
+    if (this.jsonEditor || !this.builderPane) return
+
+    this.jsonEditor = new JsonEditor({
+      schema: this.schema,
+      onChange: (parsed) => {
+        this.jsonEditing = true
+        this.setSchema(parsed)
+        this.jsonEditing = false
+      }
+    })
+
+    this.builderPane.appendChild(this.jsonEditor.render())
   }
 
   renderNodeEditor (schema, path, depth) {
@@ -397,6 +427,11 @@ class SchemaBuilder extends EventEmitter {
    */
   destroy () {
     clearTimeout(this.previewTimer)
+
+    if (this.jsonEditor) {
+      this.jsonEditor.destroy()
+      this.jsonEditor = null
+    }
 
     if (this.preview) {
       this.preview.destroy()
