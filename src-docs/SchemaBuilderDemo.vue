@@ -10,6 +10,17 @@
           </select>
         </div>
       </div>
+      <div class="col-md-4">
+        <div class="form-group mb-0">
+          <label for="builder-theme"><code>theme</code></label>
+          <select class="form-control" id="builder-theme" v-model="theme" @change="onThemeChange()">
+            <option value="bootstrap3">bootstrap3</option>
+            <option value="bootstrap4">bootstrap4</option>
+            <option value="bootstrap5">bootstrap5</option>
+            <option value="barebones">barebones</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div class="btn-group mb-3">
@@ -44,11 +55,30 @@
 import Jedison from '/src/index.js'
 const { SchemaBuilder } = Jedison
 
+const THEME_INSTANCES = {
+  bootstrap3: 'ThemeBootstrap3',
+  bootstrap4: 'ThemeBootstrap4',
+  bootstrap5: 'ThemeBootstrap5',
+  barebones: 'Theme'
+}
+
+const THEME_STYLESHEETS = {
+  bootstrap3: 'https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css',
+  bootstrap4: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css',
+  bootstrap5: 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css'
+}
+
+function defaultTheme() {
+  const theme = new URLSearchParams(window.location.search).get('theme')
+  return THEME_INSTANCES[theme] ? theme : 'bootstrap5'
+}
+
 export default {
   data() {
     return {
       builder: null,
       view: 'visual',
+      theme: defaultTheme(),
       presets: {
         Contact: {
           title: 'Contact',
@@ -101,6 +131,7 @@ export default {
     }
   },
   mounted() {
+    this.ensureStylesheet()
     this.initBuilder()
   },
   beforeUnmount() {
@@ -110,6 +141,29 @@ export default {
     }
   },
   methods: {
+    getTheme() {
+      return new Jedison[THEME_INSTANCES[this.theme]]()
+    },
+    ensureStylesheet() {
+      const href = THEME_STYLESHEETS[this.theme]
+      if (!href) {
+        this.removeStylesheets()
+        return
+      }
+      this.removeStylesheets()
+      const link = document.createElement('link')
+      link.setAttribute('rel', 'stylesheet')
+      link.setAttribute('href', href)
+      link.setAttribute('data-jedi-sb-theme', this.theme)
+      document.head.appendChild(link)
+    },
+    removeStylesheets() {
+      document.querySelectorAll('link[data-jedi-sb-theme]').forEach((link) => link.remove())
+    },
+    onThemeChange() {
+      this.ensureStylesheet()
+      this.initBuilder()
+    },
     initBuilder() {
       if (this.builder) {
         this.builder.destroy()
@@ -118,7 +172,8 @@ export default {
       this.builder = new SchemaBuilder({
         container: this.$refs.container,
         view: this.view,
-        schema: this.presets.Contact
+        schema: this.presets.Contact,
+        theme: this.getTheme()
       })
       this.builder.on('change', () => this.syncJson())
       this.syncJson()

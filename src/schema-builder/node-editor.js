@@ -44,8 +44,9 @@ class NodeEditor {
    * @param {object} options.expanded - Map of expanded property paths -> boolean
    * @param {Function} options.onSetExpanded - (key, expanded) => void
    * @param {Function} options.renderNodeEditor - (schema, path, depth) => HTMLElement
+   * @param {object} options.theme - Theme used to build the controls
    */
-  constructor ({ schema, draft, depth, maxDepth, path, onChange, onStructuralChange, expanded, onSetExpanded, renderNodeEditor }) {
+  constructor ({ schema, draft, depth, maxDepth, path, onChange, onStructuralChange, expanded, onSetExpanded, renderNodeEditor, theme }) {
     this.schema = schema
     this.draft = draft
     this.depth = depth
@@ -56,6 +57,7 @@ class NodeEditor {
     this.expanded = expanded
     this.onSetExpanded = onSetExpanded
     this.renderNodeEditor = renderNodeEditor
+    this.theme = theme
   }
 
   has (key) {
@@ -73,19 +75,19 @@ class NodeEditor {
 
     const container = createElement('div', { class: 'jedi-sb-node-editor' })
 
-    container.appendChild(section('Identity', this.renderIdentity()))
-    container.appendChild(section('Type', this.renderType()))
+    container.appendChild(section(this.theme, 'Identity', this.renderIdentity()))
+    container.appendChild(section(this.theme, 'Type', this.renderType()))
     container.appendChild(this.renderValues())
 
     const type = this.type
     if (type) {
       const constraints = getConstraintsForType(type)
       if (constraints.length > 0 || this.has('additionalProperties')) {
-        container.appendChild(section('Constraints', this.renderConstraints(constraints)))
+        container.appendChild(section(this.theme, 'Constraints', this.renderConstraints(constraints)))
       }
 
       if (type === 'array') {
-        container.appendChild(section('Array items', this.renderItems()))
+        container.appendChild(section(this.theme, 'Array items', this.renderItems()))
       }
 
       if (type === 'object') {
@@ -103,7 +105,7 @@ class NodeEditor {
     const inputs = {}
 
     const text = (key) => {
-      const input = createElement('input', { type: 'text', class: 'jedi-sb-input', value: this.schema[key] ?? '' })
+      const input = this.theme.getBuilderInput({ type: 'text', value: this.schema[key] ?? '' })
       input.addEventListener('input', () => {
         const value = input.value
         if (value === '') {
@@ -117,7 +119,7 @@ class NodeEditor {
     }
 
     inputs.title = text('title')
-    inputs.description = createElement('textarea', { class: 'jedi-sb-input', rows: 2, value: this.schema.description ?? '' })
+    inputs.description = this.theme.getBuilderTextarea({ rows: 2, value: this.schema.description ?? '' })
     inputs.description.addEventListener('input', () => {
       if (inputs.description.value === '') {
         delete this.schema.description
@@ -129,10 +131,10 @@ class NodeEditor {
     inputs.format = text('format')
     inputs.$ref = text('$ref')
 
-    fields.push(fieldRow({ id: 'sb-title', label: KEYWORD_LABELS.title, input: inputs.title }))
-    fields.push(fieldRow({ id: 'sb-description', label: KEYWORD_LABELS.description, input: inputs.description }))
-    fields.push(fieldRow({ id: 'sb-format', label: KEYWORD_LABELS.format, input: inputs.format }))
-    fields.push(fieldRow({ id: 'sb-ref', label: KEYWORD_LABELS.$ref, input: inputs.$ref, hint: 'Kept as plain text; ref resolution is out of scope.' }))
+    fields.push(fieldRow(this.theme, { id: 'sb-title', label: KEYWORD_LABELS.title, input: inputs.title }))
+    fields.push(fieldRow(this.theme, { id: 'sb-description', label: KEYWORD_LABELS.description, input: inputs.description }))
+    fields.push(fieldRow(this.theme, { id: 'sb-format', label: KEYWORD_LABELS.format, input: inputs.format }))
+    fields.push(fieldRow(this.theme, { id: 'sb-ref', label: KEYWORD_LABELS.$ref, input: inputs.$ref, hint: 'Kept as plain text; ref resolution is out of scope.' }))
 
     return createElement('div', {}, fields)
   }
@@ -143,15 +145,15 @@ class NodeEditor {
     if (isArray(current)) {
       const textarea = this.renderJsonField('type', current, 'Change this to a single type to use the select control.')
       return createElement('div', {}, [
-        fieldRow({ id: 'sb-type-array', label: KEYWORD_LABELS.type, input: textarea, hint: 'Multi-type schemas are edited as a JSON array.' })
+        fieldRow(this.theme, { id: 'sb-type-array', label: KEYWORD_LABELS.type, input: textarea, hint: 'Multi-type schemas are edited as a JSON array.' })
       ])
     }
 
-    const select = createElement('select', { class: 'jedi-sb-input' })
-    select.appendChild(createElement('option', { value: '' }, ['(any type)']))
+    const options = [{ value: '', title: '(any type)' }]
     TYPES.forEach((type) => {
-      select.appendChild(createElement('option', { value: type, selected: type === current }, [TYPE_LABELS[type]]))
+      options.push({ value: type, title: TYPE_LABELS[type], selected: type === current })
     })
+    const select = this.theme.getBuilderSelect({ options })
     select.addEventListener('change', () => {
       if (select.value) {
         this.schema.type = select.value
@@ -161,7 +163,7 @@ class NodeEditor {
       this.onStructuralChange()
     })
 
-    return createElement('div', {}, [fieldRow({ id: 'sb-type', label: KEYWORD_LABELS.type, input: select })])
+    return createElement('div', {}, [fieldRow(this.theme, { id: 'sb-type', label: KEYWORD_LABELS.type, input: select })])
   }
 
   renderValues () {
@@ -185,7 +187,7 @@ class NodeEditor {
       return createElement('div')
     }
 
-    return section('Values', createElement('div', {}, rows))
+    return section(this.theme, 'Values', createElement('div', {}, rows))
   }
 
   renderConstraints (constraints) {
@@ -211,19 +213,19 @@ class NodeEditor {
     if (this.has('items')) {
       if (isObject(this.schema.items)) {
         const body = createElement('div', {}, [this.renderNodeEditor(this.schema.items, `${this.path}.items`, this.depth + 1)])
-        const remove = btn('Remove items', () => {
+        const remove = btn(this.theme, 'Remove items', () => {
           delete this.schema.items
           this.onStructuralChange()
-        })
+        }, { variant: 'danger' })
         return createElement('div', {}, [row(body, remove)])
       }
       return createElement('div', {}, [this.renderKeywordField('items')])
     }
 
-    const add = btn('+ Add items schema', () => {
+    const add = btn(this.theme, '+ Add items schema', () => {
       this.schema.items = {}
       this.onStructuralChange()
-    })
+    }, { variant: 'primary' })
     return createElement('div', {}, [add])
   }
 
@@ -233,10 +235,10 @@ class NodeEditor {
     }
 
     if (!this.schema.properties) {
-      const add = btn('+ Add properties', () => {
+      const add = btn(this.theme, '+ Add properties', () => {
         this.schema.properties = {}
         this.onStructuralChange()
-      })
+      }, { variant: 'primary' })
       return createElement('div', { class: 'jedi-sb-properties-block' }, [add])
     }
 
@@ -254,7 +256,8 @@ class NodeEditor {
       onSetExpanded: this.onSetExpanded,
       onChange: this.onChange,
       onStructuralChange: this.onStructuralChange,
-      renderNodeEditor: this.renderNodeEditor
+      renderNodeEditor: this.renderNodeEditor,
+      theme: this.theme
     })
 
     return editor.render()
@@ -281,7 +284,7 @@ class NodeEditor {
       return createElement('div')
     }
 
-    return section('Composition', createElement('div', {}, rows))
+    return section(this.theme, 'Composition', createElement('div', {}, rows))
   }
 
   renderKeywordField (key) {
@@ -290,63 +293,62 @@ class NodeEditor {
 
     if (key === 'additionalProperties' && isObject(this.schema[key])) {
       const textarea = this.renderJsonField(key, this.schema[key])
-      const remove = btn('×', () => {
+      const remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
-      return row(fieldRow({ id, label: KEYWORD_LABELS[key], input: textarea }), remove)
+      }, { variant: 'danger' })
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: textarea }), remove)
     }
 
     if (kind === 'boolean') {
-      const input = createElement('input', { type: 'checkbox', checked: this.schema[key] === true })
+      const input = this.theme.getBuilderCheckbox({ checked: this.schema[key] === true })
       input.addEventListener('change', () => {
         this.schema[key] = input.checked
         this.onChange()
       })
-      const remove = btn('×', () => {
+      const remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
-      return row(fieldRow({ id, label: KEYWORD_LABELS[key], input }), remove)
+      }, { variant: 'danger' })
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input }), remove)
     }
 
     let input
     let remove
     if (kind === 'json') {
       input = this.renderJsonField(key, this.schema[key])
-      remove = btn('×', () => {
+      remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
+      }, { variant: 'danger' })
     } else if (kind === 'textarea') {
-      input = createElement('textarea', { class: 'jedi-sb-input', rows: 2, value: this.schema[key] ?? '' })
+      input = this.theme.getBuilderTextarea({ rows: 2, value: this.schema[key] ?? '' })
       input.addEventListener('input', () => this.writeText(key, input))
-      remove = btn('×', () => {
+      remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
+      }, { variant: 'danger' })
     } else if (kind === 'non-negative-integer' || kind === 'positive-number' || kind === 'number') {
-      input = createElement('input', { type: 'number', class: 'jedi-sb-input', value: this.schema[key], min: kind === 'non-negative-integer' ? '0' : undefined, step: kind === 'non-negative-integer' ? '1' : 'any' })
+      input = this.theme.getBuilderInput({ type: 'number', value: this.schema[key], min: kind === 'non-negative-integer' ? '0' : undefined, step: kind === 'non-negative-integer' ? '1' : 'any' })
       input.addEventListener('change', () => this.writeNumber(key, input))
-      remove = btn('×', () => {
+      remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
+      }, { variant: 'danger' })
     } else {
-      input = createElement('input', { type: 'text', class: 'jedi-sb-input', value: this.schema[key] ?? '' })
+      input = this.theme.getBuilderInput({ type: 'text', value: this.schema[key] ?? '' })
       input.addEventListener('input', () => this.writeText(key, input))
-      remove = btn('×', () => {
+      remove = btn(this.theme, '×', () => {
         delete this.schema[key]
         this.onStructuralChange()
-      })
+      }, { variant: 'danger' })
     }
 
-    return row(fieldRow({ id, label: KEYWORD_LABELS[key] || key, input }), remove)
+    return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key] || key, input }), remove)
   }
 
   renderJsonField (key, value, hint) {
-    const input = createElement('textarea', {
-      class: 'jedi-sb-input',
+    const input = this.theme.getBuilderTextarea({
       rows: 4,
       style: { fontFamily: 'monospace', fontSize: '12px' },
       value: JSON.stringify(value, null, 2)
@@ -400,11 +402,8 @@ class NodeEditor {
   }
 
   renderAddSelect (keywords, onAdd, placeholder) {
-    const select = createElement('select', { class: 'jedi-sb-add-select', style: { fontSize: '12px', padding: '2px 4px' } })
-    select.appendChild(createElement('option', { value: '' }, [placeholder]))
-    keywords.forEach((key) => {
-      select.appendChild(createElement('option', { value: key }, [KEYWORD_LABELS[key] || key]))
-    })
+    const options = keywords.map((key) => ({ value: key, title: KEYWORD_LABELS[key] || key }))
+    const select = this.theme.getBuilderSelect({ className: 'jedi-sb-add-select', options, placeholder })
     select.addEventListener('change', () => {
       if (select.value) {
         onAdd(select.value)

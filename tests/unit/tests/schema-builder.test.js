@@ -240,3 +240,60 @@ describe('SchemaBuilder — text editor view', () => {
     expect(() => jest.advanceTimersByTime(300)).not.toThrow()
   })
 })
+
+describe('SchemaBuilder — theme-decorated chrome', () => {
+  it('keeps bare hooks and inline styles with the base theme', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    expect(container.querySelector('.jedi-sb-toolbar .jedi-sb-btn').className).toBe('jedi-sb-btn')
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-control')).toBe(false)
+    expect(builder.statusBadge.className).toBe('jedi-sb-status')
+  })
+
+  it('applies Bootstrap 3 classes to buttons, selects and status', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema(), theme: new Jedison.ThemeBootstrap3() })
+    const toolbarBtn = container.querySelector('.jedi-sb-toolbar .jedi-sb-btn')
+    expect(toolbarBtn.classList.contains('btn')).toBe(true)
+    expect(toolbarBtn.classList.contains('btn-xs')).toBe(true)
+    expect(toolbarBtn.classList.contains('btn-default')).toBe(true)
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-control')).toBe(true)
+    expect(builder.statusBadge.classList.contains('label')).toBe(true)
+    expect(builder.statusBadge.classList.contains('label-success')).toBe(true)
+  })
+
+  it('applies Bootstrap 4 classes to selects and status', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema(), theme: new Jedison.ThemeBootstrap4() })
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-control')).toBe(true)
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-control-sm')).toBe(true)
+    expect(builder.statusBadge.classList.contains('badge')).toBe(true)
+    expect(builder.statusBadge.classList.contains('badge-success')).toBe(true)
+  })
+
+  it('applies Bootstrap 5 classes to buttons, selects and status', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema(), theme: new Jedison.ThemeBootstrap5() })
+    const toolbarBtn = container.querySelector('.jedi-sb-toolbar .jedi-sb-btn')
+    expect(toolbarBtn.classList.contains('btn')).toBe(true)
+    expect(toolbarBtn.classList.contains('btn-sm')).toBe(true)
+    expect(toolbarBtn.classList.contains('btn-outline-secondary')).toBe(true)
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-select')).toBe(true)
+    expect(container.querySelector('.jedi-sb-draft').classList.contains('form-select-sm')).toBe(true)
+    expect(builder.statusBadge.classList.contains('badge')).toBe(true)
+    expect(builder.statusBadge.classList.contains('text-bg-success')).toBe(true)
+  })
+
+  it('styles primary actions and the errors panel through the theme', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema(), theme: new Jedison.ThemeBootstrap5() })
+    const addBtn = Array.from(container.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === '+ Add property')
+    expect(addBtn.classList.contains('btn-outline-primary')).toBe(true)
+
+    builder.setSchema({ type: 'object', properties: { a: { type: 'bogus' } } })
+    expect(builder.statusBadge.classList.contains('text-bg-danger')).toBe(true)
+    const alert = builder.errorsPanel.querySelector('.alert.alert-danger')
+    expect(alert).toBeTruthy()
+    expect(alert.textContent).toContain('Schema validation errors')
+  })
+
+  it('styles the JSON text editor through the theme', () => {
+    new SchemaBuilder({ container, schema: validSchema(), theme: new Jedison.ThemeBootstrap5() })
+    expect(container.querySelector('.jedi-sb-json').classList.contains('form-control')).toBe(true)
+  })
+})

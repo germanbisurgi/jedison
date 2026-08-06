@@ -464,6 +464,71 @@ class ThemeBootstrap3 extends Theme {
     control.container.classList.remove('form-group')
   }
 
+  getBuilderButton (config = {}) {
+    const button = super.getBuilderButton(config)
+    button.classList.add('btn', 'btn-xs')
+
+    switch (config.variant) {
+      case 'primary':
+        button.classList.add('btn-primary')
+        break
+      case 'danger':
+        button.classList.add('btn-danger')
+        break
+      default:
+        button.classList.add('btn-default')
+        break
+    }
+
+    return button
+  }
+
+  getBuilderInput (config = {}) {
+    const input = super.getBuilderInput(config)
+    input.classList.add('form-control')
+    return input
+  }
+
+  getBuilderTextarea (config = {}) {
+    const input = super.getBuilderTextarea(config)
+    input.classList.add('form-control')
+    return input
+  }
+
+  getBuilderSelect (config = {}) {
+    const input = super.getBuilderSelect(config)
+    input.classList.add('form-control')
+    return input
+  }
+
+  getBuilderStatusBadge (config = {}) {
+    const badge = super.getBuilderStatusBadge(config)
+    badge.style.color = ''
+    badge.style.fontWeight = ''
+    badge.style.fontSize = ''
+    badge.classList.add('label')
+    badge.classList.add(config.valid ? 'label-success' : 'label-danger')
+    return badge
+  }
+
+  getBuilderAlert (config = {}) {
+    const box = super.getBuilderAlert(config)
+    box.classList.add('alert', 'alert-danger')
+    box.style.background = ''
+    box.style.border = ''
+    box.style.borderRadius = ''
+    box.style.padding = ''
+    return box
+  }
+
+  getBuilderSectionTitle (config = {}) {
+    const heading = super.getBuilderSectionTitle(config)
+    heading.classList.add('text-uppercase', 'text-muted')
+    heading.style.textTransform = ''
+    heading.style.color = ''
+    return heading
+  }
+
   getSwitcherSelect (config) {
     const control = super.getSwitcherSelect(config)
     control.input.classList.add('input-sm')

@@ -27,8 +27,9 @@ class PropertiesEditor {
    * @param {Function} options.onChange - Called on non-structural changes
    * @param {Function} options.onStructuralChange - Called when the UI must re-render
    * @param {Function} options.renderNodeEditor - (schema, path, depth) => HTMLElement
+   * @param {object} options.theme - Theme used to build the controls
    */
-  constructor ({ properties, required, onSetRequired, draft, depth, path, expanded, onSetExpanded, onChange, onStructuralChange, renderNodeEditor }) {
+  constructor ({ properties, required, onSetRequired, draft, depth, path, expanded, onSetExpanded, onChange, onStructuralChange, renderNodeEditor, theme }) {
     this.properties = properties
     this.required = isArray(required) ? required : null
     this.onSetRequired = onSetRequired
@@ -40,6 +41,7 @@ class PropertiesEditor {
     this.onChange = onChange
     this.onStructuralChange = onStructuralChange
     this.renderNodeEditor = renderNodeEditor
+    this.theme = theme
   }
 
   isExpanded (name) {
@@ -65,10 +67,10 @@ class PropertiesEditor {
       list.appendChild(this.renderProperty(name, this.properties[name]))
     })
 
-    const addInput = createElement('input', { type: 'text', class: 'jedi-sb-input', placeholder: 'property name' })
-    const addBtn = btn('+ Add property', () => {
+    const addInput = this.theme.getBuilderInput({ type: 'text', placeholder: 'property name' })
+    const addBtn = btn(this.theme, '+ Add property', () => {
       this.addProperty(addInput)
-    })
+    }, { variant: 'primary' })
     addInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') this.addProperty(addInput)
     })
@@ -89,7 +91,7 @@ class PropertiesEditor {
     }
 
     const items = names.map((name) => {
-      const checkbox = createElement('input', { type: 'checkbox', class: 'jedi-sb-required', checked: isArray(this.required) && this.required.includes(name) })
+      const checkbox = this.theme.getBuilderCheckbox({ className: 'jedi-sb-required', checked: isArray(this.required) && this.required.includes(name) })
       checkbox.addEventListener('change', () => {
         const required = this.ensureRequired()
         if (checkbox.checked && !required.includes(name)) {
@@ -105,13 +107,13 @@ class PropertiesEditor {
       return row(checkbox, createElement('span', {}, [name]))
     })
 
-    return section('Required', createElement('div', { class: 'jedi-sb-required-list' }, items))
+    return section(this.theme, 'Required', createElement('div', { class: 'jedi-sb-required-list' }, items))
   }
 
   renderProperty (name, schema) {
     const typeValue = getType(schema)
 
-    const nameInput = createElement('input', { type: 'text', class: 'jedi-sb-prop-name', value: name })
+    const nameInput = this.theme.getBuilderInput({ type: 'text', className: 'jedi-sb-prop-name', value: name })
     nameInput.addEventListener('change', () => {
       const newName = nameInput.value.trim()
       if (!newName || newName === name) return
@@ -122,11 +124,11 @@ class PropertiesEditor {
       this.onStructuralChange()
     })
 
-    const typeSelect = createElement('select', { class: 'jedi-sb-prop-type' })
-    typeSelect.appendChild(createElement('option', { value: '' }, ['(type)']))
+    const typeOptions = [{ value: '', title: '(type)' }]
     TYPES.forEach((type) => {
-      typeSelect.appendChild(createElement('option', { value: type, selected: typeValue === type }, [TYPE_LABELS[type]]))
+      typeOptions.push({ value: type, title: TYPE_LABELS[type], selected: typeValue === type })
     })
+    const typeSelect = this.theme.getBuilderSelect({ className: 'jedi-sb-prop-type', options: typeOptions })
     typeSelect.addEventListener('change', () => {
       if (typeSelect.value) {
         schema.type = typeSelect.value
@@ -136,16 +138,16 @@ class PropertiesEditor {
       this.onStructuralChange()
     })
 
-    const toggleBtn = btn('Edit', () => {
+    const toggleBtn = btn(this.theme, 'Edit', () => {
       this.toggleExpanded(name)
     })
 
-    const deleteBtn = btn('×', () => {
+    const deleteBtn = btn(this.theme, '×', () => {
       if (!window.confirm(`Delete property "${name}"?`)) return
       delete this.properties[name]
       this.removeFromRequired(name)
       this.onStructuralChange()
-    })
+    }, { variant: 'danger' })
 
     const header = row(nameInput, typeSelect, toggleBtn, deleteBtn)
     const item = createElement('div', { class: 'jedi-sb-property', style: { marginBottom: '6px', paddingLeft: '10px', borderLeft: '1px solid #dee2e6' } }, [header])

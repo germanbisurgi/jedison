@@ -140,10 +140,8 @@ class SchemaBuilder extends EventEmitter {
   }
 
   renderToolbar () {
-    const draftSelect = createElement('select', { class: 'jedi-sb-draft', style: { fontSize: '12px', padding: '2px 4px' } })
-    DRAFTS.forEach((draft) => {
-      draftSelect.appendChild(createElement('option', { value: draft.value, selected: draft.value === this.draft }, [draft.label]))
-    })
+    const draftOptions = DRAFTS.map((draft) => ({ value: draft.value, title: draft.label, selected: draft.value === this.draft }))
+    const draftSelect = this.theme.getBuilderSelect({ className: 'jedi-sb-draft', options: draftOptions })
     draftSelect.addEventListener('change', () => {
       this.draft = draftSelect.value
       if (isObject(this.schema)) {
@@ -152,7 +150,7 @@ class SchemaBuilder extends EventEmitter {
       this.notifyChange(true)
     })
 
-    this.statusBadge = createElement('span', { class: 'jedi-sb-status', style: { fontWeight: '600', fontSize: '12px', marginLeft: '12px' } })
+    this.statusBadge = this.theme.getBuilderStatusBadge({ text: '✓ Valid', valid: true })
 
     const fromJsonBtn = this.toolbarButton('Import JSON', () => this.openImportDialog())
     const generateBtn = this.toolbarButton('Generate from JSON', () => this.openGenerateDialog())
@@ -169,12 +167,7 @@ class SchemaBuilder extends EventEmitter {
   }
 
   toolbarButton (label, onClick) {
-    return createElement('button', {
-      type: 'button',
-      class: 'jedi-sb-btn',
-      onClick,
-      style: { padding: '3px 10px', fontSize: '12px', cursor: 'pointer' }
-    }, [label])
+    return this.theme.getBuilderButton({ content: label, onClick, variant: 'secondary' })
   }
 
   renderEditorPane () {
@@ -203,7 +196,8 @@ class SchemaBuilder extends EventEmitter {
           delete this.expandedProps[key]
         }
       },
-      renderNodeEditor: this.renderNodeEditor
+      renderNodeEditor: this.renderNodeEditor,
+      theme: this.theme
     })
 
     this.builderPane.appendChild(editor.render())
@@ -218,7 +212,8 @@ class SchemaBuilder extends EventEmitter {
         this.jsonEditing = true
         this.setSchema(parsed)
         this.jsonEditing = false
-      }
+      },
+      theme: this.theme
     })
 
     this.builderPane.appendChild(this.jsonEditor.render())
@@ -245,7 +240,8 @@ class SchemaBuilder extends EventEmitter {
           delete this.expandedProps[key]
         }
       },
-      renderNodeEditor: this.renderNodeEditor
+      renderNodeEditor: this.renderNodeEditor,
+      theme: this.theme
     })
 
     return editor.render()
@@ -253,10 +249,14 @@ class SchemaBuilder extends EventEmitter {
 
   updateStatus () {
     if (!this.statusBadge) return
-    this.statusBadge.textContent = this.errors.length === 0
-      ? '✓ Valid'
-      : `${this.errors.length} error${this.errors.length === 1 ? '' : 's'}`
-    this.statusBadge.style.color = this.errors.length === 0 ? '#198754' : '#b02a37'
+    const badge = this.theme.getBuilderStatusBadge({
+      text: this.errors.length === 0 ? '✓ Valid' : `${this.errors.length} error${this.errors.length === 1 ? '' : 's'}`,
+      valid: this.errors.length === 0
+    })
+    if (this.statusBadge.parentNode) {
+      this.statusBadge.parentNode.replaceChild(badge, this.statusBadge)
+    }
+    this.statusBadge = badge
     this.renderErrors()
   }
 
@@ -266,15 +266,8 @@ class SchemaBuilder extends EventEmitter {
 
     if (this.errors.length === 0) return
 
-    const list = createElement('ul', { style: { fontSize: '12px', color: '#b02a37', margin: 0, paddingLeft: '20px' } })
-    this.errors.forEach((error) => {
-      list.appendChild(createElement('li', {}, [`${error.path}: ${error.message}`]))
-    })
-
-    this.errorsPanel.appendChild(createElement('div', { style: { background: '#f8d7da', border: '1px solid #f5c2c7', borderRadius: '4px', padding: '8px 12px' } }, [
-      createElement('strong', {}, ['Schema validation errors']),
-      list
-    ]))
+    const messages = this.errors.map((error) => `${error.path}: ${error.message}`)
+    this.errorsPanel.appendChild(this.theme.getBuilderAlert({ title: 'Schema validation errors', messages }))
   }
 
   renderPreview () {
@@ -337,11 +330,11 @@ class SchemaBuilder extends EventEmitter {
   }
 
   openExportDialog () {
-    const textarea = createElement('textarea', {
-      class: 'jedi-sb-export',
+    const textarea = this.theme.getBuilderTextarea({
+      className: 'jedi-sb-export',
       rows: 20,
-      readonly: true,
-      style: { width: '100%', fontFamily: 'monospace', fontSize: '12px' },
+      readOnly: true,
+      style: { fontFamily: 'monospace', fontSize: '12px' },
       value: JSON.stringify(this.schema, null, 2)
     })
 
@@ -355,10 +348,10 @@ class SchemaBuilder extends EventEmitter {
   }
 
   openOverlay ({ title, value, placeholder, content, confirmLabel, onConfirm }) {
-    const textarea = content || createElement('textarea', {
-      class: 'jedi-sb-overlay-textarea',
+    const textarea = content || this.theme.getBuilderTextarea({
+      className: 'jedi-sb-overlay-textarea',
       rows: 20,
-      style: { width: '100%', fontFamily: 'monospace', fontSize: '12px' },
+      style: { fontFamily: 'monospace', fontSize: '12px' },
       value: value || ''
     })
 
@@ -366,8 +359,8 @@ class SchemaBuilder extends EventEmitter {
       textarea.setAttribute('placeholder', placeholder)
     }
 
-    const closeBtn = createElement('button', { type: 'button', style: { cursor: 'pointer' } }, ['Cancel'])
-    const confirmBtn = createElement('button', { type: 'button', style: { cursor: 'pointer', marginLeft: '8px' } }, [confirmLabel || 'OK'])
+    const closeBtn = this.theme.getBuilderButton({ content: 'Cancel', variant: 'secondary' })
+    const confirmBtn = this.theme.getBuilderButton({ content: confirmLabel || 'OK', variant: 'primary' })
 
     const footer = createElement('div', { style: { display: 'flex', justifyContent: 'flex-end', marginTop: '8px' } }, [closeBtn, confirmBtn])
 

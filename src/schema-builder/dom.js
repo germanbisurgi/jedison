@@ -24,16 +24,16 @@ export function createElement (tag, attributes = {}, children = []) {
   return node
 }
 
-export function fieldRow ({ id, label, input, hint, error }) {
+export function fieldRow (theme, { id, label, input, hint, error }) {
   if (id && input) {
     input.id = id
   }
 
-  const labelEl = createElement('label', { for: id }, [label])
+  const labelEl = theme.getBuilderLabel({ for: id, text: label })
   const container = createElement('div', { class: 'jedi-sb-field' }, [labelEl, input])
 
   if (hint) {
-    container.appendChild(createElement('div', { class: 'jedi-sb-hint' }, [hint]))
+    container.appendChild(createElement('div', { class: 'jedi-sb-hint', style: { color: '#999', fontSize: '12px' } }, [hint]))
   }
 
   if (error) {
@@ -45,19 +45,12 @@ export function fieldRow ({ id, label, input, hint, error }) {
 
 export const row = (left, right) => createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [left, right])
 
-export const btn = (text, onClick, extra = {}) => createElement('button', {
-  type: 'button',
-  class: 'jedi-sb-btn',
-  onClick,
-  style: {
-    padding: '2px 8px',
-    fontSize: '12px',
-    cursor: 'pointer'
-  },
-  ...extra
-}, [text])
+export const btn = (theme, text, onClick, extra = {}) => {
+  const { class: className, ...rest } = extra
+  return theme.getBuilderButton({ content: text, onClick, className, ...rest })
+}
 
-export const section = (title, body) => {
-  const heading = createElement('h4', { class: 'jedi-sb-section-title', style: { fontSize: '13px', fontWeight: '600', margin: '14px 0 6px', textTransform: 'uppercase', color: '#6c757d' } }, [title])
+export const section = (theme, title, body) => {
+  const heading = theme.getBuilderSectionTitle({ title })
   return createElement('div', { class: 'jedi-sb-section' }, [heading, body])
 }

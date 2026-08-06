@@ -10,19 +10,21 @@ class JsonEditor {
    * @param {object} options
    * @param {object|boolean} options.schema - Initial schema to seed the textarea
    * @param {Function} options.onChange - (schema) => void, called with the parsed schema
+   * @param {object} options.theme - Theme used to build the controls
    * @param {number} [options.delay] - Debounce delay in ms (default 300)
    */
-  constructor ({ schema, onChange, delay = 300 }) {
+  constructor ({ schema, onChange, theme, delay = 300 }) {
     this.onChange = onChange
     this.delay = delay
+    this.theme = theme
     this.timer = null
     this.errorEl = null
 
-    this.textarea = createElement('textarea', {
-      class: 'jedi-sb-json',
+    this.textarea = this.theme.getBuilderTextarea({
+      className: 'jedi-sb-json',
       rows: 30,
       spellcheck: false,
-      style: { width: '100%', fontFamily: 'monospace', fontSize: '12px', minHeight: '60vh' }
+      style: { fontFamily: 'monospace', fontSize: '12px', minHeight: '60vh' }
     })
 
     this.textarea.addEventListener('input', () => {
@@ -34,7 +36,7 @@ class JsonEditor {
   }
 
   render () {
-    const formatBtn = btn('Format', () => this.format(), { class: 'jedi-sb-format-btn' })
+    const formatBtn = btn(this.theme, 'Format', () => this.format(), { class: 'jedi-sb-format-btn', variant: 'primary' })
 
     this.errorEl = createElement('div', { class: 'jedi-sb-json-error', style: { color: '#b02a37', fontSize: '12px' } })
 
