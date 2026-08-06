@@ -25,6 +25,10 @@ export function createElement (tag, attributes = {}, children = []) {
 }
 
 export function fieldRow ({ id, label, input, hint, error }) {
+  if (id && input) {
+    input.id = id
+  }
+
   const labelEl = createElement('label', { for: id }, [label])
   const container = createElement('div', { class: 'jedi-sb-field' }, [labelEl, input])
 
