@@ -99,7 +99,7 @@ function isArray(value) {
 function isObject$1(value) {
   return !isNull(value) && !isArray(value) && typeof value === "object";
 }
-function getType(value) {
+function getType$1(value) {
   let type2 = "any";
   if (isNumber(value)) {
     type2 = isInteger(value) ? "integer" : "number";
@@ -303,7 +303,7 @@ const Utils = {
   isBoolean,
   isArray,
   isObject: isObject$1,
-  getType,
+  getType: getType$1,
   mergeDeep,
   combineDeep,
   overwriteExistingProperties,
@@ -587,6 +587,74 @@ class SchemaGenerator {
       type: "object",
       properties: properties2
     };
+  }
+}
+class EventEmitter {
+  constructor() {
+    this.listeners = /* @__PURE__ */ new Map();
+  }
+  /**
+   * Adds a named event listener
+   * @public
+   * @param {string} name - The name of the event
+   * @param {function} callback - A callback functions that will be executed when this event is emitted
+   */
+  on(name, callback) {
+    let callbacks = this.listeners.get(name);
+    if (!callbacks) {
+      callbacks = [];
+      this.listeners.set(name, callbacks);
+    }
+    callbacks.push(callback);
+  }
+  /**
+   * Removes event listeners for a named event.
+   * @public
+   * @param {string} name - The name of the event
+   * @param {function} [callback] - When given, only this specific callback is
+   * removed; when omitted, all listeners for the event are removed.
+   */
+  off(name, callback) {
+    if (typeof callback !== "function") {
+      this.listeners.delete(name);
+      return;
+    }
+    const callbacks = this.listeners.get(name);
+    if (!callbacks) {
+      return;
+    }
+    const remaining = callbacks.filter((cb) => cb !== callback);
+    if (remaining.length === 0) {
+      this.listeners.delete(name);
+    } else {
+      this.listeners.set(name, remaining);
+    }
+  }
+  /**
+   * Triggers the callback function of a named event listener
+   * @public
+   * @param {string} name - The name of the event to be emitted
+   * @param {...*} args - Arguments to be passed to the callback function
+   */
+  emit(name, ...args) {
+    const callbacks = this.listeners.get(name);
+    if (callbacks) {
+      for (const listener of callbacks) {
+        try {
+          listener(...args);
+        } catch (error) {
+          console.error(`Error in listener callback for event "${name}":`, error);
+        }
+      }
+    }
+  }
+  /**
+   * Deletes all properties of the class
+   */
+  destroy() {
+    Object.keys(this).forEach((key) => {
+      delete this[key];
+    });
   }
 }
 function allOf(context) {
@@ -1196,7 +1264,7 @@ function type(context) {
         messages: [
           compileTemplate(context.translator.translate("errorType"), {
             type: type2,
-            valueType: getType(context.value)
+            valueType: getType$1(context.value)
           })
         ]
       });
@@ -1792,74 +1860,6 @@ class Validator {
       }
     }
     return schemaErrors;
-  }
-}
-class EventEmitter {
-  constructor() {
-    this.listeners = /* @__PURE__ */ new Map();
-  }
-  /**
-   * Adds a named event listener
-   * @public
-   * @param {string} name - The name of the event
-   * @param {function} callback - A callback functions that will be executed when this event is emitted
-   */
-  on(name, callback) {
-    let callbacks = this.listeners.get(name);
-    if (!callbacks) {
-      callbacks = [];
-      this.listeners.set(name, callbacks);
-    }
-    callbacks.push(callback);
-  }
-  /**
-   * Removes event listeners for a named event.
-   * @public
-   * @param {string} name - The name of the event
-   * @param {function} [callback] - When given, only this specific callback is
-   * removed; when omitted, all listeners for the event are removed.
-   */
-  off(name, callback) {
-    if (typeof callback !== "function") {
-      this.listeners.delete(name);
-      return;
-    }
-    const callbacks = this.listeners.get(name);
-    if (!callbacks) {
-      return;
-    }
-    const remaining = callbacks.filter((cb) => cb !== callback);
-    if (remaining.length === 0) {
-      this.listeners.delete(name);
-    } else {
-      this.listeners.set(name, remaining);
-    }
-  }
-  /**
-   * Triggers the callback function of a named event listener
-   * @public
-   * @param {string} name - The name of the event to be emitted
-   * @param {...*} args - Arguments to be passed to the callback function
-   */
-  emit(name, ...args) {
-    const callbacks = this.listeners.get(name);
-    if (callbacks) {
-      for (const listener of callbacks) {
-        try {
-          listener(...args);
-        } catch (error) {
-          console.error(`Error in listener callback for event "${name}":`, error);
-        }
-      }
-    }
-  }
-  /**
-   * Deletes all properties of the class
-   */
-  destroy() {
-    Object.keys(this).forEach((key) => {
-      delete this[key];
-    });
   }
 }
 class Instance extends EventEmitter {
@@ -4509,8 +4509,8 @@ class EditorObjectGrid extends EditorObject {
     while (this.control.childrenSlot.firstChild) {
       this.control.childrenSlot.removeChild(this.control.childrenSlot.lastChild);
     }
-    let row = this.theme.getRow();
-    this.control.childrenSlot.appendChild(row);
+    let row2 = this.theme.getRow();
+    this.control.childrenSlot.appendChild(row2);
     this.instance.children.forEach((child) => {
       if (child.isActive) {
         const childGridOptions = getSchemaXOption(child.schema, "grid") || {};
@@ -4525,10 +4525,10 @@ class EditorObjectGrid extends EditorObject {
         const col = this.theme.getCol(columnsXs, columnsSm, columnsMd, columnsLg, offset);
         const newRow = childGridOptions.newRow || false;
         if (newRow) {
-          row = this.theme.getRow();
-          this.control.childrenSlot.appendChild(row);
+          row2 = this.theme.getRow();
+          this.control.childrenSlot.appendChild(row2);
         }
-        row.appendChild(col);
+        row2.appendChild(col);
         col.appendChild(child.ui.control.container);
         if (this.disabled || this.instance.isReadOnly()) {
           child.ui.disable();
@@ -4583,16 +4583,16 @@ class EditorObjectCategories extends EditorObject {
     const variant = formatParts[1];
     const columns = formatParts[2];
     const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
+    const row2 = this.theme.getRow();
     const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
     const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
     });
-    this.control.childrenSlot.appendChild(row);
-    row.appendChild(tabListCol);
-    row.appendChild(tabContentCol);
+    this.control.childrenSlot.appendChild(row2);
+    row2.appendChild(tabListCol);
+    row2.appendChild(tabContentCol);
     tabListCol.appendChild(tabList);
     tabContentCol.appendChild(tabContent);
     const navWarning = getSchemaXOption(this.instance.schema, "navWarning") ?? true;
@@ -4714,16 +4714,16 @@ class EditorObjectNav extends EditorObject {
     const variant = formatParts[1];
     const columns = formatParts[2];
     const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
+    const row2 = this.theme.getRow();
     const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
     const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
     this.navTabContent = this.theme.getTabContent();
     this.navTabList = this.theme.getTabList({ variant });
-    row.appendChild(tabListCol);
-    row.appendChild(tabContentCol);
+    row2.appendChild(tabListCol);
+    row2.appendChild(tabContentCol);
     tabListCol.appendChild(this.navTabList);
     tabContentCol.appendChild(this.navTabContent);
-    this.control.childrenSlot.appendChild(row);
+    this.control.childrenSlot.appendChild(row2);
   }
   createTab(child) {
     const tab = this.theme.getTab({
@@ -5111,15 +5111,15 @@ class EditorArray extends Editor {
     const cannotDeleteAll = isEmpty;
     const btns = [this.control.deleteAllBtn, this.control.footerDeleteAllBtn].filter(Boolean);
     if (cannotDeleteAll || this.disabled || this.readOnly) {
-      btns.forEach((btn) => {
-        btn.setAttribute("disabled", "");
-        btn.setAttribute("always-disabled", true);
+      btns.forEach((btn2) => {
+        btn2.setAttribute("disabled", "");
+        btn2.setAttribute("always-disabled", true);
       });
     } else {
       if (!this.disabled && !this.readOnly) {
-        btns.forEach((btn) => {
-          btn.removeAttribute("disabled");
-          btn.removeAttribute("always-disabled");
+        btns.forEach((btn2) => {
+          btn2.removeAttribute("disabled");
+          btn2.removeAttribute("always-disabled");
         });
       }
     }
@@ -5132,9 +5132,9 @@ class EditorArray extends Editor {
       this.control.addBtn.setAttribute("always-disabled", true);
       this.control.footerAddBtn.setAttribute("disabled", "");
       this.control.footerAddBtn.setAttribute("always-disabled", true);
-      this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
-        btn.setAttribute("disabled", "");
-        btn.setAttribute("always-disabled", true);
+      this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn2) => {
+        btn2.setAttribute("disabled", "");
+        btn2.setAttribute("always-disabled", true);
       });
     } else {
       if (!this.disabled && !this.readOnly) {
@@ -5142,9 +5142,9 @@ class EditorArray extends Editor {
         this.control.addBtn.removeAttribute("always-disabled");
         this.control.footerAddBtn.removeAttribute("disabled");
         this.control.footerAddBtn.removeAttribute("always-disabled");
-        this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn) => {
-          btn.removeAttribute("disabled");
-          btn.removeAttribute("always-disabled");
+        this.control.childrenSlot.querySelectorAll(".jedi-array-add-after").forEach((btn2) => {
+          btn2.removeAttribute("disabled");
+          btn2.removeAttribute("always-disabled");
         });
       }
     }
@@ -5733,7 +5733,7 @@ class EditorArrayNav extends EditorArray {
     const variant = formatParts[1];
     const columns = formatParts[2];
     const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
+    const row2 = this.theme.getRow();
     const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
     const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
     const tabContent = this.theme.getTabContent();
@@ -5743,9 +5743,9 @@ class EditorArrayNav extends EditorArray {
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
     const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
-    this.control.childrenSlot.appendChild(row);
-    row.appendChild(tabListCol);
-    row.appendChild(tabContentCol);
+    this.control.childrenSlot.appendChild(row2);
+    row2.appendChild(tabListCol);
+    row2.appendChild(tabContentCol);
     tabListCol.appendChild(tabList);
     tabContentCol.appendChild(tabContent);
     this.instance.children.forEach((child, index2) => {
@@ -5896,9 +5896,9 @@ class EditorMultiple extends Editor {
       });
     }
     if (this.switcherInput === "modal") {
-      this.control.switcher.optionButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const index2 = Number(btn.dataset.switcherValue);
+      this.control.switcher.optionButtons.forEach((btn2) => {
+        btn2.addEventListener("click", () => {
+          const index2 = Number(btn2.dataset.switcherValue);
           this.control.switcher.dialog.close();
           this.instance.switchInstance(index2, void 0, "user");
         });
@@ -5945,8 +5945,8 @@ class EditorMultiple extends Editor {
     }
     if (this.switcherInput === "modal") {
       this.control.switcher.triggerText.textContent = this.instance.switcherOptionsLabels[this.instance.index];
-      this.control.switcher.optionButtons.forEach((btn, index2) => {
-        this.theme.setSwitcherOptionActive(btn, index2 === this.instance.index);
+      this.control.switcher.optionButtons.forEach((btn2, index2) => {
+        this.theme.setSwitcherOptionActive(btn2, index2 === this.instance.index);
       });
     }
     if (this.disabled || this.instance.isReadOnly()) {
@@ -7725,166 +7725,6 @@ class Jedison extends EventEmitter {
     Object.keys(this).forEach((key) => {
       delete this[key];
     });
-  }
-}
-class RefParser {
-  constructor(options = {}) {
-    this.options = Object.assign({
-      detectRecursion: true
-    }, options);
-    this.refs = {};
-    this.data = {};
-    this.iterations = 0;
-    this.maxIterations = 1e3;
-    this.cycles = [];
-    this.walker = new JsonWalker();
-  }
-  async dereference(schema) {
-    await this.collectRefs(schema);
-    while (this.iterations < this.maxIterations) {
-      if (this.refsResolved()) {
-        break;
-      }
-      this.iterations++;
-      await this.collectRefs(schema);
-    }
-    const missingRefs = Object.entries(this.refs).filter(([key, value]) => value === null).map(([key]) => key);
-    if (missingRefs.length) {
-      console.warn("Missing refs:", JSON.stringify(missingRefs));
-    }
-    if (this.options.detectRecursion) {
-      this.cycles = this.findRecursiveRefs(this.refs);
-      this.markRecursiveSchemas();
-    }
-  }
-  refsResolved() {
-    return Object.values(this.refs).every((value) => {
-      return value !== null;
-    });
-  }
-  /**
-   * Traverses the given schema recursively and for each schema with $ref
-   * add a new property in the this.refs object with key being the json path to that schema.
-   * If the ref has no value in data will be given a value of null. This value will be later
-   * replaced in a future iteration. At that time the data will be available
-   * @param schema
-   * @param path
-   */
-  async collectRefs(schema, path = "#") {
-    if (typeof schema !== "object" || schema === null) {
-      return;
-    }
-    for (const [key, value] of Object.entries(schema)) {
-      const nextPath = path ? `${path}/${key}` : `/${key}`;
-      if (this.hasRef(schema)) {
-        const ref = schema["$ref"];
-        if (this.isExternalRef(ref)) {
-          const resolvedSchema = await this.load(ref);
-          this.refs[ref] = resolvedSchema;
-          await this.collectRefs(resolvedSchema, nextPath);
-        } else {
-          this.refs[ref] = this.data[ref] ?? null;
-        }
-      }
-      this.data[path] = schema;
-      await this.collectRefs(value, nextPath);
-    }
-  }
-  hasRef(schema) {
-    return typeof schema["$ref"] !== "undefined" && typeof schema["$ref"] === "string";
-  }
-  isExternalRef(ref) {
-    if (typeof ref !== "string") {
-      return false;
-    }
-    return ref.startsWith("http") || ref.startsWith("https");
-  }
-  isObject(value) {
-    return value !== null && typeof value === "object";
-  }
-  findRecursiveRefs(defs) {
-    const cycles = /* @__PURE__ */ new Set();
-    function checkRef(path, visited, stack) {
-      if (visited.has(path)) {
-        const cycleStartIndex = stack.indexOf(path);
-        if (cycleStartIndex !== -1) {
-          const cyclePath = stack.slice(cycleStartIndex).concat(path);
-          const minIndex = cyclePath.reduce((minIdx, ref, idx) => ref < cyclePath[minIdx] ? idx : minIdx, 0);
-          const normalizedCycle = [...cyclePath.slice(minIndex), ...cyclePath.slice(0, minIndex)];
-          const cycleSignature = normalizedCycle.join(" → ");
-          cycles.add(cycleSignature);
-        }
-        return;
-      }
-      if (!defs[path]) return;
-      visited.add(path);
-      stack.push(path);
-      function traverse(value) {
-        if (typeof value === "object" && value !== null) {
-          if (value.$ref) checkRef(value.$ref, visited, stack);
-          for (const key in value) traverse(value[key]);
-        }
-      }
-      traverse(defs[path]);
-      visited.delete(path);
-      stack.pop();
-    }
-    for (const key in defs) {
-      checkRef(key, /* @__PURE__ */ new Set(), []);
-    }
-    return [...cycles];
-  }
-  hasRefCycles() {
-    return this.options.detectRecursion && this.cycles.length > 0;
-  }
-  markRecursiveSchemas() {
-    const cycleRefs = /* @__PURE__ */ new Set();
-    this.cycles.forEach((cycle) => {
-      cycle.split(" → ").forEach((ref) => cycleRefs.add(ref));
-    });
-    for (const schema of Object.values(this.data)) {
-      if (schema && schema.$ref && cycleRefs.has(schema.$ref)) {
-        schema["x-recursive"] = true;
-      }
-    }
-  }
-  expand(schema) {
-    const cloneSchema = JSON.parse(JSON.stringify(schema));
-    if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
-      const ref = cloneSchema.$ref;
-      delete cloneSchema["$ref"];
-      return this.expand(mergeDeep({}, this.refs[ref], cloneSchema));
-    }
-    return cloneSchema;
-  }
-  expandRecursive(schema) {
-    let mustContinue = true;
-    while (mustContinue) {
-      mustContinue = false;
-      this.walker.traverse(schema, (node, path, parent, key) => {
-        if (node.$ref && typeof node.$ref === "string" && parent && key !== null) {
-          parent[key] = this.expand(node);
-          mustContinue = true;
-        }
-      });
-    }
-  }
-  /**
-   * Loads a schema with a synchronous http request
-   * @param uri
-   * @returns {any}
-   */
-  async load(uri) {
-    try {
-      const response = await fetch(uri);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return await response.json();
-    } catch (error) {
-      console.error("Error loading", uri, error);
-      throw error;
-    }
   }
 }
 class Theme {
@@ -9744,14 +9584,14 @@ class Theme {
     }
     dialogBody.classList.add("jedi-modal-content");
     config.values.forEach((value, index2) => {
-      const btn = document.createElement("button");
-      btn.setAttribute("type", "button");
-      btn.setAttribute("aria-label", `Select: ${config.titles[index2]}`);
-      btn.textContent = config.titles[index2];
-      btn.dataset.switcherValue = value;
-      btn.classList.add("jedi-switcher-option-btn");
-      optionButtons.push(btn);
-      dialogBody.appendChild(btn);
+      const btn2 = document.createElement("button");
+      btn2.setAttribute("type", "button");
+      btn2.setAttribute("aria-label", `Select: ${config.titles[index2]}`);
+      btn2.textContent = config.titles[index2];
+      btn2.dataset.switcherValue = value;
+      btn2.classList.add("jedi-switcher-option-btn");
+      optionButtons.push(btn2);
+      dialogBody.appendChild(btn2);
     });
     trigger.addEventListener("click", () => {
       dialog.showModal();
@@ -9772,8 +9612,8 @@ class Theme {
     dialog.appendChild(dialogBody);
     return { container, trigger, triggerText, dialog, dialogBody, optionButtons };
   }
-  setSwitcherOptionActive(btn, active) {
-    btn.classList.toggle("jedi-switcher-option-active", active);
+  setSwitcherOptionActive(btn2, active) {
+    btn2.classList.toggle("jedi-switcher-option-active", active);
   }
   /**
    * Compact inline <select> to switch between multiple editors options (no dialog)
@@ -9844,9 +9684,9 @@ class Theme {
    * Container for columns
    */
   getRow() {
-    const row = document.createElement("div");
-    row.classList.add("jedi-row");
-    return row;
+    const row2 = document.createElement("div");
+    row2.classList.add("jedi-row");
+    return row2;
   }
   /**
    * A column to contain content to a specific width
@@ -9986,15 +9826,1369 @@ class Theme {
     element.style.display = "none";
   }
 }
+const DRAFTS = [
+  { value: "http://json-schema.org/draft-04/schema#", label: "draft-04" },
+  { value: "http://json-schema.org/draft-06/schema#", label: "draft-06" },
+  { value: "http://json-schema.org/draft-07/schema#", label: "draft-07" },
+  { value: "https://json-schema.org/draft/2019-09/schema", label: "2019-09" },
+  { value: "https://json-schema.org/draft/2020-12/schema", label: "2020-12" }
+];
+const TYPES = ["string", "number", "integer", "boolean", "object", "array", "null"];
+const TYPE_LABELS = {
+  string: "string",
+  number: "number",
+  integer: "integer",
+  boolean: "boolean",
+  object: "object",
+  array: "array",
+  null: "null"
+};
+const STRING_CONSTRAINTS = ["minLength", "maxLength", "pattern"];
+const NUMBER_CONSTRAINTS = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf"];
+const OBJECT_CONSTRAINTS = ["additionalProperties", "minProperties", "maxProperties"];
+const ARRAY_CONSTRAINTS = ["minItems", "maxItems", "uniqueItems"];
+const VALUE_KEYWORDS = ["default", "const", "enum"];
+const COMPOSITION_KEYWORDS = ["oneOf", "anyOf", "allOf", "not", "if", "then", "else"];
+const KEYWORD_LABELS = {
+  title: "Title",
+  description: "Description",
+  format: "Format",
+  $ref: "$ref",
+  type: "Type",
+  default: "Default",
+  const: "Const",
+  enum: "Enum",
+  minLength: "Min length",
+  maxLength: "Max length",
+  pattern: "Pattern",
+  minimum: "Minimum",
+  maximum: "Maximum",
+  exclusiveMinimum: "Exclusive minimum",
+  exclusiveMaximum: "Exclusive maximum",
+  multipleOf: "Multiple of",
+  minItems: "Min items",
+  maxItems: "Max items",
+  uniqueItems: "Unique items",
+  items: "Items",
+  prefixItems: "Prefix items",
+  additionalProperties: "Additional properties",
+  minProperties: "Min properties",
+  maxProperties: "Max properties",
+  oneOf: "oneOf",
+  anyOf: "anyOf",
+  allOf: "allOf",
+  not: "not",
+  if: "if",
+  then: "then",
+  else: "else"
+};
+function isDraft2019Plus(draft) {
+  return draft === "https://json-schema.org/draft/2019-09/schema" || draft === "https://json-schema.org/draft/2020-12/schema";
+}
+function getConstraintsForType(type2) {
+  switch (type2) {
+    case "string":
+      return STRING_CONSTRAINTS;
+    case "number":
+    case "integer":
+      return NUMBER_CONSTRAINTS;
+    case "object":
+      return OBJECT_CONSTRAINTS;
+    case "array":
+      return ARRAY_CONSTRAINTS;
+    default:
+      return [];
+  }
+}
+function getValueKeywords() {
+  return VALUE_KEYWORDS;
+}
+function getCompositionKeywords() {
+  return COMPOSITION_KEYWORDS;
+}
+function getKeywordKind(name, draft) {
+  switch (name) {
+    case "title":
+    case "format":
+    case "$ref":
+    case "pattern":
+      return "text";
+    case "description":
+      return "textarea";
+    case "minLength":
+    case "maxLength":
+    case "minItems":
+    case "maxItems":
+    case "minProperties":
+    case "maxProperties":
+      return "non-negative-integer";
+    case "multipleOf":
+      return "positive-number";
+    case "minimum":
+    case "maximum":
+      return "number";
+    case "exclusiveMinimum":
+    case "exclusiveMaximum":
+      return isDraft2019Plus(draft) ? "number" : "boolean";
+    case "uniqueItems":
+    case "additionalProperties":
+      return "boolean";
+    case "default":
+    case "const":
+    case "enum":
+    case "oneOf":
+    case "anyOf":
+    case "allOf":
+    case "not":
+    case "if":
+    case "then":
+    case "else":
+    case "prefixItems":
+      return "json";
+    default:
+      return "text";
+  }
+}
+function pushError(errors, path, message) {
+  errors.push({ path, message });
+}
+function validateValueKind(schema, key, errors, path) {
+  const kind = getKeywordKind(key, schema.$schema);
+  if (kind === "text" || kind === "textarea") {
+    if (!isString(schema[key])) {
+      pushError(errors, path, `"${key}" must be a string`);
+    }
+    return;
+  }
+  if (kind === "number") {
+    if (!isNumber(schema[key])) {
+      pushError(errors, path, `"${key}" must be a number`);
+    }
+    return;
+  }
+  if (kind === "positive-number") {
+    if (!isNumber(schema[key]) || schema[key] <= 0) {
+      pushError(errors, path, `"${key}" must be a number greater than zero`);
+    }
+    return;
+  }
+  if (kind === "non-negative-integer") {
+    if (!isInteger(schema[key]) || schema[key] < 0) {
+      pushError(errors, path, `"${key}" must be a non-negative integer`);
+    }
+    return;
+  }
+  if (kind === "boolean") {
+    if (!isBoolean(schema[key])) {
+      pushError(errors, path, `"${key}" must be a boolean`);
+    }
+  }
+}
+function validateSchemaNode(schema, draft, path, errors, depth) {
+  if (depth > 50) {
+    pushError(errors, path, "Maximum nesting depth exceeded");
+    return;
+  }
+  if (isBoolean(schema)) {
+    return;
+  }
+  if (!isObject$1(schema)) {
+    pushError(errors, path, "A schema must be an object or a boolean");
+    return;
+  }
+  const draftUsed = draft || schema.$schema;
+  if (schema.$schema !== void 0 && !isString(schema.$schema)) {
+    pushError(errors, path, '"$schema" must be a string');
+  }
+  if (schema.$ref !== void 0 && !isString(schema.$ref)) {
+    pushError(errors, path, '"$ref" must be a string');
+  }
+  if (schema.title !== void 0 && !isString(schema.title)) {
+    pushError(errors, path, '"title" must be a string');
+  }
+  if (schema.description !== void 0 && !isString(schema.description)) {
+    pushError(errors, path, '"description" must be a string');
+  }
+  if (schema.format !== void 0 && !isString(schema.format)) {
+    pushError(errors, path, '"format" must be a string');
+  }
+  if (schema.type !== void 0) {
+    const types = isArray(schema.type) ? schema.type : [schema.type];
+    const allStrings = types.every(isString);
+    const allKnown = types.every((t) => TYPES.includes(t));
+    if (!allStrings || !allKnown || types.length === 0) {
+      pushError(errors, path, `"type" must be one of: ${TYPES.join(", ")} (or an array of them)`);
+    }
+    if (isArray(schema.type) && schema.type.length === 0) {
+      pushError(errors, path, '"type" array must not be empty');
+    }
+  }
+  if (schema.required !== void 0) {
+    if (!isArray(schema.required) || !schema.required.every(isString)) {
+      pushError(errors, path, '"required" must be an array of strings');
+    } else if (new Set(schema.required).size !== schema.required.length) {
+      pushError(errors, path, '"required" must not contain duplicates');
+    }
+  }
+  if (schema.enum !== void 0) {
+    if (!isArray(schema.enum) || schema.enum.length === 0) {
+      pushError(errors, path, '"enum" must be a non-empty array');
+    }
+  }
+  const simpleKeywords = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf", "minLength", "maxLength", "minItems", "maxItems", "uniqueItems", "minProperties", "maxProperties", "pattern"];
+  for (const key of simpleKeywords) {
+    if (schema[key] !== void 0) {
+      validateValueKind(schema, key, errors, path);
+    }
+  }
+  if (schema.additionalProperties !== void 0 && !isBoolean(schema.additionalProperties) && !isObject$1(schema.additionalProperties)) {
+    pushError(errors, path, '"additionalProperties" must be a boolean or a schema');
+  }
+  if (schema.properties !== void 0) {
+    if (!isObject$1(schema.properties)) {
+      pushError(errors, path, '"properties" must be an object');
+    } else {
+      Object.entries(schema.properties).forEach(([name, subschema]) => {
+        validateSchemaNode(subschema, draftUsed, `${path}.properties.${name}`, errors, depth + 1);
+      });
+    }
+  }
+  if (schema.patternProperties !== void 0) {
+    if (!isObject$1(schema.patternProperties)) {
+      pushError(errors, path, '"patternProperties" must be an object');
+    } else {
+      Object.entries(schema.patternProperties).forEach(([name, subschema]) => {
+        validateSchemaNode(subschema, draftUsed, `${path}.patternProperties.${name}`, errors, depth + 1);
+      });
+    }
+  }
+  if (schema.items !== void 0) {
+    if (isBoolean(schema.items)) ;
+    else if (isObject$1(schema.items)) {
+      validateSchemaNode(schema.items, draftUsed, `${path}.items`, errors, depth + 1);
+    } else if (isArray(schema.items)) {
+      if (isDraft2019Plus(draftUsed)) {
+        pushError(errors, path, '"items" must be a schema (use "prefixItems" for a tuple) in this draft');
+      } else {
+        schema.items.forEach((subschema, index2) => {
+          validateSchemaNode(subschema, draftUsed, `${path}.items[${index2}]`, errors, depth + 1);
+        });
+      }
+    } else {
+      pushError(errors, path, '"items" must be a schema or an array of schemas');
+    }
+  }
+  if (schema.prefixItems !== void 0) {
+    if (!isArray(schema.prefixItems)) {
+      pushError(errors, path, '"prefixItems" must be an array of schemas');
+    } else {
+      schema.prefixItems.forEach((subschema, index2) => {
+        validateSchemaNode(subschema, draftUsed, `${path}.prefixItems[${index2}]`, errors, depth + 1);
+      });
+    }
+  }
+  for (const key of ["contains", "not", "if", "then", "else"]) {
+    if (schema[key] !== void 0) {
+      if (!isBoolean(schema[key]) && !isObject$1(schema[key])) {
+        pushError(errors, path, `"${key}" must be a schema or a boolean`);
+      } else {
+        validateSchemaNode(schema[key], draftUsed, `${path}.${key}`, errors, depth + 1);
+      }
+    }
+  }
+  for (const key of ["oneOf", "anyOf", "allOf"]) {
+    if (schema[key] !== void 0) {
+      if (!isArray(schema[key]) || schema[key].length === 0) {
+        pushError(errors, path, `"${key}" must be a non-empty array of schemas`);
+      } else {
+        schema[key].forEach((subschema, index2) => {
+          validateSchemaNode(subschema, draftUsed, `${path}.${key}[${index2}]`, errors, depth + 1);
+        });
+      }
+    }
+  }
+}
+function validateSchema(schema, draft) {
+  const errors = [];
+  validateSchemaNode(schema, draft, "#", errors, 0);
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+function createElement(tag, attributes = {}, children = []) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attributes || {})) {
+    if (value === void 0 || value === null) continue;
+    if (key === "class") {
+      node.className = value;
+    } else if (key === "style" && typeof value === "object") {
+      Object.assign(node.style, value);
+    } else if (key === "dataset") {
+      Object.assign(node.dataset, value);
+    } else if (key.startsWith("on")) {
+      node.addEventListener(key.slice(2), value);
+    } else {
+      node.setAttribute(key, value);
+    }
+  }
+  for (const child of children || []) {
+    if (child === void 0 || child === null || child === false) continue;
+    node.appendChild(typeof child === "string" || typeof child === "number" ? document.createTextNode(String(child)) : child);
+  }
+  return node;
+}
+function fieldRow({ id, label, input, hint, error }) {
+  const labelEl = createElement("label", { for: id }, [label]);
+  const container = createElement("div", { class: "jedi-sb-field" }, [labelEl, input]);
+  if (hint) {
+    container.appendChild(createElement("div", { class: "jedi-sb-hint" }, [hint]));
+  }
+  if (error) {
+    container.appendChild(createElement("div", { class: "jedi-sb-error", style: { color: "#d9534f", fontSize: "12px" } }, [error]));
+  }
+  return container;
+}
+const row = (left, right) => createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" } }, [left, right]);
+const btn = (text, onClick, extra = {}) => createElement("button", {
+  type: "button",
+  class: "jedi-sb-btn",
+  onClick,
+  style: {
+    padding: "2px 8px",
+    fontSize: "12px",
+    cursor: "pointer"
+  },
+  ...extra
+}, [text]);
+const section = (title, body) => {
+  const heading = createElement("h4", { class: "jedi-sb-section-title", style: { fontSize: "13px", fontWeight: "600", margin: "14px 0 6px", textTransform: "uppercase", color: "#6c757d" } }, [title]);
+  return createElement("div", { class: "jedi-sb-section" }, [heading, body]);
+};
+function getType(schema) {
+  if (isObject$1(schema) && isArray(schema.type)) {
+    return schema.type.join(" / ");
+  }
+  return (schema == null ? void 0 : schema.type) ?? "";
+}
+class PropertiesEditor {
+  /**
+   * @param {object} options
+   * @param {object} options.properties - The node.properties object (mutated in place)
+   * @param {string[]} [options.required] - The node.required array (mutated in place)
+   * @param {Function} [options.onSetRequired] - () => requiredArray, creates it on the node when missing
+   * @param {string} options.draft - Active draft
+   * @param {number} options.depth - Nesting depth
+   * @param {string} options.path - Path of the parent node
+   * @param {object} options.expanded - Map of expanded property paths -> boolean
+   * @param {Function} options.onSetExpanded - (key, expanded) => void
+   * @param {Function} options.onChange - Called on non-structural changes
+   * @param {Function} options.onStructuralChange - Called when the UI must re-render
+   * @param {Function} options.renderNodeEditor - (schema, path, depth) => HTMLElement
+   */
+  constructor({ properties: properties2, required: required2, onSetRequired, draft, depth, path, expanded, onSetExpanded, onChange, onStructuralChange, renderNodeEditor }) {
+    this.properties = properties2;
+    this.required = isArray(required2) ? required2 : null;
+    this.onSetRequired = onSetRequired;
+    this.draft = draft;
+    this.depth = depth;
+    this.path = path;
+    this.expanded = expanded;
+    this.onSetExpanded = onSetExpanded;
+    this.onChange = onChange;
+    this.onStructuralChange = onStructuralChange;
+    this.renderNodeEditor = renderNodeEditor;
+  }
+  isExpanded(name) {
+    return !!(this.expanded && this.expanded[`${this.path}.${name}`]);
+  }
+  ensureRequired() {
+    if (!isArray(this.required)) {
+      this.required = this.onSetRequired ? this.onSetRequired() : [];
+    }
+    return this.required;
+  }
+  render() {
+    const list = createElement("div", { class: "jedi-sb-properties" });
+    const propertyNames2 = Object.keys(this.properties || {});
+    if (propertyNames2.length === 0) {
+      list.appendChild(createElement("div", { style: { color: "#999", fontSize: "12px", margin: "4px 0" } }, ["No properties defined yet."]));
+    }
+    propertyNames2.forEach((name) => {
+      list.appendChild(this.renderProperty(name, this.properties[name]));
+    });
+    const addInput = createElement("input", { type: "text", class: "jedi-sb-input", placeholder: "property name" });
+    const addBtn = btn("+ Add property", () => {
+      this.addProperty(addInput);
+    });
+    addInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") this.addProperty(addInput);
+    });
+    list.appendChild(row(addInput, addBtn));
+    const container = createElement("div", { class: "jedi-sb-properties-block" });
+    container.appendChild(this.renderRequired());
+    container.appendChild(list);
+    return container;
+  }
+  renderRequired() {
+    const names = Object.keys(this.properties || {});
+    if (names.length === 0) {
+      return createElement("div");
+    }
+    const items2 = names.map((name) => {
+      const checkbox = createElement("input", { type: "checkbox", class: "jedi-sb-required", checked: isArray(this.required) && this.required.includes(name) });
+      checkbox.addEventListener("change", () => {
+        const required2 = this.ensureRequired();
+        if (checkbox.checked && !required2.includes(name)) {
+          required2.push(name);
+        } else if (!checkbox.checked) {
+          const index2 = required2.indexOf(name);
+          if (index2 !== -1) {
+            required2.splice(index2, 1);
+          }
+        }
+        this.onChange();
+      });
+      return row(checkbox, createElement("span", {}, [name]));
+    });
+    return section("Required", createElement("div", { class: "jedi-sb-required-list" }, items2));
+  }
+  renderProperty(name, schema) {
+    const typeValue = getType(schema);
+    const nameInput = createElement("input", { type: "text", class: "jedi-sb-prop-name", value: name });
+    nameInput.addEventListener("change", () => {
+      const newName = nameInput.value.trim();
+      if (!newName || newName === name) return;
+      if (Object.prototype.hasOwnProperty.call(this.properties, newName)) return;
+      this.properties[newName] = this.properties[name];
+      delete this.properties[name];
+      this.renameRequired(name, newName);
+      this.onStructuralChange();
+    });
+    const typeSelect = createElement("select", { class: "jedi-sb-prop-type" });
+    typeSelect.appendChild(createElement("option", { value: "" }, ["(type)"]));
+    TYPES.forEach((type2) => {
+      typeSelect.appendChild(createElement("option", { value: type2, selected: typeValue === type2 }, [TYPE_LABELS[type2]]));
+    });
+    typeSelect.addEventListener("change", () => {
+      if (typeSelect.value) {
+        schema.type = typeSelect.value;
+      } else {
+        delete schema.type;
+      }
+      this.onStructuralChange();
+    });
+    btn("Edit", () => {
+      this.toggleExpanded(name);
+    });
+    btn("×", () => {
+      if (!window.confirm(`Delete property "${name}"?`)) return;
+      delete this.properties[name];
+      this.removeFromRequired(name);
+      this.onStructuralChange();
+    });
+    const header = row(nameInput, typeSelect);
+    const item = createElement("div", { class: "jedi-sb-property", style: { marginBottom: "6px", paddingLeft: "10px", borderLeft: "1px solid #dee2e6" } }, [header]);
+    if (this.isExpanded(name) && this.renderNodeEditor) {
+      item.appendChild(this.renderNodeEditor(schema, `${this.path}.properties.${name}`, this.depth + 1));
+    }
+    return item;
+  }
+  addProperty(input) {
+    let name = input.value.trim();
+    if (!name) name = "property";
+    let finalName = name;
+    let counter = 1;
+    while (Object.prototype.hasOwnProperty.call(this.properties, finalName)) {
+      finalName = `${name}${counter}`;
+      counter++;
+    }
+    this.properties[finalName] = { type: "string" };
+    input.value = "";
+    if (this.onSetExpanded) {
+      this.onSetExpanded(`${this.path}.${finalName}`, true);
+    }
+    this.onStructuralChange();
+  }
+  toggleExpanded(name) {
+    const key = `${this.path}.${name}`;
+    if (this.onSetExpanded) {
+      this.onSetExpanded(key, !this.isExpanded(name));
+    }
+    this.onStructuralChange();
+  }
+  renameRequired(oldName, newName) {
+    const required2 = this.required;
+    if (!isArray(required2)) return;
+    const index2 = required2.indexOf(oldName);
+    if (index2 !== -1) {
+      required2[index2] = newName;
+    }
+  }
+  removeFromRequired(name) {
+    if (!isArray(this.required)) return;
+    const index2 = this.required.indexOf(name);
+    if (index2 !== -1) {
+      this.required.splice(index2, 1);
+    }
+  }
+}
+function defaultValue(key) {
+  switch (key) {
+    case "enum":
+    case "oneOf":
+    case "anyOf":
+    case "allOf":
+    case "prefixItems":
+      return [{ type: "string" }];
+    case "default":
+    case "const":
+      return null;
+    case "not":
+    case "if":
+    case "then":
+    case "else":
+    case "items":
+      return {};
+    case "additionalProperties":
+    case "uniqueItems":
+      return false;
+    default:
+      return "";
+  }
+}
+class NodeEditor {
+  /**
+   * @param {object} options
+   * @param {object} options.schema - The schema node (mutated in place)
+   * @param {string} options.draft - Active draft
+   * @param {number} options.depth - Nesting depth
+   * @param {number} options.maxDepth - Maximum nesting depth
+   * @param {string} options.path - Human readable path for labels
+   * @param {Function} options.onChange - Called on non-structural changes
+   * @param {Function} options.onStructuralChange - Called when the UI must re-render
+   * @param {object} options.expanded - Map of expanded property paths -> boolean
+   * @param {Function} options.onSetExpanded - (key, expanded) => void
+   * @param {Function} options.renderNodeEditor - (schema, path, depth) => HTMLElement
+   */
+  constructor({ schema, draft, depth, maxDepth, path, onChange, onStructuralChange, expanded, onSetExpanded, renderNodeEditor }) {
+    this.schema = schema;
+    this.draft = draft;
+    this.depth = depth;
+    this.maxDepth = maxDepth;
+    this.path = path;
+    this.onChange = onChange;
+    this.onStructuralChange = onStructuralChange;
+    this.expanded = expanded;
+    this.onSetExpanded = onSetExpanded;
+    this.renderNodeEditor = renderNodeEditor;
+  }
+  has(key) {
+    return this.schema[key] !== void 0;
+  }
+  get type() {
+    return isArray(this.schema.type) ? null : this.schema.type;
+  }
+  render() {
+    if (!isObject$1(this.schema)) {
+      return createElement("div", { class: "jedi-sb-node-editor" }, ["Schema must be an object."]);
+    }
+    const container = createElement("div", { class: "jedi-sb-node-editor" });
+    container.appendChild(section("Identity", this.renderIdentity()));
+    container.appendChild(section("Type", this.renderType()));
+    container.appendChild(this.renderValues());
+    const type2 = this.type;
+    if (type2) {
+      const constraints = getConstraintsForType(type2);
+      if (constraints.length > 0 || this.has("additionalProperties")) {
+        container.appendChild(section("Constraints", this.renderConstraints(constraints)));
+      }
+      if (type2 === "array") {
+        container.appendChild(section("Array items", this.renderItems()));
+      }
+      if (type2 === "object") {
+        container.appendChild(this.renderProperties());
+      }
+    }
+    container.appendChild(this.renderComposition());
+    return container;
+  }
+  renderIdentity() {
+    const fields = [];
+    const inputs = {};
+    const text = (key) => {
+      const input = createElement("input", { type: "text", class: "jedi-sb-input", value: this.schema[key] ?? "" });
+      input.addEventListener("input", () => {
+        const value = input.value;
+        if (value === "") {
+          delete this.schema[key];
+        } else {
+          this.schema[key] = value;
+        }
+        this.onChange();
+      });
+      return input;
+    };
+    inputs.title = text("title");
+    inputs.description = createElement("textarea", { class: "jedi-sb-input", rows: 2, value: this.schema.description ?? "" });
+    inputs.description.addEventListener("input", () => {
+      if (inputs.description.value === "") {
+        delete this.schema.description;
+      } else {
+        this.schema.description = inputs.description.value;
+      }
+      this.onChange();
+    });
+    inputs.format = text("format");
+    inputs.$ref = text("$ref");
+    fields.push(fieldRow({ id: "sb-title", label: KEYWORD_LABELS.title, input: inputs.title }));
+    fields.push(fieldRow({ id: "sb-description", label: KEYWORD_LABELS.description, input: inputs.description }));
+    fields.push(fieldRow({ id: "sb-format", label: KEYWORD_LABELS.format, input: inputs.format }));
+    fields.push(fieldRow({ id: "sb-ref", label: KEYWORD_LABELS.$ref, input: inputs.$ref, hint: "Kept as plain text; ref resolution is out of scope." }));
+    return createElement("div", {}, fields);
+  }
+  renderType() {
+    const current = this.schema.type;
+    if (isArray(current)) {
+      const textarea = this.renderJsonField("type", current, "Change this to a single type to use the select control.");
+      return createElement("div", {}, [
+        fieldRow({ id: "sb-type-array", label: KEYWORD_LABELS.type, input: textarea, hint: "Multi-type schemas are edited as a JSON array." })
+      ]);
+    }
+    const select = createElement("select", { class: "jedi-sb-input" });
+    select.appendChild(createElement("option", { value: "" }, ["(any type)"]));
+    TYPES.forEach((type2) => {
+      select.appendChild(createElement("option", { value: type2, selected: type2 === current }, [TYPE_LABELS[type2]]));
+    });
+    select.addEventListener("change", () => {
+      if (select.value) {
+        this.schema.type = select.value;
+      } else {
+        delete this.schema.type;
+      }
+      this.onStructuralChange();
+    });
+    return createElement("div", {}, [fieldRow({ id: "sb-type", label: KEYWORD_LABELS.type, input: select })]);
+  }
+  renderValues() {
+    const keywords = getValueKeywords();
+    const existing = keywords.filter((key) => this.has(key));
+    const missing = keywords.filter((key) => !this.has(key));
+    const rows = [];
+    existing.forEach((key) => {
+      rows.push(this.renderKeywordField(key));
+    });
+    if (missing.length > 0) {
+      rows.push(this.renderAddSelect(missing, (key) => {
+        this.schema[key] = defaultValue(key);
+        this.onStructuralChange();
+      }, "Add value…"));
+    }
+    if (rows.length === 0) {
+      return createElement("div");
+    }
+    return section("Values", createElement("div", {}, rows));
+  }
+  renderConstraints(constraints) {
+    const existing = constraints.filter((key) => this.has(key));
+    const missing = constraints.filter((key) => !this.has(key));
+    const rows = [];
+    existing.forEach((key) => {
+      rows.push(this.renderKeywordField(key));
+    });
+    if (missing.length > 0) {
+      rows.push(this.renderAddSelect(missing, (key) => {
+        this.schema[key] = defaultValue(key);
+        this.onStructuralChange();
+      }, "Add constraint…"));
+    }
+    return createElement("div", {}, rows);
+  }
+  renderItems() {
+    if (this.has("items")) {
+      if (isObject$1(this.schema.items)) {
+        const body = createElement("div", {}, [this.renderNodeEditor(this.schema.items, `${this.path}.items`, this.depth + 1)]);
+        const remove = btn("Remove items", () => {
+          delete this.schema.items;
+          this.onStructuralChange();
+        });
+        return createElement("div", {}, [row(body, remove)]);
+      }
+      return createElement("div", {}, [this.renderKeywordField("items")]);
+    }
+    const add = btn("+ Add items schema", () => {
+      this.schema.items = {};
+      this.onStructuralChange();
+    });
+    return createElement("div", {}, [add]);
+  }
+  renderProperties() {
+    if (this.depth >= this.maxDepth) {
+      return createElement("div", { class: "jedi-sb-max-depth", style: { color: "#b02a37", fontSize: "12px", margin: "8px 0" } }, ["Maximum nesting depth reached."]);
+    }
+    if (!this.schema.properties) {
+      const add = btn("+ Add properties", () => {
+        this.schema.properties = {};
+        this.onStructuralChange();
+      });
+      return createElement("div", { class: "jedi-sb-properties-block" }, [add]);
+    }
+    const editor = new PropertiesEditor({
+      properties: this.schema.properties,
+      required: this.schema.required,
+      onSetRequired: () => {
+        this.schema.required = isArray(this.schema.required) ? this.schema.required : [];
+        return this.schema.required;
+      },
+      draft: this.draft,
+      depth: this.depth,
+      path: this.path,
+      expanded: this.expanded,
+      onSetExpanded: this.onSetExpanded,
+      onChange: this.onChange,
+      onStructuralChange: this.onStructuralChange,
+      renderNodeEditor: this.renderNodeEditor
+    });
+    return editor.render();
+  }
+  renderComposition() {
+    const keywords = getCompositionKeywords();
+    const existing = keywords.filter((key) => this.has(key));
+    const missing = keywords.filter((key) => !this.has(key));
+    const rows = [];
+    existing.forEach((key) => {
+      rows.push(this.renderKeywordField(key));
+    });
+    if (missing.length > 0) {
+      rows.push(this.renderAddSelect(missing, (key) => {
+        this.schema[key] = defaultValue(key);
+        this.onStructuralChange();
+      }, "Add composition…"));
+    }
+    if (rows.length === 0) {
+      return createElement("div");
+    }
+    return section("Composition", createElement("div", {}, rows));
+  }
+  renderKeywordField(key) {
+    const kind = getKeywordKind(key, this.draft);
+    const id = "sb-field-" + (this.path ? this.path.replace(/[^a-zA-Z0-9]+/g, "-") + "-" : "") + key;
+    if (key === "additionalProperties" && isObject$1(this.schema[key])) {
+      const textarea = this.renderJsonField(key, this.schema[key]);
+      const remove2 = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+      return row(fieldRow({ id, label: KEYWORD_LABELS[key], input: textarea }), remove2);
+    }
+    if (kind === "boolean") {
+      const input2 = createElement("input", { type: "checkbox", checked: this.schema[key] === true });
+      input2.addEventListener("change", () => {
+        this.schema[key] = input2.checked;
+        this.onChange();
+      });
+      const remove2 = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+      return row(fieldRow({ id, label: KEYWORD_LABELS[key], input: input2 }), remove2);
+    }
+    let input;
+    let remove;
+    if (kind === "json") {
+      input = this.renderJsonField(key, this.schema[key]);
+      remove = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+    } else if (kind === "textarea") {
+      input = createElement("textarea", { class: "jedi-sb-input", rows: 2, value: this.schema[key] ?? "" });
+      input.addEventListener("input", () => this.writeText(key, input));
+      remove = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+    } else if (kind === "non-negative-integer" || kind === "positive-number" || kind === "number") {
+      input = createElement("input", { type: "number", class: "jedi-sb-input", value: this.schema[key], min: kind === "non-negative-integer" ? "0" : void 0, step: kind === "non-negative-integer" ? "1" : "any" });
+      input.addEventListener("change", () => this.writeNumber(key, input));
+      remove = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+    } else {
+      input = createElement("input", { type: "text", class: "jedi-sb-input", value: this.schema[key] ?? "" });
+      input.addEventListener("input", () => this.writeText(key, input));
+      remove = btn("×", () => {
+        delete this.schema[key];
+        this.onStructuralChange();
+      });
+    }
+    return row(fieldRow({ id, label: KEYWORD_LABELS[key] || key, input }), remove);
+  }
+  renderJsonField(key, value, hint) {
+    const input = createElement("textarea", {
+      class: "jedi-sb-input",
+      rows: 4,
+      style: { fontFamily: "monospace", fontSize: "12px" },
+      value: JSON.stringify(value, null, 2)
+    });
+    let errorEl = null;
+    const validate = () => {
+      try {
+        const parsed = JSON.parse(input.value);
+        this.schema[key] = parsed;
+        if (errorEl) errorEl.textContent = "";
+        this.onChange();
+      } catch (error) {
+        if (!errorEl) {
+          errorEl = createElement("div", { class: "jedi-sb-error", style: { color: "#d9534f", fontSize: "12px" } });
+          input.parentNode.appendChild(errorEl);
+        }
+        errorEl.textContent = "Invalid JSON: " + error.message;
+      }
+    };
+    input.addEventListener("change", validate);
+    input.addEventListener("blur", validate);
+    if (hint) {
+      return createElement("div", {}, [input, createElement("div", { class: "jedi-sb-hint", style: { color: "#999", fontSize: "12px" } }, [hint])]);
+    }
+    return input;
+  }
+  writeText(key, input) {
+    if (input.value === "") {
+      delete this.schema[key];
+    } else {
+      this.schema[key] = input.value;
+    }
+    this.onChange();
+  }
+  writeNumber(key, input) {
+    if (input.value === "") {
+      delete this.schema[key];
+      this.onStructuralChange();
+      return;
+    }
+    const parsed = Number(input.value);
+    if (Number.isNaN(parsed)) return;
+    this.schema[key] = parsed;
+    this.onChange();
+  }
+  renderAddSelect(keywords, onAdd, placeholder) {
+    const select = createElement("select", { class: "jedi-sb-add-select", style: { fontSize: "12px", padding: "2px 4px" } });
+    select.appendChild(createElement("option", { value: "" }, [placeholder]));
+    keywords.forEach((key) => {
+      select.appendChild(createElement("option", { value: key }, [KEYWORD_LABELS[key] || key]));
+    });
+    select.addEventListener("change", () => {
+      if (select.value) {
+        onAdd(select.value);
+        select.value = "";
+      }
+    });
+    return select;
+  }
+}
+function detectDraft(schema) {
+  if (isObject$1(schema) && typeof schema.$schema === "string") {
+    const draft = DRAFTS.find((d) => d.value === schema.$schema);
+    if (draft) return draft.value;
+  }
+  return DRAFTS[DRAFTS.length - 1].value;
+}
+class SchemaBuilder extends EventEmitter {
+  /**
+   * @param {object} options
+   * @param {HTMLElement} options.container - Where the builder UI is rendered
+   * @param {object|boolean} [options.schema] - Initial schema
+   * @param {Theme} [options.theme] - Theme used for the form preview
+   * @param {string} [options.draft] - JSON Schema draft uri
+   * @param {number} [options.maxDepth] - Maximum nesting depth (default 20)
+   * @param {object} [options.preview] - Extra options forwarded to the preview Jedison instance
+   */
+  constructor(options = {}) {
+    super();
+    this.container = options.container;
+    this.theme = options.theme || new Theme();
+    this.draft = options.draft || detectDraft(options.schema);
+    this.maxDepth = options.maxDepth ?? 20;
+    this.previewOptions = options.preview || {};
+    this.schema = clone(options.schema);
+    if (!isObject$1(this.schema)) {
+      this.schema = { type: "object", properties: {} };
+    }
+    this.errors = [];
+    this.preview = null;
+    this.previewTimer = null;
+    this.expandedProps = {};
+    this.render();
+    this.notifyChange();
+  }
+  /**
+   * Returns a deep clone of the edited schema.
+   * @returns {object}
+   */
+  getSchema() {
+    return clone(this.schema);
+  }
+  /**
+   * Replaces the edited schema and re-renders.
+   * @param {object|boolean} schema
+   */
+  setSchema(schema) {
+    const next = clone(schema);
+    if (!isObject$1(next)) {
+      this.schema = { type: "object", properties: {} };
+    } else {
+      this.schema = next;
+    }
+    this.draft = detectDraft(this.schema);
+    this.notifyChange(true);
+  }
+  /**
+   * Returns the latest validation errors.
+   * @returns {Array<{path: string, message: string}>}
+   */
+  getErrors() {
+    return this.errors;
+  }
+  validate() {
+    const result = validateSchema(this.schema, this.draft);
+    this.errors = result.errors;
+    this.emit("validate", result);
+    return result;
+  }
+  notifyChange(structural = false) {
+    if (structural) {
+      this.renderEditorPane();
+    }
+    this.validate();
+    this.updateStatus();
+    this.emit("change", clone(this.schema));
+    clearTimeout(this.previewTimer);
+    this.previewTimer = setTimeout(() => {
+      this.renderPreview();
+    }, 300);
+  }
+  render() {
+    if (this.container) {
+      this.container.innerHTML = "";
+    }
+    this.container.appendChild(this.renderToolbar());
+    this.builderPane = createElement("div", { class: "jedi-sb-builder-pane", style: { flex: "1 1 50%", minWidth: "320px", overflow: "auto", padding: "12px", borderRight: "1px solid #dee2e6", maxHeight: "75vh", overflowY: "auto" } });
+    this.previewPane = createElement("div", { class: "jedi-sb-preview-pane", style: { flex: "1 1 50%", minWidth: "320px", overflow: "auto", padding: "12px", maxHeight: "75vh", overflowY: "auto" } });
+    const main = createElement("div", { class: "jedi-sb-main", style: { display: "flex", gap: "0", flexWrap: "wrap" } }, [this.builderPane, this.previewPane]);
+    this.container.appendChild(main);
+    this.errorsPanel = createElement("div", { class: "jedi-sb-errors", style: { marginTop: "8px" } });
+    this.container.appendChild(this.errorsPanel);
+    this.renderEditorPane();
+  }
+  renderToolbar() {
+    const draftSelect = createElement("select", { class: "jedi-sb-draft", style: { fontSize: "12px", padding: "2px 4px" } });
+    DRAFTS.forEach((draft) => {
+      draftSelect.appendChild(createElement("option", { value: draft.value, selected: draft.value === this.draft }, [draft.label]));
+    });
+    draftSelect.addEventListener("change", () => {
+      this.draft = draftSelect.value;
+      if (isObject$1(this.schema)) {
+        this.schema.$schema = this.draft;
+      }
+      this.notifyChange(true);
+    });
+    this.statusBadge = createElement("span", { class: "jedi-sb-status", style: { fontWeight: "600", fontSize: "12px", marginLeft: "12px" } });
+    const fromJsonBtn = this.toolbarButton("Import JSON", () => this.openImportDialog());
+    const generateBtn = this.toolbarButton("Generate from JSON", () => this.openGenerateDialog());
+    const copyBtn = this.toolbarButton("Copy JSON", () => this.openExportDialog());
+    return createElement("div", { class: "jedi-sb-toolbar", style: { display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", borderBottom: "1px solid #dee2e6", flexWrap: "wrap" } }, [
+      createElement("label", { for: "jedi-sb-draft-select", style: { fontSize: "12px" } }, ["Draft"]),
+      draftSelect,
+      fromJsonBtn,
+      generateBtn,
+      copyBtn,
+      this.statusBadge
+    ]);
+  }
+  toolbarButton(label, onClick) {
+    return createElement("button", {
+      type: "button",
+      class: "jedi-sb-btn",
+      onClick,
+      style: { padding: "3px 10px", fontSize: "12px", cursor: "pointer" }
+    }, [label]);
+  }
+  renderEditorPane() {
+    if (!this.builderPane) return;
+    this.builderPane.innerHTML = "";
+    const editor = new NodeEditor({
+      schema: this.schema,
+      draft: this.draft,
+      depth: 0,
+      maxDepth: this.maxDepth,
+      path: "#",
+      onChange: () => this.notifyChange(false),
+      onStructuralChange: () => this.notifyChange(true),
+      expanded: this.expandedProps,
+      onSetExpanded: (key, expanded) => {
+        if (expanded) {
+          this.expandedProps[key] = true;
+        } else {
+          delete this.expandedProps[key];
+        }
+      },
+      renderNodeEditor: this.renderNodeEditor
+    });
+    this.builderPane.appendChild(editor.render());
+  }
+  renderNodeEditor(schema, path, depth) {
+    if (depth > this.maxDepth) {
+      return createElement("div", { style: { color: "#b02a37", fontSize: "12px", margin: "8px 0" } }, ["Maximum nesting depth reached."]);
+    }
+    const editor = new NodeEditor({
+      schema,
+      draft: this.draft,
+      depth,
+      maxDepth: this.maxDepth,
+      path,
+      onChange: () => this.notifyChange(false),
+      onStructuralChange: () => this.notifyChange(true),
+      expanded: this.expandedProps,
+      onSetExpanded: (key, expanded) => {
+        if (expanded) {
+          this.expandedProps[key] = true;
+        } else {
+          delete this.expandedProps[key];
+        }
+      },
+      renderNodeEditor: this.renderNodeEditor
+    });
+    return editor.render();
+  }
+  updateStatus() {
+    if (!this.statusBadge) return;
+    this.statusBadge.textContent = this.errors.length === 0 ? "✓ Valid" : `${this.errors.length} error${this.errors.length === 1 ? "" : "s"}`;
+    this.statusBadge.style.color = this.errors.length === 0 ? "#198754" : "#b02a37";
+    this.renderErrors();
+  }
+  renderErrors() {
+    if (!this.errorsPanel) return;
+    this.errorsPanel.innerHTML = "";
+    if (this.errors.length === 0) return;
+    const list = createElement("ul", { style: { fontSize: "12px", color: "#b02a37", margin: 0, paddingLeft: "20px" } });
+    this.errors.forEach((error) => {
+      list.appendChild(createElement("li", {}, [`${error.path}: ${error.message}`]));
+    });
+    this.errorsPanel.appendChild(createElement("div", { style: { background: "#f8d7da", border: "1px solid #f5c2c7", borderRadius: "4px", padding: "8px 12px" } }, [
+      createElement("strong", {}, ["Schema validation errors"]),
+      list
+    ]));
+  }
+  renderPreview() {
+    if (this.preview) {
+      this.preview.destroy();
+      this.preview = null;
+    }
+    this.previewPane.innerHTML = "";
+    if (this.errors.length > 0) {
+      this.previewPane.appendChild(createElement("div", { style: { color: "#6c757d", fontSize: "13px", fontStyle: "italic" } }, ["Fix the validation errors to preview the form."]));
+      return;
+    }
+    const previewSchema = clone(this.schema);
+    if (isObject$1(previewSchema)) {
+      previewSchema.readOnly = true;
+    }
+    const options = {
+      container: this.previewPane,
+      schema: previewSchema,
+      theme: this.theme,
+      showErrors: "change",
+      ...this.previewOptions
+    };
+    try {
+      this.preview = new Jedison(options);
+    } catch (error) {
+      this.previewPane.appendChild(createElement("div", { style: { color: "#b02a37", fontSize: "13px" } }, [`Preview failed: ${error.message}`]));
+    }
+  }
+  openImportDialog() {
+    this.openOverlay({
+      title: "Import JSON schema",
+      value: JSON.stringify(this.schema, null, 2),
+      placeholder: "Paste a JSON schema here…",
+      confirmLabel: "Load",
+      onConfirm: (text) => {
+        this.setSchema(JSON.parse(text));
+      }
+    });
+  }
+  openGenerateDialog() {
+    this.openOverlay({
+      title: "Generate schema from JSON",
+      value: '{\n  "name": "Ada"\n}',
+      placeholder: "Paste example JSON here…",
+      confirmLabel: "Generate",
+      onConfirm: (text) => {
+        const generated = SchemaGenerator.generate(JSON.parse(text));
+        generated.$schema = this.draft;
+        this.setSchema(generated);
+      }
+    });
+  }
+  openExportDialog() {
+    const textarea = createElement("textarea", {
+      class: "jedi-sb-export",
+      rows: 20,
+      readonly: true,
+      style: { width: "100%", fontFamily: "monospace", fontSize: "12px" },
+      value: JSON.stringify(this.schema, null, 2)
+    });
+    const overlay = this.openOverlay({ title: "Export schema JSON", content: textarea, confirmLabel: "Copy" });
+    overlay.confirmBtn.addEventListener("click", () => {
+      textarea.select();
+      document.execCommand("copy");
+      overlay.close();
+    });
+  }
+  openOverlay({ title, value, placeholder, content, confirmLabel, onConfirm }) {
+    const textarea = content || createElement("textarea", {
+      class: "jedi-sb-overlay-textarea",
+      rows: 20,
+      style: { width: "100%", fontFamily: "monospace", fontSize: "12px" },
+      value: value || ""
+    });
+    if (placeholder) {
+      textarea.setAttribute("placeholder", placeholder);
+    }
+    const closeBtn = createElement("button", { type: "button", style: { cursor: "pointer" } }, ["Cancel"]);
+    const confirmBtn = createElement("button", { type: "button", style: { cursor: "pointer", marginLeft: "8px" } }, [confirmLabel || "OK"]);
+    const footer = createElement("div", { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } }, [closeBtn, confirmBtn]);
+    const box = createElement("div", {
+      class: "jedi-sb-overlay-box",
+      style: { background: "#fff", border: "1px solid #dee2e6", borderRadius: "6px", padding: "12px", maxWidth: "640px", width: "90%", margin: "0 auto" }
+    }, [
+      createElement("h3", { style: { margin: "0 0 8px", fontSize: "16px" } }, [title]),
+      textarea,
+      footer
+    ]);
+    const overlay = createElement("div", {
+      class: "jedi-sb-overlay",
+      style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", zIndex: 1e3 }
+    }, [box]);
+    const close = () => {
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    };
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) close();
+    });
+    closeBtn.addEventListener("click", close);
+    confirmBtn.addEventListener("click", () => {
+      try {
+        if (onConfirm) {
+          onConfirm(textarea.value);
+        }
+        close();
+      } catch (error) {
+        this.showOverlayError(box, error.message);
+      }
+    });
+    document.body.appendChild(overlay);
+    textarea.focus();
+    return { overlay, textarea, confirmBtn, close };
+  }
+  showOverlayError(box, message) {
+    let errorEl = box.querySelector(".jedi-sb-overlay-error");
+    if (!errorEl) {
+      errorEl = createElement("div", { class: "jedi-sb-overlay-error", style: { color: "#b02a37", fontSize: "12px", marginTop: "8px" } });
+      box.appendChild(errorEl);
+    }
+    errorEl.textContent = message;
+  }
+  /**
+   * Destroys the preview and removes the builder UI.
+   */
+  destroy() {
+    clearTimeout(this.previewTimer);
+    if (this.preview) {
+      this.preview.destroy();
+      this.preview = null;
+    }
+    if (this.container) {
+      this.container.innerHTML = "";
+    }
+    Object.keys(this).forEach((key) => {
+      delete this[key];
+    });
+  }
+}
+class RefParser {
+  constructor(options = {}) {
+    this.options = Object.assign({
+      detectRecursion: true
+    }, options);
+    this.refs = {};
+    this.data = {};
+    this.iterations = 0;
+    this.maxIterations = 1e3;
+    this.cycles = [];
+    this.walker = new JsonWalker();
+  }
+  async dereference(schema) {
+    await this.collectRefs(schema);
+    while (this.iterations < this.maxIterations) {
+      if (this.refsResolved()) {
+        break;
+      }
+      this.iterations++;
+      await this.collectRefs(schema);
+    }
+    const missingRefs = Object.entries(this.refs).filter(([key, value]) => value === null).map(([key]) => key);
+    if (missingRefs.length) {
+      console.warn("Missing refs:", JSON.stringify(missingRefs));
+    }
+    if (this.options.detectRecursion) {
+      this.cycles = this.findRecursiveRefs(this.refs);
+      this.markRecursiveSchemas();
+    }
+  }
+  refsResolved() {
+    return Object.values(this.refs).every((value) => {
+      return value !== null;
+    });
+  }
+  /**
+   * Traverses the given schema recursively and for each schema with $ref
+   * add a new property in the this.refs object with key being the json path to that schema.
+   * If the ref has no value in data will be given a value of null. This value will be later
+   * replaced in a future iteration. At that time the data will be available
+   * @param schema
+   * @param path
+   */
+  async collectRefs(schema, path = "#") {
+    if (typeof schema !== "object" || schema === null) {
+      return;
+    }
+    for (const [key, value] of Object.entries(schema)) {
+      const nextPath = path ? `${path}/${key}` : `/${key}`;
+      if (this.hasRef(schema)) {
+        const ref = schema["$ref"];
+        if (this.isExternalRef(ref)) {
+          const resolvedSchema = await this.load(ref);
+          this.refs[ref] = resolvedSchema;
+          await this.collectRefs(resolvedSchema, nextPath);
+        } else {
+          this.refs[ref] = this.data[ref] ?? null;
+        }
+      }
+      this.data[path] = schema;
+      await this.collectRefs(value, nextPath);
+    }
+  }
+  hasRef(schema) {
+    return typeof schema["$ref"] !== "undefined" && typeof schema["$ref"] === "string";
+  }
+  isExternalRef(ref) {
+    if (typeof ref !== "string") {
+      return false;
+    }
+    return ref.startsWith("http") || ref.startsWith("https");
+  }
+  isObject(value) {
+    return value !== null && typeof value === "object";
+  }
+  findRecursiveRefs(defs) {
+    const cycles = /* @__PURE__ */ new Set();
+    function checkRef(path, visited, stack) {
+      if (visited.has(path)) {
+        const cycleStartIndex = stack.indexOf(path);
+        if (cycleStartIndex !== -1) {
+          const cyclePath = stack.slice(cycleStartIndex).concat(path);
+          const minIndex = cyclePath.reduce((minIdx, ref, idx) => ref < cyclePath[minIdx] ? idx : minIdx, 0);
+          const normalizedCycle = [...cyclePath.slice(minIndex), ...cyclePath.slice(0, minIndex)];
+          const cycleSignature = normalizedCycle.join(" → ");
+          cycles.add(cycleSignature);
+        }
+        return;
+      }
+      if (!defs[path]) return;
+      visited.add(path);
+      stack.push(path);
+      function traverse(value) {
+        if (typeof value === "object" && value !== null) {
+          if (value.$ref) checkRef(value.$ref, visited, stack);
+          for (const key in value) traverse(value[key]);
+        }
+      }
+      traverse(defs[path]);
+      visited.delete(path);
+      stack.pop();
+    }
+    for (const key in defs) {
+      checkRef(key, /* @__PURE__ */ new Set(), []);
+    }
+    return [...cycles];
+  }
+  hasRefCycles() {
+    return this.options.detectRecursion && this.cycles.length > 0;
+  }
+  markRecursiveSchemas() {
+    const cycleRefs = /* @__PURE__ */ new Set();
+    this.cycles.forEach((cycle) => {
+      cycle.split(" → ").forEach((ref) => cycleRefs.add(ref));
+    });
+    for (const schema of Object.values(this.data)) {
+      if (schema && schema.$ref && cycleRefs.has(schema.$ref)) {
+        schema["x-recursive"] = true;
+      }
+    }
+  }
+  expand(schema) {
+    const cloneSchema = JSON.parse(JSON.stringify(schema));
+    if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
+      const ref = cloneSchema.$ref;
+      delete cloneSchema["$ref"];
+      return this.expand(mergeDeep({}, this.refs[ref], cloneSchema));
+    }
+    return cloneSchema;
+  }
+  expandRecursive(schema) {
+    let mustContinue = true;
+    while (mustContinue) {
+      mustContinue = false;
+      this.walker.traverse(schema, (node, path, parent, key) => {
+        if (node.$ref && typeof node.$ref === "string" && parent && key !== null) {
+          parent[key] = this.expand(node);
+          mustContinue = true;
+        }
+      });
+    }
+  }
+  /**
+   * Loads a schema with a synchronous http request
+   * @param uri
+   * @returns {any}
+   */
+  async load(uri) {
+    try {
+      const response = await fetch(uri);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error loading", uri, error);
+      throw error;
+    }
+  }
+}
 class ThemeBootstrap3 extends Theme {
   init() {
     this.useToggleEvents = false;
   }
   getAddPropertyButton(config) {
-    const btn = super.getAddPropertyButton(config);
-    btn.classList.add("btn-primary");
-    btn.classList.add("btn-block");
-    return btn;
+    const btn2 = super.getAddPropertyButton(config);
+    btn2.classList.add("btn-primary");
+    btn2.classList.add("btn-block");
+    return btn2;
   }
   getCollapseToggle(config) {
     const toggle = super.getCollapseToggle(config);
@@ -10376,15 +11570,15 @@ class ThemeBootstrap3 extends Theme {
     control.trigger.classList.add("label", "label-primary");
     control.dialogBody.classList.add("btn-group-vertical");
     control.dialogBody.style.width = "100%";
-    control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-default", "btn-block");
+    control.optionButtons.forEach((btn2) => {
+      btn2.classList.add("btn", "btn-default", "btn-block");
     });
     return control;
   }
-  setSwitcherOptionActive(btn, active) {
-    super.setSwitcherOptionActive(btn, active);
-    btn.classList.toggle("btn-primary", active);
-    btn.classList.toggle("btn-default", !active);
+  setSwitcherOptionActive(btn2, active) {
+    super.setSwitcherOptionActive(btn2, active);
+    btn2.classList.toggle("btn-primary", active);
+    btn2.classList.toggle("btn-default", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -10406,9 +11600,9 @@ class ThemeBootstrap3 extends Theme {
     return html;
   }
   getRow() {
-    const row = super.getRow();
-    row.classList.add("row");
-    return row;
+    const row2 = super.getRow();
+    row2.classList.add("row");
+    return row2;
   }
   getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol();
@@ -10532,10 +11726,10 @@ class ThemeBootstrap4 extends Theme {
     this.useToggleEvents = false;
   }
   getAddPropertyButton(config) {
-    const btn = super.getAddPropertyButton(config);
-    btn.classList.add("btn-primary");
-    btn.classList.add("btn-block");
-    return btn;
+    const btn2 = super.getAddPropertyButton(config);
+    btn2.classList.add("btn-primary");
+    btn2.classList.add("btn-block");
+    return btn2;
   }
   getCollapseToggle(config) {
     const toggle = super.getCollapseToggle(config);
@@ -10917,15 +12111,15 @@ class ThemeBootstrap4 extends Theme {
     const control = super.getSwitcherModal(config);
     control.trigger.classList.add("badge", "badge-primary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
-    control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-light");
+    control.optionButtons.forEach((btn2) => {
+      btn2.classList.add("btn", "btn-light");
     });
     return control;
   }
-  setSwitcherOptionActive(btn, active) {
-    super.setSwitcherOptionActive(btn, active);
-    btn.classList.toggle("btn-primary", active);
-    btn.classList.toggle("btn-light", !active);
+  setSwitcherOptionActive(btn2, active) {
+    super.setSwitcherOptionActive(btn2, active);
+    btn2.classList.toggle("btn-primary", active);
+    btn2.classList.toggle("btn-light", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -10955,9 +12149,9 @@ class ThemeBootstrap4 extends Theme {
     return "col-" + size + "-" + cols;
   }
   getRow() {
-    const row = super.getRow();
-    row.classList.add("row");
-    return row;
+    const row2 = super.getRow();
+    row2.classList.add("row");
+    return row2;
   }
   getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol(xs, md, offsetMd);
@@ -11080,10 +12274,10 @@ class ThemeBootstrap5 extends Theme {
     this.useToggleEvents = false;
   }
   getAddPropertyButton(config) {
-    const btn = super.getAddPropertyButton(config);
-    btn.classList.add("btn-primary");
-    btn.classList.add("w-100");
-    return btn;
+    const btn2 = super.getAddPropertyButton(config);
+    btn2.classList.add("btn-primary");
+    btn2.classList.add("w-100");
+    return btn2;
   }
   getCollapseToggle(config) {
     const toggle = super.getCollapseToggle(config);
@@ -11471,15 +12665,15 @@ class ThemeBootstrap5 extends Theme {
     const control = super.getSwitcherModal(config);
     control.trigger.classList.add("badge", "bg-primary");
     control.dialogBody.classList.add("btn-group", "btn-group-vertical", "w-100");
-    control.optionButtons.forEach((btn) => {
-      btn.classList.add("btn", "btn-light");
+    control.optionButtons.forEach((btn2) => {
+      btn2.classList.add("btn", "btn-light");
     });
     return control;
   }
-  setSwitcherOptionActive(btn, active) {
-    super.setSwitcherOptionActive(btn, active);
-    btn.classList.toggle("btn-primary", active);
-    btn.classList.toggle("btn-light", !active);
+  setSwitcherOptionActive(btn2, active) {
+    super.setSwitcherOptionActive(btn2, active);
+    btn2.classList.toggle("btn-primary", active);
+    btn2.classList.toggle("btn-light", !active);
   }
   adaptForTableMultipleControl(control, td) {
     super.adaptForTableMultipleControl(control, td);
@@ -11506,9 +12700,9 @@ class ThemeBootstrap5 extends Theme {
     return html;
   }
   getRow() {
-    const row = super.getRow();
-    row.classList.add("row");
-    return row;
+    const row2 = super.getRow();
+    row2.classList.add("row");
+    return row2;
   }
   getCol(xs, sm, md, lg, offsetMd) {
     const col = super.getCol(xs, md, offsetMd);
@@ -11884,6 +13078,7 @@ const index = {
   RefParser,
   Create: Jedison,
   SchemaGenerator,
+  SchemaBuilder,
   applyOverlay
 };
 export {
