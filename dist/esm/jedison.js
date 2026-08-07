@@ -10673,6 +10673,7 @@ class NodeEditor {
    * @param {number} options.depth - Nesting depth
    * @param {number} options.maxDepth - Maximum nesting depth
    * @param {string} options.path - Human readable path for labels
+   * @param {boolean} [options.enableComposition] - Render composition keywords (oneOf/anyOf/allOf/not/if/then/else). Default false.
    * @param {Function} options.onChange - Called on non-structural changes
    * @param {Function} options.onStructuralChange - Called when the UI must re-render
    * @param {object} options.expanded - Map of expanded property paths -> boolean
@@ -10680,12 +10681,13 @@ class NodeEditor {
    * @param {Function} options.renderNodeEditor - (schema, path, depth) => HTMLElement
    * @param {object} options.theme - Theme used to build the controls
    */
-  constructor({ schema, draft, depth, maxDepth, path, onChange, onStructuralChange, expanded, onSetExpanded, renderNodeEditor, theme }) {
+  constructor({ schema, draft, depth, maxDepth, path, enableComposition, onChange, onStructuralChange, expanded, onSetExpanded, renderNodeEditor, theme }) {
     this.schema = schema;
     this.draft = draft;
     this.depth = depth;
     this.maxDepth = maxDepth;
     this.path = path;
+    this.enableComposition = enableComposition === true;
     this.onChange = onChange;
     this.onStructuralChange = onStructuralChange;
     this.expanded = expanded;
@@ -10897,6 +10899,9 @@ class NodeEditor {
     return section(this.theme, "Pattern properties", createElement("div", {}, [row(textarea, remove), hint]));
   }
   renderComposition() {
+    if (!this.enableComposition) {
+      return createElement("div");
+    }
     const keywords = getCompositionKeywords();
     const existing = keywords.filter((key) => this.has(key));
     const missing = keywords.filter((key) => {
@@ -11196,6 +11201,7 @@ class SchemaBuilder extends EventEmitter {
    * @param {Theme} [options.theme] - Theme used for the form preview
    * @param {string} [options.draft] - JSON Schema draft uri
    * @param {number} [options.maxDepth] - Maximum nesting depth (default 20)
+   * @param {boolean} [options.enableComposition] - Show composition keywords (oneOf/anyOf/allOf/not/if/then/else). Default false.
    * @param {object} [options.preview] - Extra options forwarded to the preview Jedison instance
    */
   constructor(options = {}) {
@@ -11204,6 +11210,7 @@ class SchemaBuilder extends EventEmitter {
     this.theme = options.theme || new Theme();
     this.draft = options.draft || detectDraft(options.schema);
     this.maxDepth = options.maxDepth ?? 20;
+    this.enableComposition = options.enableComposition === true;
     this.previewOptions = options.preview || {};
     this.view = options.view === "visual" ? "visual" : "text";
     this.renderNodeEditor = this.renderNodeEditor.bind(this);
@@ -11321,6 +11328,7 @@ class SchemaBuilder extends EventEmitter {
       depth: 0,
       maxDepth: this.maxDepth,
       path: "#",
+      enableComposition: this.enableComposition,
       onChange: () => this.notifyChange(false),
       onStructuralChange: () => this.notifyChange(true),
       expanded: this.expandedProps,
@@ -11359,6 +11367,7 @@ class SchemaBuilder extends EventEmitter {
       depth,
       maxDepth: this.maxDepth,
       path,
+      enableComposition: this.enableComposition,
       onChange: () => this.notifyChange(false),
       onStructuralChange: () => this.notifyChange(true),
       expanded: this.expandedProps,

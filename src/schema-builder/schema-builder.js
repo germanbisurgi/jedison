@@ -34,6 +34,7 @@ class SchemaBuilder extends EventEmitter {
    * @param {Theme} [options.theme] - Theme used for the form preview
    * @param {string} [options.draft] - JSON Schema draft uri
    * @param {number} [options.maxDepth] - Maximum nesting depth (default 20)
+   * @param {boolean} [options.enableComposition] - Show composition keywords (oneOf/anyOf/allOf/not/if/then/else). Default false.
    * @param {object} [options.preview] - Extra options forwarded to the preview Jedison instance
    */
   constructor (options = {}) {
@@ -43,6 +44,7 @@ class SchemaBuilder extends EventEmitter {
     this.theme = options.theme || new Theme()
     this.draft = options.draft || detectDraft(options.schema)
     this.maxDepth = options.maxDepth ?? 20
+    this.enableComposition = options.enableComposition === true
     this.previewOptions = options.preview || {}
     this.view = options.view === 'visual' ? 'visual' : 'text'
     this.renderNodeEditor = this.renderNodeEditor.bind(this)
@@ -187,6 +189,7 @@ class SchemaBuilder extends EventEmitter {
       depth: 0,
       maxDepth: this.maxDepth,
       path: '#',
+      enableComposition: this.enableComposition,
       onChange: () => this.notifyChange(false),
       onStructuralChange: () => this.notifyChange(true),
       expanded: this.expandedProps,
@@ -231,6 +234,7 @@ class SchemaBuilder extends EventEmitter {
       depth,
       maxDepth: this.maxDepth,
       path,
+      enableComposition: this.enableComposition,
       onChange: () => this.notifyChange(false),
       onStructuralChange: () => this.notifyChange(true),
       expanded: this.expandedProps,

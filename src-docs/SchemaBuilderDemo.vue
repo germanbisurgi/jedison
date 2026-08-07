@@ -21,6 +21,14 @@
           </select>
         </div>
       </div>
+      <div class="col-md-4">
+        <div class="form-group mb-0">
+          <div class="form-check mt-2">
+            <input type="checkbox" class="form-check-input" id="builder-composition" v-model="enableComposition" @change="initBuilder()">
+            <label class="form-check-label" for="builder-composition"><code>enableComposition</code></label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="btn-group mb-3">
@@ -79,6 +87,7 @@ export default {
       builder: null,
       view: 'visual',
       theme: defaultTheme(),
+      enableComposition: false,
       presets: {
         Contact: {
           title: 'Contact',
@@ -99,7 +108,7 @@ export default {
           properties: {
             sku: { type: 'string', pattern: '^[A-Z]{3}-[0-9]{4}$' },
             name: { type: 'string' },
-            price: { type: 'number', exclusiveMinimum: 0 },
+            price: { type: 'number', exclusiveMinimum: true },
             category: {
               type: 'string',
               enum: ['books', 'electronics', 'clothing', 'toys']
@@ -172,6 +181,7 @@ export default {
       this.builder = new SchemaBuilder({
         container: this.$refs.container,
         view: this.view,
+        enableComposition: this.enableComposition,
         schema: this.presets.Contact,
         theme: this.getTheme()
       })

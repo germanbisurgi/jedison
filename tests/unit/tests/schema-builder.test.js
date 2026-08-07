@@ -539,7 +539,7 @@ describe('SchemaBuilder — layout zones', () => {
   })
 
   it('keeps the top-level sections in Schema definition / Body / Composition order', () => {
-    new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: validSchema() })
     const titles = Array.from(container.querySelectorAll('.jedi-sb-node-editor > .jedi-sb-section')).map((s) => s.children[0].textContent)
     expect(titles).toEqual(['Schema definition', 'Body', 'Composition'])
   })
@@ -550,7 +550,7 @@ describe('SchemaBuilder — composition visual editing', () => {
   const addButtons = () => Array.from(container.querySelectorAll('.jedi-sb-composition-add .jedi-sb-btn')).map((b) => b.textContent)
 
   it('renders oneOf entries as nested node editors', () => {
-    new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
     const arrayEl = container.querySelector('.jedi-sb-composition-array')
     expect(arrayEl).toBeTruthy()
     const entries = arrayEl.querySelectorAll('.jedi-sb-composition-entry')
@@ -564,13 +564,13 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('adds an entry to a schema-array composition', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }] } })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { oneOf: [{ type: 'string' }] } })
     findBtn(container.querySelector('.jedi-sb-composition-array'), '+ Add oneOf entry').click()
     expect(builder.getSchema().oneOf).toEqual([{ type: 'string' }, {}])
   })
 
   it('removes an entry from a schema-array composition', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
     const removeEntryBtns = Array.from(container.querySelectorAll('.jedi-sb-composition-entry .jedi-sb-btn')).filter((b) => b.textContent === '× Remove entry')
     expect(removeEntryBtns).toHaveLength(2)
     removeEntryBtns[1].click()
@@ -578,13 +578,13 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('removes the whole composition keyword', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }] } })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { oneOf: [{ type: 'string' }] } })
     findBtn(container.querySelector('.jedi-sb-composition-array'), '× Remove oneOf').click()
     expect(builder.getSchema().oneOf).toBeUndefined()
   })
 
   it('renders not/if/then/else as single nested node editors', () => {
-    new SchemaBuilder({ container, view: 'visual', schema: { not: { type: 'string' }, if: { type: 'string' }, then: {}, else: {} } })
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { not: { type: 'string' }, if: { type: 'string' }, then: {}, else: {} } })
     const singles = container.querySelectorAll('.jedi-sb-composition-single')
     expect(singles).toHaveLength(4)
     singles.forEach((el) => {
@@ -594,7 +594,7 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('renders boolean subschemas as checkboxes', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: { not: false, oneOf: [true] } })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { not: false, oneOf: [true] } })
     const single = container.querySelector('.jedi-sb-composition-single')
     expect(single.textContent).toContain('(boolean schema)')
 
@@ -607,7 +607,7 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('hides then/else add buttons until if is added', () => {
-    new SchemaBuilder({ container, view: 'visual', schema: {} })
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: {} })
     const buttons = addButtons()
     expect(buttons).toContain('+ oneOf')
     expect(buttons).toContain('+ not')
@@ -617,14 +617,14 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('offers then/else add buttons once if is present', () => {
-    new SchemaBuilder({ container, view: 'visual', schema: { if: {} } })
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: { if: {} } })
     const buttons = addButtons()
     expect(buttons).toContain('+ then')
     expect(buttons).toContain('+ else')
   })
 
   it('adds oneOf with an [{}] default', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: {} })
     const root = container.querySelector('.jedi-sb-node-editor')
     const compSection = Array.from(root.children).find((el) => el.classList.contains('jedi-sb-section') && el.children[0].textContent === 'Composition')
     findBtn(compSection, '+ oneOf').click()
@@ -632,7 +632,7 @@ describe('SchemaBuilder — composition visual editing', () => {
   })
 
   it('adds not with an {} default', () => {
-    const builder = new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const builder = new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: {} })
     const root = container.querySelector('.jedi-sb-node-editor')
     const compSection = Array.from(root.children).find((el) => el.classList.contains('jedi-sb-section') && el.children[0].textContent === 'Composition')
     findBtn(compSection, '+ not').click()
@@ -644,5 +644,30 @@ describe('SchemaBuilder — composition visual editing', () => {
     const select = container.querySelector('#sb-type')
     const options = Array.from(select.options).map((o) => o.value)
     expect(options).toEqual(['', 'string', 'number', 'integer', 'boolean', 'null', 'object', 'array'])
+  })
+})
+
+describe('SchemaBuilder — enableComposition flag', () => {
+  const compositionSection = () => Array.from(container.querySelectorAll('.jedi-sb-section')).find((s) => s.querySelector('.jedi-sb-section-title')?.textContent === 'Composition')
+
+  it('hides the Composition section by default', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    expect(compositionSection()).toBeUndefined()
+    expect(container.querySelector('.jedi-sb-composition-array')).toBeNull()
+    expect(container.querySelector('.jedi-sb-composition-single')).toBeNull()
+    expect(container.querySelector('.jedi-sb-composition-add')).toBeNull()
+  })
+
+  it('keeps existing composition keywords in the schema when hidden', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }] } })
+    expect(compositionSection()).toBeUndefined()
+    expect(builder.getSchema().oneOf).toEqual([{ type: 'string' }])
+    expect(container.querySelector('.jedi-sb-composition-array')).toBeNull()
+  })
+
+  it('renders the Composition section when enabled', () => {
+    new SchemaBuilder({ container, view: 'visual', enableComposition: true, schema: validSchema() })
+    expect(compositionSection()).toBeTruthy()
+    expect(container.querySelector('.jedi-sb-composition-add')).toBeTruthy()
   })
 })
