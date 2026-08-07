@@ -67,6 +67,14 @@ class PropertiesEditor {
       list.appendChild(this.renderProperty(name, this.properties[name]))
     })
 
+    const container = createElement('div', { class: 'jedi-sb-properties-block' })
+    container.appendChild(this.renderAddPropertySection())
+    container.appendChild(this.renderRequired())
+    container.appendChild(list)
+    return container
+  }
+
+  renderAddPropertySection () {
     const addInput = this.theme.getBuilderInput({ type: 'text', placeholder: 'property name' })
     const addBtn = btn(this.theme, '+ Add property', () => {
       this.openTypeChooser(addInput)
@@ -77,12 +85,7 @@ class PropertiesEditor {
 
     const addRow = row(addInput, addBtn)
     this.addRow = addRow
-    list.appendChild(addRow)
-
-    const container = createElement('div', { class: 'jedi-sb-properties-block' })
-    container.appendChild(this.renderRequired())
-    container.appendChild(list)
-    return container
+    return section(this.theme, 'Add property', addRow)
   }
 
   renderRequired () {

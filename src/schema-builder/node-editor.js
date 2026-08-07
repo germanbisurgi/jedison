@@ -1,5 +1,5 @@
 import { isArray, isObject } from '../helpers/utils.js'
-import { TYPES, TYPE_LABELS, KEYWORD_LABELS, getConstraintsForType, getValueKeywords, getCompositionKeywords, getKeywordKind } from './schema-keywords.js'
+import { TYPES, TYPE_LABELS, KEYWORD_LABELS, getConstraintsForType, getValueKeywords, getCompositionKeywords, getCompositionKind, getKeywordKind } from './schema-keywords.js'
 import PropertiesEditor from './properties-editor.js'
 import { createElement, btn, fieldRow, row, section } from './dom.js'
 
@@ -10,6 +10,7 @@ function defaultValue (key) {
     case 'oneOf':
     case 'anyOf':
     case 'allOf':
+      return [{}]
     case 'prefixItems':
       return [{ type: 'string' }]
     case 'default':
@@ -76,33 +77,50 @@ class NodeEditor {
 
     const container = createElement('div', { class: 'jedi-sb-node-editor' })
 
-    container.appendChild(section(this.theme, 'Identity', this.renderIdentity()))
-    container.appendChild(section(this.theme, 'Type', this.renderType()))
-    container.appendChild(this.renderValues())
+    container.appendChild(section(this.theme, 'Schema definition', this.renderDefinition()))
 
-    const type = this.type
-    if (type) {
-      const constraints = getConstraintsForType(type)
-      if (constraints.length > 0 || this.has('additionalProperties')) {
-        container.appendChild(section(this.theme, 'Constraints', this.renderConstraints(constraints)))
-      }
-
-      if (type === 'array') {
-        container.appendChild(section(this.theme, 'Array items', this.renderItems()))
-      }
-
-      if (type === 'object') {
-        container.appendChild(this.renderProperties())
-      }
-    }
-
-    if (type === 'object' || isObject(this.schema.patternProperties)) {
-      container.appendChild(this.renderPatternProperties())
+    const body = this.renderBody()
+    if (body) {
+      container.appendChild(section(this.theme, 'Body', body))
     }
 
     container.appendChild(this.renderComposition())
 
     return container
+  }
+
+  renderDefinition () {
+    const children = [section(this.theme, 'Identity', this.renderIdentity()), section(this.theme, 'Type', this.renderType()), this.renderValues()]
+
+    const type = this.type
+    if (type) {
+      const constraints = getConstraintsForType(type)
+      if (constraints.length > 0 || this.has('additionalProperties')) {
+        children.push(section(this.theme, 'Constraints', this.renderConstraints(constraints)))
+      }
+    }
+
+    return createElement('div', {}, children)
+  }
+
+  renderBody () {
+    const type = this.type
+    const children = []
+
+    if (type === 'array') {
+      children.push(section(this.theme, 'Array items', this.renderItems()))
+    }
+
+    if (type === 'object' || isObject(this.schema.patternProperties)) {
+      children.push(this.renderProperties())
+      children.push(this.renderPatternProperties())
+    }
+
+    if (children.length === 0) {
+      return null
+    }
+
+    return createElement('div', {}, children)
   }
 
   renderIdentity () {
@@ -293,18 +311,26 @@ class NodeEditor {
   renderComposition () {
     const keywords = getCompositionKeywords()
     const existing = keywords.filter((key) => this.has(key))
-    const missing = keywords.filter((key) => !this.has(key))
+    const missing = keywords.filter((key) => {
+      if (this.has(key)) return false
+      if (key === 'then' || key === 'else') return this.has('if')
+      return true
+    })
     const rows = []
 
     existing.forEach((key) => {
-      rows.push(this.renderKeywordField(key))
+      const kind = getCompositionKind(key)
+      if (kind === 'schema-array') {
+        rows.push(this.renderSchemaArrayKeyword(key))
+      } else if (kind === 'single-schema') {
+        rows.push(this.renderSingleSchemaKeyword(key))
+      } else {
+        rows.push(this.renderKeywordField(key))
+      }
     })
 
     if (missing.length > 0) {
-      rows.push(this.renderAddSelect(missing, (key) => {
-        this.schema[key] = defaultValue(key)
-        this.onStructuralChange()
-      }, 'Add composition…'))
+      rows.push(this.renderCompositionAddButtons(missing))
     }
 
     if (rows.length === 0) {
@@ -312,6 +338,101 @@ class NodeEditor {
     }
 
     return section(this.theme, 'Composition', createElement('div', {}, rows))
+  }
+
+  renderCompositionAddButtons (missing) {
+    const buttons = missing.map((key) => btn(this.theme, '+ ' + KEYWORD_LABELS[key], () => {
+      this.schema[key] = defaultValue(key)
+      this.onStructuralChange()
+    }, { variant: 'secondary' }))
+    return createElement('div', {
+      class: 'jedi-sb-composition-add',
+      style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }
+    }, buttons)
+  }
+
+  renderSingleSchemaKeyword (key) {
+    const schema = this.schema[key]
+    const header = createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
+      createElement('strong', {}, [KEYWORD_LABELS[key]]),
+      createElement('div', { style: { flex: '1 1 auto' } }),
+      btn(this.theme, '×', () => {
+        delete this.schema[key]
+        this.onStructuralChange()
+      }, { variant: 'danger' })
+    ])
+
+    let body
+    if (schema === true || schema === false) {
+      body = this.renderBooleanSchema(schema, (value) => {
+        this.schema[key] = value
+        this.onChange()
+      })
+    } else if (isObject(schema)) {
+      body = this.renderNodeEditor(schema, `${this.path}.${key}`, this.depth + 1)
+    } else {
+      body = this.renderJsonField(key, schema)
+    }
+
+    return createElement('div', { class: 'jedi-sb-composition-single' }, [header, body])
+  }
+
+  renderSchemaArrayKeyword (key) {
+    const arr = isArray(this.schema[key]) ? this.schema[key] : []
+    const header = createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' } }, [
+      createElement('strong', {}, [KEYWORD_LABELS[key]]),
+      createElement('div', { style: { flex: '1 1 auto' } }),
+      btn(this.theme, `× Remove ${key}`, () => {
+        delete this.schema[key]
+        this.onStructuralChange()
+      }, { variant: 'danger' })
+    ])
+
+    const entries = createElement('div', {})
+    arr.forEach((subschema, index) => {
+      const entry = createElement('div', {
+        class: 'jedi-sb-composition-entry',
+        style: { paddingLeft: '10px', borderLeft: '2px solid #dee2e6', marginBottom: '8px' }
+      })
+      entry.appendChild(createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
+        createElement('span', { style: { fontWeight: '600' } }, [`[${index}]`]),
+        createElement('div', { style: { flex: '1 1 auto' } }),
+        btn(this.theme, '× Remove entry', () => {
+          arr.splice(index, 1)
+          this.onStructuralChange()
+        }, { variant: 'danger' })
+      ]))
+
+      if (subschema === true || subschema === false) {
+        entry.appendChild(this.renderBooleanSchema(subschema, (value) => {
+          arr[index] = value
+          this.schema[key] = arr
+          this.onChange()
+        }))
+      } else if (isObject(subschema)) {
+        entry.appendChild(this.renderNodeEditor(subschema, `${this.path}.${key}[${index}]`, this.depth + 1))
+      } else {
+        entry.appendChild(this.renderJsonField(key, subschema))
+      }
+
+      entries.appendChild(entry)
+    })
+
+    const add = btn(this.theme, `+ Add ${key} entry`, () => {
+      arr.push({})
+      this.schema[key] = arr
+      this.onStructuralChange()
+    }, { variant: 'primary' })
+
+    return createElement('div', { class: 'jedi-sb-composition-array' }, [header, entries, add])
+  }
+
+  renderBooleanSchema (value, writeback) {
+    const checkbox = this.theme.getBuilderCheckbox({ checked: value === true })
+    checkbox.addEventListener('change', () => {
+      writeback(checkbox.checked)
+    })
+    return row(checkbox, createElement('span', {}, ['(boolean schema)']))
   }
 
   renderKeywordField (key) {

@@ -6,11 +6,11 @@ export const DRAFTS = [
   { value: 'https://json-schema.org/draft/2020-12/schema', label: '2020-12' }
 ]
 
-export const TYPES = ['string', 'number', 'integer', 'boolean', 'object', 'array', 'null']
-
 export const SCALAR_TYPES = ['string', 'number', 'integer', 'boolean', 'null']
 
 export const STRUCTURED_TYPES = ['object', 'array']
+
+export const TYPES = [...SCALAR_TYPES, ...STRUCTURED_TYPES]
 
 export function isStructuredType (type) {
   return STRUCTURED_TYPES.includes(type)
@@ -96,6 +96,12 @@ export function getCompositionKeywords () {
   return COMPOSITION_KEYWORDS
 }
 
+export function getCompositionKind (key) {
+  if (key === 'oneOf' || key === 'anyOf' || key === 'allOf') return 'schema-array'
+  if (key === 'not' || key === 'if' || key === 'then' || key === 'else') return 'single-schema'
+  return null
+}
+
 export function getArrayKeywords () {
   return ARRAY_KEYWORDS
 }
@@ -156,6 +162,7 @@ export default {
   getConstraintsForType,
   getValueKeywords,
   getCompositionKeywords,
+  getCompositionKind,
   getArrayKeywords,
   getKeywordKind
 }

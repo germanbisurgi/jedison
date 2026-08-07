@@ -515,3 +515,134 @@ describe('SchemaBuilder — validation additions', () => {
     expect(builder.getErrors()[0].message).toMatch(/non-empty/)
   })
 })
+
+describe('SchemaBuilder — layout zones', () => {
+  const findSection = (title) => Array.from(container.querySelectorAll('.jedi-sb-section')).find((s) => s.querySelector('.jedi-sb-section-title')?.textContent === title)
+
+  it('groups the schema definition at the top', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const definition = findSection('Schema definition')
+    expect(definition).toBeTruthy()
+    const titles = Array.from(definition.querySelectorAll('.jedi-sb-section-title')).map((t) => t.textContent)
+    expect(titles).toEqual(expect.arrayContaining(['Identity', 'Type', 'Constraints']))
+    expect(definition.querySelector('.jedi-sb-properties-block')).toBeNull()
+  })
+
+  it('renders the Body zone with the add-property section at the top', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const body = findSection('Body')
+    expect(body).toBeTruthy()
+    const sections = Array.from(body.querySelectorAll('.jedi-sb-section'))
+    expect(sections[0].querySelector('.jedi-sb-section-title').textContent).toBe('Add property')
+    expect(body.querySelector('.jedi-sb-property')).toBeTruthy()
+    expect(builder.getSchema().properties).toEqual(validSchema().properties)
+  })
+
+  it('keeps the top-level sections in Schema definition / Body / Composition order', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const titles = Array.from(container.querySelectorAll('.jedi-sb-node-editor > .jedi-sb-section')).map((s) => s.children[0].textContent)
+    expect(titles).toEqual(['Schema definition', 'Body', 'Composition'])
+  })
+})
+
+describe('SchemaBuilder — composition visual editing', () => {
+  const findBtn = (root, text) => Array.from(root.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === text)
+  const addButtons = () => Array.from(container.querySelectorAll('.jedi-sb-composition-add .jedi-sb-btn')).map((b) => b.textContent)
+
+  it('renders oneOf entries as nested node editors', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
+    const arrayEl = container.querySelector('.jedi-sb-composition-array')
+    expect(arrayEl).toBeTruthy()
+    const entries = arrayEl.querySelectorAll('.jedi-sb-composition-entry')
+    expect(entries).toHaveLength(2)
+    expect(entries[0].textContent).toContain('[0]')
+    expect(entries[1].textContent).toContain('[1]')
+    entries.forEach((entry) => {
+      expect(entry.querySelector('.jedi-sb-node-editor')).toBeTruthy()
+    })
+    expect(arrayEl.querySelector('.jedi-sb-json-field')).toBeNull()
+  })
+
+  it('adds an entry to a schema-array composition', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }] } })
+    findBtn(container.querySelector('.jedi-sb-composition-array'), '+ Add oneOf entry').click()
+    expect(builder.getSchema().oneOf).toEqual([{ type: 'string' }, {}])
+  })
+
+  it('removes an entry from a schema-array composition', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }, { type: 'number' }] } })
+    const removeEntryBtns = Array.from(container.querySelectorAll('.jedi-sb-composition-entry .jedi-sb-btn')).filter((b) => b.textContent === '× Remove entry')
+    expect(removeEntryBtns).toHaveLength(2)
+    removeEntryBtns[1].click()
+    expect(builder.getSchema().oneOf).toEqual([{ type: 'string' }])
+  })
+
+  it('removes the whole composition keyword', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { oneOf: [{ type: 'string' }] } })
+    findBtn(container.querySelector('.jedi-sb-composition-array'), '× Remove oneOf').click()
+    expect(builder.getSchema().oneOf).toBeUndefined()
+  })
+
+  it('renders not/if/then/else as single nested node editors', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: { not: { type: 'string' }, if: { type: 'string' }, then: {}, else: {} } })
+    const singles = container.querySelectorAll('.jedi-sb-composition-single')
+    expect(singles).toHaveLength(4)
+    singles.forEach((el) => {
+      expect(el.querySelector('.jedi-sb-node-editor')).toBeTruthy()
+    })
+    expect(container.querySelector('.jedi-sb-composition-single .jedi-sb-json-field')).toBeNull()
+  })
+
+  it('renders boolean subschemas as checkboxes', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { not: false, oneOf: [true] } })
+    const single = container.querySelector('.jedi-sb-composition-single')
+    expect(single.textContent).toContain('(boolean schema)')
+
+    const entry = container.querySelector('.jedi-sb-composition-entry')
+    expect(entry.textContent).toContain('(boolean schema)')
+    const checkbox = entry.querySelector('input[type="checkbox"]')
+    expect(checkbox.checked).toBe(true)
+    checkbox.click()
+    expect(builder.getSchema().oneOf).toEqual([false])
+  })
+
+  it('hides then/else add buttons until if is added', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const buttons = addButtons()
+    expect(buttons).toContain('+ oneOf')
+    expect(buttons).toContain('+ not')
+    expect(buttons).toContain('+ if')
+    expect(buttons).not.toContain('+ then')
+    expect(buttons).not.toContain('+ else')
+  })
+
+  it('offers then/else add buttons once if is present', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: { if: {} } })
+    const buttons = addButtons()
+    expect(buttons).toContain('+ then')
+    expect(buttons).toContain('+ else')
+  })
+
+  it('adds oneOf with an [{}] default', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const root = container.querySelector('.jedi-sb-node-editor')
+    const compSection = Array.from(root.children).find((el) => el.classList.contains('jedi-sb-section') && el.children[0].textContent === 'Composition')
+    findBtn(compSection, '+ oneOf').click()
+    expect(builder.getSchema().oneOf).toEqual([{}])
+  })
+
+  it('adds not with an {} default', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const root = container.querySelector('.jedi-sb-node-editor')
+    const compSection = Array.from(root.children).find((el) => el.classList.contains('jedi-sb-section') && el.children[0].textContent === 'Composition')
+    findBtn(compSection, '+ not').click()
+    expect(builder.getSchema().not).toEqual({})
+  })
+
+  it('offers all seven types in the type select', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: {} })
+    const select = container.querySelector('#sb-type')
+    const options = Array.from(select.options).map((o) => o.value)
+    expect(options).toEqual(['', 'string', 'number', 'integer', 'boolean', 'null', 'object', 'array'])
+  })
+})
