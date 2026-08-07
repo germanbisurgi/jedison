@@ -2396,6 +2396,268 @@ class Theme {
     return tabList
   }
 
+  /**
+   * Schema builder: a button for the schema-builder widget chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `btn`).
+   * @param {object} config
+   * @param {string} [config.content] - Button label
+   * @param {string} [config.variant] - 'secondary' | 'primary' | 'danger'
+   * @param {Function} [config.onClick]
+   * @param {string} [config.className] - Extra hook classes to add
+   * @return {HTMLButtonElement}
+   */
+  getBuilderButton (config = {}) {
+    const button = document.createElement('button')
+    button.classList.add('jedi-sb-btn')
+    button.setAttribute('type', 'button')
+    button.textContent = config.content ?? ''
+
+    if (config.id) {
+      button.setAttribute('id', config.id)
+    }
+
+    if (config.className) {
+      config.className.split(' ').filter(Boolean).forEach((cls) => button.classList.add(cls))
+    }
+
+    if (config.onClick) {
+      button.addEventListener('click', config.onClick)
+    }
+
+    return button
+  }
+
+  /**
+   * Schema builder: a text/date/number input for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `form-control`).
+   * @return {HTMLInputElement}
+   */
+  getBuilderInput (config = {}) {
+    const input = document.createElement('input')
+    input.classList.add('jedi-sb-input')
+    input.style.width = '100%'
+
+    if (config.type) {
+      input.setAttribute('type', config.type)
+    }
+
+    if (config.value !== undefined && config.value !== null) {
+      input.setAttribute('value', config.value)
+    }
+
+    if (config.placeholder) {
+      input.setAttribute('placeholder', config.placeholder)
+    }
+
+    if (config.min !== undefined) {
+      input.setAttribute('min', config.min)
+    }
+
+    if (config.step !== undefined) {
+      input.setAttribute('step', config.step)
+    }
+
+    if (config.className) {
+      config.className.split(' ').filter(Boolean).forEach((cls) => input.classList.add(cls))
+    }
+
+    if (config.style) {
+      Object.assign(input.style, config.style)
+    }
+
+    return input
+  }
+
+  /**
+   * Schema builder: a textarea for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `form-control`).
+   * @return {HTMLTextAreaElement}
+   */
+  getBuilderTextarea (config = {}) {
+    const input = document.createElement('textarea')
+    input.classList.add('jedi-sb-input')
+    input.style.width = '100%'
+
+    if (config.rows) {
+      input.setAttribute('rows', config.rows)
+    }
+
+    if (config.spellcheck !== undefined) {
+      input.setAttribute('spellcheck', config.spellcheck)
+    }
+
+    if (config.placeholder) {
+      input.setAttribute('placeholder', config.placeholder)
+    }
+
+    if (config.readOnly) {
+      input.setAttribute('readonly', '')
+    }
+
+    input.textContent = config.value ?? ''
+
+    if (config.className) {
+      config.className.split(' ').filter(Boolean).forEach((cls) => input.classList.add(cls))
+    }
+
+    if (config.style) {
+      Object.assign(input.style, config.style)
+    }
+
+    return input
+  }
+
+  /**
+   * Schema builder: a select for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `form-select`).
+   * @param {object} config
+   * @param {Array<{value: string, title: string, selected?: boolean}>} [config.options]
+   * @param {string} [config.placeholder] - Optional first option with an empty value
+   * @return {HTMLSelectElement}
+   */
+  getBuilderSelect (config = {}) {
+    const input = document.createElement('select')
+    input.classList.add('jedi-sb-select')
+
+    config.options?.forEach((option) => {
+      const optionEl = document.createElement('option')
+      optionEl.setAttribute('value', option.value)
+      if (option.selected) {
+        optionEl.setAttribute('selected', '')
+      }
+      optionEl.textContent = option.title ?? option.value
+      input.appendChild(optionEl)
+    })
+
+    if (config.placeholder) {
+      const optionEl = document.createElement('option')
+      optionEl.setAttribute('value', '')
+      optionEl.setAttribute('selected', '')
+      optionEl.textContent = config.placeholder
+      input.appendChild(optionEl)
+    }
+
+    if (config.className) {
+      config.className.split(' ').filter(Boolean).forEach((cls) => input.classList.add(cls))
+    }
+
+    if (config.style) {
+      Object.assign(input.style, config.style)
+    }
+
+    return input
+  }
+
+  /**
+   * Schema builder: a checkbox for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `form-check-input`).
+   * @return {HTMLInputElement}
+   */
+  getBuilderCheckbox (config = {}) {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'checkbox')
+    input.classList.add('jedi-sb-checkbox')
+
+    if (config.checked) {
+      input.setAttribute('checked', '')
+    }
+
+    if (config.className) {
+      config.className.split(' ').filter(Boolean).forEach((cls) => input.classList.add(cls))
+    }
+
+    return input
+  }
+
+  /**
+   * Schema builder: a label for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `form-label`).
+   * @return {HTMLLabelElement}
+   */
+  getBuilderLabel (config = {}) {
+    const label = document.createElement('label')
+    label.textContent = config.text ?? ''
+
+    if (config.for) {
+      label.setAttribute('for', config.for)
+    }
+
+    return label
+  }
+
+  /**
+   * Schema builder: status badge shown in the builder toolbar.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `badge`).
+   * @param {object} config
+   * @param {string} config.text - Badge label, e.g. '✓ Valid'
+   * @param {boolean} config.valid - Whether the schema is valid
+   * @return {HTMLSpanElement}
+   */
+  getBuilderStatusBadge (config = {}) {
+    const badge = document.createElement('span')
+    badge.classList.add('jedi-sb-status')
+    badge.textContent = config.text ?? ''
+    badge.style.fontWeight = '600'
+    badge.style.fontSize = '12px'
+    badge.style.marginLeft = '12px'
+    badge.style.color = config.valid ? '#198754' : '#b02a37'
+    return badge
+  }
+
+  /**
+   * Schema builder: alert box listing validation errors.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `alert alert-danger`).
+   * @param {object} config
+   * @param {string} config.title - Heading text
+   * @param {string[]} [config.messages] - Error messages
+   * @return {HTMLDivElement}
+   */
+  getBuilderAlert (config = {}) {
+    const box = document.createElement('div')
+    box.classList.add('jedi-sb-errors')
+    box.style.background = '#f8d7da'
+    box.style.border = '1px solid #f5c2c7'
+    box.style.borderRadius = '4px'
+    box.style.padding = '8px 12px'
+
+    const title = document.createElement('strong')
+    title.textContent = config.title ?? ''
+    box.appendChild(title)
+
+    if (config.messages && config.messages.length > 0) {
+      const list = document.createElement('ul')
+      list.style.fontSize = '12px'
+      list.style.color = '#b02a37'
+      list.style.margin = '0'
+      list.style.paddingLeft = '20px'
+      config.messages.forEach((message) => {
+        const item = document.createElement('li')
+        item.textContent = message
+        list.appendChild(item)
+      })
+      box.appendChild(list)
+    }
+
+    return box
+  }
+
+  /**
+   * Schema builder: section heading for the schema-builder chrome.
+   * Subclasses decorate it with framework classes (e.g. Bootstrap `text-uppercase text-muted`).
+   * @return {HTMLHeadingElement}
+   */
+  getBuilderSectionTitle (config = {}) {
+    const heading = document.createElement('h4')
+    heading.classList.add('jedi-sb-section-title')
+    heading.textContent = config.title ?? ''
+    heading.style.fontSize = '13px'
+    heading.style.fontWeight = '600'
+    heading.style.margin = '14px 0 6px'
+    heading.style.textTransform = 'uppercase'
+    heading.style.color = '#6c757d'
+    return heading
+  }
+
   styleLegendWarning (span) {}
 
   /**

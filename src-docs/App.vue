@@ -4,6 +4,14 @@
       <h1>Playground</h1>
     </header>
 
+    <div class="btn-group mb-3">
+      <button class="btn btn-primary" :class="{ active: mode === 'playground' }" @click="switchMode('playground')">Form Playground</button>
+      <button class="btn btn-primary" :class="{ active: mode === 'builder' }" @click="switchMode('builder')">Schema Builder</button>
+    </div>
+
+    <SchemaBuilderDemo v-if="mode === 'builder'" />
+
+    <template v-else>
     <div class="row">
       <div class="col-xs-12 col-md-12">
         <div class="form-group mb-3">
@@ -204,12 +212,14 @@
         </aside>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
 <script>
 
 import EditorStringCustom from "./js/custom-editor.js"
+import SchemaBuilderDemo from "./SchemaBuilderDemo.vue"
 
 import Jedison from '/src/index.js'
 import all from './json/editors/all.json'
@@ -386,9 +396,13 @@ import {isSet} from "../src/helpers/utils.js"
 
 
 export default {
+  components: {
+    SchemaBuilderDemo
+  },
   data() {
     return {
       errorCount: 0,
+      mode: 'playground',
       examples: {
         'Examples': {
           'examples/character-creator': characterCreator,
@@ -728,6 +742,12 @@ export default {
     this.initEditor()
   },
   methods: {
+    switchMode(mode) {
+      this.mode = mode
+      if (mode === 'playground') {
+        this.initEditor()
+      }
+    },
     getThemeInstance(name) {
       let theme
 

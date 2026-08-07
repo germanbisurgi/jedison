@@ -468,6 +468,77 @@ class ThemeBootstrap4 extends Theme {
     control.container.classList.remove('form-group')
   }
 
+  getBuilderButton (config = {}) {
+    const button = super.getBuilderButton(config)
+    button.classList.add('btn', 'btn-sm')
+
+    switch (config.variant) {
+      case 'primary':
+        button.classList.add('btn-outline-primary')
+        break
+      case 'danger':
+        button.classList.add('btn-outline-danger')
+        break
+      default:
+        button.classList.add('btn-outline-secondary')
+        break
+    }
+
+    return button
+  }
+
+  getBuilderInput (config = {}) {
+    const input = super.getBuilderInput(config)
+    input.classList.add('form-control', 'form-control-sm')
+    return input
+  }
+
+  getBuilderTextarea (config = {}) {
+    const input = super.getBuilderTextarea(config)
+    input.classList.add('form-control', 'form-control-sm')
+    return input
+  }
+
+  getBuilderSelect (config = {}) {
+    const input = super.getBuilderSelect(config)
+    input.classList.add('form-control', 'form-control-sm')
+    return input
+  }
+
+  getBuilderCheckbox (config = {}) {
+    const input = super.getBuilderCheckbox(config)
+    input.classList.add('form-check-input')
+    return input
+  }
+
+  getBuilderStatusBadge (config = {}) {
+    const badge = super.getBuilderStatusBadge(config)
+    badge.style.color = ''
+    badge.style.fontWeight = ''
+    badge.style.fontSize = ''
+    badge.classList.add('badge')
+    badge.classList.add(config.valid ? 'badge-success' : 'badge-danger')
+    return badge
+  }
+
+  getBuilderAlert (config = {}) {
+    const box = super.getBuilderAlert(config)
+    box.classList.add('alert', 'alert-danger')
+    box.style.background = ''
+    box.style.border = ''
+    box.style.borderRadius = ''
+    box.style.padding = ''
+    return box
+  }
+
+  getBuilderSectionTitle (config = {}) {
+    const heading = super.getBuilderSectionTitle(config)
+    heading.classList.add('text-uppercase', 'text-muted')
+    heading.style.textTransform = ''
+    heading.style.color = ''
+    return heading
+  }
+
   getSwitcherSelect (config) {
     const control = super.getSwitcherSelect(config)
     control.input.classList.add('form-control-sm')
