@@ -178,6 +178,10 @@ function validateSchemaNode (schema, draft, path, errors, depth) {
     }
   }
 
+  if ((schema.then !== undefined || schema.else !== undefined) && schema.if === undefined) {
+    pushError(errors, path, '"then"/"else" without "if" has no effect')
+  }
+
   for (const key of ['oneOf', 'anyOf', 'allOf']) {
     if (schema[key] !== undefined) {
       if (!isArray(schema[key]) || schema[key].length === 0) {

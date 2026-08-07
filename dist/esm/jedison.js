@@ -10055,6 +10055,11 @@ const DRAFTS = [
   { value: "https://json-schema.org/draft/2020-12/schema", label: "2020-12" }
 ];
 const TYPES = ["string", "number", "integer", "boolean", "object", "array", "null"];
+const SCALAR_TYPES = ["string", "number", "integer", "boolean", "null"];
+const STRUCTURED_TYPES = ["object", "array"];
+function isStructuredType(type2) {
+  return STRUCTURED_TYPES.includes(type2);
+}
 const TYPE_LABELS = {
   string: "string",
   number: "number",
@@ -10317,6 +10322,9 @@ function validateSchemaNode(schema, draft, path, errors, depth) {
       }
     }
   }
+  if ((schema.then !== void 0 || schema.else !== void 0) && schema.if === void 0) {
+    pushError(errors, path, '"then"/"else" without "if" has no effect');
+  }
   for (const key of ["oneOf", "anyOf", "allOf"]) {
     if (schema[key] !== void 0) {
       if (!isArray(schema[key]) || schema[key].length === 0) {
@@ -10438,12 +10446,14 @@ class PropertiesEditor {
     });
     const addInput = this.theme.getBuilderInput({ type: "text", placeholder: "property name" });
     const addBtn = btn(this.theme, "+ Add property", () => {
-      this.addProperty(addInput);
+      this.openTypeChooser(addInput);
     }, { variant: "primary" });
     addInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") this.addProperty(addInput);
+      if (event.key === "Enter") this.openTypeChooser(addInput);
     });
-    list.appendChild(row(addInput, addBtn));
+    const addRow = row(addInput, addBtn);
+    this.addRow = addRow;
+    list.appendChild(addRow);
     const container = createElement("div", { class: "jedi-sb-properties-block" });
     container.appendChild(this.renderRequired());
     container.appendChild(list);
@@ -10497,23 +10507,92 @@ class PropertiesEditor {
       }
       this.onStructuralChange();
     });
-    btn(this.theme, "Edit", () => {
+    const toggleBtn = btn(this.theme, "Edit", () => {
       this.toggleExpanded(name);
     });
-    btn(this.theme, "×", () => {
-      if (!window.confirm(`Delete property "${name}"?`)) return;
-      delete this.properties[name];
-      this.removeFromRequired(name);
-      this.onStructuralChange();
+    const deleteBtn = btn(this.theme, "×", () => {
+      if (deleteBtn.dataset.armed === "true") {
+        delete this.properties[name];
+        this.removeFromRequired(name);
+        this.onStructuralChange();
+        return;
+      }
+      deleteBtn.dataset.armed = "true";
+      deleteBtn.textContent = "Confirm?";
+      deleteBtn.classList.add("jedi-sb-delete-armed");
+      setTimeout(() => {
+        deleteBtn.dataset.armed = "";
+        deleteBtn.textContent = "×";
+        deleteBtn.classList.remove("jedi-sb-delete-armed");
+      }, 2e3);
     }, { variant: "danger" });
-    const header = row(nameInput, typeSelect);
+    const header = createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" } }, [
+      createElement("div", { style: { flex: "1 1 auto" } }, [nameInput]),
+      typeSelect,
+      toggleBtn,
+      deleteBtn
+    ]);
     const item = createElement("div", { class: "jedi-sb-property", style: { marginBottom: "6px", paddingLeft: "10px", borderLeft: "1px solid #dee2e6" } }, [header]);
     if (this.isExpanded(name) && this.renderNodeEditor) {
       item.appendChild(this.renderNodeEditor(schema, `${this.path}.properties.${name}`, this.depth + 1));
     }
     return item;
   }
-  addProperty(input) {
+  openTypeChooser(addInput) {
+    if (this.chooserEl) return;
+    this.addInput = addInput;
+    this.chooserEl = this.renderTypeChooser();
+    this.addRow.parentNode.insertBefore(this.chooserEl, this.addRow.nextSibling);
+    this.escapeHandler = (event) => {
+      if (event.key === "Escape") this.closeChooser();
+    };
+    document.addEventListener("keydown", this.escapeHandler);
+  }
+  closeChooser() {
+    if (this.escapeHandler) {
+      document.removeEventListener("keydown", this.escapeHandler);
+      this.escapeHandler = null;
+    }
+    if (this.chooserEl && this.chooserEl.parentNode) {
+      this.chooserEl.parentNode.removeChild(this.chooserEl);
+    }
+    this.chooserEl = null;
+  }
+  renderTypeChooser() {
+    const groups = [
+      { title: "Scalar", options: SCALAR_TYPES.map((type2) => ({ value: type2, label: TYPE_LABELS[type2] })) },
+      { title: "Structured", options: STRUCTURED_TYPES.map((type2) => ({ value: type2, label: TYPE_LABELS[type2] })) },
+      { title: "Any type", options: [{ value: "", label: "Any type (no type constraint)" }] }
+    ];
+    const children = [];
+    groups.forEach((group, index2) => {
+      if (index2 > 0) children.push(this.renderTypeSeparator());
+      children.push(this.renderTypeGroup(group));
+    });
+    children.push(createElement("div", { style: { display: "flex", justifyContent: "flex-end", marginTop: "6px" } }, [
+      btn(this.theme, "Cancel", () => this.closeChooser())
+    ]));
+    return createElement("div", { class: "jedi-sb-type-chooser", style: { marginTop: "6px", padding: "8px 10px", border: "1px solid #dee2e6", borderRadius: "4px", background: "#f8f9fa" } }, children);
+  }
+  renderTypeGroup({ title, options }) {
+    const caption = createElement("div", { class: "jedi-sb-type-group-title", style: { fontSize: "12px", color: "#6c757d", marginBottom: "4px" } }, [title]);
+    return createElement("div", { class: "jedi-sb-type-group" }, [caption, ...options.map((option) => this.renderTypeOption(option))]);
+  }
+  renderTypeOption({ value, label }) {
+    const radio = this.theme.getBuilderCheckbox({ className: "jedi-sb-type-option" });
+    radio.type = "radio";
+    radio.name = "jedi-sb-new-property-type";
+    radio.value = value;
+    radio.addEventListener("change", () => {
+      this.closeChooser();
+      this.addProperty(this.addInput, value);
+    });
+    return createElement("label", { class: "jedi-sb-type-option-label", style: { display: "inline-flex", alignItems: "center", gap: "4px", marginRight: "10px", fontSize: "13px", cursor: "pointer" } }, [radio, label]);
+  }
+  renderTypeSeparator() {
+    return createElement("div", { class: "jedi-sb-type-separator", style: { borderTop: "1px solid #dee2e6", margin: "6px 0" } });
+  }
+  addProperty(input, type2) {
     let name = input.value.trim();
     if (!name) name = "property";
     let finalName = name;
@@ -10522,9 +10601,9 @@ class PropertiesEditor {
       finalName = `${name}${counter}`;
       counter++;
     }
-    this.properties[finalName] = { type: "string" };
+    this.properties[finalName] = type2 ? { type: type2 } : {};
     input.value = "";
-    if (this.onSetExpanded) {
+    if (isStructuredType(type2) && this.onSetExpanded) {
       this.onSetExpanded(`${this.path}.${finalName}`, true);
     }
     this.onStructuralChange();
@@ -10555,6 +10634,7 @@ class PropertiesEditor {
 function defaultValue(key) {
   switch (key) {
     case "enum":
+      return [];
     case "oneOf":
     case "anyOf":
     case "allOf":
@@ -10630,6 +10710,9 @@ class NodeEditor {
       if (type2 === "object") {
         container.appendChild(this.renderProperties());
       }
+    }
+    if (type2 === "object" || isObject$1(this.schema.patternProperties)) {
+      container.appendChild(this.renderPatternProperties());
     }
     container.appendChild(this.renderComposition());
     return container;
@@ -10773,6 +10856,25 @@ class NodeEditor {
     });
     return editor.render();
   }
+  renderPatternProperties() {
+    if (this.depth >= this.maxDepth) {
+      return createElement("div", { class: "jedi-sb-max-depth", style: { color: "#b02a37", fontSize: "12px", margin: "8px 0" } }, ["Maximum nesting depth reached."]);
+    }
+    if (!isObject$1(this.schema.patternProperties)) {
+      const add = btn(this.theme, "+ Add patternProperties", () => {
+        this.schema.patternProperties = {};
+        this.onStructuralChange();
+      }, { variant: "primary" });
+      return createElement("div", { class: "jedi-sb-pattern-properties-block" }, [add]);
+    }
+    const textarea = this.renderJsonField("patternProperties", this.schema.patternProperties);
+    const remove = btn(this.theme, "×", () => {
+      delete this.schema.patternProperties;
+      this.onStructuralChange();
+    }, { variant: "danger" });
+    const hint = createElement("div", { class: "jedi-sb-hint", style: { color: "#999", fontSize: "12px" } }, ["Edited as JSON; one subschema per regex key."]);
+    return section(this.theme, "Pattern properties", createElement("div", {}, [row(textarea, remove), hint]));
+  }
   renderComposition() {
     const keywords = getCompositionKeywords();
     const existing = keywords.filter((key) => this.has(key));
@@ -10795,13 +10897,18 @@ class NodeEditor {
   renderKeywordField(key) {
     const kind = getKeywordKind(key, this.draft);
     const id = "sb-field-" + (this.path ? this.path.replace(/[^a-zA-Z0-9]+/g, "-") + "-" : "") + key;
+    const remove = btn(this.theme, "×", () => {
+      delete this.schema[key];
+      this.onStructuralChange();
+    }, { variant: "danger" });
     if (key === "additionalProperties" && isObject$1(this.schema[key])) {
-      const textarea = this.renderJsonField(key, this.schema[key]);
-      const remove2 = btn(this.theme, "×", () => {
-        delete this.schema[key];
+      const input2 = this.renderJsonField(key, this.schema[key]);
+      const asBoolean = btn(this.theme, "as boolean", () => {
+        this.schema[key] = false;
         this.onStructuralChange();
-      }, { variant: "danger" });
-      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: textarea }), remove2);
+      }, { variant: "secondary" });
+      const actions = createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px" } }, [asBoolean, remove]);
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: input2 }), actions);
     }
     if (kind === "boolean") {
       const input2 = this.theme.getBuilderCheckbox({ checked: this.schema[key] === true });
@@ -10809,41 +10916,28 @@ class NodeEditor {
         this.schema[key] = input2.checked;
         this.onChange();
       });
-      const remove2 = btn(this.theme, "×", () => {
-        delete this.schema[key];
-        this.onStructuralChange();
-      }, { variant: "danger" });
-      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: input2 }), remove2);
+      const actions = [remove];
+      if (key === "additionalProperties") {
+        const asSchema = btn(this.theme, "as schema", () => {
+          this.schema[key] = {};
+          this.onStructuralChange();
+        }, { variant: "secondary" });
+        actions.unshift(asSchema);
+      }
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: input2 }), createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px" } }, actions));
     }
     let input;
-    let remove;
     if (kind === "json") {
       input = this.renderJsonField(key, this.schema[key]);
-      remove = btn(this.theme, "×", () => {
-        delete this.schema[key];
-        this.onStructuralChange();
-      }, { variant: "danger" });
     } else if (kind === "textarea") {
       input = this.theme.getBuilderTextarea({ rows: 2, value: this.schema[key] ?? "" });
       input.addEventListener("input", () => this.writeText(key, input));
-      remove = btn(this.theme, "×", () => {
-        delete this.schema[key];
-        this.onStructuralChange();
-      }, { variant: "danger" });
     } else if (kind === "non-negative-integer" || kind === "positive-number" || kind === "number") {
       input = this.theme.getBuilderInput({ type: "number", value: this.schema[key], min: kind === "non-negative-integer" ? "0" : void 0, step: kind === "non-negative-integer" ? "1" : "any" });
       input.addEventListener("change", () => this.writeNumber(key, input));
-      remove = btn(this.theme, "×", () => {
-        delete this.schema[key];
-        this.onStructuralChange();
-      }, { variant: "danger" });
     } else {
       input = this.theme.getBuilderInput({ type: "text", value: this.schema[key] ?? "" });
       input.addEventListener("input", () => this.writeText(key, input));
-      remove = btn(this.theme, "×", () => {
-        delete this.schema[key];
-        this.onStructuralChange();
-      }, { variant: "danger" });
     }
     return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key] || key, input }), remove);
   }
@@ -10853,6 +10947,11 @@ class NodeEditor {
       style: { fontFamily: "monospace", fontSize: "12px" },
       value: JSON.stringify(value, null, 2)
     });
+    const container = createElement("div", { class: "jedi-sb-json-field" });
+    container.appendChild(input);
+    if (hint) {
+      container.appendChild(createElement("div", { class: "jedi-sb-hint", style: { color: "#999", fontSize: "12px" } }, [hint]));
+    }
     let errorEl = null;
     const validate = () => {
       try {
@@ -10863,17 +10962,14 @@ class NodeEditor {
       } catch (error) {
         if (!errorEl) {
           errorEl = createElement("div", { class: "jedi-sb-error", style: { color: "#d9534f", fontSize: "12px" } });
-          input.parentNode.appendChild(errorEl);
+          container.appendChild(errorEl);
         }
         errorEl.textContent = "Invalid JSON: " + error.message;
       }
     };
     input.addEventListener("change", validate);
     input.addEventListener("blur", validate);
-    if (hint) {
-      return createElement("div", {}, [input, createElement("div", { class: "jedi-sb-hint", style: { color: "#999", fontSize: "12px" } }, [hint])]);
-    }
-    return input;
+    return container;
   }
   writeText(key, input) {
     if (input.value === "") {
@@ -10997,6 +11093,7 @@ class SchemaBuilder extends EventEmitter {
     this.maxDepth = options.maxDepth ?? 20;
     this.previewOptions = options.preview || {};
     this.view = options.view === "visual" ? "visual" : "text";
+    this.renderNodeEditor = this.renderNodeEditor.bind(this);
     this.schema = clone(options.schema);
     if (!isObject$1(this.schema)) {
       this.schema = { type: "object", properties: {} };

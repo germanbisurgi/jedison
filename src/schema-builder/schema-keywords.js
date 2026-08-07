@@ -8,6 +8,14 @@ export const DRAFTS = [
 
 export const TYPES = ['string', 'number', 'integer', 'boolean', 'object', 'array', 'null']
 
+export const SCALAR_TYPES = ['string', 'number', 'integer', 'boolean', 'null']
+
+export const STRUCTURED_TYPES = ['object', 'array']
+
+export function isStructuredType (type) {
+  return STRUCTURED_TYPES.includes(type)
+}
+
 export const TYPE_LABELS = {
   string: 'string',
   number: 'number',
@@ -139,9 +147,12 @@ export function getKeywordKind (name, draft) {
 export default {
   DRAFTS,
   TYPES,
+  SCALAR_TYPES,
+  STRUCTURED_TYPES,
   TYPE_LABELS,
   KEYWORD_LABELS,
   isDraft2019Plus,
+  isStructuredType,
   getConstraintsForType,
   getValueKeywords,
   getCompositionKeywords,

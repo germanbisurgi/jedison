@@ -45,6 +45,7 @@ class SchemaBuilder extends EventEmitter {
     this.maxDepth = options.maxDepth ?? 20
     this.previewOptions = options.preview || {}
     this.view = options.view === 'visual' ? 'visual' : 'text'
+    this.renderNodeEditor = this.renderNodeEditor.bind(this)
 
     this.schema = clone(options.schema)
     if (!isObject(this.schema)) {

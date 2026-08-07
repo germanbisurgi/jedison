@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-/* global describe it expect beforeEach afterEach jest */
+/* global describe it expect beforeEach afterEach jest KeyboardEvent */
 const Jedison = require('../../../dist/cjs/jedison.cjs')
 const { SchemaBuilder, Create } = Jedison
 
@@ -295,5 +295,223 @@ describe('SchemaBuilder — theme-decorated chrome', () => {
   it('styles the JSON text editor through the theme', () => {
     new SchemaBuilder({ container, schema: validSchema(), theme: new Jedison.ThemeBootstrap5() })
     expect(container.querySelector('.jedi-sb-json').classList.contains('form-control')).toBe(true)
+  })
+})
+
+describe('SchemaBuilder — add-property type chooser', () => {
+  const addButton = () => Array.from(container.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === '+ Add property')
+  const chooser = () => container.querySelector('.jedi-sb-type-chooser')
+  const radio = (value) => {
+    const el = Array.from(chooser().querySelectorAll('input[type="radio"]')).find((r) => r.value === value)
+    return el
+  }
+
+  const openChooser = (builder, name) => {
+    const input = container.querySelector('.jedi-sb-properties-block input[placeholder="property name"]')
+    input.value = name
+    addButton().click()
+    return input
+  }
+
+  it('reveals the grouped chooser instead of creating a property on click', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'nick')
+    expect(chooser()).toBeTruthy()
+    expect(builder.getSchema().properties.nick).toBeUndefined()
+  })
+
+  it('groups scalar, structured and any-type options with separators', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'nick')
+    const groups = chooser().querySelectorAll('.jedi-sb-type-group')
+    expect(groups).toHaveLength(3)
+    expect(groups[0].textContent).toContain('Scalar')
+    expect(groups[0].textContent).toContain('string')
+    expect(groups[0].textContent).toContain('null')
+    expect(groups[1].textContent).toContain('object')
+    expect(groups[1].textContent).toContain('array')
+    expect(groups[2].textContent).toContain('Any type')
+    expect(chooser().querySelectorAll('.jedi-sb-type-separator').length).toBeGreaterThanOrEqual(2)
+    const radios = Array.from(chooser().querySelectorAll('input[type="radio"]'))
+    expect(radios.length).toBe(8)
+    radios.forEach((r) => expect(r.name).toBe('jedi-sb-new-property-type'))
+  })
+
+  it('Cancel dismisses the chooser without creating a property', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'nick')
+    Array.from(chooser().querySelectorAll('button')).find((b) => b.textContent === 'Cancel').click()
+    expect(chooser()).toBeNull()
+    expect(builder.getSchema().properties.nick).toBeUndefined()
+  })
+
+  it('creates a collapsed scalar property with the chosen type', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'nick')
+    radio('string').click()
+    expect(builder.getSchema().properties.nick).toEqual({ type: 'string' })
+    expect(builder.expandedProps['#.nick']).toBeUndefined()
+    const item = Array.from(container.querySelectorAll('.jedi-sb-property')).find((el) => el.querySelector('.jedi-sb-prop-name').value === 'nick')
+    expect(item.querySelector('.jedi-sb-node-editor')).toBeNull()
+  })
+
+  it('creates an auto-expanded object property', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'address')
+    radio('object').click()
+    expect(builder.getSchema().properties.address).toEqual({ type: 'object' })
+    expect(builder.expandedProps['#.address']).toBe(true)
+    const item = Array.from(container.querySelectorAll('.jedi-sb-property')).find((el) => el.querySelector('.jedi-sb-prop-name').value === 'address')
+    expect(item.querySelector('.jedi-sb-node-editor')).toBeTruthy()
+  })
+
+  it('creates an auto-expanded array property', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'tags')
+    radio('array').click()
+    expect(builder.getSchema().properties.tags).toEqual({ type: 'array' })
+    expect(builder.expandedProps['#.tags']).toBe(true)
+    const item = Array.from(container.querySelectorAll('.jedi-sb-property')).find((el) => el.querySelector('.jedi-sb-prop-name').value === 'tags')
+    expect(item.querySelector('.jedi-sb-node-editor')).toBeTruthy()
+  })
+
+  it('creates an unconstrained property from the Any type option', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'flex')
+    radio('').click()
+    expect(builder.getSchema().properties.flex).toEqual({})
+    expect(builder.expandedProps['#.flex']).toBeUndefined()
+  })
+
+  it('dedupes property names with a numeric suffix', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'name')
+    radio('string').click()
+    expect(Object.keys(builder.getSchema().properties)).toContain('name1')
+  })
+
+  it('opens the chooser from Enter on the name input', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const input = container.querySelector('.jedi-sb-properties-block input[placeholder="property name"]')
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    expect(chooser()).toBeTruthy()
+    expect(builder.getSchema().properties).toEqual(validSchema().properties)
+  })
+
+  it('Escape closes the chooser', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    openChooser(builder, 'nick')
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(chooser()).toBeNull()
+  })
+})
+
+describe('SchemaBuilder — nested visual editing', () => {
+  const nestedSchema = () => ({
+    type: 'object',
+    properties: {
+      address: {
+        type: 'object',
+        properties: {
+          street: { type: 'string' }
+        }
+      }
+    }
+  })
+
+  const expandAddress = (builder) => {
+    builder.expandedProps['#.address'] = true
+    builder.renderEditorPane()
+    return Array.from(container.querySelectorAll('.jedi-sb-property')).find((el) => el.querySelector('.jedi-sb-prop-name')?.value === 'address')
+  }
+
+  it('editing a nested field updates the schema without throwing', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: nestedSchema() })
+    const addressItem = expandAddress(builder)
+
+    const nestedEditor = addressItem.querySelector('.jedi-sb-node-editor')
+    const titleInput = nestedEditor.querySelector('input[type="text"]')
+    expect(titleInput).toBeTruthy()
+    titleInput.value = 'Street line'
+    titleInput.dispatchEvent(new Event('input', { bubbles: true }))
+
+    expect(builder.getSchema().properties.address.title).toBe('Street line')
+    builder.destroy()
+    builder.destroy()
+  })
+
+  it('enforces the max depth guard for nested properties', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: nestedSchema(), maxDepth: 1 })
+    const addressItem = expandAddress(builder)
+    expect(addressItem.textContent).toContain('Maximum nesting depth reached.')
+    builder.destroy()
+  })
+})
+
+describe('SchemaBuilder — keyword controls', () => {
+  it('offers an as-schema toggle for a boolean additionalProperties', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { type: 'object', additionalProperties: false } })
+    const asSchemaBtn = Array.from(container.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === 'as schema')
+    expect(asSchemaBtn).toBeTruthy()
+    asSchemaBtn.click()
+    expect(builder.getSchema().additionalProperties).toEqual({})
+  })
+
+  it('offers an as-boolean toggle for an object additionalProperties', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: { type: 'object', additionalProperties: { type: 'string' } } })
+    const asBooleanBtn = Array.from(container.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === 'as boolean')
+    expect(asBooleanBtn).toBeTruthy()
+    asBooleanBtn.click()
+    expect(builder.getSchema().additionalProperties).toBe(false)
+  })
+
+  it('renders a patternProperties section for object schemas', () => {
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const addBtn = Array.from(container.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === '+ Add patternProperties')
+    expect(addBtn).toBeTruthy()
+    addBtn.click()
+    expect(builder.getSchema().patternProperties).toEqual({})
+    const section = Array.from(container.querySelectorAll('.jedi-sb-section')).find((s) => s.textContent.startsWith('Pattern properties'))
+    expect(section).toBeTruthy()
+    expect(section.querySelector('textarea')).toBeTruthy()
+  })
+
+  it('renders imported patternProperties as JSON', () => {
+    new SchemaBuilder({ container, view: 'visual', schema: { type: 'object', properties: {}, patternProperties: { '^x-': { type: 'string' } } } })
+    const section = Array.from(container.querySelectorAll('.jedi-sb-section')).find((s) => s.textContent.startsWith('Pattern properties'))
+    expect(section).toBeTruthy()
+    expect(JSON.parse(section.querySelector('textarea').value)).toEqual({ '^x-': { type: 'string' } })
+  })
+
+  it('deletes a property only after arming the confirm', () => {
+    jest.useFakeTimers()
+    const builder = new SchemaBuilder({ container, view: 'visual', schema: validSchema() })
+    const ageItem = Array.from(container.querySelectorAll('.jedi-sb-property')).find((el) => el.querySelector('.jedi-sb-prop-name')?.value === 'age')
+    const deleteBtn = Array.from(ageItem.querySelectorAll('.jedi-sb-btn')).find((b) => b.textContent === '×')
+
+    deleteBtn.click()
+    expect(builder.getSchema().properties.age).toBeTruthy()
+    expect(deleteBtn.textContent).toBe('Confirm?')
+
+    deleteBtn.click()
+    expect(builder.getSchema().properties.age).toBeUndefined()
+  })
+})
+
+describe('SchemaBuilder — validation additions', () => {
+  it('flags then/else without if', () => {
+    const builder = new SchemaBuilder({ container, schema: { type: 'object', then: { type: 'string' } } })
+    expect(builder.getErrors()).toEqual([{ path: '#', message: '"then"/"else" without "if" has no effect' }])
+  })
+
+  it('does not flag then/else when if is present', () => {
+    const builder = new SchemaBuilder({ container, schema: { if: { type: 'string' }, then: {}, else: {} } })
+    expect(builder.getErrors()).toEqual([])
+  })
+
+  it('flags an empty enum', () => {
+    const builder = new SchemaBuilder({ container, schema: { type: 'string', enum: [] } })
+    expect(builder.getErrors()).toHaveLength(1)
+    expect(builder.getErrors()[0].message).toMatch(/non-empty/)
   })
 })

@@ -6,6 +6,7 @@ import { createElement, btn, fieldRow, row, section } from './dom.js'
 function defaultValue (key) {
   switch (key) {
     case 'enum':
+      return []
     case 'oneOf':
     case 'anyOf':
     case 'allOf':
@@ -93,6 +94,10 @@ class NodeEditor {
       if (type === 'object') {
         container.appendChild(this.renderProperties())
       }
+    }
+
+    if (type === 'object' || isObject(this.schema.patternProperties)) {
+      container.appendChild(this.renderPatternProperties())
     }
 
     container.appendChild(this.renderComposition())
@@ -263,6 +268,28 @@ class NodeEditor {
     return editor.render()
   }
 
+  renderPatternProperties () {
+    if (this.depth >= this.maxDepth) {
+      return createElement('div', { class: 'jedi-sb-max-depth', style: { color: '#b02a37', fontSize: '12px', margin: '8px 0' } }, ['Maximum nesting depth reached.'])
+    }
+
+    if (!isObject(this.schema.patternProperties)) {
+      const add = btn(this.theme, '+ Add patternProperties', () => {
+        this.schema.patternProperties = {}
+        this.onStructuralChange()
+      }, { variant: 'primary' })
+      return createElement('div', { class: 'jedi-sb-pattern-properties-block' }, [add])
+    }
+
+    const textarea = this.renderJsonField('patternProperties', this.schema.patternProperties)
+    const remove = btn(this.theme, '×', () => {
+      delete this.schema.patternProperties
+      this.onStructuralChange()
+    }, { variant: 'danger' })
+    const hint = createElement('div', { class: 'jedi-sb-hint', style: { color: '#999', fontSize: '12px' } }, ['Edited as JSON; one subschema per regex key.'])
+    return section(this.theme, 'Pattern properties', createElement('div', {}, [row(textarea, remove), hint]))
+  }
+
   renderComposition () {
     const keywords = getCompositionKeywords()
     const existing = keywords.filter((key) => this.has(key))
@@ -291,13 +318,19 @@ class NodeEditor {
     const kind = getKeywordKind(key, this.draft)
     const id = 'sb-field-' + (this.path ? this.path.replace(/[^a-zA-Z0-9]+/g, '-') + '-' : '') + key
 
+    const remove = btn(this.theme, '×', () => {
+      delete this.schema[key]
+      this.onStructuralChange()
+    }, { variant: 'danger' })
+
     if (key === 'additionalProperties' && isObject(this.schema[key])) {
-      const textarea = this.renderJsonField(key, this.schema[key])
-      const remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
+      const input = this.renderJsonField(key, this.schema[key])
+      const asBoolean = btn(this.theme, 'as boolean', () => {
+        this.schema[key] = false
         this.onStructuralChange()
-      }, { variant: 'danger' })
-      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input: textarea }), remove)
+      }, { variant: 'secondary' })
+      const actions = createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [asBoolean, remove])
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input }), actions)
     }
 
     if (kind === 'boolean') {
@@ -306,42 +339,29 @@ class NodeEditor {
         this.schema[key] = input.checked
         this.onChange()
       })
-      const remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
-        this.onStructuralChange()
-      }, { variant: 'danger' })
-      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input }), remove)
+      const actions = [remove]
+      if (key === 'additionalProperties') {
+        const asSchema = btn(this.theme, 'as schema', () => {
+          this.schema[key] = {}
+          this.onStructuralChange()
+        }, { variant: 'secondary' })
+        actions.unshift(asSchema)
+      }
+      return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key], input }), createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } }, actions))
     }
 
     let input
-    let remove
     if (kind === 'json') {
       input = this.renderJsonField(key, this.schema[key])
-      remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
-        this.onStructuralChange()
-      }, { variant: 'danger' })
     } else if (kind === 'textarea') {
       input = this.theme.getBuilderTextarea({ rows: 2, value: this.schema[key] ?? '' })
       input.addEventListener('input', () => this.writeText(key, input))
-      remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
-        this.onStructuralChange()
-      }, { variant: 'danger' })
     } else if (kind === 'non-negative-integer' || kind === 'positive-number' || kind === 'number') {
       input = this.theme.getBuilderInput({ type: 'number', value: this.schema[key], min: kind === 'non-negative-integer' ? '0' : undefined, step: kind === 'non-negative-integer' ? '1' : 'any' })
       input.addEventListener('change', () => this.writeNumber(key, input))
-      remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
-        this.onStructuralChange()
-      }, { variant: 'danger' })
     } else {
       input = this.theme.getBuilderInput({ type: 'text', value: this.schema[key] ?? '' })
       input.addEventListener('input', () => this.writeText(key, input))
-      remove = btn(this.theme, '×', () => {
-        delete this.schema[key]
-        this.onStructuralChange()
-      }, { variant: 'danger' })
     }
 
     return row(fieldRow(this.theme, { id, label: KEYWORD_LABELS[key] || key, input }), remove)
@@ -354,6 +374,13 @@ class NodeEditor {
       value: JSON.stringify(value, null, 2)
     })
 
+    const container = createElement('div', { class: 'jedi-sb-json-field' })
+    container.appendChild(input)
+
+    if (hint) {
+      container.appendChild(createElement('div', { class: 'jedi-sb-hint', style: { color: '#999', fontSize: '12px' } }, [hint]))
+    }
+
     let errorEl = null
 
     const validate = () => {
@@ -365,7 +392,7 @@ class NodeEditor {
       } catch (error) {
         if (!errorEl) {
           errorEl = createElement('div', { class: 'jedi-sb-error', style: { color: '#d9534f', fontSize: '12px' } })
-          input.parentNode.appendChild(errorEl)
+          container.appendChild(errorEl)
         }
         errorEl.textContent = 'Invalid JSON: ' + error.message
       }
@@ -374,10 +401,7 @@ class NodeEditor {
     input.addEventListener('change', validate)
     input.addEventListener('blur', validate)
 
-    if (hint) {
-      return createElement('div', {}, [input, createElement('div', { class: 'jedi-sb-hint', style: { color: '#999', fontSize: '12px' } }, [hint])])
-    }
-    return input
+    return container
   }
 
   writeText (key, input) {
