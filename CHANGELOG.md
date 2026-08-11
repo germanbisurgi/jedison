@@ -1,3 +1,8 @@
+### 1.18.0
+
+- Vertical nav now shrinks to fit its widest label instead of a fixed ~33% column; added `x-navMinWidth`/`x-navMaxWidth`
+- Vertical nav now stacks full-width on narrow containers, via a container query
+
 ### 1.17.0
 
 - Added `applyOverlay` helper: apply an OpenAPI-Overlay-style document (ordered `update`/`remove` actions targeted by a JSONPath subset) to layer presentation directives (`x-format`, `x-hidden`, …) onto a schema without editing the source

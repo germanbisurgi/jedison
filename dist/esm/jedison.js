@@ -4542,7 +4542,7 @@ class EditorObjectGrid extends EditorObject {
 class EditorObjectCategories extends EditorObject {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^categories-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^categories-(horizontal|vertical)$/;
     return getSchemaType(schema) === "object" && regex.test(format2);
   }
   init() {
@@ -4581,11 +4581,9 @@ class EditorObjectCategories extends EditorObject {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -4664,7 +4662,7 @@ class EditorObjectCategories extends EditorObject {
 class EditorObjectNav extends EditorObject {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^nav-(horizontal|vertical)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "object" && hasNavFormat;
   }
@@ -4712,11 +4710,9 @@ class EditorObjectNav extends EditorObject {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     this.navTabContent = this.theme.getTabContent();
     this.navTabList = this.theme.getTabList({ variant });
     row.appendChild(tabListCol);
@@ -5679,7 +5675,7 @@ class EditorArrayChoices extends Editor {
 class EditorArrayNav extends EditorArray {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^nav-(horizontal|vertical)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "array" && hasNavFormat;
   }
@@ -5731,11 +5727,9 @@ class EditorArrayNav extends EditorArray {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -9862,6 +9856,62 @@ class Theme {
       col.classList.add("jedi-col-md-offset-" + offsetMd);
     }
     return col;
+  }
+  /**
+   * Row + two columns for nav-style editors (object-nav, array-nav,
+   * object-categories). Horizontal keeps the fixed full-width split (the
+   * zero-width content col intentionally forces it onto a new flex line
+   * below the full-width tab list) built on the regular getRow()/getCol()
+   * grid. Vertical uses a plain (non-grid) flex row instead: Bootstrap's
+   * `.row > *` rule forces `width: 100%` on grid columns, which would
+   * fight flex-basis:auto's content-based sizing, so the shrink-to-fit nav
+   * column can't share that grid. It hugs its widest pill on wider
+   * containers (constrained by widthOptions.minWidth/maxWidth) and stacks
+   * full-width below the container-query breakpoint in ensureNavStyles().
+   */
+  getNavRow(variant, widthOptions = {}) {
+    if (variant === "horizontal") {
+      const row2 = this.getRow();
+      const tabListCol2 = this.getCol(12, 12, 12, 12);
+      const tabContentCol2 = this.getCol(12, 12, 0, 0);
+      return { row: row2, tabListCol: tabListCol2, tabContentCol: tabContentCol2 };
+    }
+    this.ensureNavStyles();
+    const row = document.createElement("div");
+    row.classList.add("jedi-nav-row");
+    const tabListCol = document.createElement("div");
+    tabListCol.classList.add("jedi-col");
+    tabListCol.classList.add("jedi-nav-list-col");
+    tabListCol.style.setProperty("--jedi-nav-max-width", widthOptions.maxWidth ?? "40%");
+    if (widthOptions.minWidth) tabListCol.style.setProperty("--jedi-nav-min-width", widthOptions.minWidth);
+    const tabContentCol = document.createElement("div");
+    tabContentCol.classList.add("jedi-col");
+    tabContentCol.classList.add("jedi-nav-content-col");
+    return { row, tabListCol, tabContentCol };
+  }
+  /**
+   * Mobile-first: the nav row stacks at 100% width by default; a container
+   * query (not a viewport media query) switches to shrink-to-fit once the
+   * row itself has >= 576px to work with, so a narrow embed (a modal, a
+   * sidebar) gets the same treatment as a narrow viewport regardless of
+   * how wide the page around it is. Injected once, same pattern as
+   * bootstrap5.js's jedi-accordion-button-style, since inline styles can't
+   * express @container.
+   */
+  ensureNavStyles() {
+    if (document.getElementById("jedi-nav-styles")) return;
+    const style = document.createElement("style");
+    style.id = "jedi-nav-styles";
+    style.textContent = `
+      .jedi-nav-row { display: flex; flex-wrap: wrap; gap: 1rem; container-type: inline-size; }
+      .jedi-nav-list-col { flex: 1 1 100%; width: 100%; max-width: 100%; }
+      .jedi-nav-content-col { flex: 1 1 100%; width: 100%; min-width: 0; }
+      @container (min-width: 576px) {
+        .jedi-nav-list-col { flex: 0 1 auto; width: auto; max-width: var(--jedi-nav-max-width, 40%); min-width: var(--jedi-nav-min-width, auto); }
+        .jedi-nav-content-col { flex: 1 1 0%; width: auto; }
+      }
+    `;
+    document.head.appendChild(style);
   }
   /**
    * Clearfix fixes layout issues in some libraries like bootstrap 3
