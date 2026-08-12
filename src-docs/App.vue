@@ -213,6 +213,7 @@ import EditorStringCustom from "./js/custom-editor.js"
 
 import Jedison from '/src/index.js'
 import all from './json/editors/all.json'
+import smoke from './json/editors/smoke.json'
 import array from './json/editors/array.json'
 import arrayButtonsContent from './json/editors/array-buttons-content.json'
 import arrayNoButtons from './json/editors/array-no-buttons.json'
@@ -382,7 +383,6 @@ import titleIconClass from './json/features/title-icon-class.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
 import xButtons from './json/features/x-buttons.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
-import experimentalObjectHorizontal from './json/experimental/object-horizontal.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -408,6 +408,7 @@ export default {
         },
         'Editors': {
           'editors/all': all,
+          'editors/smoke': smoke,
           'editors/array': array,
           'editors/array-buttons-content': arrayButtonsContent,
           'editors/array-no-buttons': arrayNoButtons,
@@ -574,7 +575,6 @@ export default {
         },
         'Experimental': {
           'experimental/object-no-card': experimentalObjectNoCard,
-          'experimental/object-horizontal': experimentalObjectHorizontal,
         },
       },
       example: 'examples/character-creator',
