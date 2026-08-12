@@ -312,6 +312,7 @@ import choices from './json/plugins/array-choices.json'
 import awesomplete from './json/plugins/string-awesomplete.json'
 import emojiButton from './json/plugins/string-emoji-button.json'
 import simplemde from './json/plugins/string-simplemde.json'
+import milkdown from './json/plugins/string-milkdown.json'
 import quill from './json/plugins/string-quill.json'
 import jodit from './json/plugins/string-jodit.json'
 import flatpickr from './json/plugins/string-flatpickr.json'
@@ -472,6 +473,7 @@ export default {
           'plugins/jodit': jodit,
           'plugins/quill': quill,
           'plugins/simplemde': simplemde,
+          'plugins/milkdown': milkdown,
           'plugins/raty': raty,
           'plugins/ace': stringAce,
           'plugins/filepond': filepond,

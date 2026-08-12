@@ -1,3 +1,8 @@
+### 1.19.0
+
+- Added Milkdown editor (`x-format: "milkdown"`), a WYSIWYG markdown editor built on ProseMirror and Remark
+- security updates
+
 ### 1.18.0
 
 - Vertical nav now shrinks to fit its widest label instead of a fixed ~33% column; added `x-navMinWidth`/`x-navMaxWidth`
