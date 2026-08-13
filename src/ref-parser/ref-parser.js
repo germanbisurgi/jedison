@@ -47,7 +47,7 @@ class RefParser {
 
   /**
    * Traverses the given schema recursively and for each schema with $ref
-   * add a new property in the this.refs object with key being the json path to that schema.
+   * add a new property in the this.refs object with key being the JSON Pointer to that schema.
    * If the ref has no value in data will be given a value of null. This value will be later
    * replaced in a future iteration. At that time the data will be available
    * @param schema

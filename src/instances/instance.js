@@ -29,7 +29,7 @@ class Instance extends EventEmitter {
     this.jedison = config.jedison
 
     /**
-     * The schema path of this instance.
+     * The JSON Pointer of this instance (e.g. "#/address/street").
      * @type {string}
      */
     this.path = config.path || this.jedison.rootName
@@ -131,7 +131,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Return the last part of the instance path
+   * Return the last part of the instance JSON Pointer
    */
   getKey () {
     return this.key
@@ -145,7 +145,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Adds a child instance pointer to the instance list
+   * Adds a child instance reference to the instance list
    */
   register () {
     this.jedison.register(this)
@@ -163,7 +163,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Deletes a child instance pointer from the instance list
+   * Deletes a child instance reference from the instance list
    */
   unregister () {
     this.jedison.unregister(this)

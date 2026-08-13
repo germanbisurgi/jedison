@@ -97,13 +97,13 @@ class Jedison extends EventEmitter {
     }, options)
 
     /**
-     * Roots symbol used in paths
+     * Root symbol used in JSON Pointers
      * @type {string}
      */
     this.rootName = '#'
 
     /**
-     * Separator symbol used in paths
+     * Separator symbol used in JSON Pointers
      * @type {string}
      */
     this.pathSeparator = '/'
@@ -121,7 +121,7 @@ class Jedison extends EventEmitter {
     this.root = null
 
     /**
-     * Per-path store for editor view state that must survive a rebuild.
+     * Per-pointer store for editor view state that must survive a rebuild.
      * @type {object}
      */
     this.persistentState = {}
@@ -363,14 +363,14 @@ class Jedison extends EventEmitter {
   }
 
   /**
-   * Adds a child instance pointer to the instances list
+   * Adds a child instance reference to the instances list
    */
   register (instance) {
     this.instances.set(instance.path, instance)
   }
 
   /**
-   * Deletes a child instance pointer from the instances list
+   * Deletes a child instance reference from the instances list
    */
   unregister (instance) {
     this.instances.delete(instance.path)
@@ -498,9 +498,9 @@ class Jedison extends EventEmitter {
     // x-inferType: resolve a multi-type schema's type from another field's
     // current value before the InstanceMultiple decision below, so an inferred
     // field is built directly as its concrete single-type Instance/Editor.
-    // Takes a relative path to the source field (e.g. "type" for a direct
-    // sibling, "../type" for a schema nested one level deeper like an array's
-    // `items`), resolved the same way x-enumSource resolves its source path.
+    // Takes a relative JSON Pointer to the source field (e.g. "type" for a
+    // direct sibling, "../type" for a schema nested one level deeper like an
+    // array's `items`), resolved the same way x-enumSource resolves its source.
     if (this.isEditor) {
       const schemaTypeArray = getSchemaType(config.schema)
       if (isArray(schemaTypeArray)) {
@@ -575,7 +575,7 @@ class Jedison extends EventEmitter {
   }
 
   /**
-   * Returns an instance by path
+   * Returns an instance by JSON Pointer
    * @return {*}
    */
   getInstance (path) {
@@ -596,8 +596,8 @@ class Jedison extends EventEmitter {
   }
 
   /**
-   * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.
-   * @param {string} path - The instance path (e.g. '#/address/street')
+   * Navigates to a specific instance by JSON Pointer, activating any ancestor nav/categories tabs as needed.
+   * @param {string} path - The instance JSON Pointer (e.g. '#/address/street')
    */
   navigateTo (path) {
     if (!this.isEditor) return

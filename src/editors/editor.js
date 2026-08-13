@@ -96,7 +96,7 @@ class Editor {
   }
 
   /**
-   * Gets the json path level by counting how many "/" it has
+   * Gets the JSON Pointer level by counting how many "/" it has
    */
   getLevel () {
     return (this.instance.path.match(/\//g) || []).length

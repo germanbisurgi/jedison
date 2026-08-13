@@ -61,8 +61,8 @@ export function replaceAll (str, find, replace) {
 }
 
 /**
- * Formats a json path to be used as an html attribute value
- * @param {string} path - The json path
+ * Formats a JSON Pointer to be used as an html attribute value
+ * @param {string} path - The JSON Pointer
  * @return {string}
  */
 export function pathToAttribute (path) {
@@ -408,9 +408,11 @@ export const overwriteExistingProperties = (obj1, obj2) => {
 }
 
 /**
- * Get some value by traversing the data using JSON path
+ * Get some value by traversing the data using a dot-separated key path
+ * (e.g. "address.street" or "items.0.name"). Despite the function name, this
+ * is neither JSON Pointer nor JSONPath syntax — just plain dot-notation.
  * @param {object} data - The data source
- * @param {string} path - JSON path
+ * @param {string} path - Dot-separated key path
  * @return {*}
  */
 export function getValueByJSONPath (data, path) {
@@ -480,6 +482,13 @@ export function removeDuplicatesFromArray (arr) {
   return uniqueObjects
 }
 
+/**
+ * Resolves a relative JSON Pointer (e.g. "../type") against a current
+ * instance JSON Pointer (e.g. "#/address/street") into an absolute one.
+ * @param {string} currentPath - The current instance's JSON Pointer
+ * @param {string} sourcePath - An absolute ("#/...") or relative ("../x") pointer
+ * @return {string}
+ */
 export function resolveInstancePath (currentPath, sourcePath) {
   if (sourcePath.startsWith('#')) return sourcePath
   const parts = currentPath.split('/')
