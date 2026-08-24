@@ -22,6 +22,7 @@ import EditorArrayTuple from './editors/array-tuple.js'
 import EditorArrayTable from './editors/array-table.js'
 import EditorArrayTableObject from './editors/array-table-object.js'
 import EditorArrayChoices from './editors/array-choices.js'
+import EditorArrayTomSelect from './editors/array-tom-select.js'
 import EditorArrayNav from './editors/array-nav.js'
 import EditorArray from './editors/array.js'
 import EditorMultiple from './editors/multiple.js'
@@ -84,6 +85,7 @@ class UiResolver {
       EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
+      EditorArrayTomSelect,
       EditorArrayCheckboxes,
       EditorArrayTuple,
       EditorArrayTableObject,

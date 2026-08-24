@@ -1,0 +1,41 @@
+{
+  "title": "Tom Select",
+  "description": "A vanilla JS select box/text input plugin with drag-and-drop reordering of selected items.",
+  "type": "array",
+  "uniqueItems": true,
+  "items": {
+    "type": "string",
+    "enum": [
+      "US",
+      "CA",
+      "GB",
+      "FR",
+      "DE",
+      "IT",
+      "IN",
+      "JP",
+      "BR",
+      "AU"
+    ],
+    "x-enumTitles": [
+      "United States (US)",
+      "Canada (CA)",
+      "United Kingdom (GB)",
+      "France (FR)",
+      "Germany (DE)",
+      "Italy (IT)",
+      "India (IN)",
+      "Japan (JP)",
+      "Brazil (BR)",
+      "Australia (AU)"
+    ]
+  },
+  "default": ["US"],
+  "minItems": 1,
+  "x-format": "tom-select",
+  "x-info": {
+    "variant": "modal",
+    "title": "### Info Button title",
+    "content": "Info button content"
+  }
+}

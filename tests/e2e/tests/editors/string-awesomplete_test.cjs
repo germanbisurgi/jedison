@@ -51,6 +51,16 @@ Scenario('@plugin @string-awesomplete should @setValue', ({I}) => {
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify(value))
 })
 
+Scenario('@plugin @string-awesomplete should update value when text is deleted', ({I}) => {
+  I._click('#root')
+  I.pressKey('End')
+  for (let i = 0; i < valueDefault.length; i++) {
+    I.pressKey('Backspace')
+  }
+  I.pressKey('Tab')
+  I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify(''))
+})
+
 Scenario('@plugin @string-awesomplete should @showValidationErrors', ({ I }) => {
   I.fillField('#editor-value', JSON.stringify(valueWithErrors))
   I._scrollTo('#set-value')

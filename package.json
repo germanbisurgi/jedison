@@ -65,7 +65,7 @@
     "@milkdown/kit": "^7.21.3",
     "@vitejs/plugin-vue": "^5.2.0",
     "bootstrap": "^5.3.0",
-    "codeceptjs": "^3.7.4",
+    "codeceptjs": "^3.7.9",
     "codeceptjs-chai": "^2.3.5",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^14.1.0",

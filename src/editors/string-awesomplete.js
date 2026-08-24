@@ -41,6 +41,11 @@ class EditorStringAwesomplete extends EditorString {
   }
 
   addEventListeners () {
+    const eventType = this.getValidationEventType()
+    this.control.input.addEventListener(eventType, () => {
+      this.instance.setValue(this.control.input.value, true, 'user')
+    })
+
     this.control.input.addEventListener('awesomplete-selectcomplete', () => {
       this.instance.setValue(this.control.input.value, true, 'user')
     })

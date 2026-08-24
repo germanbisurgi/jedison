@@ -1910,7 +1910,7 @@ class Instance extends EventEmitter {
     }
   }
   /**
-   * Return the last part of the instance path
+   * Return the last part of the instance JSON Pointer
    */
   getKey() {
     return this.key;
@@ -1922,7 +1922,7 @@ class Instance extends EventEmitter {
     return this.schema;
   }
   /**
-   * Adds a child instance pointer to the instance list
+   * Adds a child instance reference to the instance list
    */
   register() {
     this.jedison.register(this);
@@ -1936,7 +1936,7 @@ class Instance extends EventEmitter {
     this.children.forEach(registerChildRecursive);
   }
   /**
-   * Deletes a child instance pointer from the instance list
+   * Deletes a child instance reference from the instance list
    */
   unregister() {
     this.jedison.unregister(this);
@@ -2230,7 +2230,7 @@ class Editor {
     this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.getOption("purifyHtml");
   }
   /**
-   * Gets the json path level by counting how many "/" it has
+   * Gets the JSON Pointer level by counting how many "/" it has
    */
   getLevel() {
     return (this.instance.path.match(/\//g) || []).length;
@@ -3883,6 +3883,10 @@ class EditorStringAwesomplete extends EditorString {
     this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
+      this.instance.setValue(this.control.input.value, true, "user");
+    });
     this.control.input.addEventListener("awesomplete-selectcomplete", () => {
       this.instance.setValue(this.control.input.value, true, "user");
     });
@@ -5672,6 +5676,121 @@ class EditorArrayChoices extends Editor {
     super.destroy();
   }
 }
+class EditorArrayTomSelect extends Editor {
+  static resolves(schema) {
+    const hasTomSelectFormat = getSchemaXOption(schema, "format") === "tom-select";
+    const tomSelectInstalled = window.TomSelect;
+    const schemaType = getSchemaType(schema);
+    const schemaItems = getSchemaItems(schema);
+    const schemaItemsType = isSet(schemaItems) && getSchemaType(schemaItems);
+    const isArrayType = isSet(schemaType) && schemaType === "array";
+    const isUniqueItems = getSchemaUniqueItems(schema) === true;
+    const hasTypes = isSet(schemaItems) && isSet(schemaItemsType);
+    const validTypes = ["string", "number", "integer"];
+    const hasValidItemType = isSet(schemaItems) && isSet(schemaItemsType) && (validTypes.includes(schemaItemsType) || isArray(schemaItemsType) && schemaItemsType.some((type2) => validTypes.includes(type2)));
+    return hasTomSelectFormat && tomSelectInstalled && isArrayType && isUniqueItems && hasTypes && hasValidItemType;
+  }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return this.instance.schema.items && this.instance.schema.items.enum || [];
+  }
+  refreshOptions() {
+    if (!this.tomSelectInstance) return;
+    const values = this.getEnumSourceValues();
+    const currentValue = this.instance.getValue();
+    const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
+    const options = values.map((item, index2) => ({
+      value: item,
+      text: itemEnumTitles[index2] || item
+    }));
+    this.tomSelectInstance.clearOptions();
+    this.tomSelectInstance.addOptions(options);
+    this.tomSelectInstance.setValue(isArray(currentValue) ? currentValue : [], true);
+  }
+  build() {
+    this.control = this.theme.getSelectControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values: [],
+      titles: [],
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    this.control.input.setAttribute("multiple", "");
+    try {
+      const value = this.instance.getValue();
+      const itemEnum = this.getEnumSourceValues();
+      const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
+      const tomSelectOptions = getSchemaXOption(this.instance.schema, "tomSelectOptions") ?? {};
+      if (this.tomSelectInstance) {
+        this.tomSelectInstance.destroy();
+      }
+      this.options = itemEnum.map((item, index2) => ({
+        value: item,
+        text: itemEnumTitles[index2] || item
+      }));
+      this.tomSelectInstance = new window.TomSelect(this.control.input, {
+        plugins: ["drag_drop", "remove_button", "caret_position"],
+        options: this.options,
+        items: isArray(value) ? value : [],
+        ...tomSelectOptions
+      });
+    } catch (e) {
+      console.error("Tom Select is not available or not loaded correctly.", e);
+    }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
+  addEventListeners() {
+    this.tomSelectInstance.on("change", (value) => {
+      if (JSON.stringify(value) !== JSON.stringify(this.instance.getValue())) {
+        this.instance.setValue(value, true, "user");
+      }
+    });
+  }
+  refreshDisabledState() {
+    if (this.disabled || this.readOnly) {
+      this.tomSelectInstance.disable();
+    } else {
+      this.tomSelectInstance.enable();
+    }
+  }
+  refreshUI() {
+    super.refreshUI();
+    const value = this.instance.getValue();
+    this.tomSelectInstance.setValue(isArray(value) ? value : [], true);
+  }
+  destroy() {
+    this.tomSelectInstance.destroy();
+    super.destroy();
+  }
+}
 class EditorArrayNav extends EditorArray {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
@@ -6973,6 +7092,7 @@ class UiResolver {
       EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
+      EditorArrayTomSelect,
       EditorArrayCheckboxes,
       EditorArrayTuple,
       EditorArrayTableObject,
@@ -7519,13 +7639,13 @@ class Jedison extends EventEmitter {
     this.hiddenInput.value = JSON.stringify(this.getValue());
   }
   /**
-   * Adds a child instance pointer to the instances list
+   * Adds a child instance reference to the instances list
    */
   register(instance) {
     this.instances.set(instance.path, instance);
   }
   /**
-   * Deletes a child instance pointer from the instances list
+   * Deletes a child instance reference from the instances list
    */
   unregister(instance) {
     this.instances.delete(instance.path);
@@ -7681,7 +7801,7 @@ class Jedison extends EventEmitter {
     this.updateInstancesWatchedData();
   }
   /**
-   * Returns an instance by path
+   * Returns an instance by JSON Pointer
    * @return {*}
    */
   getInstance(path) {
@@ -7700,8 +7820,8 @@ class Jedison extends EventEmitter {
     return this.options[canonical];
   }
   /**
-   * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.
-   * @param {string} path - The instance path (e.g. '#/address/street')
+   * Navigates to a specific instance by JSON Pointer, activating any ancestor nav/categories tabs as needed.
+   * @param {string} path - The instance JSON Pointer (e.g. '#/address/street')
    */
   navigateTo(path) {
     if (!this.isEditor) return;
@@ -7798,7 +7918,9 @@ class Jedison extends EventEmitter {
 class RefParser {
   constructor(options = {}) {
     this.options = Object.assign({
-      detectRecursion: true
+      detectRecursion: true,
+      fetch: typeof fetch === "function" ? fetch.bind(globalThis) : void 0,
+      fetchOptions: {}
     }, options);
     this.refs = {};
     this.data = {};
@@ -7832,7 +7954,7 @@ class RefParser {
   }
   /**
    * Traverses the given schema recursively and for each schema with $ref
-   * add a new property in the this.refs object with key being the json path to that schema.
+   * add a new property in the this.refs object with key being the JSON Pointer to that schema.
    * If the ref has no value in data will be given a value of null. This value will be later
    * replaced in a future iteration. At that time the data will be available
    * @param schema
@@ -7938,13 +8060,15 @@ class RefParser {
     }
   }
   /**
-   * Loads a schema with a synchronous http request
+   * Loads a schema over HTTP. Uses options.fetch (defaults to the global fetch) and
+   * options.fetchOptions, so callers needing auth (e.g. forwarding a session cookie
+   * server-side) can supply headers/credentials, or swap in a custom fetch entirely.
    * @param uri
    * @returns {any}
    */
   async load(uri) {
     try {
-      const response = await fetch(uri);
+      const response = await this.options.fetch(uri, this.options.fetchOptions);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -11996,6 +12120,7 @@ const index = {
   EditorObjectRadios,
   EditorObject,
   EditorArrayChoices,
+  EditorArrayTomSelect,
   EditorArrayNav,
   EditorArray,
   EditorMultiple,

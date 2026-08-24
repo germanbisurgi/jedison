@@ -310,6 +310,7 @@ import messagesArray from './json/validator/messages-array.json'
 import messagesByLanguage from './json/validator/messages-by-language.json'
 import messagesByConstraint from './json/validator/messages-by-constraint.json'
 import choices from './json/plugins/array-choices.json'
+import tomSelect from './json/plugins/array-tom-select.json'
 import awesomplete from './json/plugins/string-awesomplete.json'
 import emojiButton from './json/plugins/string-emoji-button.json'
 import simplemde from './json/plugins/string-simplemde.json'
@@ -463,6 +464,7 @@ export default {
         },
         'Plugins': {
           'plugins/choices': choices,
+          'plugins/tom-select': tomSelect,
           'plugins/awesomplete': awesomplete,
           'plugins/emoji-button': emojiButton,
           'plugins/flatpickr': flatpickr,

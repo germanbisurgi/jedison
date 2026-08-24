@@ -31,6 +31,7 @@ import EditorObjectHorizontal from './editors/object-horizontal.js'
 import EditorObjectRadios from './editors/object-radios.js'
 import EditorObject from './editors/object.js'
 import EditorArrayChoices from './editors/array-choices.js'
+import EditorArrayTomSelect from './editors/array-tom-select.js'
 import EditorArrayNav from './editors/array-nav.js'
 import EditorArray from './editors/array.js'
 import EditorMultiple from './editors/multiple.js'
@@ -67,6 +68,7 @@ export default {
   EditorObjectRadios,
   EditorObject,
   EditorArrayChoices,
+  EditorArrayTomSelect,
   EditorArrayNav,
   EditorArray,
   EditorMultiple,

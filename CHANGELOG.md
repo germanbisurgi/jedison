@@ -1,3 +1,12 @@
+### Unreleased
+
+### 1.20.0
+
+- Added Tom Select editor (`x-format: "tom-select"`)
+- Added RefParser constructor options
+- Fixed awesomplete issue #67
+- Fixed security updates
+
 ### 1.19.0
 
 - Added Milkdown editor (`x-format: "milkdown"`), a WYSIWYG markdown editor built on ProseMirror and Remark
