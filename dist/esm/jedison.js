@@ -2228,6 +2228,8 @@ class Editor {
     this.theme = this.instance.jedison.theme;
     this.markdownEnabled = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
     this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.getOption("purifyHtml");
+    this.markdownCache = /* @__PURE__ */ new Map();
+    this.purifyCache = /* @__PURE__ */ new Map();
   }
   /**
    * Gets the JSON Pointer level by counting how many "/" it has
@@ -2462,7 +2464,13 @@ class Editor {
    */
   purifyContent(content, domPurifyOptions) {
     if (this.instance.jedison.getOption("purifyHtml") && typeof window !== "undefined" && window.DOMPurify) {
-      return window.DOMPurify.sanitize(content, domPurifyOptions);
+      const cacheKey = JSON.stringify([content, domPurifyOptions]);
+      if (this.purifyCache.has(cacheKey)) {
+        return this.purifyCache.get(cacheKey);
+      }
+      const clean = window.DOMPurify.sanitize(content, domPurifyOptions);
+      this.purifyCache.set(cacheKey, clean);
+      return clean;
     } else {
       const tmp = document.createElement("div");
       tmp.innerHTML = content;
@@ -2470,7 +2478,12 @@ class Editor {
     }
   }
   getHtmlFromMarkdown(content) {
-    return window.marked.parse(content);
+    if (this.markdownCache.has(content)) {
+      return this.markdownCache.get(content);
+    }
+    const html = window.marked.parse(content);
+    this.markdownCache.set(content, html);
+    return html;
   }
   getTitle() {
     let titleFromSchema = false;

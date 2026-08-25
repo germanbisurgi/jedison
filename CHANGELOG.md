@@ -1,5 +1,9 @@
 ### Unreleased
 
+### 1.20.1
+
+- Fixed issue #68: titles/descriptions no longer re-parsed through `marked`/`DOMPurify` on every change
+
 ### 1.20.0
 
 - Added Tom Select editor (`x-format: "tom-select"`)
