@@ -98,14 +98,22 @@ class UiResolver {
 
   getClass (schema) {
     for (const editor of this.customEditors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || 'custom editor'}" threw while resolving the schema and will be skipped.`, e)
       }
     }
 
     for (const editor of this.editors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || 'built-in editor'}" threw while resolving the schema and will be skipped.`, e)
       }
     }
 

@@ -1,7 +1,7 @@
 import Schema from './helpers/schema.js'
 import Utils from './helpers/utils.js'
 import SchemaGenerator from './schema-generator/schema-generator.js'
-import Create from './jedison.js'
+import Create, { version } from './jedison.js'
 import RefParser from './ref-parser/ref-parser.js'
 import Theme from './themes/theme.js'
 import ThemeBootstrap3 from './themes/bootstrap3.js'
@@ -80,6 +80,7 @@ export default {
   ThemeBootstrap5,
   RefParser,
   Create,
+  version,
   SchemaGenerator,
   applyOverlay
 }

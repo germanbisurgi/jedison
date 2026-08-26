@@ -26,6 +26,7 @@ import { bootstrapIcons, fontAwesome3, fontAwesome4, fontAwesome5, fontAwesome6,
 import UiResolver from './ui-resolver.js'
 import Translator from './i18n/translator.js'
 import JsonWalker from './json-walker.js'
+import { version } from '../package.json'
 
 /**
  * Represents a Jedison instance.
@@ -71,7 +72,7 @@ class Jedison extends EventEmitter {
       data: undefined,
       assertFormat: false,
       customEditors: [],
-      constraints: [],
+      constraints: {},
       hiddenInputAttributes: {},
       id: '',
       radiosInline: false,
@@ -711,5 +712,13 @@ class Jedison extends EventEmitter {
     })
   }
 }
+
+/**
+ * The current package version, sourced from package.json at build time.
+ * @type {string}
+ */
+Jedison.version = version
+
+export { version }
 
 export default Jedison

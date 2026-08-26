@@ -1721,6 +1721,10 @@ class Validator {
   constructor(config = {}) {
     this.refParser = config.refParser;
     this.constraints = config.constraints ?? {};
+    if (isArray(this.constraints)) {
+      console.warn('Jedison: option "constraints" must be an object keyed by constraint name, not an array. Ignoring the value.');
+      this.constraints = {};
+    }
     this.assertFormat = config.assertFormat ? config.assertFormat : false;
     this.translator = config.translator ? config.translator : false;
     this.subErrors = config.subErrors ?? false;
@@ -1906,6 +1910,10 @@ class Instance extends EventEmitter {
   setUI() {
     if (this.jedison.isEditor) {
       const EditorClass = this.jedison.uiResolver.getClass(this.schema);
+      if (!EditorClass) {
+        console.error(`Jedison: no editor could be resolved for the schema at "${this.path}". The field will not be rendered.`, this.schema);
+        return;
+      }
       this.ui = new EditorClass(this);
     }
   }
@@ -7117,13 +7125,21 @@ class UiResolver {
   }
   getClass(schema) {
     for (const editor of this.customEditors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor;
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor;
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || "custom editor"}" threw while resolving the schema and will be skipped.`, e);
       }
     }
     for (const editor of this.editors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor;
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor;
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || "built-in editor"}" threw while resolving the schema and will be skipped.`, e);
       }
     }
     return null;
@@ -7409,6 +7425,7 @@ class JsonWalker {
     }
   }
 }
+const version = "1.20.1";
 class Jedison extends EventEmitter {
   /**
    * Creates a Jedison instance.
@@ -7449,7 +7466,7 @@ class Jedison extends EventEmitter {
       data: void 0,
       assertFormat: false,
       customEditors: [],
-      constraints: [],
+      constraints: {},
       hiddenInputAttributes: {},
       id: "",
       radiosInline: false,
@@ -7928,6 +7945,7 @@ class Jedison extends EventEmitter {
     });
   }
 }
+Jedison.version = version;
 class RefParser {
   constructor(options = {}) {
     this.options = Object.assign({
@@ -12145,6 +12163,7 @@ const index = {
   ThemeBootstrap5,
   RefParser,
   Create: Jedison,
+  version,
   SchemaGenerator,
   applyOverlay
 };

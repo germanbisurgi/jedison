@@ -1,5 +1,9 @@
 ### Unreleased
 
+### 1.20.2
+
+- Fixed issue #69: exposed a runtime `version`, contained editor-resolution errors, fixed the `constraints` default type mismatch
+
 ### 1.20.1
 
 - Fixed issue #68: titles/descriptions no longer re-parsed through `marked`/`DOMPurify` on every change

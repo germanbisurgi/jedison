@@ -13,6 +13,12 @@ class Validator {
   constructor (config = {}) {
     this.refParser = config.refParser
     this.constraints = config.constraints ?? {}
+
+    if (isArray(this.constraints)) {
+      console.warn('Jedison: option "constraints" must be an object keyed by constraint name, not an array. Ignoring the value.')
+      this.constraints = {}
+    }
+
     this.assertFormat = config.assertFormat ? config.assertFormat : false
     this.translator = config.translator ? config.translator : false
     this.subErrors = config.subErrors ?? false

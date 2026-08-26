@@ -126,6 +126,12 @@ class Instance extends EventEmitter {
   setUI () {
     if (this.jedison.isEditor) {
       const EditorClass = this.jedison.uiResolver.getClass(this.schema)
+
+      if (!EditorClass) {
+        console.error(`Jedison: no editor could be resolved for the schema at "${this.path}". The field will not be rendered.`, this.schema)
+        return
+      }
+
       this.ui = new EditorClass(this)
     }
   }
