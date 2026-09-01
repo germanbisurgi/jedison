@@ -350,6 +350,9 @@ function getSchemaContains(schema) {
 function getSchemaDefault(schema) {
   return clone(schema.default);
 }
+function getSchemaDeprecated(schema) {
+  return isBoolean(schema.deprecated) ? clone(schema.deprecated) : void 0;
+}
 function getSchemaDependentRequired(schema) {
   return isObject$1(schema.dependentRequired) ? clone(schema.dependentRequired) : void 0;
 }
@@ -2168,6 +2171,15 @@ class Instance extends EventEmitter {
     return this.parent ? this.parent.isReadOnly() : false;
   }
   /**
+   * Returns true if this instance's own schema is marked deprecated.
+   * Unlike isReadOnly(), this does not cascade to/from the parent: per the
+   * JSON Schema spec, "deprecated" applies only to the exact instance
+   * location it's declared on.
+   */
+  isDeprecated() {
+    return getSchemaDeprecated(this.schema) === true;
+  }
+  /**
    * Destroy the instance and it's children
    */
   destroy() {
@@ -2194,6 +2206,7 @@ class Editor {
     this.control = null;
     this.disabled = false;
     this.readOnly = this.instance.isReadOnly();
+    this.deprecated = this.instance.isDeprecated();
     this.showingValidationErrors = false;
     this.markdownEnabled = false;
     this.purifyEnabled = false;
@@ -2204,6 +2217,7 @@ class Editor {
     this.build();
     this.setAttributes();
     this.setReadOnlyAttribute();
+    this.setDeprecatedAttribute();
     this.addEventListeners();
     this.setVisibility();
     this.setContainerAttributes();
@@ -2220,6 +2234,15 @@ class Editor {
     this.instance.on("change", valueChangeHandler);
   }
   static resolves(schema) {
+  }
+  /**
+   * Resolution priority used by UiResolver to order candidate editors before
+   * scanning them with resolves(). Higher values are tried first. Editors
+   * that don't override this share the default and keep their relative
+   * declaration order (stable sort).
+   */
+  static priority() {
+    return 0;
   }
   /**
    * Whether this editor already renders a heading for each of its children
@@ -2359,6 +2382,17 @@ class Editor {
       inputElements.forEach((element) => {
         element.setAttribute("always-disabled", "");
       });
+    }
+  }
+  /**
+   * Marks the control container so integrators can target deprecated fields
+   * via CSS/JS and decide what to do with them (badge, hide, warn, etc.).
+   * Theme-agnostic: operates on the built DOM rather than the theme's
+   * control-building methods, so it applies uniformly across all themes.
+   */
+  setDeprecatedAttribute() {
+    if (this.deprecated) {
+      this.control.container.classList.add("jedi-deprecated");
     }
   }
   getIdFromPath(path) {
@@ -7072,9 +7106,12 @@ class EditorStringFilepond extends EditorString {
     super.destroy();
   }
 }
+function byPriorityDescending(a, b) {
+  return b.priority() - a.priority();
+}
 class UiResolver {
   constructor(options) {
-    this.customEditors = options.customEditors ?? [];
+    this.customEditors = [...options.customEditors ?? []].sort(byPriorityDescending);
     this.refParser = options.refParser ?? null;
     this.editors = [
       EditorNumberInputNullable,
@@ -7121,7 +7158,7 @@ class UiResolver {
       EditorArrayNav,
       EditorArray,
       EditorNull
-    ];
+    ].sort(byPriorityDescending);
   }
   getClass(schema) {
     for (const editor of this.customEditors) {
@@ -7425,7 +7462,7 @@ class JsonWalker {
     }
   }
 }
-const version = "1.20.1";
+const version = "1.21.0";
 class Jedison extends EventEmitter {
   /**
    * Creates a Jedison instance.
