@@ -40,9 +40,9 @@
     "lint:fix": "eslint --fix -c ./.eslintrc.json ./src ./tests",
     "test:full": "yarn e2e:clean && yarn e2e && yarn unit",
     "test:grep": "yarn e2e:clean && start-server-and-test serve http://localhost:8181 'codeceptjs run-workers 10 -c tests/e2e/codecept.conf.cjs --grep \"${GREP}\"'",
-    "version": "yarn build && git add dist",
+    "version": "vite build --config ./vite.config.prod.js && git add dist",
     "postversion": "git push && git push --tags",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "vite build --config ./vite.config.prod.js",
     "release": "npm publish --access public"
   },
   "repository": {
