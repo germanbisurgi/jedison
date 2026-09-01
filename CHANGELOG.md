@@ -1,5 +1,11 @@
 ### Unreleased
 
+### 1.21.0
+
+- Fixed issue #70: `dist` now rebuilds on version bump and before publish, so `Jedison.version` matches the package version
+- Added issue #71: custom/built-in editors can set a `static priority()` to control resolution order
+- Added issue #72: `deprecated: true` now adds a `jedi-deprecated` class to the field's container
+
 ### 1.20.2
 
 - Fixed issue #69: exposed a runtime `version`, contained editor-resolution errors, fixed the `constraints` default type mismatch

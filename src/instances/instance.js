@@ -10,7 +10,7 @@ import {
 
 import {
   getSchemaConst,
-  getSchemaDefault, getSchemaEnum,
+  getSchemaDefault, getSchemaDeprecated, getSchemaEnum,
   getSchemaReadOnly,
   getSchemaType, getSchemaXOption
 } from '../helpers/schema.js'
@@ -449,6 +449,16 @@ class Instance extends EventEmitter {
     }
 
     return this.parent ? this.parent.isReadOnly() : false
+  }
+
+  /**
+   * Returns true if this instance's own schema is marked deprecated.
+   * Unlike isReadOnly(), this does not cascade to/from the parent: per the
+   * JSON Schema spec, "deprecated" applies only to the exact instance
+   * location it's declared on.
+   */
+  isDeprecated () {
+    return getSchemaDeprecated(this.schema) === true
   }
 
   /**

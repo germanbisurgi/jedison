@@ -43,9 +43,13 @@ import EditorNumberRange from './editors/number-range.js'
 import EditorStringAce from './editors/string-ace.js'
 import EditorStringFilepond from './editors/string-filepond.js'
 
+function byPriorityDescending (a, b) {
+  return b.priority() - a.priority()
+}
+
 class UiResolver {
   constructor (options) {
-    this.customEditors = options.customEditors ?? []
+    this.customEditors = [...(options.customEditors ?? [])].sort(byPriorityDescending)
     this.refParser = options.refParser ?? null
 
     this.editors = [
@@ -93,7 +97,7 @@ class UiResolver {
       EditorArrayNav,
       EditorArray,
       EditorNull
-    ]
+    ].sort(byPriorityDescending)
   }
 
   getClass (schema) {

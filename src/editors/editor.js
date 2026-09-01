@@ -37,6 +37,12 @@ class Editor {
      */
     this.readOnly = this.instance.isReadOnly()
 
+    /**
+     * Deprecated status for this editor user interface
+     * @type {boolean}
+     */
+    this.deprecated = this.instance.isDeprecated()
+
     this.showingValidationErrors = false
 
     this.markdownEnabled = false
@@ -55,6 +61,7 @@ class Editor {
     this.build()
     this.setAttributes()
     this.setReadOnlyAttribute()
+    this.setDeprecatedAttribute()
     this.addEventListeners()
     this.setVisibility()
     this.setContainerAttributes()
@@ -76,6 +83,16 @@ class Editor {
   }
 
   static resolves (schema) {}
+
+  /**
+   * Resolution priority used by UiResolver to order candidate editors before
+   * scanning them with resolves(). Higher values are tried first. Editors
+   * that don't override this share the default and keep their relative
+   * declaration order (stable sort).
+   */
+  static priority () {
+    return 0
+  }
 
   /**
    * Whether this editor already renders a heading for each of its children
@@ -244,6 +261,18 @@ class Editor {
       inputElements.forEach((element) => {
         element.setAttribute('always-disabled', '')
       })
+    }
+  }
+
+  /**
+   * Marks the control container so integrators can target deprecated fields
+   * via CSS/JS and decide what to do with them (badge, hide, warn, etc.).
+   * Theme-agnostic: operates on the built DOM rather than the theme's
+   * control-building methods, so it applies uniformly across all themes.
+   */
+  setDeprecatedAttribute () {
+    if (this.deprecated) {
+      this.control.container.classList.add('jedi-deprecated')
     }
   }
 
