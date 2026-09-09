@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/germanbisurgi/jedison">
-    <img src="https://raw.githubusercontent.com/germanbisurgi/jedison/main/public/images/jedison-mark.svg" alt="Jedison logo" width="120" height="120">
+    <img src="https://raw.githubusercontent.com/germanbisurgi/jedison/main/public/images/jedison-mark.png" alt="Jedison logo" width="120" height="120">
   </a>
 
   <h3 align="center">Jedison</h3>
