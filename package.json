@@ -5,6 +5,7 @@
   "main": "./dist/cjs/jedison.cjs",
   "module": "./dist/esm/jedison.js",
   "type": "module",
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md",
