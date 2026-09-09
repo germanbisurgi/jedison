@@ -1,5 +1,9 @@
 ### Unreleased
 
+### 1.21.1
+
+- security updates
+
 ### 1.21.0
 
 - Fixed issue #70: `dist` now rebuilds on version bump and before publish, so `Jedison.version` matches the package version

@@ -101,7 +101,7 @@
     "minimatch": ">=10.2.3",
     "postcss": ">=8.5.18",
     "rollup": ">=4.59.0",
-    "multer": ">=2.2.0",
+    "multer": ">=2.3.0",
     "ajv": "^6.14.0",
     "serialize-javascript": ">=7.0.5",
     "immutable": ">=5.1.8",
@@ -109,11 +109,14 @@
     "flatted": ">=3.4.2",
     "postcss/nanoid": ">=3.3.17",
     "undici": ">=8.9.0",
-    "joi": ">=18.2.1",
+    "joi": ">=18.2.5",
     "form-data": ">=4.0.6",
     "yaml": ">=2.8.3",
     "uuid": ">=11.1.1",
-    "@xmldom/xmldom": ">=0.9.10"
+    "@xmldom/xmldom": ">=0.9.12",
+    "browserslist": ">=4.28.7",
+    "baseline-browser-mapping": ">=2.11.0",
+    "stream-json": ">=3.5.0"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
