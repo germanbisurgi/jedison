@@ -1,5 +1,3 @@
-<img src="https://raw.githubusercontent.com/germanbisurgi/jedison/main/public/images/jedison-mark.svg" width="96" alt="Jedison logo">
-
 [![Tests](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml)
 [![npm version](https://img.shields.io/npm/v/jedison)](https://www.npmjs.com/package/jedison)
 [![npm downloads](https://img.shields.io/npm/dm/jedison)](https://www.npmjs.com/package/jedison)
@@ -7,15 +5,26 @@
 [![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/jedison?activeTab=dependencies)
 [![license](https://img.shields.io/npm/l/jedison)](https://github.com/germanbisurgi/jedison/blob/main/LICENSE)
 
-# Jedison
+<p align="center">
+  <a href="https://github.com/germanbisurgi/jedison">
+    <img src="https://raw.githubusercontent.com/germanbisurgi/jedison/main/public/images/jedison-mark.svg" alt="Jedison logo" width="120" height="120">
+  </a>
 
-## 🚀 Quick Links
+  <h3 align="center">Jedison</h3>
 
-🎮 **[Playground](https://germanbisurgi.github.io/jedison/index.html?theme=bootstrap5)**  
-Test and experiment with configuration options in a live environment.
-
-📖 **[Documentation](https://germanbisurgi.github.io/jedison-docs/)**  
-Learn how to use Jedison with detailed guides and interactive examples.
+  <p align="center">
+    Framework-agnostic JavaScript library that generates and validates forms from <a href="https://json-schema.org/">JSON Schema</a>.
+    <br />
+    <a href="https://germanbisurgi.github.io/jedison-docs/"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://germanbisurgi.github.io/jedison/index.html?theme=bootstrap5">View Playground</a>
+    &middot;
+    <a href="https://github.com/germanbisurgi/jedison/issues">Report Bug</a>
+    &middot;
+    <a href="https://github.com/germanbisurgi/jedison/issues">Request Feature</a>
+  </p>
+</p>
 
 ## What is Jedison
 
