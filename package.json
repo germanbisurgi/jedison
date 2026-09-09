@@ -1,7 +1,7 @@
 {
   "name": "jedison",
   "version": "1.21.0",
-  "description": "A JavaScript Library that generates forms from JSON Schemas, to editing and validate JSON.",
+  "description": "Framework-agnostic JavaScript library that generates and validates forms from JSON Schema, with zero runtime dependencies.",
   "main": "./dist/cjs/jedison.cjs",
   "module": "./dist/esm/jedison.js",
   "type": "module",
@@ -51,10 +51,19 @@
   },
   "keywords": [
     "json",
+    "json-schema",
+    "json-schema-form",
+    "schema",
     "validation",
     "editor",
-    "schema",
-    "json-schema"
+    "form",
+    "form-generator",
+    "form-builder",
+    "headless",
+    "vanilla-js",
+    "framework-agnostic",
+    "admin-ui",
+    "cms"
   ],
   "author": "German Bisurgi <gebisurgi@protonmail.com>",
   "license": "MIT",

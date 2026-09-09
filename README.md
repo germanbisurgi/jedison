@@ -1,4 +1,9 @@
 [![Tests](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml)
+[![npm version](https://img.shields.io/npm/v/jedison)](https://www.npmjs.com/package/jedison)
+[![npm downloads](https://img.shields.io/npm/dm/jedison)](https://www.npmjs.com/package/jedison)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/jedison)](https://bundlephobia.com/package/jedison)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/jedison?activeTab=dependencies)
+[![license](https://img.shields.io/npm/l/jedison)](https://github.com/germanbisurgi/jedison/blob/main/LICENSE)
 
 # Jedison
 
