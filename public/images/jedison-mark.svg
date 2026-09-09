@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <linearGradient id="jedison-mark-gradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
-    </linearGradient>
-  </defs>
-  <rect width="100" height="100" rx="22" fill="url(#jedison-mark-gradient)"/>
-  <path d="M68 26 L68 60 A16 16 0 0 1 52 76 L38 76"
-        fill="none" stroke="#ffffff" stroke-width="12"
-        stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- left brace -->
+  <g transform="translate(150,400)">
+    <path d="M 55,-280
+             C 5,-280 -15,-250 -15,-190
+             L -15,-90
+             C -15,-40 -35,-20 -75,0
+             C -35,20 -15,40 -15,90
+             L -15,190
+             C -15,250 5,280 55,280"
+          fill="none" stroke="#000000" stroke-width="42"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- right brace: same path, mirrored -->
+  <g transform="translate(650,400) scale(-1,1)">
+    <path d="M 55,-280
+             C 5,-280 -15,-250 -15,-190
+             L -15,-90
+             C -15,-40 -35,-20 -75,0
+             C -35,20 -15,40 -15,90
+             L -15,190
+             C -15,250 5,280 55,280"
+          fill="none" stroke="#000000" stroke-width="42"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- center: text input field with cursor + typed text, representing form building -->
+  <g transform="translate(400,400)">
+    <rect x="-155" y="-165" width="310" height="330" rx="42" fill="none" stroke="#000000" stroke-width="42"/>
+    <line x1="-85" y1="-65" x2="-85" y2="65" stroke="#000000" stroke-width="42" stroke-linecap="round"/>
+    <line x1="-15" y1="0" x2="95" y2="0" stroke="#000000" stroke-width="42" stroke-linecap="round"/>
+  </g>
 </svg>
