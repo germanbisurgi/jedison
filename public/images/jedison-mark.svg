@@ -12,7 +12,7 @@
              C -35,20 -15,40 -15,90
              L -15,190
              C -15,250 5,280 55,280"
-          fill="none" stroke="#95CFFD" stroke-width="42"
+          fill="none" stroke="#757575" stroke-width="42"
           stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
@@ -25,7 +25,7 @@
              C -35,20 -15,40 -15,90
              L -15,190
              C -15,250 5,280 55,280"
-          fill="none" stroke="#95CFFD" stroke-width="42"
+          fill="none" stroke="#757575" stroke-width="42"
           stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
