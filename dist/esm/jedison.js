@@ -7462,7 +7462,7 @@ class JsonWalker {
     }
   }
 }
-const version = "1.21.0";
+const version = "1.21.1";
 class Jedison extends EventEmitter {
   /**
    * Creates a Jedison instance.
