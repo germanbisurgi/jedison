@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/germanbisurgi/jedison/main/public/images/jedison-mark.svg" width="96" alt="Jedison logo">
+
 [![Tests](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/germanbisurgi/jedison/actions/workflows/main.yml)
 [![npm version](https://img.shields.io/npm/v/jedison)](https://www.npmjs.com/package/jedison)
 [![npm downloads](https://img.shields.io/npm/dm/jedison)](https://www.npmjs.com/package/jedison)
