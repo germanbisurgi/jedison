@@ -9,7 +9,7 @@
              C -35,20 -15,40 -15,90
              L -15,190
              C -15,250 5,280 55,280"
-          fill="none" stroke="#000000" stroke-width="42"
+          fill="none" stroke="#757575" stroke-width="42"
           stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
@@ -22,14 +22,14 @@
              C -35,20 -15,40 -15,90
              L -15,190
              C -15,250 5,280 55,280"
-          fill="none" stroke="#000000" stroke-width="42"
+          fill="none" stroke="#757575" stroke-width="42"
           stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
   <!-- center: text input field with cursor + typed text, representing form building -->
   <g transform="translate(400,400)">
-    <rect x="-155" y="-165" width="310" height="330" rx="42" fill="none" stroke="#000000" stroke-width="42"/>
-    <line x1="-85" y1="-65" x2="-85" y2="65" stroke="#000000" stroke-width="42" stroke-linecap="round"/>
-    <line x1="-15" y1="0" x2="95" y2="0" stroke="#000000" stroke-width="42" stroke-linecap="round"/>
+    <rect x="-155" y="-165" width="310" height="330" rx="42" fill="none" stroke="#757575" stroke-width="42"/>
+    <line x1="-85" y1="-65" x2="-85" y2="65" stroke="#757575" stroke-width="42" stroke-linecap="round"/>
+    <line x1="-15" y1="0" x2="95" y2="0" stroke="#757575" stroke-width="42" stroke-linecap="round"/>
   </g>
 </svg>
