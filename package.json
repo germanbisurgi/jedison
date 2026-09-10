@@ -75,7 +75,7 @@
   "devDependencies": {
     "@milkdown/crepe": "^7.21.3",
     "@milkdown/kit": "^7.21.3",
-    "@vitejs/plugin-vue": "^5.2.0",
+    "@vitejs/plugin-vue": "^6.0.8",
     "bootstrap": "^5.3.0",
     "codeceptjs": "^3.7.9",
     "codeceptjs-chai": "^2.3.5",
