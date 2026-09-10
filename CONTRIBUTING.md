@@ -32,7 +32,32 @@ SHOW=true THEME='bootstrap5' yarn e2e:grep
 ```
 
 A PR is expected to pass `yarn lint`, `yarn unit`, and the relevant `yarn e2e:*`
-suite before review.
+suite before review. To run all four themes in one go, quote the script name as
+`yarn "e2e:*"` — it really is named with a `*`, so in zsh an unquoted
+`yarn e2e:*` aborts with `no matches found`, while bash only gets away with it
+because no file happens to match the pattern.
+
+## What the build scripts write where
+
+`yarn build` refreshes both committed build artifacts — run it before committing
+if your change affects either one:
+
+- **`yarn build:lib` → `dist/`** — the library that gets published to npm.
+  `yarn unit` runs it first, because the unit tests import the built bundle
+  rather than `src/`. At release time the `version` and `prepublishOnly` hooks
+  rebuild it for you.
+- **`yarn pages` → `docs/`** — the playground published at
+  [germanbisurgi.github.io/jedison](https://germanbisurgi.github.io/jedison/index.html?theme=bootstrap5).
+  GitHub Pages serves it straight from `main:/docs`, so it is a committed build
+  artifact.
+
+A third target is throwaway: **`yarn serve` → `.vite-preview/`**, gitignored,
+which every `e2e` script builds into via the `preserve` hook. `yarn dev` writes
+nothing at all; it serves from memory.
+
+Only `vite.config.pages.js` sets the `/jedison/` base path, so `docs/` must come
+from `yarn pages` (or `yarn build`) and nothing else — output from any other
+config has root-absolute `/assets/…` URLs that 404 on the live site.
 
 ## Reporting a bug
 

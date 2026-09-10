@@ -5,7 +5,9 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [vue()],
   build: {
-    outDir: resolve(__dirname, 'docs')
+    // Local preview target only. Must not be 'docs' — that is the GitHub Pages
+    // source, and this config has no base, so its output breaks the /jedison/ paths.
+    outDir: resolve(__dirname, '.vite-preview')
   },
   server: {
     open: true,

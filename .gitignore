@@ -1,4 +1,5 @@
 node_modules
 tests/e2e/output
+.vite-preview
 .idea
 .claude

@@ -8,9 +8,14 @@ editor.instances I only see the root instance using the multiple-instance exampl
 
 **Instructions:**
 1. Run the following tests to reproduce and validate fixes:
-    - **E2E test**: `yarn serve` and `yarn e2e:grep` (only `@multiple-register` e2e).
+    - **E2E test**: `GREP='@multiple-register' yarn test:grep` (only the `@multiple-register` e2e).
+      `yarn e2e:grep` is hardcoded to `@object-radios`, so it will not run this scenario.
     - **Unit test**: `yarn unit` (executes all unit tests).
-    - Make sure the server is started before running e2e tests (in separate terminals).
+    - Do not start `yarn serve` yourself — every e2e script already starts its own
+      preview server on port 8181 via `start-server-and-test`. The suite still passes
+      if one is running, but port 8181 is `strictPort`, so the second server fails to
+      bind and dumps a confusing `Error: Port 8181 is already in use` stack trace into
+      the test output.
 
 2. Debugging workflow:
     - Investigate and **find the real issue**.
