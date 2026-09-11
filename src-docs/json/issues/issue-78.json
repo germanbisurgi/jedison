@@ -3,19 +3,31 @@
   "title": "Issue 78",
   "description": "x-defaultProperties acts as a whitelist: listed optional properties show by default, unlisted ones stay hidden behind the properties toggle - no x-deactivateNonRequired needed.",
   "x-enablePropertiesToggle": true,
-  "x-defaultProperties": ["nickname"],
-  "required": ["name"],
+  "required": ["firstName", "lastName"],
+  "x-defaultProperties": ["email", "phone"],
   "properties": {
-    "name": {
-      "title": "Name",
+    "firstName": {
+      "title": "First name",
       "type": "string"
     },
-    "nickname": {
-      "title": "Nickname",
+    "lastName": {
+      "title": "Last name",
       "type": "string"
     },
-    "bio": {
-      "title": "Bio",
+    "email": {
+      "title": "Email",
+      "type": "string"
+    },
+    "phone": {
+      "title": "Phone",
+      "type": "string"
+    },
+    "company": {
+      "title": "Company",
+      "type": "string"
+    },
+    "notes": {
+      "title": "Notes",
       "type": "string"
     }
   }

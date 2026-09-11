@@ -11,19 +11,30 @@ BeforeSuite(({ I }) => {
   I._waitForElement('.jedi-ready')
 })
 
-// "name" is required but absent from x-defaultProperties - required must win regardless.
-Scenario('@issue @issue-78 required property is shown even though it is not listed in x-defaultProperties', ({ I }) => {
-  I._waitForElement('[data-path="#/name"]')
+// firstName/lastName are required but absent from x-defaultProperties - required must win regardless.
+Scenario('@issue @issue-78 required properties are shown even though they are not listed in x-defaultProperties', ({ I }) => {
+  I._waitForElement('[data-path="#/firstName"]')
+  I._waitForElement('[data-path="#/lastName"]')
 })
 
-Scenario('@issue @issue-78 property listed in x-defaultProperties is shown without opting in', ({ I }) => {
-  I._waitForElement('[data-path="#/nickname"]')
+Scenario('@issue @issue-78 properties listed in x-defaultProperties are shown without opting in', ({ I }) => {
+  I._waitForElement('[data-path="#/email"]')
+  I._waitForElement('[data-path="#/phone"]')
 })
 
-Scenario('@issue @issue-78 property not listed in x-defaultProperties stays hidden until opted in', ({ I }) => {
-  I.dontSeeElement('[data-path="#/bio"]')
+Scenario('@issue @issue-78 properties not listed in x-defaultProperties stay hidden until opted in', ({ I }) => {
+  I.dontSeeElement('[data-path="#/company"]')
+  I.dontSeeElement('[data-path="#/notes"]')
+
   I._click('.jedi-properties-toggle')
-  I._waitForElement('[id="root-bio-activator"]:not(:disabled)')
-  I._click('[id="root-bio-activator"]')
-  I._waitForElement('[data-path="#/bio"]')
+  I._waitForElement('[id="root-company-activator"]:not(:disabled)')
+  I._click('[id="root-company-activator"]')
+  I._waitForElement('[data-path="#/company"]')
+
+  // notes is still untouched - opting one property in must not opt others in too
+  I.dontSeeElement('[data-path="#/notes"]')
+
+  I._waitForElement('[id="root-notes-activator"]:not(:disabled)')
+  I._click('[id="root-notes-activator"]')
+  I._waitForElement('[data-path="#/notes"]')
 })
