@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "title": "Issue 78",
+  "description": "x-defaultProperties pre-activates listed optional properties instead of hiding them behind the properties toggle.",
+  "x-deactivateNonRequired": true,
+  "x-enablePropertiesToggle": true,
+  "x-defaultProperties": ["nickname"],
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "nickname": {
+      "title": "Nickname",
+      "type": "string"
+    },
+    "bio": {
+      "title": "Bio",
+      "type": "string"
+    }
+  }
+}

@@ -3110,8 +3110,13 @@ class InstanceObject extends Instance {
         if (!isReq && isRecursive) {
           musstCreateChild = false;
         }
+        const defaultProperties = getSchemaXOption(this.schema, "defaultProperties");
+        const isDefaultProperty = !isReq && !isRecursive && isArray(defaultProperties) && defaultProperties.includes(key);
+        if (isDefaultProperty) {
+          musstCreateChild = true;
+        }
         if (musstCreateChild) {
-          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : void 0);
+          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : void 0, isDefaultProperty);
         }
       });
     }
