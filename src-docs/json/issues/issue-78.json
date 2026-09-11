@@ -1,8 +1,7 @@
 {
   "type": "object",
   "title": "Issue 78",
-  "description": "x-defaultProperties pre-activates listed optional properties instead of hiding them behind the properties toggle.",
-  "x-deactivateNonRequired": true,
+  "description": "x-defaultProperties acts as a whitelist: listed optional properties show by default, unlisted ones stay hidden behind the properties toggle - no x-deactivateNonRequired needed.",
   "x-enablePropertiesToggle": true,
   "x-defaultProperties": ["nickname"],
   "required": ["name"],

@@ -3111,8 +3111,12 @@ class InstanceObject extends Instance {
           musstCreateChild = false;
         }
         const defaultProperties = getSchemaXOption(this.schema, "defaultProperties");
-        const isDefaultProperty = !isReq && !isRecursive && isArray(defaultProperties) && defaultProperties.includes(key);
-        if (isDefaultProperty) {
+        const hasDefaultProperties = isArray(defaultProperties);
+        const isDefaultProperty = hasDefaultProperties && defaultProperties.includes(key);
+        if (!isReq && hasDefaultProperties && !isDefaultProperty) {
+          musstCreateChild = false;
+        }
+        if (!isReq && !isRecursive && isDefaultProperty) {
           musstCreateChild = true;
         }
         if (musstCreateChild) {

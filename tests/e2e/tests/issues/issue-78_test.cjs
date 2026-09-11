@@ -3,7 +3,7 @@
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'issue/issue-78'
 
-Feature('issue-78 x-defaultProperties pre-activates listed optional properties')
+Feature('issue-78 x-defaultProperties acts as a whitelist for optional properties')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
@@ -11,7 +11,8 @@ BeforeSuite(({ I }) => {
   I._waitForElement('.jedi-ready')
 })
 
-Scenario('@issue @issue-78 required property is always shown', ({ I }) => {
+// "name" is required but absent from x-defaultProperties - required must win regardless.
+Scenario('@issue @issue-78 required property is shown even though it is not listed in x-defaultProperties', ({ I }) => {
   I._waitForElement('[data-path="#/name"]')
 })
 

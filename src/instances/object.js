@@ -56,9 +56,16 @@ class InstanceObject extends Instance {
         }
 
         const defaultProperties = getSchemaXOption(this.schema, 'defaultProperties')
-        const isDefaultProperty = !isReq && !isRecursive && isArray(defaultProperties) && defaultProperties.includes(key)
+        const hasDefaultProperties = isArray(defaultProperties)
+        const isDefaultProperty = hasDefaultProperties && defaultProperties.includes(key)
 
-        if (isDefaultProperty) {
+        // Declaring x-defaultProperties turns it into a whitelist: any non-required
+        // property left off the list is hidden too, regardless of deactivateNonRequired.
+        if (!isReq && hasDefaultProperties && !isDefaultProperty) {
+          musstCreateChild = false
+        }
+
+        if (!isReq && !isRecursive && isDefaultProperty) {
           musstCreateChild = true
         }
 
