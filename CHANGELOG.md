@@ -1,6 +1,9 @@
 ### Unreleased
 
-- Added issue #78: `x-defaultProperties` (object-level whitelist) and `x-defaultProperty` (property-level override, wins when set) let optional properties show by default without the properties-toggle opt-in
+### 1.22.0
+
+- Added issue #78: `x-defaultProperties` lets an object schema whitelist which optional properties show by default, without needing the properties-toggle opt-in
+- Added issue #78: `x-defaultProperty` lets a property override that whitelist on its own schema, so a property reused via `$ref` can decide its own default visibility per consumer
 
 ### 1.21.1
 
