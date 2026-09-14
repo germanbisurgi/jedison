@@ -38,3 +38,25 @@ Scenario('@issue @issue-78 properties not listed in x-defaultProperties stay hid
   I._click('[id="root-notes-activator"]')
   I._waitForElement('[data-path="#/notes"]')
 })
+
+// fax is absent from x-defaultProperties, but its own x-defaultProperty:true overrides that.
+Scenario('@issue @issue-78 a property\'s own x-defaultProperty:true is shown even when absent from x-defaultProperties', ({ I }) => {
+  I._waitForElement('[data-path="#/fax"]')
+})
+
+// website is listed in x-defaultProperties, but its own x-defaultProperty:false overrides that -
+// this is the override point for a property reused (e.g. via $ref) across parents that disagree.
+// Reloads the page first: an earlier scenario leaves the properties dialog open, and the toggle
+// button closes it instead of opening it when it is already open.
+Scenario('@issue @issue-78 a property\'s own x-defaultProperty:false stays hidden even when listed in x-defaultProperties', ({ I }) => {
+  I.amOnPage(`playground.html?theme=${theme}`)
+  I.selectOption('#examples', pathToSchema)
+  I._waitForElement('.jedi-ready')
+
+  I.dontSeeElement('[data-path="#/website"]')
+
+  I._click('.jedi-properties-toggle')
+  I._waitForElement('[id="root-website-activator"]:not(:disabled)')
+  I._click('[id="root-website-activator"]')
+  I._waitForElement('[data-path="#/website"]')
+})

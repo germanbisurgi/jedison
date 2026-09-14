@@ -1,10 +1,10 @@
 {
   "type": "object",
   "title": "Issue 78",
-  "description": "x-defaultProperties acts as a whitelist: listed optional properties show by default, unlisted ones stay hidden behind the properties toggle - no x-deactivateNonRequired needed.",
+  "description": "x-defaultProperties (on the object) is a whitelist for which optional properties show by default. x-defaultProperty (on a property itself) overrides that whitelist either way - needed so a property reused via $ref can decide for itself, per consumer.",
   "x-enablePropertiesToggle": true,
   "required": ["firstName", "lastName"],
-  "x-defaultProperties": ["email", "phone"],
+  "x-defaultProperties": ["email", "phone", "website"],
   "properties": {
     "firstName": {
       "title": "First name",
@@ -29,6 +29,18 @@
     "notes": {
       "title": "Notes",
       "type": "string"
+    },
+    "fax": {
+      "title": "Fax",
+      "type": "string",
+      "description": "Not in x-defaultProperties, but its own x-defaultProperty:true still shows it by default.",
+      "x-defaultProperty": true
+    },
+    "website": {
+      "title": "Website",
+      "type": "string",
+      "description": "Listed in x-defaultProperties, but its own x-defaultProperty:false still hides it by default.",
+      "x-defaultProperty": false
     }
   }
 }

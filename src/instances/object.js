@@ -57,11 +57,20 @@ class InstanceObject extends Instance {
 
         const defaultProperties = getSchemaXOption(this.schema, 'defaultProperties')
         const hasDefaultProperties = isArray(defaultProperties)
-        const isDefaultProperty = hasDefaultProperties && defaultProperties.includes(key)
+        const propertyDefaultProperty = getSchemaXOption(schema, 'defaultProperty')
+        const hasPropertyDefaultProperty = isSet(propertyDefaultProperty)
 
-        // Declaring x-defaultProperties turns it into a whitelist: any non-required
-        // property left off the list is hidden too, regardless of deactivateNonRequired.
-        if (!isReq && hasDefaultProperties && !isDefaultProperty) {
+        // A property's own x-defaultProperty always wins over the parent's list -
+        // this is the override point for properties reused (e.g. via $ref) across
+        // parents that disagree on whether it should show by default.
+        const isDefaultProperty = hasPropertyDefaultProperty
+          ? propertyDefaultProperty === true
+          : (hasDefaultProperties && defaultProperties.includes(key))
+
+        // Declaring either form of "default properties" turns this into a whitelist:
+        // a non-required property that doesn't resolve as default is hidden,
+        // regardless of deactivateNonRequired.
+        if (!isReq && (hasDefaultProperties || hasPropertyDefaultProperty) && !isDefaultProperty) {
           musstCreateChild = false
         }
 
