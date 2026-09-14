@@ -1,5 +1,7 @@
 ### Unreleased
 
+- Added issue #78: `x-defaultProperties` (object-level whitelist) and `x-defaultProperty` (property-level override, wins when set) let optional properties show by default without the properties-toggle opt-in
+
 ### 1.21.1
 
 - security updates
