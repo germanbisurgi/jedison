@@ -1,5 +1,7 @@
 ### Unreleased
 
+### 1.22.1
+
 - Fixed issue #79: `x-buttons` on an array editor (`nav-horizontal`/`nav-vertical`/default) never fired - `refreshUI()` cleared the button's click listener right after it was registered. Schema-button listeners now live in their own list, separate from the one array editors clear on every refresh
 
 ### 1.22.0
