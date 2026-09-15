@@ -1,7 +1,7 @@
 {
   "type": "object",
   "title": "Issue 79",
-  "description": "x-buttons on an array editor. Clicking the button must fire jedison:fill even after the array's refreshUI() has run (e.g. after adding/removing an item).",
+  "description": "x-buttons on an array editor. Clicking Fill replaces the rows with a single filled item - it must keep working even after the array's refreshUI() has run (e.g. after adding/removing an item).",
   "properties": {
     "rows": {
       "type": "array",

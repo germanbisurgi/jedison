@@ -910,7 +910,7 @@ export default {
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
 
-      const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup']
+      const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup', 'fill']
       events.forEach((name) => {
         this.editor.on('jedison:' + name, ({ editor, path }) => {
           console.log('jedison:' + name, { path })
@@ -918,6 +918,7 @@ export default {
           if (name === 'insertTemplate') editor.instance.setValue('Dear customer, thank you for your message.')
           if (name === 'clearComment') editor.instance.setValue('')
           if (name === 'zipLookup') editor.instance.setValue({ ...editor.instance.getValue(), city: 'Stuttgart' })
+          if (name === 'fill') editor.instance.setValue([{ a: 'filled' }])
         })
       })
     },
