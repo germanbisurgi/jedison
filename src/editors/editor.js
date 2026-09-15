@@ -57,6 +57,16 @@ class Editor {
      */
     this.storedEventListeners = []
 
+    /**
+     * Event listeners for schema-defined buttons (`x-buttons`). Kept separate
+     * from storedEventListeners because some editors' refreshUI() (e.g.
+     * EditorArrayNav) clears that list on every refresh, while the buttons
+     * live on control.container which refreshUI() never rebuilds - see
+     * issue #79.
+     * @type {Array}
+     */
+    this.schemaButtonListeners = []
+
     this.init()
     this.build()
     this.setAttributes()
@@ -175,8 +185,9 @@ class Editor {
    *   `jedison.on('jedison:<name>', ({ jedison, editor, path }) => ...)`. The
    *   listener map is private to the instance, so the payload is not exposed to
    *   unrelated scripts on the page (F3 contained).
-   * - Click listeners are registered through storedEventListeners so destroy()
-   *   cleans them up.
+   * - Click listeners are registered through schemaButtonListeners so
+   *   destroy() cleans them up, without being cleared by an editor's
+   *   refreshUI() in the meantime (issue #79).
    */
   appendSchemaButtons () {
     const buttons = getSchemaXOption(this.instance.schema, 'buttons')
@@ -219,7 +230,7 @@ class Editor {
 
       button.addEventListener('click', handler)
 
-      this.storedEventListeners.push({
+      this.schemaButtonListeners.push({
         element: button,
         eventType: 'click',
         handler
@@ -309,6 +320,23 @@ class Editor {
       })
     }
     this.storedEventListeners = []
+  }
+
+  /**
+   * Clears the click listeners registered by appendSchemaButtons(). Separate
+   * from clearStoredEventListeners() so editors that clear the latter on
+   * every refreshUI() (e.g. EditorArrayNav) don't also detach the schema
+   * buttons, which are only ever appended once and never rebuilt (issue #79).
+   */
+  clearSchemaButtonListeners () {
+    if (this.schemaButtonListeners) {
+      this.schemaButtonListeners.forEach(listener => {
+        if (listener.element && listener.handler) {
+          listener.element.removeEventListener(listener.eventType || 'click', listener.handler)
+        }
+      })
+    }
+    this.schemaButtonListeners = []
   }
 
   /**
@@ -613,6 +641,7 @@ class Editor {
    */
   destroy () {
     this.clearStoredEventListeners()
+    this.clearSchemaButtonListeners()
 
     if (this.control.container && this.control.container.parentNode) {
       this.control.container.parentNode.removeChild(this.control.container)

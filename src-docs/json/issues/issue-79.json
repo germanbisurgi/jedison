@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "title": "Issue 79",
+  "description": "x-buttons on an array editor. Clicking the button must fire jedison:fill even after the array's refreshUI() has run (e.g. after adding/removing an item).",
+  "properties": {
+    "rows": {
+      "type": "array",
+      "title": "Rows",
+      "x-format": "nav-horizontal",
+      "x-buttons": [
+        {
+          "label": "Fill",
+          "event": {
+            "name": "fill"
+          }
+        }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "title": "A"
+          }
+        }
+      }
+    }
+  }
+}
