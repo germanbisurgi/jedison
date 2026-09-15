@@ -1039,11 +1039,11 @@ class Theme {
     })
     const quickAddPropertyBtn = this.getAddPropertyButton({
       content: config.addPropertyContent,
-      icon: 'add'
+      icon: 'addProperty'
     })
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: 'add',
+      icon: 'addProperty',
       propertiesContainer: quickAddPropertyContainer
     })
     const fieldset = this.getFieldset()
@@ -1175,10 +1175,10 @@ class Theme {
       id: 'jedi-quick-add-property-input-' + config.id,
       title: config.addPropertyContent
     })
-    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: 'add' })
+    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: 'addProperty' })
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: 'add',
+      icon: 'addProperty',
       propertiesContainer: quickAddPropertyContainer
     })
 

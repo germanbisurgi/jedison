@@ -3496,6 +3496,7 @@ const glyphicons = {
   properties: "glyphicon glyphicon-list",
   delete: "glyphicon glyphicon-trash",
   add: "glyphicon glyphicon-plus",
+  addProperty: "glyphicon glyphicon-plus-sign",
   moveUp: "glyphicon glyphicon-arrow-up",
   moveDown: "glyphicon glyphicon-arrow-down",
   collapse: "glyphicon glyphicon-chevron-down",
@@ -3513,6 +3514,7 @@ const bootstrapIcons = {
   properties: "bi bi-card-list",
   delete: "bi bi-trash2",
   add: "bi bi-plus",
+  addProperty: "bi bi-plus-circle",
   moveUp: "bi bi-arrow-up",
   moveDown: "bi bi-arrow-down",
   collapse: "bi bi-chevron-down",
@@ -3529,6 +3531,7 @@ const fontAwesome3 = {
   properties: "icon-list",
   delete: "icon-trash",
   add: "icon-plus",
+  addProperty: "icon-plus-sign",
   moveUp: "icon-arrow-up",
   moveDown: "icon-arrow-down",
   collapse: "icon-chevron-down",
@@ -3545,6 +3548,7 @@ const fontAwesome4 = {
   properties: "fa fa-list",
   delete: "fa fa-trash-o",
   add: "fa fa-plus",
+  addProperty: "fa fa-plus-circle",
   moveUp: "fa fa-arrow-up",
   moveDown: "fa fa-arrow-down",
   collapse: "fa fa-chevron-down",
@@ -3561,6 +3565,7 @@ const fontAwesome5 = {
   properties: "fas fa-list",
   delete: "fas fa-trash",
   add: "fas fa-plus",
+  addProperty: "fas fa-plus-circle",
   moveUp: "fas fa-arrow-up",
   moveDown: "fas fa-arrow-down",
   collapse: "fas fa-chevron-down",
@@ -3577,6 +3582,7 @@ const fontAwesome6 = {
   properties: "fa-solid fa-list",
   delete: "fa-solid fa-trash",
   add: "fa-solid fa-plus",
+  addProperty: "fa-solid fa-circle-plus",
   moveUp: "fa-solid fa-arrow-up",
   moveDown: "fa-solid fa-arrow-down",
   collapse: "fa-solid fa-chevron-down",
@@ -9037,11 +9043,11 @@ class Theme {
     });
     const quickAddPropertyBtn = this.getAddPropertyButton({
       content: config.addPropertyContent,
-      icon: "add"
+      icon: "addProperty"
     });
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: "add",
+      icon: "addProperty",
       propertiesContainer: quickAddPropertyContainer
     });
     const fieldset = this.getFieldset();
@@ -9154,10 +9160,10 @@ class Theme {
       id: "jedi-quick-add-property-input-" + config.id,
       title: config.addPropertyContent
     });
-    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: "add" });
+    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: "addProperty" });
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: "add",
+      icon: "addProperty",
       propertiesContainer: quickAddPropertyContainer
     });
     const collapse = document.createElement("div");
