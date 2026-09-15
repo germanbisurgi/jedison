@@ -3,6 +3,7 @@
 ### 1.22.1
 
 - Fixed issue #79: `x-buttons` on an array editor (`nav-horizontal`/`nav-vertical`/default) never fired - `refreshUI()` cleared the button's click listener right after it was registered. Schema-button listeners now live in their own list, separate from the one array editors clear on every refresh
+- The object editor's "Add property" button now has its own icon (a circled plus) instead of reusing the array's plain "Add item" plus, which made the two easy to confuse
 
 ### 1.22.0
 
