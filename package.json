@@ -1,6 +1,6 @@
 {
   "name": "jedison",
-  "version": "1.22.1",
+  "version": "1.22.2",
   "description": "Framework-agnostic JavaScript library that generates and validates forms from JSON Schema, with zero runtime dependencies.",
   "main": "./dist/cjs/jedison.cjs",
   "module": "./dist/esm/jedison.js",
