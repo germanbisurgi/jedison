@@ -1,5 +1,9 @@
 ### Unreleased
 
+### 1.22.2
+
+- Fixed issue #78: `x-defaultProperties`/`x-defaultProperty` had no effect on `oneOf`/`anyOf` branches under `x-discriminator` - `InstanceMultiple` was stomping each branch's defaults with an empty placeholder right after creation, also letting properties leak between branches
+
 ### 1.22.1
 
 - Fixed issue #79: `x-buttons` on an array editor (`nav-horizontal`/`nav-vertical`/default) never fired - `refreshUI()` cleared the button's click listener right after it was registered. Schema-button listeners now live in their own list, separate from the one array editors clear on every refresh

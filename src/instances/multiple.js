@@ -22,6 +22,15 @@ import {
  * @extends Instance
  */
 class InstanceMultiple extends Instance {
+  // A Multiple's real value always comes from resolving the active branch
+  // (see switchInstance()) - never from its own wrapper schema. The base
+  // class's type-based placeholder (e.g. {} when the wrapper also declares
+  // "type": "object" alongside oneOf, a common x-discriminator pattern) is
+  // not real data, but prepare()/switchInstance() below can't tell it apart
+  // from one - propagating it stomps the freshly built branch's own
+  // x-defaultProperties-activated children right after creation.
+  setInitialValue () {}
+
   prepare () {
     this.instances = []
     this.activeInstance = null
