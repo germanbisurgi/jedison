@@ -3,3 +3,6 @@ tests/e2e/output
 .vite-preview
 .idea
 .claude
+
+.playwright-mcp
+_tasks
