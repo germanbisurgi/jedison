@@ -1,26 +1,40 @@
 {
+  "title": "Select Inline Switcher",
+  "description": "Reporter's original repro schema for issue 56 - setValue() called directly on a deactivated instance (e.g. after unchecking its properties-toggle checkbox) must reactivate it.",
   "type": "object",
-  "title": "Issue 56",
-  "description": "setValue() called directly on a deactivated instance (e.g. a non-required property under x-deactivateNonRequired) must reactivate it, so the value reaches the root instead of being silently dropped by the parent's aggregation.",
+  "additionalProperties": false,
   "x-deactivateNonRequired": true,
-  "x-defaultProperties": ["oneOfExample"],
+  "x-enablePropertiesToggle": true,
   "properties": {
     "oneOfExample": {
-      "title": "One Of Example",
+      "title": "oneOf",
+      "description": "x-switcherInput: select-inline with oneOf — two object schemas",
       "type": "object",
+      "x-switcherInput": "select-inline",
       "oneOf": [
         {
-          "title": "Circle",
+          "x-switcherTitle": "Circle",
           "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
           "properties": {
-            "radius": { "type": "number", "default": 0 }
+            "radius": {
+              "type": "number"
+            }
           }
         },
         {
-          "title": "Square",
+          "x-switcherTitle": "Rectangle",
           "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
           "properties": {
-            "side": { "type": "number", "default": 0 }
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
           }
         }
       ]
