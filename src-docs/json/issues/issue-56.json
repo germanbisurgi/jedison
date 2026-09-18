@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "title": "Issue 56",
+  "description": "setValue() called directly on a deactivated instance (e.g. a non-required property under x-deactivateNonRequired) must reactivate it, so the value reaches the root instead of being silently dropped by the parent's aggregation.",
+  "x-deactivateNonRequired": true,
+  "x-defaultProperties": ["oneOfExample"],
+  "properties": {
+    "oneOfExample": {
+      "title": "One Of Example",
+      "type": "object",
+      "oneOf": [
+        {
+          "title": "Circle",
+          "type": "object",
+          "properties": {
+            "radius": { "type": "number", "default": 0 }
+          }
+        },
+        {
+          "title": "Square",
+          "type": "object",
+          "properties": {
+            "side": { "type": "number", "default": 0 }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -2079,7 +2079,11 @@ class Instance extends EventEmitter {
    * @returns {*} The final value after constraint enforcement
    */
   setValue(newValue, notifyParent = true, initiator = "api") {
-    if (this.value === newValue) {
+    const wasInactive = !this.isActive;
+    if (wasInactive) {
+      this.isActive = true;
+    }
+    if (this.value === newValue && !wasInactive) {
       return this.value;
     }
     const purifiedValue = this.purify(newValue);
@@ -2092,7 +2096,7 @@ class Instance extends EventEmitter {
         newValue = schemaConst;
       }
     }
-    if (!wasPurified && !different(this.value, newValue)) {
+    if (!wasPurified && !different(this.value, newValue) && !wasInactive) {
       return this.value;
     }
     this.value = newValue;
@@ -2258,7 +2262,11 @@ class Editor {
    */
   init() {
     this.theme = this.instance.jedison.theme;
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
+    const parseMarkdownOption = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
+    this.markdownEnabled = Boolean(parseMarkdownOption) && typeof window !== "undefined" && Boolean(window.marked);
+    if (parseMarkdownOption && !this.markdownEnabled && typeof window !== "undefined") {
+      console.warn("Jedison: parseMarkdown is enabled but window.marked was not found. Markdown will not be parsed.");
+    }
     this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.getOption("purifyHtml");
     this.markdownCache = /* @__PURE__ */ new Map();
     this.purifyCache = /* @__PURE__ */ new Map();

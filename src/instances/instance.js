@@ -338,8 +338,19 @@ class Instance extends EventEmitter {
    * @returns {*} The final value after constraint enforcement
    */
   setValue (newValue, notifyParent = true, initiator = 'api') {
+    // A value being set always implies the instance participates in the
+    // result, even if it was previously deactivated (e.g. a non-required
+    // property under x-deactivateNonRequired). Otherwise a setValue() call
+    // reaching an inactive descendant directly (bypassing the parent's
+    // refreshInstances(), which activates children explicitly) updates the
+    // instance's own value while the parent's aggregation keeps ignoring it.
+    const wasInactive = !this.isActive
+    if (wasInactive) {
+      this.isActive = true
+    }
+
     // zero-cost bail-out
-    if (this.value === newValue) {
+    if (this.value === newValue && !wasInactive) {
       return this.value
     }
 
@@ -357,7 +368,7 @@ class Instance extends EventEmitter {
     }
 
     // Only do expensive comparison if values might be different
-    if (!wasPurified && !different(this.value, newValue)) {
+    if (!wasPurified && !different(this.value, newValue) && !wasInactive) {
       return this.value
     }
 

@@ -118,7 +118,11 @@ class Editor {
    */
   init () {
     this.theme = this.instance.jedison.theme
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.getOption('parseMarkdown')
+    const parseMarkdownOption = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.getOption('parseMarkdown')
+    this.markdownEnabled = Boolean(parseMarkdownOption) && typeof window !== 'undefined' && Boolean(window.marked)
+    if (parseMarkdownOption && !this.markdownEnabled && typeof window !== 'undefined') {
+      console.warn('Jedison: parseMarkdown is enabled but window.marked was not found. Markdown will not be parsed.')
+    }
     this.purifyEnabled = getSchemaXOption(this.instance.schema, 'purifyHtml') ?? this.instance.jedison.getOption('purifyHtml')
 
     // remembers markdown/HTML already computed for this editor, so an

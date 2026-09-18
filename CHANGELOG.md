@@ -1,5 +1,8 @@
 ### Unreleased
 
+- Fixed issue #56: calling `setValue()` directly on a deactivated instance (e.g. a non-required property under `x-deactivateNonRequired`) updated its own value but left it inactive, so the parent object's aggregated value never picked up the change - `setValue()` now reactivates the instance, matching what already happens when a value is set through the parent's own `refreshInstances()`
+- Fixed issue #80: `parseMarkdown: true` threw instead of degrading when `window.marked` wasn't loaded - `markdownEnabled` now checks for `window.marked`'s presence the same way `purifyContent()` already checks for `window.DOMPurify`, and warns once instead of crashing
+
 ### 1.22.2
 
 - Fixed issue #78: `x-defaultProperties`/`x-defaultProperty` had no effect on `oneOf`/`anyOf` branches under `x-discriminator` - `InstanceMultiple` was stomping each branch's defaults with an empty placeholder right after creation, also letting properties leak between branches
