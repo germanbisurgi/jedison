@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- background: fixed dark backdrop so the mark reads the same on any page theme -->
+  <rect x="0" y="0" width="800" height="800" rx="120" fill="#1E1F21"/>
+
+  <!-- left brace -->
+  <g transform="translate(150,400)">
+    <path d="M 55,-280
+             C 5,-280 -15,-250 -15,-190
+             L -15,-90
+             C -15,-40 -35,-20 -75,0
+             C -35,20 -15,40 -15,90
+             L -15,190
+             C -15,250 5,280 55,280"
+          fill="none" stroke="#95CFFD" stroke-width="42"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- right brace: same path, mirrored -->
+  <g transform="translate(650,400) scale(-1,1)">
+    <path d="M 55,-280
+             C 5,-280 -15,-250 -15,-190
+             L -15,-90
+             C -15,-40 -35,-20 -75,0
+             C -35,20 -15,40 -15,90
+             L -15,190
+             C -15,250 5,280 55,280"
+          fill="none" stroke="#95CFFD" stroke-width="42"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- center: text input field with cursor + typed text, representing form building -->
+  <g transform="translate(400,400)">
+    <rect x="-155" y="-165" width="310" height="330" rx="42" fill="none" stroke="#95CFFD" stroke-width="42"/>
+    <line x1="-85" y1="-65" x2="-85" y2="65" stroke="#95CFFD" stroke-width="42" stroke-linecap="round"/>
+    <line x1="-15" y1="0" x2="95" y2="0" stroke="#95CFFD" stroke-width="42" stroke-linecap="round"/>
+  </g>
+</svg>

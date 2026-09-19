@@ -1,0 +1,13 @@
+{
+  "title": "Milkdown",
+  "type": "string",
+  "description": "Milkdown is a WYSIWYG markdown editor built on ProseMirror and Remark.",
+  "default": "# Hello Milkdown\n\nThis is **Markdown**.",
+  "minLength": 3,
+  "x-format": "milkdown",
+  "x-info": {
+    "variant": "modal",
+    "title": "### Info Button title",
+    "content": "Info button content"
+  }
+}

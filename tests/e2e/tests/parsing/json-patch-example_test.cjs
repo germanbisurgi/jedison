@@ -16,12 +16,16 @@ Scenario('Should use @expand allOf and oneOf schemas and @mergeAllOf in @jsonPat
   I._waitForElement('#root-0-path')
   I._waitForElement('#root-0-op')
   I._waitForElement('[data-path="#/0/value"]')
+  // "from" belongs to the move/copy branches only - the "add" operation's own
+  // merged schema never declares it. Asserting it here used to pin a value-object
+  // sharing bug in InstanceMultiple where every oneOf branch mutated the same
+  // placeholder, leaking properties across unrelated branches (fixed alongside
+  // issue #78's oneOf/x-discriminator report).
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify([
     {
-      "op": "add",
       "path": "",
-      "value": "",
-      "from": ""
+      "op": "add",
+      "value": ""
     }
   ]))
 })

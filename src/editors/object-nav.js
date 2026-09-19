@@ -9,7 +9,7 @@ import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/sche
 class EditorObjectNav extends EditorObject {
   static resolves (schema) {
     const format = getSchemaXOption(schema, 'format')
-    const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/
+    const regex = /^nav-(horizontal|vertical)$/
     const hasNavFormat = regex.test(format)
     return getSchemaType(schema) === 'object' && hasNavFormat
   }
@@ -67,11 +67,9 @@ class EditorObjectNav extends EditorObject {
     const format = getSchemaXOption(this.instance.schema, 'format')
     const formatParts = format.split('-')
     const variant = formatParts[1]
-    const columns = formatParts[2]
-    const navColumns = variant === 'horizontal' ? 12 : columns ?? 4
-    const row = this.theme.getRow()
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns)
-    const tabContentCol = this.theme.getCol(12, 12, (12 - navColumns), (12 - navColumns))
+    const navMinWidth = getSchemaXOption(this.instance.schema, 'navMinWidth')
+    const navMaxWidth = getSchemaXOption(this.instance.schema, 'navMaxWidth')
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth })
 
     this.navTabContent = this.theme.getTabContent()
     this.navTabList = this.theme.getTabList({ variant: variant })

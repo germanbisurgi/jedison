@@ -38,6 +38,10 @@ export function getSchemaDefault (schema) {
   return clone(schema.default)
 }
 
+export function getSchemaDeprecated (schema) {
+  return isBoolean(schema.deprecated) ? clone(schema.deprecated) : undefined
+}
+
 export function getSchemaDependentRequired (schema) {
   return isObject(schema.dependentRequired) ? clone(schema.dependentRequired) : undefined
 }

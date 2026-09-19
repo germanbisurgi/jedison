@@ -213,6 +213,7 @@ import EditorStringCustom from "./js/custom-editor.js"
 
 import Jedison from '/src/index.js'
 import all from './json/editors/all.json'
+import smoke from './json/editors/smoke.json'
 import array from './json/editors/array.json'
 import arrayButtonsContent from './json/editors/array-buttons-content.json'
 import arrayNoButtons from './json/editors/array-no-buttons.json'
@@ -309,9 +310,11 @@ import messagesArray from './json/validator/messages-array.json'
 import messagesByLanguage from './json/validator/messages-by-language.json'
 import messagesByConstraint from './json/validator/messages-by-constraint.json'
 import choices from './json/plugins/array-choices.json'
+import tomSelect from './json/plugins/array-tom-select.json'
 import awesomplete from './json/plugins/string-awesomplete.json'
 import emojiButton from './json/plugins/string-emoji-button.json'
 import simplemde from './json/plugins/string-simplemde.json'
+import milkdown from './json/plugins/string-milkdown.json'
 import quill from './json/plugins/string-quill.json'
 import jodit from './json/plugins/string-jodit.json'
 import flatpickr from './json/plugins/string-flatpickr.json'
@@ -367,6 +370,9 @@ import issue64 from './json/issues/issue-64.json'
 import issue65 from './json/issues/issue-65.json'
 import issue33 from './json/issues/issue-33.json'
 import issue31 from './json/issues/issue-31.json'
+import issue56 from './json/issues/issue-56.json'
+import issue78 from './json/issues/issue-78.json'
+import issue79 from './json/issues/issue-79.json'
 import joditAsProp from './json/issues/jodit-as-prop.json'
 import perfCheckbox from './json/issues/perf-checkbox.json'
 import perfOneOf from './json/issues/perf-oneOf.json'
@@ -381,7 +387,6 @@ import titleIconClass from './json/features/title-icon-class.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
 import xButtons from './json/features/x-buttons.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
-import experimentalObjectHorizontal from './json/experimental/object-horizontal.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -407,6 +412,7 @@ export default {
         },
         'Editors': {
           'editors/all': all,
+          'editors/smoke': smoke,
           'editors/array': array,
           'editors/array-buttons-content': arrayButtonsContent,
           'editors/array-no-buttons': arrayNoButtons,
@@ -461,6 +467,7 @@ export default {
         },
         'Plugins': {
           'plugins/choices': choices,
+          'plugins/tom-select': tomSelect,
           'plugins/awesomplete': awesomplete,
           'plugins/emoji-button': emojiButton,
           'plugins/flatpickr': flatpickr,
@@ -472,6 +479,7 @@ export default {
           'plugins/jodit': jodit,
           'plugins/quill': quill,
           'plugins/simplemde': simplemde,
+          'plugins/milkdown': milkdown,
           'plugins/raty': raty,
           'plugins/ace': stringAce,
           'plugins/filepond': filepond,
@@ -566,13 +574,15 @@ export default {
           'issue/issue-44': issue44,
           'issue/issue-64': issue64,
           'issue/issue-65': issue65,
+          'issue/issue-56': issue56,
+          'issue/issue-78': issue78,
+          'issue/issue-79': issue79,
           'issue/jodit-as-prop': joditAsProp,
           'issue/perf-checkbox': perfCheckbox,
           'issue/perf-oneOf': perfOneOf,
         },
         'Experimental': {
           'experimental/object-no-card': experimentalObjectNoCard,
-          'experimental/object-horizontal': experimentalObjectHorizontal,
         },
       },
       example: 'examples/character-creator',
@@ -902,7 +912,7 @@ export default {
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
 
-      const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup']
+      const events = ['detectCity', 'insertTemplate', 'clearComment', 'zipLookup', 'fill']
       events.forEach((name) => {
         this.editor.on('jedison:' + name, ({ editor, path }) => {
           console.log('jedison:' + name, { path })
@@ -910,6 +920,7 @@ export default {
           if (name === 'insertTemplate') editor.instance.setValue('Dear customer, thank you for your message.')
           if (name === 'clearComment') editor.instance.setValue('')
           if (name === 'zipLookup') editor.instance.setValue({ ...editor.instance.getValue(), city: 'Stuttgart' })
+          if (name === 'fill') editor.instance.setValue([{ a: 'filled' }])
         })
       })
     },

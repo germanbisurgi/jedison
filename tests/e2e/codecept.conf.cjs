@@ -23,6 +23,14 @@ exports.config = {
     },
     ChaiWrapper: {
       require: 'codeceptjs-chai'
+    },
+    DialogListenerFix: {
+      require: './helpers/DialogListenerFix.cjs'
+    }
+  },
+  plugins: {
+    retryFailedStep: {
+      enabled: true
     }
   }
 }

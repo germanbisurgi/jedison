@@ -9,7 +9,7 @@ import { getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/sche
 class EditorObjectCategories extends EditorObject {
   static resolves (schema) {
     const format = getSchemaXOption(schema, 'format')
-    const regex = /^categories-(horizontal|vertical(?:-\d+)?)$/
+    const regex = /^categories-(horizontal|vertical)$/
     return getSchemaType(schema) === 'object' && regex.test(format)
   }
 
@@ -51,13 +51,11 @@ class EditorObjectCategories extends EditorObject {
 
     const format = getSchemaXOption(this.instance.schema, 'format')
     const formatParts = format.split('-')
-    // format is: categories-horizontal or categories-vertical or categories-vertical-N
+    // format is: categories-horizontal or categories-vertical
     const variant = formatParts[1]
-    const columns = formatParts[2]
-    const navColumns = variant === 'horizontal' ? 12 : columns ?? 4
-    const row = this.theme.getRow()
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns)
-    const tabContentCol = this.theme.getCol(12, 12, (12 - navColumns), (12 - navColumns))
+    const navMinWidth = getSchemaXOption(this.instance.schema, 'navMinWidth')
+    const navMaxWidth = getSchemaXOption(this.instance.schema, 'navMaxWidth')
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth })
     const tabContent = this.theme.getTabContent()
     const tabList = this.theme.getTabList({
       variant: variant

@@ -22,11 +22,13 @@ import EditorArrayTuple from './editors/array-tuple.js'
 import EditorArrayTable from './editors/array-table.js'
 import EditorArrayTableObject from './editors/array-table-object.js'
 import EditorArrayChoices from './editors/array-choices.js'
+import EditorArrayTomSelect from './editors/array-tom-select.js'
 import EditorArrayNav from './editors/array-nav.js'
 import EditorArray from './editors/array.js'
 import EditorMultiple from './editors/multiple.js'
 import EditorNull from './editors/null.js'
 import EditorStringSimpleMDE from './editors/string-simplemde.js'
+import EditorStringMilkdown from './editors/string-milkdown.js'
 import EditorStringQuill from './editors/string-quill.js'
 import EditorStringJodit from './editors/string-jodit.js'
 import EditorStringPickr from './editors/string-pickr.js'
@@ -41,9 +43,13 @@ import EditorNumberRange from './editors/number-range.js'
 import EditorStringAce from './editors/string-ace.js'
 import EditorStringFilepond from './editors/string-filepond.js'
 
+function byPriorityDescending (a, b) {
+  return b.priority() - a.priority()
+}
+
 class UiResolver {
   constructor (options) {
-    this.customEditors = options.customEditors ?? []
+    this.customEditors = [...(options.customEditors ?? [])].sort(byPriorityDescending)
     this.refParser = options.refParser ?? null
 
     this.editors = [
@@ -60,6 +66,7 @@ class UiResolver {
       EditorStringAwesomplete,
       EditorStringEmojiButton,
       EditorStringSimpleMDE,
+      EditorStringMilkdown,
       EditorStringQuill,
       EditorStringJodit,
       EditorStringPickr,
@@ -82,6 +89,7 @@ class UiResolver {
       EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
+      EditorArrayTomSelect,
       EditorArrayCheckboxes,
       EditorArrayTuple,
       EditorArrayTableObject,
@@ -89,19 +97,27 @@ class UiResolver {
       EditorArrayNav,
       EditorArray,
       EditorNull
-    ]
+    ].sort(byPriorityDescending)
   }
 
   getClass (schema) {
     for (const editor of this.customEditors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || 'custom editor'}" threw while resolving the schema and will be skipped.`, e)
       }
     }
 
     for (const editor of this.editors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || 'built-in editor'}" threw while resolving the schema and will be skipped.`, e)
       }
     }
 

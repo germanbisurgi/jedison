@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Test page for jedi">
-    <link rel="icon" type="image/x-icon" href="../images/json-schema.svg">
-    <title>Playground</title>
+    <meta name="description" content="Jedison playground: paste a JSON Schema and get an interactive, validated form instantly. Framework-agnostic, zero runtime dependencies.">
+    <link rel="icon" type="image/svg+xml" href="images/jedison-mark.svg">
+    <title>Jedison Playground</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://germanbisurgi.github.io/jedison/">
+    <meta property="og:title" content="Jedison Playground">
+    <meta property="og:description" content="Paste a JSON Schema and get an interactive, validated form instantly. Framework-agnostic, zero runtime dependencies.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/germanbisurgi/jedison/main/jedison-form.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jedison Playground">
+    <meta name="twitter:description" content="Paste a JSON Schema and get an interactive, validated form instantly. Framework-agnostic, zero runtime dependencies.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/germanbisurgi/jedison/main/jedison-form.png">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/raty-js@4.3.0/src/raty.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -13,6 +24,7 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css">
@@ -29,6 +41,7 @@
 <script src="https://cdn.jsdelivr.net/npm/raty-js@4.3.0/build/raty.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.4.2/Sortable.min.js"></script><!--  sortable 1.4.2 doesn't break checkboxes -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjs@latest/lib/browser/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/6.1.0/imask.min.js"></script><!-- this version works with 0,X numbers -->

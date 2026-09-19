@@ -1,3 +1,59 @@
+### Unreleased
+
+### 1.22.3
+
+- Fixed issue #56: calling `setValue()` directly on a deactivated instance (e.g. a non-required property under `x-deactivateNonRequired`) updated its own value but left it inactive, so the parent object's aggregated value never picked up the change - `setValue()` now reactivates the instance, matching what already happens when a value is set through the parent's own `refreshInstances()`
+- Fixed issue #80: `parseMarkdown: true` threw instead of degrading when `window.marked` wasn't loaded - `markdownEnabled` now checks for `window.marked`'s presence the same way `purifyContent()` already checks for `window.DOMPurify`, and warns once instead of crashing
+
+### 1.22.2
+
+- Fixed issue #78: `x-defaultProperties`/`x-defaultProperty` had no effect on `oneOf`/`anyOf` branches under `x-discriminator` - `InstanceMultiple` was stomping each branch's defaults with an empty placeholder right after creation, also letting properties leak between branches
+
+### 1.22.1
+
+- Fixed issue #79: `x-buttons` on an array editor (`nav-horizontal`/`nav-vertical`/default) never fired - `refreshUI()` cleared the button's click listener right after it was registered. Schema-button listeners now live in their own list, separate from the one array editors clear on every refresh
+- The object editor's "Add property" button now has its own icon (a circled plus) instead of reusing the array's plain "Add item" plus, which made the two easy to confuse
+
+### 1.22.0
+
+- Added issue #78: `x-defaultProperties` lets an object schema whitelist which optional properties show by default, without needing the properties-toggle opt-in
+- Added issue #78: `x-defaultProperty` lets a property override that whitelist on its own schema, so a property reused via `$ref` can decide its own default visibility per consumer
+
+### 1.21.1
+
+- security updates
+
+### 1.21.0
+
+- Fixed issue #70: `dist` now rebuilds on version bump and before publish, so `Jedison.version` matches the package version
+- Added issue #71: custom/built-in editors can set a `static priority()` to control resolution order
+- Added issue #72: `deprecated: true` now adds a `jedi-deprecated` class to the field's container
+
+### 1.20.2
+
+- Fixed issue #69: exposed a runtime `version`, contained editor-resolution errors, fixed the `constraints` default type mismatch
+
+### 1.20.1
+
+- Fixed issue #68: titles/descriptions no longer re-parsed through `marked`/`DOMPurify` on every change
+
+### 1.20.0
+
+- Added Tom Select editor (`x-format: "tom-select"`)
+- Added RefParser constructor options
+- Fixed awesomplete issue #67
+- Fixed security updates
+
+### 1.19.0
+
+- Added Milkdown editor (`x-format: "milkdown"`), a WYSIWYG markdown editor built on ProseMirror and Remark
+- security updates
+
+### 1.18.0
+
+- Vertical nav now shrinks to fit its widest label instead of a fixed ~33% column; added `x-navMinWidth`/`x-navMaxWidth`
+- Vertical nav now stacks full-width on narrow containers, via a container query
+
 ### 1.17.0
 
 - Added `applyOverlay` helper: apply an OpenAPI-Overlay-style document (ordered `update`/`remove` actions targeted by a JSONPath subset) to layer presentation directives (`x-format`, `x-hidden`, …) onto a schema without editing the source

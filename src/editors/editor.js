@@ -37,6 +37,12 @@ class Editor {
      */
     this.readOnly = this.instance.isReadOnly()
 
+    /**
+     * Deprecated status for this editor user interface
+     * @type {boolean}
+     */
+    this.deprecated = this.instance.isDeprecated()
+
     this.showingValidationErrors = false
 
     this.markdownEnabled = false
@@ -51,10 +57,21 @@ class Editor {
      */
     this.storedEventListeners = []
 
+    /**
+     * Event listeners for schema-defined buttons (`x-buttons`). Kept separate
+     * from storedEventListeners because some editors' refreshUI() (e.g.
+     * EditorArrayNav) clears that list on every refresh, while the buttons
+     * live on control.container which refreshUI() never rebuilds - see
+     * issue #79.
+     * @type {Array}
+     */
+    this.schemaButtonListeners = []
+
     this.init()
     this.build()
     this.setAttributes()
     this.setReadOnlyAttribute()
+    this.setDeprecatedAttribute()
     this.addEventListeners()
     this.setVisibility()
     this.setContainerAttributes()
@@ -78,6 +95,16 @@ class Editor {
   static resolves (schema) {}
 
   /**
+   * Resolution priority used by UiResolver to order candidate editors before
+   * scanning them with resolves(). Higher values are tried first. Editors
+   * that don't override this share the default and keep their relative
+   * declaration order (stable sort).
+   */
+  static priority () {
+    return 0
+  }
+
+  /**
    * Whether this editor already renders a heading for each of its children
    * (e.g. an accordion toggle or a nav tab label), so a child editor can
    * skip drawing its own duplicate heading/panel when embedded here.
@@ -91,12 +118,21 @@ class Editor {
    */
   init () {
     this.theme = this.instance.jedison.theme
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.getOption('parseMarkdown')
+    const parseMarkdownOption = getSchemaXOption(this.instance.schema, 'parseMarkdown') ?? this.instance.jedison.getOption('parseMarkdown')
+    this.markdownEnabled = Boolean(parseMarkdownOption) && typeof window !== 'undefined' && Boolean(window.marked)
+    if (parseMarkdownOption && !this.markdownEnabled && typeof window !== 'undefined') {
+      console.warn('Jedison: parseMarkdown is enabled but window.marked was not found. Markdown will not be parsed.')
+    }
     this.purifyEnabled = getSchemaXOption(this.instance.schema, 'purifyHtml') ?? this.instance.jedison.getOption('purifyHtml')
+
+    // remembers markdown/HTML already computed for this editor, so an
+    // unrelated value change elsewhere doesn't force a re-parse here
+    this.markdownCache = new Map()
+    this.purifyCache = new Map()
   }
 
   /**
-   * Gets the json path level by counting how many "/" it has
+   * Gets the JSON Pointer level by counting how many "/" it has
    */
   getLevel () {
     return (this.instance.path.match(/\//g) || []).length
@@ -153,8 +189,9 @@ class Editor {
    *   `jedison.on('jedison:<name>', ({ jedison, editor, path }) => ...)`. The
    *   listener map is private to the instance, so the payload is not exposed to
    *   unrelated scripts on the page (F3 contained).
-   * - Click listeners are registered through storedEventListeners so destroy()
-   *   cleans them up.
+   * - Click listeners are registered through schemaButtonListeners so
+   *   destroy() cleans them up, without being cleared by an editor's
+   *   refreshUI() in the meantime (issue #79).
    */
   appendSchemaButtons () {
     const buttons = getSchemaXOption(this.instance.schema, 'buttons')
@@ -197,7 +234,7 @@ class Editor {
 
       button.addEventListener('click', handler)
 
-      this.storedEventListeners.push({
+      this.schemaButtonListeners.push({
         element: button,
         eventType: 'click',
         handler
@@ -242,6 +279,18 @@ class Editor {
     }
   }
 
+  /**
+   * Marks the control container so integrators can target deprecated fields
+   * via CSS/JS and decide what to do with them (badge, hide, warn, etc.).
+   * Theme-agnostic: operates on the built DOM rather than the theme's
+   * control-building methods, so it applies uniformly across all themes.
+   */
+  setDeprecatedAttribute () {
+    if (this.deprecated) {
+      this.control.container.classList.add('jedi-deprecated')
+    }
+  }
+
   getIdFromPath (path) {
     const optionId = this.instance.jedison.getOption('id')
     return optionId ? optionId + '-' + pathToAttribute(path) : pathToAttribute(path)
@@ -275,6 +324,23 @@ class Editor {
       })
     }
     this.storedEventListeners = []
+  }
+
+  /**
+   * Clears the click listeners registered by appendSchemaButtons(). Separate
+   * from clearStoredEventListeners() so editors that clear the latter on
+   * every refreshUI() (e.g. EditorArrayNav) don't also detach the schema
+   * buttons, which are only ever appended once and never rebuilt (issue #79).
+   */
+  clearSchemaButtonListeners () {
+    if (this.schemaButtonListeners) {
+      this.schemaButtonListeners.forEach(listener => {
+        if (listener.element && listener.handler) {
+          listener.element.removeEventListener(listener.eventType || 'click', listener.handler)
+        }
+      })
+    }
+    this.schemaButtonListeners = []
   }
 
   /**
@@ -374,7 +440,15 @@ class Editor {
    */
   purifyContent (content, domPurifyOptions) {
     if (this.instance.jedison.getOption('purifyHtml') && typeof window !== 'undefined' && window.DOMPurify) {
-      return window.DOMPurify.sanitize(content, domPurifyOptions)
+      const cacheKey = JSON.stringify([content, domPurifyOptions])
+
+      if (this.purifyCache.has(cacheKey)) {
+        return this.purifyCache.get(cacheKey)
+      }
+
+      const clean = window.DOMPurify.sanitize(content, domPurifyOptions)
+      this.purifyCache.set(cacheKey, clean)
+      return clean
     } else {
       const tmp = document.createElement('div')
       tmp.innerHTML = content
@@ -383,7 +457,13 @@ class Editor {
   }
 
   getHtmlFromMarkdown (content) {
-    return window.marked.parse(content)
+    if (this.markdownCache.has(content)) {
+      return this.markdownCache.get(content)
+    }
+
+    const html = window.marked.parse(content)
+    this.markdownCache.set(content, html)
+    return html
   }
 
   getTitle () {
@@ -565,6 +645,7 @@ class Editor {
    */
   destroy () {
     this.clearStoredEventListeners()
+    this.clearSchemaButtonListeners()
 
     if (this.control.container && this.control.container.parentNode) {
       this.control.container.parentNode.removeChild(this.control.container)

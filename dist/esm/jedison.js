@@ -350,6 +350,9 @@ function getSchemaContains(schema) {
 function getSchemaDefault(schema) {
   return clone(schema.default);
 }
+function getSchemaDeprecated(schema) {
+  return isBoolean(schema.deprecated) ? clone(schema.deprecated) : void 0;
+}
 function getSchemaDependentRequired(schema) {
   return isObject$1(schema.dependentRequired) ? clone(schema.dependentRequired) : void 0;
 }
@@ -1721,6 +1724,10 @@ class Validator {
   constructor(config = {}) {
     this.refParser = config.refParser;
     this.constraints = config.constraints ?? {};
+    if (isArray(this.constraints)) {
+      console.warn('Jedison: option "constraints" must be an object keyed by constraint name, not an array. Ignoring the value.');
+      this.constraints = {};
+    }
     this.assertFormat = config.assertFormat ? config.assertFormat : false;
     this.translator = config.translator ? config.translator : false;
     this.subErrors = config.subErrors ?? false;
@@ -1906,11 +1913,15 @@ class Instance extends EventEmitter {
   setUI() {
     if (this.jedison.isEditor) {
       const EditorClass = this.jedison.uiResolver.getClass(this.schema);
+      if (!EditorClass) {
+        console.error(`Jedison: no editor could be resolved for the schema at "${this.path}". The field will not be rendered.`, this.schema);
+        return;
+      }
       this.ui = new EditorClass(this);
     }
   }
   /**
-   * Return the last part of the instance path
+   * Return the last part of the instance JSON Pointer
    */
   getKey() {
     return this.key;
@@ -1922,7 +1933,7 @@ class Instance extends EventEmitter {
     return this.schema;
   }
   /**
-   * Adds a child instance pointer to the instance list
+   * Adds a child instance reference to the instance list
    */
   register() {
     this.jedison.register(this);
@@ -1936,7 +1947,7 @@ class Instance extends EventEmitter {
     this.children.forEach(registerChildRecursive);
   }
   /**
-   * Deletes a child instance pointer from the instance list
+   * Deletes a child instance reference from the instance list
    */
   unregister() {
     this.jedison.unregister(this);
@@ -2068,7 +2079,11 @@ class Instance extends EventEmitter {
    * @returns {*} The final value after constraint enforcement
    */
   setValue(newValue, notifyParent = true, initiator = "api") {
-    if (this.value === newValue) {
+    const wasInactive = !this.isActive;
+    if (wasInactive) {
+      this.isActive = true;
+    }
+    if (this.value === newValue && !wasInactive) {
       return this.value;
     }
     const purifiedValue = this.purify(newValue);
@@ -2081,7 +2096,7 @@ class Instance extends EventEmitter {
         newValue = schemaConst;
       }
     }
-    if (!wasPurified && !different(this.value, newValue)) {
+    if (!wasPurified && !different(this.value, newValue) && !wasInactive) {
       return this.value;
     }
     this.value = newValue;
@@ -2160,6 +2175,15 @@ class Instance extends EventEmitter {
     return this.parent ? this.parent.isReadOnly() : false;
   }
   /**
+   * Returns true if this instance's own schema is marked deprecated.
+   * Unlike isReadOnly(), this does not cascade to/from the parent: per the
+   * JSON Schema spec, "deprecated" applies only to the exact instance
+   * location it's declared on.
+   */
+  isDeprecated() {
+    return getSchemaDeprecated(this.schema) === true;
+  }
+  /**
    * Destroy the instance and it's children
    */
   destroy() {
@@ -2186,16 +2210,19 @@ class Editor {
     this.control = null;
     this.disabled = false;
     this.readOnly = this.instance.isReadOnly();
+    this.deprecated = this.instance.isDeprecated();
     this.showingValidationErrors = false;
     this.markdownEnabled = false;
     this.purifyEnabled = false;
     this.title = null;
     this.description = null;
     this.storedEventListeners = [];
+    this.schemaButtonListeners = [];
     this.init();
     this.build();
     this.setAttributes();
     this.setReadOnlyAttribute();
+    this.setDeprecatedAttribute();
     this.addEventListeners();
     this.setVisibility();
     this.setContainerAttributes();
@@ -2214,6 +2241,15 @@ class Editor {
   static resolves(schema) {
   }
   /**
+   * Resolution priority used by UiResolver to order candidate editors before
+   * scanning them with resolves(). Higher values are tried first. Editors
+   * that don't override this share the default and keep their relative
+   * declaration order (stable sort).
+   */
+  static priority() {
+    return 0;
+  }
+  /**
    * Whether this editor already renders a heading for each of its children
    * (e.g. an accordion toggle or a nav tab label), so a child editor can
    * skip drawing its own duplicate heading/panel when embedded here.
@@ -2226,11 +2262,17 @@ class Editor {
    */
   init() {
     this.theme = this.instance.jedison.theme;
-    this.markdownEnabled = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
+    const parseMarkdownOption = getSchemaXOption(this.instance.schema, "parseMarkdown") ?? this.instance.jedison.getOption("parseMarkdown");
+    this.markdownEnabled = Boolean(parseMarkdownOption) && typeof window !== "undefined" && Boolean(window.marked);
+    if (parseMarkdownOption && !this.markdownEnabled && typeof window !== "undefined") {
+      console.warn("Jedison: parseMarkdown is enabled but window.marked was not found. Markdown will not be parsed.");
+    }
     this.purifyEnabled = getSchemaXOption(this.instance.schema, "purifyHtml") ?? this.instance.jedison.getOption("purifyHtml");
+    this.markdownCache = /* @__PURE__ */ new Map();
+    this.purifyCache = /* @__PURE__ */ new Map();
   }
   /**
-   * Gets the json path level by counting how many "/" it has
+   * Gets the JSON Pointer level by counting how many "/" it has
    */
   getLevel() {
     return (this.instance.path.match(/\//g) || []).length;
@@ -2281,8 +2323,9 @@ class Editor {
    *   `jedison.on('jedison:<name>', ({ jedison, editor, path }) => ...)`. The
    *   listener map is private to the instance, so the payload is not exposed to
    *   unrelated scripts on the page (F3 contained).
-   * - Click listeners are registered through storedEventListeners so destroy()
-   *   cleans them up.
+   * - Click listeners are registered through schemaButtonListeners so
+   *   destroy() cleans them up, without being cleared by an editor's
+   *   refreshUI() in the meantime (issue #79).
    */
   appendSchemaButtons() {
     const buttons = getSchemaXOption(this.instance.schema, "buttons");
@@ -2312,7 +2355,7 @@ class Editor {
         });
       };
       button.addEventListener("click", handler);
-      this.storedEventListeners.push({
+      this.schemaButtonListeners.push({
         element: button,
         eventType: "click",
         handler
@@ -2351,6 +2394,17 @@ class Editor {
       });
     }
   }
+  /**
+   * Marks the control container so integrators can target deprecated fields
+   * via CSS/JS and decide what to do with them (badge, hide, warn, etc.).
+   * Theme-agnostic: operates on the built DOM rather than the theme's
+   * control-building methods, so it applies uniformly across all themes.
+   */
+  setDeprecatedAttribute() {
+    if (this.deprecated) {
+      this.control.container.classList.add("jedi-deprecated");
+    }
+  }
   getIdFromPath(path) {
     const optionId = this.instance.jedison.getOption("id");
     return optionId ? optionId + "-" + pathToAttribute(path) : pathToAttribute(path);
@@ -2381,6 +2435,22 @@ class Editor {
       });
     }
     this.storedEventListeners = [];
+  }
+  /**
+   * Clears the click listeners registered by appendSchemaButtons(). Separate
+   * from clearStoredEventListeners() so editors that clear the latter on
+   * every refreshUI() (e.g. EditorArrayNav) don't also detach the schema
+   * buttons, which are only ever appended once and never rebuilt (issue #79).
+   */
+  clearSchemaButtonListeners() {
+    if (this.schemaButtonListeners) {
+      this.schemaButtonListeners.forEach((listener) => {
+        if (listener.element && listener.handler) {
+          listener.element.removeEventListener(listener.eventType || "click", listener.handler);
+        }
+      });
+    }
+    this.schemaButtonListeners = [];
   }
   /**
    * Shows validation error messages in the editor container.
@@ -2462,7 +2532,13 @@ class Editor {
    */
   purifyContent(content, domPurifyOptions) {
     if (this.instance.jedison.getOption("purifyHtml") && typeof window !== "undefined" && window.DOMPurify) {
-      return window.DOMPurify.sanitize(content, domPurifyOptions);
+      const cacheKey = JSON.stringify([content, domPurifyOptions]);
+      if (this.purifyCache.has(cacheKey)) {
+        return this.purifyCache.get(cacheKey);
+      }
+      const clean = window.DOMPurify.sanitize(content, domPurifyOptions);
+      this.purifyCache.set(cacheKey, clean);
+      return clean;
     } else {
       const tmp = document.createElement("div");
       tmp.innerHTML = content;
@@ -2470,7 +2546,12 @@ class Editor {
     }
   }
   getHtmlFromMarkdown(content) {
-    return window.marked.parse(content);
+    if (this.markdownCache.has(content)) {
+      return this.markdownCache.get(content);
+    }
+    const html = window.marked.parse(content);
+    this.markdownCache.set(content, html);
+    return html;
   }
   getTitle() {
     let titleFromSchema = false;
@@ -2616,6 +2697,7 @@ class Editor {
    */
   destroy() {
     this.clearStoredEventListeners();
+    this.clearSchemaButtonListeners();
     if (this.control.container && this.control.container.parentNode) {
       this.control.container.parentNode.removeChild(this.control.container);
     }
@@ -2848,6 +2930,15 @@ class InstanceIfThenElse extends Instance {
   }
 }
 class InstanceMultiple extends Instance {
+  // A Multiple's real value always comes from resolving the active branch
+  // (see switchInstance()) - never from its own wrapper schema. The base
+  // class's type-based placeholder (e.g. {} when the wrapper also declares
+  // "type": "object" alongside oneOf, a common x-discriminator pattern) is
+  // not real data, but prepare()/switchInstance() below can't tell it apart
+  // from one - propagating it stomps the freshly built branch's own
+  // x-defaultProperties-activated children right after creation.
+  setInitialValue() {
+  }
   prepare() {
     this.instances = [];
     this.activeInstance = null;
@@ -3055,8 +3146,19 @@ class InstanceObject extends Instance {
         if (!isReq && isRecursive) {
           musstCreateChild = false;
         }
+        const defaultProperties = getSchemaXOption(this.schema, "defaultProperties");
+        const hasDefaultProperties = isArray(defaultProperties);
+        const propertyDefaultProperty = getSchemaXOption(schema, "defaultProperty");
+        const hasPropertyDefaultProperty = isSet(propertyDefaultProperty);
+        const isDefaultProperty = hasPropertyDefaultProperty ? propertyDefaultProperty === true : hasDefaultProperties && defaultProperties.includes(key);
+        if (!isReq && (hasDefaultProperties || hasPropertyDefaultProperty) && !isDefaultProperty) {
+          musstCreateChild = false;
+        }
+        if (!isReq && !isRecursive && isDefaultProperty) {
+          musstCreateChild = true;
+        }
         if (musstCreateChild) {
-          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : void 0);
+          this.createChild(schema, key, hasOwn(initialValue, key) ? initialValue[key] : void 0, isDefaultProperty);
         }
       });
     }
@@ -3416,6 +3518,7 @@ const glyphicons = {
   properties: "glyphicon glyphicon-list",
   delete: "glyphicon glyphicon-trash",
   add: "glyphicon glyphicon-plus",
+  addProperty: "glyphicon glyphicon-plus-sign",
   moveUp: "glyphicon glyphicon-arrow-up",
   moveDown: "glyphicon glyphicon-arrow-down",
   collapse: "glyphicon glyphicon-chevron-down",
@@ -3433,6 +3536,7 @@ const bootstrapIcons = {
   properties: "bi bi-card-list",
   delete: "bi bi-trash2",
   add: "bi bi-plus",
+  addProperty: "bi bi-plus-circle",
   moveUp: "bi bi-arrow-up",
   moveDown: "bi bi-arrow-down",
   collapse: "bi bi-chevron-down",
@@ -3449,6 +3553,7 @@ const fontAwesome3 = {
   properties: "icon-list",
   delete: "icon-trash",
   add: "icon-plus",
+  addProperty: "icon-plus-sign",
   moveUp: "icon-arrow-up",
   moveDown: "icon-arrow-down",
   collapse: "icon-chevron-down",
@@ -3465,6 +3570,7 @@ const fontAwesome4 = {
   properties: "fa fa-list",
   delete: "fa fa-trash-o",
   add: "fa fa-plus",
+  addProperty: "fa fa-plus-circle",
   moveUp: "fa fa-arrow-up",
   moveDown: "fa fa-arrow-down",
   collapse: "fa fa-chevron-down",
@@ -3481,6 +3587,7 @@ const fontAwesome5 = {
   properties: "fas fa-list",
   delete: "fas fa-trash",
   add: "fas fa-plus",
+  addProperty: "fas fa-plus-circle",
   moveUp: "fas fa-arrow-up",
   moveDown: "fas fa-arrow-down",
   collapse: "fas fa-chevron-down",
@@ -3497,6 +3604,7 @@ const fontAwesome6 = {
   properties: "fa-solid fa-list",
   delete: "fa-solid fa-trash",
   add: "fa-solid fa-plus",
+  addProperty: "fa-solid fa-circle-plus",
   moveUp: "fa-solid fa-arrow-up",
   moveDown: "fa-solid fa-arrow-down",
   collapse: "fa-solid fa-chevron-down",
@@ -3888,6 +3996,10 @@ class EditorStringAwesomplete extends EditorString {
     this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
   }
   addEventListeners() {
+    const eventType = this.getValidationEventType();
+    this.control.input.addEventListener(eventType, () => {
+      this.instance.setValue(this.control.input.value, true, "user");
+    });
     this.control.input.addEventListener("awesomplete-selectcomplete", () => {
       this.instance.setValue(this.control.input.value, true, "user");
     });
@@ -4547,7 +4659,7 @@ class EditorObjectGrid extends EditorObject {
 class EditorObjectCategories extends EditorObject {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^categories-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^categories-(horizontal|vertical)$/;
     return getSchemaType(schema) === "object" && regex.test(format2);
   }
   init() {
@@ -4586,11 +4698,9 @@ class EditorObjectCategories extends EditorObject {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -4669,7 +4779,7 @@ class EditorObjectCategories extends EditorObject {
 class EditorObjectNav extends EditorObject {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^nav-(horizontal|vertical)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "object" && hasNavFormat;
   }
@@ -4717,11 +4827,9 @@ class EditorObjectNav extends EditorObject {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     this.navTabContent = this.theme.getTabContent();
     this.navTabList = this.theme.getTabList({ variant });
     row.appendChild(tabListCol);
@@ -5681,10 +5789,125 @@ class EditorArrayChoices extends Editor {
     super.destroy();
   }
 }
+class EditorArrayTomSelect extends Editor {
+  static resolves(schema) {
+    const hasTomSelectFormat = getSchemaXOption(schema, "format") === "tom-select";
+    const tomSelectInstalled = window.TomSelect;
+    const schemaType = getSchemaType(schema);
+    const schemaItems = getSchemaItems(schema);
+    const schemaItemsType = isSet(schemaItems) && getSchemaType(schemaItems);
+    const isArrayType = isSet(schemaType) && schemaType === "array";
+    const isUniqueItems = getSchemaUniqueItems(schema) === true;
+    const hasTypes = isSet(schemaItems) && isSet(schemaItemsType);
+    const validTypes = ["string", "number", "integer"];
+    const hasValidItemType = isSet(schemaItems) && isSet(schemaItemsType) && (validTypes.includes(schemaItemsType) || isArray(schemaItemsType) && schemaItemsType.some((type2) => validTypes.includes(type2)));
+    return hasTomSelectFormat && tomSelectInstalled && isArrayType && isUniqueItems && hasTypes && hasValidItemType;
+  }
+  init() {
+    super.init();
+    this.setupEnumSource();
+  }
+  setupEnumSource() {
+    const enumSourceRaw = getSchemaXOption(this.instance.schema, "enumSource");
+    if (!isSet(enumSourceRaw)) return;
+    const enumSource = resolveInstancePath(this.instance.path, enumSourceRaw);
+    const src = this.instance.jedison.getInstance(enumSource);
+    if (src) this.enumSourceValues = src.getValue();
+    this.instance.jedison.watch(enumSource, () => {
+      if (!this.control) return;
+      const s = this.instance.jedison.getInstance(enumSource);
+      if (s) {
+        this.enumSourceValues = s.getValue();
+        this.refreshOptions();
+      }
+    });
+  }
+  getEnumSourceValues() {
+    if (this.enumSourceValues !== void 0) {
+      if (isArray(this.enumSourceValues)) return this.enumSourceValues;
+      if (isObject$1(this.enumSourceValues)) return Object.keys(this.enumSourceValues);
+      return [];
+    }
+    return this.instance.schema.items && this.instance.schema.items.enum || [];
+  }
+  refreshOptions() {
+    if (!this.tomSelectInstance) return;
+    const values = this.getEnumSourceValues();
+    const currentValue = this.instance.getValue();
+    const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
+    const options = values.map((item, index2) => ({
+      value: item,
+      text: itemEnumTitles[index2] || item
+    }));
+    this.tomSelectInstance.clearOptions();
+    this.tomSelectInstance.addOptions(options);
+    this.tomSelectInstance.setValue(isArray(currentValue) ? currentValue : [], true);
+  }
+  build() {
+    this.control = this.theme.getSelectControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      values: [],
+      titles: [],
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    this.control.input.setAttribute("multiple", "");
+    try {
+      const value = this.instance.getValue();
+      const itemEnum = this.getEnumSourceValues();
+      const itemEnumTitles = getSchemaXOption(this.instance.schema.items || {}, "enumTitles") || [];
+      const tomSelectOptions = getSchemaXOption(this.instance.schema, "tomSelectOptions") ?? {};
+      if (this.tomSelectInstance) {
+        this.tomSelectInstance.destroy();
+      }
+      this.options = itemEnum.map((item, index2) => ({
+        value: item,
+        text: itemEnumTitles[index2] || item
+      }));
+      this.tomSelectInstance = new window.TomSelect(this.control.input, {
+        plugins: ["drag_drop", "remove_button", "caret_position"],
+        options: this.options,
+        items: isArray(value) ? value : [],
+        ...tomSelectOptions
+      });
+    } catch (e) {
+      console.error("Tom Select is not available or not loaded correctly.", e);
+    }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalSelectControl(this.control, labelCol, inputCol);
+  }
+  addEventListeners() {
+    this.tomSelectInstance.on("change", (value) => {
+      if (JSON.stringify(value) !== JSON.stringify(this.instance.getValue())) {
+        this.instance.setValue(value, true, "user");
+      }
+    });
+  }
+  refreshDisabledState() {
+    if (this.disabled || this.readOnly) {
+      this.tomSelectInstance.disable();
+    } else {
+      this.tomSelectInstance.enable();
+    }
+  }
+  refreshUI() {
+    super.refreshUI();
+    const value = this.instance.getValue();
+    this.tomSelectInstance.setValue(isArray(value) ? value : [], true);
+  }
+  destroy() {
+    this.tomSelectInstance.destroy();
+    super.destroy();
+  }
+}
 class EditorArrayNav extends EditorArray {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
-    const regex = /^nav-(horizontal|vertical(?:-\d+)?)$/;
+    const regex = /^nav-(horizontal|vertical)$/;
     const hasNavFormat = regex.test(format2);
     return getSchemaType(schema) === "array" && hasNavFormat;
   }
@@ -5736,11 +5959,9 @@ class EditorArrayNav extends EditorArray {
     const format2 = getSchemaXOption(this.instance.schema, "format");
     const formatParts = format2.split("-");
     const variant = formatParts[1];
-    const columns = formatParts[2];
-    const navColumns = variant === "horizontal" ? 12 : columns ?? 4;
-    const row = this.theme.getRow();
-    const tabListCol = this.theme.getCol(12, 12, navColumns, navColumns);
-    const tabContentCol = this.theme.getCol(12, 12, 12 - navColumns, 12 - navColumns);
+    const navMinWidth = getSchemaXOption(this.instance.schema, "navMinWidth");
+    const navMaxWidth = getSchemaXOption(this.instance.schema, "navMaxWidth");
+    const { row, tabListCol, tabContentCol } = this.theme.getNavRow(variant, { minWidth: navMinWidth, maxWidth: navMaxWidth });
     const tabContent = this.theme.getTabContent();
     const tabList = this.theme.getTabList({
       variant
@@ -6056,6 +6277,79 @@ class EditorStringSimpleMDE extends EditorString {
     if (this.aceEditor) {
       this.aceEditor.destroy();
       this.aceEditor.container.remove();
+    }
+    super.destroy();
+  }
+}
+class EditorStringMilkdown extends EditorString {
+  static resolves(schema) {
+    const format2 = getSchemaXOption(schema, "format");
+    return isSet(format2) && format2 === "milkdown" && window.Milkdown && window.Milkdown.Crepe && getSchemaType(schema) === "string";
+  }
+  build() {
+    this.control = this.theme.getPlaceholderControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    this.mounted = false;
+    try {
+      const milkdownOptions = getSchemaXOption(this.instance.schema, "milkdown") ?? {};
+      const { Crepe } = window.Milkdown;
+      this.crepe = new Crepe({
+        ...milkdownOptions,
+        root: this.control.placeholder,
+        defaultValue: this.instance.getValue() ?? ""
+      });
+      this.crepe.on((api) => {
+        api.markdownUpdated((ctx, markdown) => {
+          if (markdown !== this.instance.getValue()) {
+            this.syncingFromEditor = true;
+            this.instance.setValue(markdown, true, "user");
+            this.syncingFromEditor = false;
+          }
+        });
+      });
+      this.crepe.create().then(() => {
+        this.mounted = true;
+        this.refreshDisabledState();
+      }).catch((e) => console.error("Milkdown failed to mount.", e));
+    } catch (e) {
+      console.error("Milkdown is not available or not loaded correctly.", e);
+    }
+  }
+  adaptForHorizontal(labelCol, inputCol) {
+    this.theme.adaptForHorizontalInputControl(this.control, labelCol, inputCol);
+  }
+  addEventListeners() {
+  }
+  refreshDisabledState() {
+    if (this.crepe && this.mounted) {
+      this.crepe.setReadonly(this.disabled || this.readOnly);
+    }
+  }
+  refreshUI() {
+    super.refreshUI();
+    if (!this.crepe || !this.mounted || this.syncingFromEditor) {
+      return;
+    }
+    const value = this.instance.getValue() ?? "";
+    if (value !== this.crepe.getMarkdown()) {
+      try {
+        const { replaceAll: replaceAll2 } = window.Milkdown;
+        this.crepe.editor.action(replaceAll2(value));
+      } catch (e) {
+        console.error("Milkdown could not apply the updated value.", e);
+      }
+    }
+  }
+  destroy() {
+    if (this.crepe) {
+      this.crepe.destroy().catch(() => {
+      });
     }
     super.destroy();
   }
@@ -6870,9 +7164,12 @@ class EditorStringFilepond extends EditorString {
     super.destroy();
   }
 }
+function byPriorityDescending(a, b) {
+  return b.priority() - a.priority();
+}
 class UiResolver {
   constructor(options) {
-    this.customEditors = options.customEditors ?? [];
+    this.customEditors = [...options.customEditors ?? []].sort(byPriorityDescending);
     this.refParser = options.refParser ?? null;
     this.editors = [
       EditorNumberInputNullable,
@@ -6888,6 +7185,7 @@ class UiResolver {
       EditorStringAwesomplete,
       EditorStringEmojiButton,
       EditorStringSimpleMDE,
+      EditorStringMilkdown,
       EditorStringQuill,
       EditorStringJodit,
       EditorStringPickr,
@@ -6910,6 +7208,7 @@ class UiResolver {
       EditorObjectRadios,
       EditorObject,
       EditorArrayChoices,
+      EditorArrayTomSelect,
       EditorArrayCheckboxes,
       EditorArrayTuple,
       EditorArrayTableObject,
@@ -6917,17 +7216,25 @@ class UiResolver {
       EditorArrayNav,
       EditorArray,
       EditorNull
-    ];
+    ].sort(byPriorityDescending);
   }
   getClass(schema) {
     for (const editor of this.customEditors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor;
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor;
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || "custom editor"}" threw while resolving the schema and will be skipped.`, e);
       }
     }
     for (const editor of this.editors) {
-      if (editor.resolves(schema, this.refParser)) {
-        return editor;
+      try {
+        if (editor.resolves(schema, this.refParser)) {
+          return editor;
+        }
+      } catch (e) {
+        console.error(`Editor "${editor.name || "built-in editor"}" threw while resolving the schema and will be skipped.`, e);
       }
     }
     return null;
@@ -7213,6 +7520,7 @@ class JsonWalker {
     }
   }
 }
+const version = "1.22.3";
 class Jedison extends EventEmitter {
   /**
    * Creates a Jedison instance.
@@ -7253,7 +7561,7 @@ class Jedison extends EventEmitter {
       data: void 0,
       assertFormat: false,
       customEditors: [],
-      constraints: [],
+      constraints: {},
       hiddenInputAttributes: {},
       id: "",
       radiosInline: false,
@@ -7458,13 +7766,13 @@ class Jedison extends EventEmitter {
     this.hiddenInput.value = JSON.stringify(this.getValue());
   }
   /**
-   * Adds a child instance pointer to the instances list
+   * Adds a child instance reference to the instances list
    */
   register(instance) {
     this.instances.set(instance.path, instance);
   }
   /**
-   * Deletes a child instance pointer from the instances list
+   * Deletes a child instance reference from the instances list
    */
   unregister(instance) {
     this.instances.delete(instance.path);
@@ -7620,7 +7928,7 @@ class Jedison extends EventEmitter {
     this.updateInstancesWatchedData();
   }
   /**
-   * Returns an instance by path
+   * Returns an instance by JSON Pointer
    * @return {*}
    */
   getInstance(path) {
@@ -7639,8 +7947,8 @@ class Jedison extends EventEmitter {
     return this.options[canonical];
   }
   /**
-   * Navigates to a specific instance by path, activating any ancestor nav/categories tabs as needed.
-   * @param {string} path - The instance path (e.g. '#/address/street')
+   * Navigates to a specific instance by JSON Pointer, activating any ancestor nav/categories tabs as needed.
+   * @param {string} path - The instance JSON Pointer (e.g. '#/address/street')
    */
   navigateTo(path) {
     if (!this.isEditor) return;
@@ -7734,10 +8042,13 @@ class Jedison extends EventEmitter {
     });
   }
 }
+Jedison.version = version;
 class RefParser {
   constructor(options = {}) {
     this.options = Object.assign({
-      detectRecursion: true
+      detectRecursion: true,
+      fetch: typeof fetch === "function" ? fetch.bind(globalThis) : void 0,
+      fetchOptions: {}
     }, options);
     this.refs = {};
     this.data = {};
@@ -7771,7 +8082,7 @@ class RefParser {
   }
   /**
    * Traverses the given schema recursively and for each schema with $ref
-   * add a new property in the this.refs object with key being the json path to that schema.
+   * add a new property in the this.refs object with key being the JSON Pointer to that schema.
    * If the ref has no value in data will be given a value of null. This value will be later
    * replaced in a future iteration. At that time the data will be available
    * @param schema
@@ -7877,13 +8188,15 @@ class RefParser {
     }
   }
   /**
-   * Loads a schema with a synchronous http request
+   * Loads a schema over HTTP. Uses options.fetch (defaults to the global fetch) and
+   * options.fetchOptions, so callers needing auth (e.g. forwarding a session cookie
+   * server-side) can supply headers/credentials, or swap in a custom fetch entirely.
    * @param uri
    * @returns {any}
    */
   async load(uri) {
     try {
-      const response = await fetch(uri);
+      const response = await this.options.fetch(uri, this.options.fetchOptions);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -8754,11 +9067,11 @@ class Theme {
     });
     const quickAddPropertyBtn = this.getAddPropertyButton({
       content: config.addPropertyContent,
-      icon: "add"
+      icon: "addProperty"
     });
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: "add",
+      icon: "addProperty",
       propertiesContainer: quickAddPropertyContainer
     });
     const fieldset = this.getFieldset();
@@ -8871,10 +9184,10 @@ class Theme {
       id: "jedi-quick-add-property-input-" + config.id,
       title: config.addPropertyContent
     });
-    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: "add" });
+    const quickAddPropertyBtn = this.getAddPropertyButton({ content: config.addPropertyContent, icon: "addProperty" });
     const quickAddPropertyToggle = this.getQuickAddPropertyToggle({
       content: config.addPropertyContent,
-      icon: "add",
+      icon: "addProperty",
       propertiesContainer: quickAddPropertyContainer
     });
     const collapse = document.createElement("div");
@@ -9869,6 +10182,62 @@ class Theme {
       col.classList.add("jedi-col-md-offset-" + offsetMd);
     }
     return col;
+  }
+  /**
+   * Row + two columns for nav-style editors (object-nav, array-nav,
+   * object-categories). Horizontal keeps the fixed full-width split (the
+   * zero-width content col intentionally forces it onto a new flex line
+   * below the full-width tab list) built on the regular getRow()/getCol()
+   * grid. Vertical uses a plain (non-grid) flex row instead: Bootstrap's
+   * `.row > *` rule forces `width: 100%` on grid columns, which would
+   * fight flex-basis:auto's content-based sizing, so the shrink-to-fit nav
+   * column can't share that grid. It hugs its widest pill on wider
+   * containers (constrained by widthOptions.minWidth/maxWidth) and stacks
+   * full-width below the container-query breakpoint in ensureNavStyles().
+   */
+  getNavRow(variant, widthOptions = {}) {
+    if (variant === "horizontal") {
+      const row2 = this.getRow();
+      const tabListCol2 = this.getCol(12, 12, 12, 12);
+      const tabContentCol2 = this.getCol(12, 12, 0, 0);
+      return { row: row2, tabListCol: tabListCol2, tabContentCol: tabContentCol2 };
+    }
+    this.ensureNavStyles();
+    const row = document.createElement("div");
+    row.classList.add("jedi-nav-row");
+    const tabListCol = document.createElement("div");
+    tabListCol.classList.add("jedi-col");
+    tabListCol.classList.add("jedi-nav-list-col");
+    tabListCol.style.setProperty("--jedi-nav-max-width", widthOptions.maxWidth ?? "40%");
+    if (widthOptions.minWidth) tabListCol.style.setProperty("--jedi-nav-min-width", widthOptions.minWidth);
+    const tabContentCol = document.createElement("div");
+    tabContentCol.classList.add("jedi-col");
+    tabContentCol.classList.add("jedi-nav-content-col");
+    return { row, tabListCol, tabContentCol };
+  }
+  /**
+   * Mobile-first: the nav row stacks at 100% width by default; a container
+   * query (not a viewport media query) switches to shrink-to-fit once the
+   * row itself has >= 576px to work with, so a narrow embed (a modal, a
+   * sidebar) gets the same treatment as a narrow viewport regardless of
+   * how wide the page around it is. Injected once, same pattern as
+   * bootstrap5.js's jedi-accordion-button-style, since inline styles can't
+   * express @container.
+   */
+  ensureNavStyles() {
+    if (document.getElementById("jedi-nav-styles")) return;
+    const style = document.createElement("style");
+    style.id = "jedi-nav-styles";
+    style.textContent = `
+      .jedi-nav-row { display: flex; flex-wrap: wrap; gap: 1rem; container-type: inline-size; }
+      .jedi-nav-list-col { flex: 1 1 100%; width: 100%; max-width: 100%; }
+      .jedi-nav-content-col { flex: 1 1 100%; width: 100%; min-width: 0; }
+      @container (min-width: 576px) {
+        .jedi-nav-list-col { flex: 0 1 auto; width: auto; max-width: var(--jedi-nav-max-width, 40%); min-width: var(--jedi-nav-min-width, auto); }
+        .jedi-nav-content-col { flex: 1 1 0%; width: auto; }
+      }
+    `;
+    document.head.appendChild(style);
   }
   /**
    * Clearfix fixes layout issues in some libraries like bootstrap 3
@@ -11879,6 +12248,7 @@ const index = {
   EditorObjectRadios,
   EditorObject,
   EditorArrayChoices,
+  EditorArrayTomSelect,
   EditorArrayNav,
   EditorArray,
   EditorMultiple,
@@ -11890,6 +12260,7 @@ const index = {
   ThemeBootstrap5,
   RefParser,
   Create: Jedison,
+  version,
   SchemaGenerator,
   applyOverlay
 };

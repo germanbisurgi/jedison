@@ -1,0 +1,43 @@
+{
+  "title": "Select Inline Switcher",
+  "description": "Reporter's original repro schema for issue 56 - setValue() called directly on a deactivated instance (e.g. after unchecking its properties-toggle checkbox) must reactivate it.",
+  "type": "object",
+  "additionalProperties": false,
+  "x-deactivateNonRequired": true,
+  "x-enablePropertiesToggle": true,
+  "properties": {
+    "oneOfExample": {
+      "title": "oneOf",
+      "description": "x-switcherInput: select-inline with oneOf — two object schemas",
+      "type": "object",
+      "x-switcherInput": "select-inline",
+      "oneOf": [
+        {
+          "x-switcherTitle": "Circle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "radius": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "x-switcherTitle": "Rectangle",
+          "type": "object",
+          "additionalProperties": false,
+          "x-enablePropertiesToggle": false,
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

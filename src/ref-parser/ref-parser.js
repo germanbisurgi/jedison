@@ -4,7 +4,9 @@ import JsonWalker from '../json-walker.js'
 class RefParser {
   constructor (options = {}) {
     this.options = Object.assign({
-      detectRecursion: true
+      detectRecursion: true,
+      fetch: typeof fetch === 'function' ? fetch.bind(globalThis) : undefined,
+      fetchOptions: {}
     }, options)
 
     this.refs = {}
@@ -47,7 +49,7 @@ class RefParser {
 
   /**
    * Traverses the given schema recursively and for each schema with $ref
-   * add a new property in the this.refs object with key being the json path to that schema.
+   * add a new property in the this.refs object with key being the JSON Pointer to that schema.
    * If the ref has no value in data will be given a value of null. This value will be later
    * replaced in a future iteration. At that time the data will be available
    * @param schema
@@ -187,13 +189,15 @@ class RefParser {
   }
 
   /**
-   * Loads a schema with a synchronous http request
+   * Loads a schema over HTTP. Uses options.fetch (defaults to the global fetch) and
+   * options.fetchOptions, so callers needing auth (e.g. forwarding a session cookie
+   * server-side) can supply headers/credentials, or swap in a custom fetch entirely.
    * @param uri
    * @returns {any}
    */
   async load (uri) {
     try {
-      const response = await fetch(uri)
+      const response = await this.options.fetch(uri, this.options.fetchOptions)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }

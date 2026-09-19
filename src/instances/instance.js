@@ -10,7 +10,7 @@ import {
 
 import {
   getSchemaConst,
-  getSchemaDefault, getSchemaEnum,
+  getSchemaDefault, getSchemaDeprecated, getSchemaEnum,
   getSchemaReadOnly,
   getSchemaType, getSchemaXOption
 } from '../helpers/schema.js'
@@ -29,7 +29,7 @@ class Instance extends EventEmitter {
     this.jedison = config.jedison
 
     /**
-     * The schema path of this instance.
+     * The JSON Pointer of this instance (e.g. "#/address/street").
      * @type {string}
      */
     this.path = config.path || this.jedison.rootName
@@ -126,12 +126,18 @@ class Instance extends EventEmitter {
   setUI () {
     if (this.jedison.isEditor) {
       const EditorClass = this.jedison.uiResolver.getClass(this.schema)
+
+      if (!EditorClass) {
+        console.error(`Jedison: no editor could be resolved for the schema at "${this.path}". The field will not be rendered.`, this.schema)
+        return
+      }
+
       this.ui = new EditorClass(this)
     }
   }
 
   /**
-   * Return the last part of the instance path
+   * Return the last part of the instance JSON Pointer
    */
   getKey () {
     return this.key
@@ -145,7 +151,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Adds a child instance pointer to the instance list
+   * Adds a child instance reference to the instance list
    */
   register () {
     this.jedison.register(this)
@@ -163,7 +169,7 @@ class Instance extends EventEmitter {
   }
 
   /**
-   * Deletes a child instance pointer from the instance list
+   * Deletes a child instance reference from the instance list
    */
   unregister () {
     this.jedison.unregister(this)
@@ -332,8 +338,19 @@ class Instance extends EventEmitter {
    * @returns {*} The final value after constraint enforcement
    */
   setValue (newValue, notifyParent = true, initiator = 'api') {
+    // A value being set always implies the instance participates in the
+    // result, even if it was previously deactivated (e.g. a non-required
+    // property under x-deactivateNonRequired). Otherwise a setValue() call
+    // reaching an inactive descendant directly (bypassing the parent's
+    // refreshInstances(), which activates children explicitly) updates the
+    // instance's own value while the parent's aggregation keeps ignoring it.
+    const wasInactive = !this.isActive
+    if (wasInactive) {
+      this.isActive = true
+    }
+
     // zero-cost bail-out
-    if (this.value === newValue) {
+    if (this.value === newValue && !wasInactive) {
       return this.value
     }
 
@@ -351,7 +368,7 @@ class Instance extends EventEmitter {
     }
 
     // Only do expensive comparison if values might be different
-    if (!wasPurified && !different(this.value, newValue)) {
+    if (!wasPurified && !different(this.value, newValue) && !wasInactive) {
       return this.value
     }
 
@@ -443,6 +460,16 @@ class Instance extends EventEmitter {
     }
 
     return this.parent ? this.parent.isReadOnly() : false
+  }
+
+  /**
+   * Returns true if this instance's own schema is marked deprecated.
+   * Unlike isReadOnly(), this does not cascade to/from the parent: per the
+   * JSON Schema spec, "deprecated" applies only to the exact instance
+   * location it's declared on.
+   */
+  isDeprecated () {
+    return getSchemaDeprecated(this.schema) === true
   }
 
   /**
