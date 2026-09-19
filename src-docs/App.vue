@@ -201,6 +201,11 @@
             <input type="checkbox" id="arrayDeleteConfirm" v-model="arrayDeleteConfirm" @change="initEditor()">
             <label for="arrayDeleteConfirm"><code>arrayDeleteConfirm</code></label>
           </div>
+
+          <div class="form-group mb-3">
+            <input type="checkbox" id="preserveMissingProperties" v-model="preserveMissingProperties" @change="initEditor()">
+            <label for="preserveMissingProperties"><code>preserveMissingProperties</code></label>
+          </div>
         </aside>
       </div>
     </div>
@@ -645,6 +650,7 @@ export default {
       editJsonData: false,
       useConstraintAttributes: true,
       arrayDeleteConfirm: true,
+      preserveMissingProperties: false,
     }
   },
   created() {
@@ -672,6 +678,7 @@ export default {
     this.editJsonData = this.getQueryParam('editJsonData') ? this.parseBooleanString(this.getQueryParam('editJsonData')) : false
     this.useConstraintAttributes = this.getQueryParam('useConstraintAttributes') ? this.parseBooleanString(this.getQueryParam('useConstraintAttributes')) : true
     this.arrayDeleteConfirm = this.getQueryParam('arrayDeleteConfirm') ? this.parseBooleanString(this.getQueryParam('arrayDeleteConfirm')) : true
+    this.preserveMissingProperties = this.getQueryParam('preserveMissingProperties') ? this.parseBooleanString(this.getQueryParam('preserveMissingProperties')) : false
   },
   mounted() {
     switch (this.theme) {
@@ -821,6 +828,7 @@ export default {
         editJsonData: this.editJsonData,
         useConstraintAttributes: this.useConstraintAttributes,
         arrayDeleteConfirm: this.arrayDeleteConfirm,
+        preserveMissingProperties: this.preserveMissingProperties,
         muteValidationMessages: ['properties'],
         schema: this.schema,
         data: this.data,
