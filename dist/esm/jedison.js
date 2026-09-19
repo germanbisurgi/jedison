@@ -3262,10 +3262,15 @@ class InstanceObject extends Instance {
         this.createChild(schema, propertyName, value[propertyName], true);
       }
     });
+    const preserveMissingProperties = this.jedison.getOption("preserveMissingProperties");
     for (let i = this.children.length - 1; i >= 0; i--) {
       const instance = this.children[i];
       const propertyName = instance.getKey();
       if (notSet(value[propertyName])) {
+        const isSchemaProperty = hasOwn(this.properties, propertyName);
+        if (isSchemaProperty && preserveMissingProperties) {
+          continue;
+        }
         if (childMap.has(propertyName)) {
           instance.deactivate();
         } else {
@@ -7270,7 +7275,9 @@ class Jedison extends EventEmitter {
       subErrors: false,
       debug: false,
       audacity: true,
-      switcherTypeLabels: {}
+      switcherTypeLabels: {},
+      preserveMissingProperties: false
+      // for backwards compatibility
     }, options);
     this.rootName = "#";
     this.pathSeparator = "/";
