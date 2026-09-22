@@ -353,14 +353,14 @@ class InstanceObject extends Instance {
       }
     })
 
-    const preserveMissingProperties = this.jedison.getOption('preserveMissingProperties')
+    const keepMissingSchemaFields = this.jedison.getOption('keepMissingSchemaFields')
 
     for (let i = this.children.length - 1; i >= 0; i--) {
       const instance = this.children[i]
       const propertyName = instance.getKey()
       if (notSet(value[propertyName])) {
         const isSchemaProperty = hasOwn(this.properties, propertyName)
-        if (isSchemaProperty && preserveMissingProperties) {
+        if (isSchemaProperty && keepMissingSchemaFields) {
           continue
         }
         if (childMap.has(propertyName)) {
