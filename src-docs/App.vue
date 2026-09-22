@@ -203,8 +203,8 @@
           </div>
 
           <div class="form-group mb-3">
-            <input type="checkbox" id="preserveMissingProperties" v-model="preserveMissingProperties" @change="initEditor()">
-            <label for="preserveMissingProperties"><code>preserveMissingProperties</code></label>
+            <input type="checkbox" id="keepMissingSchemaFields" v-model="keepMissingSchemaFields" @change="initEditor()">
+            <label for="keepMissingSchemaFields"><code>keepMissingSchemaFields</code></label>
           </div>
         </aside>
       </div>
@@ -650,7 +650,7 @@ export default {
       editJsonData: false,
       useConstraintAttributes: true,
       arrayDeleteConfirm: true,
-      preserveMissingProperties: false,
+      keepMissingSchemaFields: false,
     }
   },
   created() {
@@ -678,7 +678,7 @@ export default {
     this.editJsonData = this.getQueryParam('editJsonData') ? this.parseBooleanString(this.getQueryParam('editJsonData')) : false
     this.useConstraintAttributes = this.getQueryParam('useConstraintAttributes') ? this.parseBooleanString(this.getQueryParam('useConstraintAttributes')) : true
     this.arrayDeleteConfirm = this.getQueryParam('arrayDeleteConfirm') ? this.parseBooleanString(this.getQueryParam('arrayDeleteConfirm')) : true
-    this.preserveMissingProperties = this.getQueryParam('preserveMissingProperties') ? this.parseBooleanString(this.getQueryParam('preserveMissingProperties')) : false
+    this.keepMissingSchemaFields = this.getQueryParam('keepMissingSchemaFields') ? this.parseBooleanString(this.getQueryParam('keepMissingSchemaFields')) : false
   },
   mounted() {
     switch (this.theme) {
@@ -828,7 +828,7 @@ export default {
         editJsonData: this.editJsonData,
         useConstraintAttributes: this.useConstraintAttributes,
         arrayDeleteConfirm: this.arrayDeleteConfirm,
-        preserveMissingProperties: this.preserveMissingProperties,
+        keepMissingSchemaFields: this.keepMissingSchemaFields,
         muteValidationMessages: ['properties'],
         schema: this.schema,
         data: this.data,

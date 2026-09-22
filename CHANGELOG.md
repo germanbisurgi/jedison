@@ -1,6 +1,6 @@
 ### Unreleased
 
-- Added `preserveMissingProperties` option: when `true`, schema-defined properties that are missing from the value will remain visible in the form instead of being hidden. Default is `false` for backward compatibility.
+- Added `keepMissingSchemaFields` option: when `true`, schema-defined properties that are missing from the value will remain visible in the form instead of being hidden. Default is `false` for backward compatibility.
 
 ### 1.22.3
 
