@@ -27,7 +27,16 @@ class InstanceObject extends Instance {
 
     if (isSet(schemaProperties)) {
       Object.keys(schemaProperties).forEach((key) => {
-        const schema = schemaProperties[key]
+        let schema = schemaProperties[key]
+
+        // Expand a property's own $ref so x-options declared on the referenced
+        // schema (e.g. x-defaultProperty) are visible before the create/activate
+        // decision below (fixes issue #78, mirrors the array items fix for #24).
+        if (isObject(schema) && this.jedison.refParser && this.jedison.refParser.hasRef(schema) && !schema['x-recursive']) {
+          schema = this.jedison.refParser.expand(schema)
+          schemaProperties[key] = schema
+        }
+
         this.properties[key] = { schema }
 
         let musstCreateChild = true

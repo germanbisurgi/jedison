@@ -3126,7 +3126,11 @@ class InstanceObject extends Instance {
     const initialValue = clone(this.value);
     if (isSet(schemaProperties)) {
       Object.keys(schemaProperties).forEach((key) => {
-        const schema = schemaProperties[key];
+        let schema = schemaProperties[key];
+        if (isObject$1(schema) && this.jedison.refParser && this.jedison.refParser.hasRef(schema) && !schema["x-recursive"]) {
+          schema = this.jedison.refParser.expand(schema);
+          schemaProperties[key] = schema;
+        }
         this.properties[key] = { schema };
         let musstCreateChild = true;
         const isRecursive = isSet(schema["x-recursive"]);
