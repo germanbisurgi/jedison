@@ -1,5 +1,7 @@
 ### Unreleased
 
+### 1.23.0
+
 - Added `keepMissingSchemaFields` option: when `true`, schema-defined properties that are missing from the value will remain visible in the form instead of being hidden. Default is `false` for backward compatibility.
 - Fixed issue #78: `x-defaultProperty` had no effect when declared on a property behind a `$ref`
 
