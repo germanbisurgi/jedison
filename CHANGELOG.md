@@ -1,5 +1,7 @@
 ### Unreleased
 
+- Added `keepMissingSchemaFields` option: when `true`, schema-defined properties that are missing from the value will remain visible in the form instead of being hidden. Default is `false` for backward compatibility.
+
 ### 1.22.3
 
 - Fixed issue #56: calling `setValue()` directly on a deactivated instance (e.g. a non-required property under `x-deactivateNonRequired`) updated its own value but left it inactive, so the parent object's aggregated value never picked up the change - `setValue()` now reactivates the instance, matching what already happens when a value is set through the parent's own `refreshInstances()`

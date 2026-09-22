@@ -94,7 +94,8 @@ class Jedison extends EventEmitter {
       subErrors: false,
       debug: false,
       audacity: true,
-      switcherTypeLabels: {}
+      switcherTypeLabels: {},
+      keepMissingSchemaFields: false // for backwards compatibility
     }, options)
 
     /**
