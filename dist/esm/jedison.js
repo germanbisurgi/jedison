@@ -3364,13 +3364,13 @@ class InstanceObject extends Instance {
         this.createChild(schema, propertyName, value[propertyName], true);
       }
     });
-    const preserveMissingProperties = this.jedison.getOption("preserveMissingProperties");
+    const keepMissingSchemaFields = this.jedison.getOption("keepMissingSchemaFields");
     for (let i = this.children.length - 1; i >= 0; i--) {
       const instance = this.children[i];
       const propertyName = instance.getKey();
       if (notSet(value[propertyName])) {
         const isSchemaProperty = hasOwn(this.properties, propertyName);
-        if (isSchemaProperty && preserveMissingProperties) {
+        if (isSchemaProperty && keepMissingSchemaFields) {
           continue;
         }
         if (childMap.has(propertyName)) {
@@ -7584,7 +7584,7 @@ class Jedison extends EventEmitter {
       debug: false,
       audacity: true,
       switcherTypeLabels: {},
-      preserveMissingProperties: false
+      keepMissingSchemaFields: false
       // for backwards compatibility
     }, options);
     this.rootName = "#";
