@@ -1,5 +1,6 @@
 export default {
   en: {
+    errorAddPropertyPatternMismatch: 'Property name "{{ property }}" does not match any allowed property or pattern.',
     errorAdditionalProperties: 'Has additional property "{{ property }}" but no additional properties are allowed.',
     errorAnyOf: 'Must validate against at least one of the provided schemas.',
     errorConst: 'Must have value of: {{ const }}.',
@@ -46,6 +47,7 @@ export default {
     collapseToggle: 'Collapse'
   },
   de: {
+    errorAddPropertyPatternMismatch: 'Der Eigenschaftsname "{{ property }}" entspricht keiner erlaubten Eigenschaft oder keinem erlaubten Muster.',
     errorAdditionalProperties: 'Hat die zusätzliche Eigenschaft "{{ property }}", aber keine zusätzlichen Eigenschaften sind erlaubt.',
     errorAnyOf: 'Muss mindestens einem der bereitgestellten Schemata entsprechen.',
     errorConst: 'Muss den Wert {{ const }} haben.',
@@ -92,6 +94,7 @@ export default {
     collapseToggle: 'Einklappen'
   },
   it: {
+    errorAddPropertyPatternMismatch: 'Il nome della proprietà "{{ property }}" non corrisponde a nessuna proprietà o modello consentito.',
     errorAdditionalProperties: 'Ha la proprietà aggiuntiva "{{ property }}" ma non sono consentite proprietà aggiuntive.',
     errorAnyOf: 'Deve rispettare almeno uno degli schemi forniti.',
     errorConst: 'Deve avere il valore: {{ const }}.',
@@ -138,6 +141,7 @@ export default {
     collapseToggle: 'Comprimi'
   },
   es: {
+    errorAddPropertyPatternMismatch: 'El nombre de propiedad "{{ property }}" no coincide con ninguna propiedad o patrón permitido.',
     errorAdditionalProperties: 'Tiene la propiedad adicional "{{ property }}" pero no se permiten propiedades adicionales.',
     errorAnyOf: 'Debe cumplir con al menos uno de los esquemas proporcionados.',
     errorConst: 'Debe tener el valor: {{ const }}.',

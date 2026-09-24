@@ -1,5 +1,6 @@
 import Editor from './editor.js'
 import {
+  compileTemplate,
   equal,
   hasOwn,
   isObject,
@@ -8,6 +9,8 @@ import {
 } from '../helpers/utils.js'
 import {
   getSchemaAdditionalProperties,
+  getSchemaPatternProperties,
+  getSchemaProperties,
   getSchemaTitle, getSchemaType,
   getSchemaXOption
 } from '../helpers/schema.js'
@@ -24,8 +27,12 @@ class EditorObject extends Editor {
   getObjectControlConfig () {
     let addProperty = true
     const additionalProperties = getSchemaAdditionalProperties(this.instance.schema)
+    const patternProperties = getSchemaPatternProperties(this.instance.schema)
 
-    if (isSet(additionalProperties) && additionalProperties === false) {
+    // `additionalProperties: false` only blocks names that match neither `properties`
+    // nor `patternProperties` (issue #82) - keep the control when patternProperties
+    // still allows adding a matching name; addProperty() enforces the pattern itself.
+    if (isSet(additionalProperties) && additionalProperties === false && !isSet(patternProperties)) {
       addProperty = false
     }
 
@@ -95,10 +102,49 @@ class EditorObject extends Editor {
     this.control.ariaLive.appendChild(ariaLiveMessage)
   }
 
+  /**
+   * A name is only rejected when `additionalProperties: false` is enforced and the
+   * name matches neither `properties` nor `patternProperties` (issue #82) - mirrors
+   * the check InstanceObject.removeNotListedPropertiesFromValue() applies on setValue.
+   */
+  isAddPropertyNameAllowed (propertyName) {
+    const additionalProperties = getSchemaAdditionalProperties(this.instance.schema)
+
+    if (!isSet(additionalProperties) || additionalProperties !== false) {
+      return true
+    }
+
+    const schemaEnforceAdditionalProperties = getSchemaXOption(this.instance.schema, 'enforceAdditionalProperties')
+    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.instance.jedison.getOption('enforceAdditionalProperties')
+
+    if (!enforceAdditionalProperties) {
+      return true
+    }
+
+    const declaredProperties = getSchemaProperties(this.instance.schema) || {}
+
+    if (hasOwn(declaredProperties, propertyName)) {
+      return true
+    }
+
+    const patternProperties = getSchemaPatternProperties(this.instance.schema) || {}
+
+    return Object.keys(patternProperties).some((pattern) => new RegExp(pattern).test(propertyName))
+  }
+
   addProperty (input, postAction) {
     const propertyName = input.value.split(' ').join('')
     if (propertyName.length === 0) return
     if (isSet(this.instance.value[propertyName])) return
+
+    this.control.quickAddPropertyControl.messages.replaceChildren()
+
+    if (!this.isAddPropertyNameAllowed(propertyName)) {
+      const message = compileTemplate(this.instance.jedison.translator.translate('errorAddPropertyPatternMismatch'), { property: propertyName })
+      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message }))
+      return
+    }
+
     const schema = this.instance.getPropertySchema(propertyName)
     const child = this.instance.createChild(schema, propertyName)
     child.activate()

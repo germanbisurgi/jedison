@@ -1,5 +1,7 @@
 ### Unreleased
 
+- Fixed issue #82: the object editor's "Add property" control was fully disabled whenever `additionalProperties: false` was set, even when `patternProperties` still allowed adding a matching property name. The control now stays available in that case, and rejects (with an inline message) a name that matches neither `properties` nor `patternProperties`, instead of silently accepting it and only failing validation afterwards.
+
 ### 1.23.0
 
 - Added `keepMissingSchemaFields` option: when `true`, schema-defined properties that are missing from the value will remain visible in the form instead of being hidden. Default is `false` for backward compatibility.

@@ -4371,7 +4371,8 @@ class EditorObject extends Editor {
   getObjectControlConfig() {
     let addProperty = true;
     const additionalProperties2 = getSchemaAdditionalProperties(this.instance.schema);
-    if (isSet(additionalProperties2) && additionalProperties2 === false) {
+    const patternProperties2 = getSchemaPatternProperties(this.instance.schema);
+    if (isSet(additionalProperties2) && additionalProperties2 === false && !isSet(patternProperties2)) {
       addProperty = false;
     }
     const objectAdd = getSchemaXOption(this.instance.schema, "objectAdd") ?? this.instance.jedison.getOption("objectAdd");
@@ -4430,10 +4431,38 @@ class EditorObject extends Editor {
     ariaLiveMessage.textContent = label + " " + this.instance.jedison.translator.translate("objectPropertyAdded");
     this.control.ariaLive.appendChild(ariaLiveMessage);
   }
+  /**
+   * A name is only rejected when `additionalProperties: false` is enforced and the
+   * name matches neither `properties` nor `patternProperties` (issue #82) - mirrors
+   * the check InstanceObject.removeNotListedPropertiesFromValue() applies on setValue.
+   */
+  isAddPropertyNameAllowed(propertyName) {
+    const additionalProperties2 = getSchemaAdditionalProperties(this.instance.schema);
+    if (!isSet(additionalProperties2) || additionalProperties2 !== false) {
+      return true;
+    }
+    const schemaEnforceAdditionalProperties = getSchemaXOption(this.instance.schema, "enforceAdditionalProperties");
+    const enforceAdditionalProperties = isSet(schemaEnforceAdditionalProperties) ? schemaEnforceAdditionalProperties : this.instance.jedison.getOption("enforceAdditionalProperties");
+    if (!enforceAdditionalProperties) {
+      return true;
+    }
+    const declaredProperties = getSchemaProperties(this.instance.schema) || {};
+    if (hasOwn(declaredProperties, propertyName)) {
+      return true;
+    }
+    const patternProperties2 = getSchemaPatternProperties(this.instance.schema) || {};
+    return Object.keys(patternProperties2).some((pattern2) => new RegExp(pattern2).test(propertyName));
+  }
   addProperty(input, postAction) {
     const propertyName = input.value.split(" ").join("");
     if (propertyName.length === 0) return;
     if (isSet(this.instance.value[propertyName])) return;
+    this.control.quickAddPropertyControl.messages.replaceChildren();
+    if (!this.isAddPropertyNameAllowed(propertyName)) {
+      const message = compileTemplate(this.instance.jedison.translator.translate("errorAddPropertyPatternMismatch"), { property: propertyName });
+      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message }));
+      return;
+    }
     const schema = this.instance.getPropertySchema(propertyName);
     const child = this.instance.createChild(schema, propertyName);
     child.activate();
@@ -7245,6 +7274,7 @@ class UiResolver {
   }
 }
 const defaultTranslations = {
+  errorAddPropertyPatternMismatch: 'Property name "{{ property }}" does not match any allowed property or pattern.',
   errorAdditionalProperties: 'Has additional property "{{ property }}" but no additional properties are allowed.',
   errorAnyOf: "Must validate against at least one of the provided schemas.",
   errorConst: "Must have value of: {{ const }}.",
@@ -7293,6 +7323,7 @@ const defaultTranslations = {
 };
 const translations = {
   en: {
+    errorAddPropertyPatternMismatch: 'Property name "{{ property }}" does not match any allowed property or pattern.',
     errorAdditionalProperties: 'Has additional property "{{ property }}" but no additional properties are allowed.',
     errorAnyOf: "Must validate against at least one of the provided schemas.",
     errorConst: "Must have value of: {{ const }}.",
@@ -7339,6 +7370,7 @@ const translations = {
     collapseToggle: "Collapse"
   },
   de: {
+    errorAddPropertyPatternMismatch: 'Der Eigenschaftsname "{{ property }}" entspricht keiner erlaubten Eigenschaft oder keinem erlaubten Muster.',
     errorAdditionalProperties: 'Hat die zusätzliche Eigenschaft "{{ property }}", aber keine zusätzlichen Eigenschaften sind erlaubt.',
     errorAnyOf: "Muss mindestens einem der bereitgestellten Schemata entsprechen.",
     errorConst: "Muss den Wert {{ const }} haben.",
@@ -7385,6 +7417,7 @@ const translations = {
     collapseToggle: "Einklappen"
   },
   it: {
+    errorAddPropertyPatternMismatch: 'Il nome della proprietà "{{ property }}" non corrisponde a nessuna proprietà o modello consentito.',
     errorAdditionalProperties: 'Ha la proprietà aggiuntiva "{{ property }}" ma non sono consentite proprietà aggiuntive.',
     errorAnyOf: "Deve rispettare almeno uno degli schemi forniti.",
     errorConst: "Deve avere il valore: {{ const }}.",
@@ -7431,6 +7464,7 @@ const translations = {
     collapseToggle: "Comprimi"
   },
   es: {
+    errorAddPropertyPatternMismatch: 'El nombre de propiedad "{{ property }}" no coincide con ninguna propiedad o patrón permitido.',
     errorAdditionalProperties: 'Tiene la propiedad adicional "{{ property }}" pero no se permiten propiedades adicionales.',
     errorAnyOf: "Debe cumplir con al menos uno de los esquemas proporcionados.",
     errorConst: "Debe tener el valor: {{ const }}.",

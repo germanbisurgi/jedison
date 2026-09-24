@@ -1,4 +1,5 @@
 export default {
+  errorAddPropertyPatternMismatch: 'Property name "{{ property }}" does not match any allowed property or pattern.',
   errorAdditionalProperties: 'Has additional property "{{ property }}" but no additional properties are allowed.',
   errorAnyOf: 'Must validate against at least one of the provided schemas.',
   errorConst: 'Must have value of: {{ const }}.',
