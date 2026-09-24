@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Issue 82",
+  "description": "patternProperties alone never forbids other property names - that is what additionalProperties: false is for, and it is checked against both `properties` and `patternProperties`. Try \"Add property\" with a name matching ^[0-9]+$ (e.g. `1`) to see it accepted, then with a name that matches neither (e.g. `test`) to see it rejected inline instead of silently creating a property that only fails validation afterwards.",
+  "patternProperties": {
+    "^[0-9]+$": {
+      "type": "object",
+      "title": "Numbered entry",
+      "properties": {
+        "note": {
+          "type": "string",
+          "title": "Note"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

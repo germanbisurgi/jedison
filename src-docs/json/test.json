@@ -1,154 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "x-showErrors": "never",
-  "required": [
-    "interface",
-    "service"
-  ],
-  "x-format": "nav-horizontal",
-  "properties": {
-    "service": {
+  "$ref": "#/$defs/Node",
+  "$defs": {
+    "Node": {
       "type": "object",
-      "title": "Service Attributes",
-      "required": [
-        "bgpenabled"
-      ],
-      "x-objectAdd": false,
+      "required": ["type", "name"],
       "properties": {
-        "bgpenabled": {
-          "type": "boolean",
-          "x-format": "checkbox",
-          "title": "BGP?"
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/Node" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "leaf" } } },
+          "then": { "properties": { "children": { "type": "array", "maxItems": 0 } } },
+          "else": { "required": ["children"] }
         }
-      }
-    },
-    "interface": {
-      "type": "object",
-      "title": "Interface",
-      "x-objectAdd": false,
-      "required": [
-        "ipv6enabled"
-      ],
-      "properties": {
-        "ipv6enabled": {
-          "type": "boolean",
-          "x-format": "checkbox",
-          "title": "Enable IPv6"
-        }
-      }
+      ]
     }
-  },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "interface": {
-            "properties": {
-              "ipv6enabled": {
-                "const": true
-              }
-            },
-            "required": [
-              "ipv6enabled"
-            ]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "interface": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "service": {
-            "properties": {
-              "bgpenabled": {
-                "const": true
-              }
-            },
-            "required": [
-              "bgpenabled"
-            ]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "bgp": {
-            "type": "object",
-            "x-objectAdd": false,
-            "title": "BGP",
-            "required": [
-              "test"
-            ],
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "bgp"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "service": {
-            "properties": {
-              "bgpenabled": {
-                "const": true
-              }
-            },
-            "required": [
-              "bgpenabled"
-            ]
-          },
-          "interface": {
-            "properties": {
-              "ipv6enabled": {
-                "const": true
-              }
-            },
-            "required": [
-              "ipv6enabled"
-            ]
-          }
-        },
-        "required": [
-          "service",
-          "interface"
-        ]
-      },
-      "then": {
-        "properties": {
-          "bgp": {
-            "properties": {
-              "test2": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test2"
-            ]
-          }
-        }
-      }
-    }
-  ]
+  }
 }
