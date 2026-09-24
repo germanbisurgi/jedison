@@ -1,4 +1,4 @@
-### Unreleased
+### 1.23.1
 
 - Fixed issue #82: the object editor's "Add property" control was fully disabled whenever `additionalProperties: false` was set, even when `patternProperties` still allowed adding a matching property name. The control now stays available in that case, and rejects (with an inline message) a name that matches neither `properties` nor `patternProperties`, instead of silently accepting it and only failing validation afterwards.
 
