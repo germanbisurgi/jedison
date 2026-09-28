@@ -4567,6 +4567,11 @@ class EditorObject extends Editor {
         }
         checkbox.disabled = this.disabled || isRequired;
         checkbox.checked = hasOwn(currentValue, property);
+        if (isRequired) {
+          checkbox.setAttribute("always-disabled", "");
+        } else {
+          checkbox.removeAttribute("always-disabled");
+        }
       });
       const propGroupOrder = getSchemaXOption(this.instance.schema, "propGroupOrder");
       if (isSet(propGroupOrder) && Array.isArray(propGroupOrder)) {

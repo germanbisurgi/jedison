@@ -278,6 +278,17 @@ class EditorObject extends Editor {
 
         checkbox.disabled = this.disabled || isRequired
         checkbox.checked = hasOwn(currentValue, property)
+
+        // refreshDisabledState() (editor.js) sweeps every interactive element under
+        // this container on each refresh and clears `disabled` unless the element
+        // is marked `always-disabled` - without this, a later unrelated refresh
+        // (e.g. typing in a sibling field) re-enables a required property's
+        // activator, letting it be deactivated despite isRequired above.
+        if (isRequired) {
+          checkbox.setAttribute('always-disabled', '')
+        } else {
+          checkbox.removeAttribute('always-disabled')
+        }
       })
 
       const propGroupOrder = getSchemaXOption(this.instance.schema, 'propGroupOrder')

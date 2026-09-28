@@ -1,5 +1,7 @@
 {
   "title": "GeoJSON 2D",
+  "x-discriminator": "type",
+  "x-switcherInput": "select-inline",
   "oneOf": [
     { "$ref": "#/definitions/point" },
     { "$ref": "#/definitions/lineString" },
@@ -47,7 +49,8 @@
           "type": "string",
           "const": "Point",
           "default": "Point",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
@@ -55,6 +58,7 @@
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -70,16 +74,20 @@
           "type": "string",
           "const": "LineString",
           "default": "LineString",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
           "type": "array",
           "minItems": 2,
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "{{ i1 }}) {{ value.0 }}, {{ value.1 }}",
           "items": { "title": "Position", "$ref": "#/definitions/position" }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -95,20 +103,27 @@
           "type": "string",
           "const": "Polygon",
           "default": "Polygon",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
           "type": "array",
+          "minItems": 1,
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "Ring {{ i1 }}",
           "items": {
             "title": "Linear Ring",
             "type": "array",
             "minItems": 4,
+            "x-format": "nav-vertical",
+            "x-titleTemplate": "{{ i1 }}) {{ value.0 }}, {{ value.1 }}",
             "items": { "title": "Position", "$ref": "#/definitions/position" }
           }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -124,15 +139,19 @@
           "type": "string",
           "const": "MultiPoint",
           "default": "MultiPoint",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
           "type": "array",
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "{{ i1 }}) {{ value.0 }}, {{ value.1 }}",
           "items": { "title": "Position", "$ref": "#/definitions/position" }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -148,20 +167,26 @@
           "type": "string",
           "const": "MultiLineString",
           "default": "MultiLineString",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
           "type": "array",
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "Line {{ i1 }}",
           "items": {
             "title": "Line",
             "type": "array",
             "minItems": 2,
+            "x-format": "nav-vertical",
+            "x-titleTemplate": "{{ i1 }}) {{ value.0 }}, {{ value.1 }}",
             "items": { "title": "Position", "$ref": "#/definitions/position" }
           }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -177,30 +202,41 @@
           "type": "string",
           "const": "MultiPolygon",
           "default": "MultiPolygon",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "coordinates": {
           "title": "Coordinates",
           "type": "array",
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "Polygon {{ i1 }}",
           "items": {
             "title": "Polygon",
             "type": "array",
+            "minItems": 1,
+            "x-format": "nav-vertical",
+            "x-titleTemplate": "Ring {{ i1 }}",
             "items": {
               "title": "Linear Ring",
               "type": "array",
               "minItems": 4,
+              "x-format": "nav-vertical",
+              "x-titleTemplate": "{{ i1 }}) {{ value.0 }}, {{ value.1 }}",
               "items": { "title": "Position", "$ref": "#/definitions/position" }
             }
           }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
     },
     "geometry": {
       "title": "Geometry",
+      "x-discriminator": "type",
+      "x-switcherInput": "select-inline",
       "oneOf": [
         { "$ref": "#/definitions/point" },
         { "$ref": "#/definitions/lineString" },
@@ -221,15 +257,19 @@
           "type": "string",
           "const": "GeometryCollection",
           "default": "GeometryCollection",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "geometries": {
           "title": "Geometries",
           "type": "array",
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "{{ i1 }}) {{ value.type }}",
           "items": { "title": "Geometry", "$ref": "#/definitions/geometry" }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -245,14 +285,15 @@
           "type": "string",
           "const": "Feature",
           "default": "Feature",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "id": {
           "title": "ID",
           "x-switcherInput": "radios-inline",
           "oneOf": [
             { "title": "Numeric ID", "type": "number" },
-            { "title": "String ID", "type": "string" }
+            { "title": "String ID", "type": "string", "minLength": 1 }
           ]
         },
         "properties": {
@@ -262,6 +303,8 @@
         },
         "geometry": {
           "title": "Geometry",
+          "x-discriminator": "type",
+          "x-switcherInput": "select-inline",
           "oneOf": [
             { "title": "Null Geometry", "type": "null" },
             { "$ref": "#/definitions/point" },
@@ -275,6 +318,7 @@
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }
@@ -290,15 +334,19 @@
           "type": "string",
           "const": "FeatureCollection",
           "default": "FeatureCollection",
-          "readOnly": true
+          "readOnly": true,
+          "x-hidden": true
         },
         "features": {
           "title": "Features",
           "type": "array",
+          "x-format": "nav-vertical",
+          "x-titleTemplate": "{{ i1 }}) {{ value.geometry.type }}",
           "items": { "title": "Feature", "$ref": "#/definitions/feature" }
         },
         "bbox": {
           "title": "Bounding Box",
+          "x-propertyOrder": 10,
           "$ref": "#/definitions/bbox"
         }
       }

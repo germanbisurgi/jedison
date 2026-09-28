@@ -26,6 +26,10 @@
   </p>
 </p>
 
+<p align="center">
+  <img src="jedison-playground.gif" alt="Jedison Playground demo: switching a GeoJSON schema between geometry types, including a discriminator-driven oneOf and a recursive GeometryCollection" width="700">
+</p>
+
 ## What is Jedison
 
 Jedison generates forms from JSON schemas. Simply provide a JSON schema and Jedison automatically creates a complete, interactive form with built-in validation.
