@@ -1,3 +1,7 @@
+### 1.23.2
+
+- Fixed issue #84: a nullable object with `properties` and `"default": null` crashed the editor (`hasOwn` on `null`) - the `object` branch inherited the wrapper's `null` default. Branches now only inherit a `default` that fits their type
+
 ### 1.23.1
 
 - Fixed issue #82: the object editor's "Add property" control was fully disabled whenever `additionalProperties: false` was set, even when `patternProperties` still allowed adding a matching property name. The control now stays available in that case, and rejects (with an inline message) a name that matches neither `properties` nor `patternProperties`, instead of silently accepting it and only failing validation afterwards.

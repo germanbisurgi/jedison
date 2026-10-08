@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "title": "Issue 84",
+  "description": "A nullable object with its own properties and a wrapper default of null must render and start as null, and switching it to Object must show its fields.",
+  "x-enablePropertiesToggle": true,
+  "properties": {
+    "rating": {
+      "type": ["object", "null"],
+      "default": null,
+      "properties": {
+        "field": {
+          "type": "string"
+        }
+      }
+    },
+    "review": {
+      "default": null,
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "properties": {
+            "comment": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

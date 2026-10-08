@@ -7,7 +7,8 @@ import {
   different,
   clone,
   mergeDeep,
-  hasOwn
+  hasOwn,
+  getType
 } from '../helpers/utils.js'
 import {
   getSchemaAnyOf, getSchemaDescription,
@@ -123,6 +124,19 @@ class InstanceMultiple extends Instance {
         label => hasOwn(switcherTypeLabels, label) ? switcherTypeLabels[label] : label
       )
     }
+
+    // The wrapper default is copied into every branch; only keep it where
+    // its type fits, otherwise e.g. an object branch would hold null
+    this.schemas.forEach((schema) => {
+      if (isSet(schema.default) && isString(schema.type)) {
+        const defaultType = getType(schema.default)
+        const fits = defaultType === schema.type || (defaultType === 'integer' && schema.type === 'number')
+
+        if (!fits) {
+          delete schema.default
+        }
+      }
+    })
 
     this.schemas.forEach((schema) => {
       const instance = this.jedison.createInstance({

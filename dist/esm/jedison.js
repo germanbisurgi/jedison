@@ -3021,6 +3021,15 @@ class InstanceMultiple extends Instance {
       );
     }
     this.schemas.forEach((schema) => {
+      if (isSet(schema.default) && isString(schema.type)) {
+        const defaultType = getType(schema.default);
+        const fits = defaultType === schema.type || defaultType === "integer" && schema.type === "number";
+        if (!fits) {
+          delete schema.default;
+        }
+      }
+    });
+    this.schemas.forEach((schema) => {
       const instance = this.jedison.createInstance({
         jedison: this.jedison,
         schema,
