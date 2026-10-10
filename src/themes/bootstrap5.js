@@ -157,6 +157,7 @@ class ThemeBootstrap5 extends Theme {
 
     const toggle = document.createElement('button')
     toggle.type = 'button'
+    toggle.setAttribute('always-enabled', '')
     toggle.classList.add('accordion-button', 'collapsed')
     toggle.setAttribute('data-bs-toggle', 'collapse')
     toggle.setAttribute('data-bs-target', '#' + collapseId)

@@ -2633,6 +2633,9 @@ class Editor {
         element.removeAttribute("disabled", "");
       }
     });
+    if (this.control.jsonData && this.control.jsonData.input) {
+      this.control.jsonData.input.readOnly = this.disabled || this.readOnly;
+    }
   }
   refreshTemplates() {
     if (this.control.legendText && this.getTitle()) {
@@ -8689,6 +8692,7 @@ class Theme {
       icon: "edit"
     });
     toggle.classList.add("jedi-json-data-toggle");
+    toggle.setAttribute("always-enabled", "");
     toggle.addEventListener("click", () => {
       if (dialog.open) {
         dialog.close();
@@ -8703,6 +8707,7 @@ class Theme {
     });
     const input = document.createElement("textarea");
     input.setAttribute("id", "json-data-input-" + config.id);
+    input.setAttribute("always-enabled", "");
     input.cols = 60;
     input.style.whiteSpace = "pre";
     input.style.overflowX = "auto";
@@ -8713,6 +8718,7 @@ class Theme {
       icon: "copy"
     });
     copyBtn.classList.add("jedi-json-data-copy");
+    copyBtn.setAttribute("always-enabled", "");
     const saveBtn = this.getButton({
       // content: config.propertiesToggleContent, // todo: use text config or something
       id: "jedi-json-data-save-" + config.id,
@@ -9372,6 +9378,7 @@ class Theme {
     header.classList.add("jedi-accordion-header");
     const toggle = document.createElement("button");
     toggle.type = "button";
+    toggle.setAttribute("always-enabled", "");
     toggle.classList.add("jedi-accordion-toggle", "collapsed");
     const chevron = document.createElement("i");
     chevron.classList.add("jedi-accordion-chevron");
@@ -11079,6 +11086,7 @@ class ThemeBootstrap4 extends Theme {
     header.classList.add("card-header", "p-0");
     const toggle = document.createElement("button");
     toggle.type = "button";
+    toggle.setAttribute("always-enabled", "");
     toggle.classList.add("btn", "btn-link", "w-100", "text-left");
     toggle.setAttribute("data-toggle", "collapse");
     toggle.setAttribute("data-target", "#" + collapseId);
@@ -11627,6 +11635,7 @@ class ThemeBootstrap5 extends Theme {
     header.classList.add("accordion-header");
     const toggle = document.createElement("button");
     toggle.type = "button";
+    toggle.setAttribute("always-enabled", "");
     toggle.classList.add("accordion-button", "collapsed");
     toggle.setAttribute("data-bs-toggle", "collapse");
     toggle.setAttribute("data-bs-target", "#" + collapseId);

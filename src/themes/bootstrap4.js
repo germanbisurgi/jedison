@@ -157,6 +157,7 @@ class ThemeBootstrap4 extends Theme {
 
     const toggle = document.createElement('button')
     toggle.type = 'button'
+    toggle.setAttribute('always-enabled', '')
     toggle.classList.add('btn', 'btn-link', 'w-100', 'text-left')
     toggle.setAttribute('data-toggle', 'collapse')
     toggle.setAttribute('data-target', '#' + collapseId)

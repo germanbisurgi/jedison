@@ -571,6 +571,10 @@ class Editor {
         element.removeAttribute('disabled', '')
       }
     })
+
+    if (this.control.jsonData && this.control.jsonData.input) {
+      this.control.jsonData.input.readOnly = this.disabled || this.readOnly
+    }
   }
 
   refreshTemplates () {

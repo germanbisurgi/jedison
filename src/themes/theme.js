@@ -526,6 +526,7 @@ class Theme {
     })
 
     toggle.classList.add('jedi-json-data-toggle')
+    toggle.setAttribute('always-enabled', '')
 
     toggle.addEventListener('click', () => {
       if (dialog.open) {
@@ -546,6 +547,7 @@ class Theme {
     // input
     const input = document.createElement('textarea')
     input.setAttribute('id', 'json-data-input-' + config.id)
+    input.setAttribute('always-enabled', '')
     input.cols = 60
     input.style.whiteSpace = 'pre'
     input.style.overflowX = 'auto'
@@ -558,6 +560,7 @@ class Theme {
       icon: 'copy'
     })
     copyBtn.classList.add('jedi-json-data-copy')
+    copyBtn.setAttribute('always-enabled', '')
 
     // saveBtn
     const saveBtn = this.getButton({
@@ -1332,6 +1335,7 @@ class Theme {
 
     const toggle = document.createElement('button')
     toggle.type = 'button'
+    toggle.setAttribute('always-enabled', '')
     toggle.classList.add('jedi-accordion-toggle', 'collapsed')
 
     const chevron = document.createElement('i')

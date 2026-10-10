@@ -1,3 +1,7 @@
+### 1.23.3
+
+- Fixed: disabled editors can still expand accordions and view/copy JSON in the "Edit JSON" dialog
+
 ### 1.23.2
 
 - Fixed issue #84: a nullable object with `properties` and `"default": null` crashed the editor (`hasOwn` on `null`) - the `object` branch inherited the wrapper's `null` default. Branches now only inherit a `default` that fits their type
