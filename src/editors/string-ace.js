@@ -1,5 +1,5 @@
 import EditorString from './string.js'
-import { isSet } from '../helpers/utils.js'
+import { isSet, isObject } from '../helpers/utils.js'
 import { getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 class EditorStringAce extends EditorString {
@@ -56,6 +56,12 @@ class EditorStringAce extends EditorString {
         this.aceEditor.session.setMode(`ace/mode/${mode}`)
       } catch {
         console.warn(`Ace mode "${mode}" not loaded`)
+      }
+
+      // Any other Ace option (minLines, maxLines, wrap, ...) via x-ace.options.
+      // With maxLines Ace sizes the container itself, so the editor can grow with its content.
+      if (isObject(aceOptions.options)) {
+        this.aceEditor.setOptions(aceOptions.options)
       }
 
       // Set initial value - ensure it's a string

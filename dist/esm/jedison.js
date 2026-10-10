@@ -7107,6 +7107,9 @@ class EditorStringAce extends EditorString {
       } catch {
         console.warn(`Ace mode "${mode}" not loaded`);
       }
+      if (isObject$1(aceOptions.options)) {
+        this.aceEditor.setOptions(aceOptions.options);
+      }
       const initialValue = this.instance.getValue();
       this.aceEditor.setValue(typeof initialValue === "string" ? initialValue : "");
       this.aceEditor.clearSelection();

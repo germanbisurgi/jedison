@@ -1,0 +1,34 @@
+{
+  "title": "Ace with x-ace.options (auto height, wrap)",
+  "description": "`x-ace.options` is passed to Ace's `setOptions`. With `minLines`/`maxLines` the editor is as high as its content (between the two), `wrap` wraps long lines.",
+  "type": "object",
+  "properties": {
+    "short": {
+      "title": "Short text: grows to 3 lines (minLines)",
+      "type": "string",
+      "x-format": "ace",
+      "x-ace": {
+        "mode": "markdown",
+        "options": { "minLines": 3, "maxLines": 20, "wrap": true }
+      },
+      "default": "### A short heading\n\nOne line of text."
+    },
+    "long": {
+      "title": "Long text: grows up to 12 lines (maxLines), then scrolls",
+      "type": "string",
+      "x-format": "ace",
+      "x-ace": {
+        "mode": "markdown",
+        "options": { "minLines": 3, "maxLines": 12, "wrap": true }
+      },
+      "default": "# Title\n\nA very long line that would normally run far beyond the right edge of the editor and force a horizontal scrollbar, but with wrap enabled it breaks at the editor width instead.\n\n- one\n- two\n- three\n- four\n- five\n\n| Status | When |\n|---|---|\n| `completed` | every frozen message was replayed |\n| `failed` | a source message no longer exists |\n\nLast line one.\nLast line two.\nLast line three."
+    },
+    "fixed": {
+      "title": "No options: unchanged, fixed height",
+      "type": "string",
+      "x-format": "ace",
+      "x-ace": { "mode": "markdown", "height": "120px" },
+      "default": "### Fixed height\n\nStays 120px high, as before."
+    }
+  }
+}

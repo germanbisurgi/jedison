@@ -1,3 +1,7 @@
+### 1.24.0
+
+- Added `x-ace.options` for the Ace editor (`x-format: "ace"`): the object is passed to Ace's `setOptions`, so any Ace option works like the options of the SimpleMDE and Milkdown editors do. For example `"x-ace": { "mode": "markdown", "options": { "minLines": 3, "maxLines": 60, "wrap": true } }` makes the editor as high as its content (between `minLines` and `maxLines`) and wraps long lines. Without `options` nothing changes
+
 ### 1.23.3
 
 - Fixed: disabled editors can still expand accordions and view/copy JSON in the "Edit JSON" dialog
