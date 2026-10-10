@@ -2069,7 +2069,8 @@ class Instance extends EventEmitter {
     return Object.fromEntries(Object.entries(functionsObject).map(([functionName, functionValue]) => [functionName, functionValue(context)]));
   }
   purify(value) {
-    if (typeof value === "string" && this.jedison.getOption("purifyData") && typeof window !== "undefined" && window.DOMPurify) {
+    const purifyData = getSchemaXOption(this.schema, "purifyData") ?? this.jedison.getOption("purifyData");
+    if (typeof value === "string" && purifyData && typeof window !== "undefined" && window.DOMPurify) {
       value = window.DOMPurify.sanitize(value);
     }
     return value;

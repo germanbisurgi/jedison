@@ -1,3 +1,7 @@
+### 1.25.0
+
+- Added `x-purifyData` to override the `purifyData` option per schema, like `x-purifyHtml` does for `purifyHtml`. `"x-purifyData": false` keeps a string exactly as it is, which matters for fields where markup is content, for example a Markdown editor holding an HTML comment: DOMPurify removes comments, so the field showed (and saved) an empty string. Without it nothing changes
+
 ### 1.24.0
 
 - Added `x-ace.options` for the Ace editor (`x-format: "ace"`): the object is passed to Ace's `setOptions`, so any Ace option works like the options of the SimpleMDE and Milkdown editors do. For example `"x-ace": { "mode": "markdown", "options": { "minLines": 3, "maxLines": 60, "wrap": true } }` makes the editor as high as its content (between `minLines` and `maxLines`) and wraps long lines. Without `options` nothing changes

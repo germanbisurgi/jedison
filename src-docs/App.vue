@@ -388,6 +388,7 @@ import templates from './json/features/templates.json'
 import editJsonData from './json/features/edit-json-data.json'
 import templateFunctions from './json/features/template-functions.json'
 import purifyValue from './json/features/purify-value.json'
+import purifyDataExample from './json/features/purify-data.json'
 import switcherModal from './json/features/switcher-modal.json'
 import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
@@ -498,6 +499,7 @@ export default {
           'features/templates': templates,
           'features/template-functions': templateFunctions,
           'features/purify-value': purifyValue,
+          'features/purify-data': purifyDataExample,
           'features/edit-json-data': editJsonData,
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,

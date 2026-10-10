@@ -1,0 +1,18 @@
+{
+  "title": "x-purifyData: keep a string unsanitized",
+  "description": "With `purifyData: true` every string is run through DOMPurify, which removes HTML comments and scripts. `x-purifyData: false` exempts one field, e.g. Markdown that contains an HTML comment.",
+  "type": "object",
+  "properties": {
+    "purified": {
+      "title": "Default: sanitized (comment is removed)",
+      "type": "string",
+      "default": "<!-- a comment -->\nText <script>alert(1)</script>after"
+    },
+    "untouched": {
+      "title": "x-purifyData: false (kept as is)",
+      "type": "string",
+      "x-purifyData": false,
+      "default": "<!-- a comment -->\nText after"
+    }
+  }
+}

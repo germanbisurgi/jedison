@@ -326,7 +326,9 @@ class Instance extends EventEmitter {
   }
 
   purify (value) {
-    if (typeof value === 'string' && this.jedison.getOption('purifyData') && typeof window !== 'undefined' && window.DOMPurify) {
+    const purifyData = getSchemaXOption(this.schema, 'purifyData') ?? this.jedison.getOption('purifyData')
+
+    if (typeof value === 'string' && purifyData && typeof window !== 'undefined' && window.DOMPurify) {
       value = window.DOMPurify.sanitize(value)
     }
 
