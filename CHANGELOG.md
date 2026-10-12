@@ -1,3 +1,8 @@
+### 1.26.0
+
+- Improved performance of large arrays: editing a field or calling `setValue()` is now much faster (300 items: about 220 ms to 12 ms per edit). First render is unchanged
+- Added a "Large array" example and a "Sticky" sidebar checkbox to the playground
+
 ### 1.25.0
 
 - Added `x-purifyData` to override the `purifyData` option per schema, like `x-purifyHtml` does for `purifyHtml`. `"x-purifyData": false` keeps a string exactly as it is, which matters for fields where markup is content, for example a Markdown editor holding an HTML comment: DOMPurify removes comments, so the field showed (and saved) an empty string. Without it nothing changes

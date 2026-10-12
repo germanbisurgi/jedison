@@ -37,7 +37,12 @@
       </div>
 
       <div class="col-xs-12 col-md-4">
-        <aside>
+        <aside :style="stickySidebar ? 'position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto;' : ''">
+          <div class="form-group mb-3">
+            <input type="checkbox" id="sticky-sidebar" v-model="stickySidebar" @change="saveStickySidebar()">
+            <label for="sticky-sidebar">Sticky</label>
+          </div>
+
           <div class="form-group mb-0">
             <label for="schema"><code>schema</code></label>
             <textarea ref="schema" class="form-control" id="schema" wrap="off" style="font-size: 12px; font-family: monospace; min-height: 300px;"></textarea>
@@ -345,6 +350,7 @@ import userProfile from './json/examples/user-profile.json'
 import productListing from './json/examples/product-listing.json'
 import eventBooking from './json/examples/event-booking.json'
 import surveyBuilder from './json/examples/survey-builder.json'
+import largeArray from './json/examples/large-array.json'
 import testJson from './json/test.json'
 import markdownAnnotations from './json/experimental/markdon-annotations.json'
 import jsonPatch from './json/parsing/json-patch.json'
@@ -417,6 +423,7 @@ export default {
           'examples/product-listing': productListing,
           'examples/event-booking': eventBooking,
           'examples/survey-builder': surveyBuilder,
+          'examples/large-array': largeArray,
           'test': testJson,
         },
         'Editors': {
@@ -634,6 +641,7 @@ export default {
         'es'
       ],
       btnContents: false,
+      stickySidebar: false,
       btnIcons: true,
       enablePropertiesToggle: true,
       enableCollapseToggle: true,
@@ -687,6 +695,12 @@ export default {
     this.useConstraintAttributes = this.getQueryParam('useConstraintAttributes') ? this.parseBooleanString(this.getQueryParam('useConstraintAttributes')) : true
     this.arrayDeleteConfirm = this.getQueryParam('arrayDeleteConfirm') ? this.parseBooleanString(this.getQueryParam('arrayDeleteConfirm')) : true
     this.keepMissingSchemaFields = this.getQueryParam('keepMissingSchemaFields') ? this.parseBooleanString(this.getQueryParam('keepMissingSchemaFields')) : false
+
+    try {
+      this.stickySidebar = localStorage.getItem('stickySidebar') === 'true'
+    } catch (error) {
+      this.stickySidebar = false
+    }
   },
   mounted() {
     switch (this.theme) {
@@ -753,6 +767,13 @@ export default {
     this.initEditor()
   },
   methods: {
+    saveStickySidebar() {
+      try {
+        localStorage.setItem('stickySidebar', this.stickySidebar)
+      } catch (error) {
+        // storage unavailable: the checkbox still works for this page view
+      }
+    },
     getThemeInstance(name) {
       let theme
 

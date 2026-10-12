@@ -287,6 +287,16 @@ class EditorArray extends Editor {
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
     const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
 
+    if (this.isRenderCurrent()) {
+      // Same item instances in the same order: only item values changed, and the
+      // item editors refresh themselves. Skip rebuilding every item's DOM.
+      this.refreshAddBtn()
+      this.refreshDeleteAllBtn()
+      this.refreshJsonData()
+      this.refreshLegendWarning()
+      return
+    }
+
     this.control.childrenSlot.innerHTML = ''
 
     this.instance.children.forEach((child, index) => {
@@ -336,10 +346,23 @@ class EditorArray extends Editor {
       child.ui.refreshUI()
     })
 
+    this.renderedChildren = [...this.instance.children]
+    this.renderedLocked = this.disabled || this.instance.isReadOnly()
+
     this.refreshAddBtn()
     this.refreshDeleteAllBtn()
     this.refreshJsonData()
     this.refreshLegendWarning()
+  }
+
+  isRenderCurrent () {
+    const rendered = this.renderedChildren
+    const children = this.instance.children
+
+    return isSet(rendered) &&
+      rendered.length === children.length &&
+      rendered.every((child, index) => child === children[index]) &&
+      this.renderedLocked === (this.disabled || this.instance.isReadOnly())
   }
 
   refreshLegendWarning () {

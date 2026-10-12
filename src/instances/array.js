@@ -141,20 +141,27 @@ class InstanceArray extends Instance {
   }
 
   refreshChildren () {
-    this.children = []
-
     const value = this.getValueRaw()
 
     if (!isArray(value)) {
+      this.children = []
       return
     }
 
+    // Reuse the instance at each index; only create missing ones and drop surplus ones.
+    const surplus = this.children.splice(value.length)
+    surplus.forEach((child) => child.destroy())
+
     const correctedValues = []
     value.forEach((itemValue, index) => {
-      const child = this.createItemInstance(index)
-      this.children.push(child)
-      const finalValue = child.setValue(itemValue, false)
-      correctedValues.push(finalValue)
+      let child = this.children[index]
+
+      if (!child) {
+        child = this.createItemInstance(index)
+        this.children.push(child)
+      }
+
+      correctedValues.push(child.setValue(itemValue, false))
     })
 
     // Update the array's value with constraint-enforced values

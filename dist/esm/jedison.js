@@ -3510,17 +3510,21 @@ class InstanceArray extends Instance {
     this.emit("notifyParent", initiator);
   }
   refreshChildren() {
-    this.children = [];
     const value = this.getValueRaw();
     if (!isArray(value)) {
+      this.children = [];
       return;
     }
+    const surplus = this.children.splice(value.length);
+    surplus.forEach((child) => child.destroy());
     const correctedValues = [];
     value.forEach((itemValue, index2) => {
-      const child = this.createItemInstance(index2);
-      this.children.push(child);
-      const finalValue = child.setValue(itemValue, false);
-      correctedValues.push(finalValue);
+      let child = this.children[index2];
+      if (!child) {
+        child = this.createItemInstance(index2);
+        this.children.push(child);
+      }
+      correctedValues.push(child.setValue(itemValue, false));
     });
     this.value = correctedValues;
   }
@@ -5319,6 +5323,13 @@ class EditorArray extends Editor {
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
     const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
+    if (this.isRenderCurrent()) {
+      this.refreshAddBtn();
+      this.refreshDeleteAllBtn();
+      this.refreshJsonData();
+      this.refreshLegendWarning();
+      return;
+    }
     this.control.childrenSlot.innerHTML = "";
     this.instance.children.forEach((child, index2) => {
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
@@ -5356,10 +5367,17 @@ class EditorArray extends Editor {
     this.instance.children.forEach((child) => {
       child.ui.refreshUI();
     });
+    this.renderedChildren = [...this.instance.children];
+    this.renderedLocked = this.disabled || this.instance.isReadOnly();
     this.refreshAddBtn();
     this.refreshDeleteAllBtn();
     this.refreshJsonData();
     this.refreshLegendWarning();
+  }
+  isRenderCurrent() {
+    const rendered = this.renderedChildren;
+    const children = this.instance.children;
+    return isSet(rendered) && rendered.length === children.length && rendered.every((child, index2) => child === children[index2]) && this.renderedLocked === (this.disabled || this.instance.isReadOnly());
   }
   refreshLegendWarning() {
     if (!this.control.legendText) return;
