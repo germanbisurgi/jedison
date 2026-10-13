@@ -351,6 +351,8 @@ import productListing from './json/examples/product-listing.json'
 import eventBooking from './json/examples/event-booking.json'
 import surveyBuilder from './json/examples/survey-builder.json'
 import largeArray from './json/examples/large-array.json'
+import largeTable from './json/examples/large-table.json'
+import largeTableObject from './json/examples/large-table-object.json'
 import testJson from './json/test.json'
 import markdownAnnotations from './json/experimental/markdon-annotations.json'
 import jsonPatch from './json/parsing/json-patch.json'
@@ -424,6 +426,8 @@ export default {
           'examples/event-booking': eventBooking,
           'examples/survey-builder': surveyBuilder,
           'examples/large-array': largeArray,
+          'examples/large-table': largeTable,
+          'examples/large-table-object': largeTableObject,
           'test': testJson,
         },
         'Editors': {

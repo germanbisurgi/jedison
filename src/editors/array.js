@@ -224,6 +224,8 @@ class EditorArray extends Editor {
         handle: '.jedi-array-drag',
         disabled: this.disabled || this.readOnly,
         onEnd: (evt) => {
+          // Sortable already moved the DOM rows itself; force a rebuild so the DOM matches the new order
+          this.renderedInstances = null
           this.instance.move(evt.oldIndex, evt.newIndex)
         }
       })
@@ -346,8 +348,7 @@ class EditorArray extends Editor {
       child.ui.refreshUI()
     })
 
-    this.renderedChildren = [...this.instance.children]
-    this.renderedLocked = this.disabled || this.instance.isReadOnly()
+    this.markRendered()
 
     this.refreshAddBtn()
     this.refreshDeleteAllBtn()
@@ -355,13 +356,30 @@ class EditorArray extends Editor {
     this.refreshLegendWarning()
   }
 
-  isRenderCurrent () {
-    const rendered = this.renderedChildren
-    const children = this.instance.children
+  /**
+   * Instances whose editors the current DOM is built from. Editors that also
+   * render deeper instances (e.g. table cells) override this.
+   */
+  getRenderedInstances () {
+    return this.instance.children
+  }
 
-    return isSet(rendered) &&
-      rendered.length === children.length &&
-      rendered.every((child, index) => child === children[index]) &&
+  markRendered () {
+    this.renderedInstances = [...this.getRenderedInstances()]
+    this.renderedLocked = this.disabled || this.instance.isReadOnly()
+  }
+
+  /**
+   * True when the DOM was built from the same instances in the same order, so
+   * a change only touched values and a rebuild would produce the same DOM.
+   */
+  isRenderCurrent () {
+    const rendered = this.renderedInstances
+    const current = this.getRenderedInstances()
+
+    return isArray(rendered) &&
+      rendered.length === current.length &&
+      rendered.every((instance, index) => instance === current[index]) &&
       this.renderedLocked === (this.disabled || this.instance.isReadOnly())
   }
 

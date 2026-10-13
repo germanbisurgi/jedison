@@ -5268,6 +5268,7 @@ class EditorArray extends Editor {
         handle: ".jedi-array-drag",
         disabled: this.disabled || this.readOnly,
         onEnd: (evt) => {
+          this.renderedInstances = null;
           this.instance.move(evt.oldIndex, evt.newIndex);
         }
       });
@@ -5367,17 +5368,31 @@ class EditorArray extends Editor {
     this.instance.children.forEach((child) => {
       child.ui.refreshUI();
     });
-    this.renderedChildren = [...this.instance.children];
-    this.renderedLocked = this.disabled || this.instance.isReadOnly();
+    this.markRendered();
     this.refreshAddBtn();
     this.refreshDeleteAllBtn();
     this.refreshJsonData();
     this.refreshLegendWarning();
   }
+  /**
+   * Instances whose editors the current DOM is built from. Editors that also
+   * render deeper instances (e.g. table cells) override this.
+   */
+  getRenderedInstances() {
+    return this.instance.children;
+  }
+  markRendered() {
+    this.renderedInstances = [...this.getRenderedInstances()];
+    this.renderedLocked = this.disabled || this.instance.isReadOnly();
+  }
+  /**
+   * True when the DOM was built from the same instances in the same order, so
+   * a change only touched values and a rebuild would produce the same DOM.
+   */
   isRenderCurrent() {
-    const rendered = this.renderedChildren;
-    const children = this.instance.children;
-    return isSet(rendered) && rendered.length === children.length && rendered.every((child, index2) => child === children[index2]) && this.renderedLocked === (this.disabled || this.instance.isReadOnly());
+    const rendered = this.renderedInstances;
+    const current = this.getRenderedInstances();
+    return isArray(rendered) && rendered.length === current.length && rendered.every((instance, index2) => instance === current[index2]) && this.renderedLocked === (this.disabled || this.instance.isReadOnly());
   }
   refreshLegendWarning() {
     if (!this.control.legendText) return;
@@ -5468,6 +5483,12 @@ class EditorArrayTable extends EditorArray {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
   }
   refreshUI() {
+    if (this.isRenderCurrent()) {
+      this.refreshAddBtn();
+      this.refreshDeleteAllBtn();
+      this.refreshJsonData();
+      return;
+    }
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
@@ -5547,6 +5568,7 @@ class EditorArrayTable extends EditorArray {
     this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
+    this.markRendered();
     table.container.addEventListener("scroll", () => {
       this.lastScrollTop = table.container.scrollTop;
       this.lastScrollLeft = table.container.scrollLeft;
@@ -5557,21 +5579,6 @@ class EditorArrayTable extends EditorArray {
       top: this.lastScrollTop,
       left: this.lastScrollLeft
     });
-  }
-  refreshSortable(container) {
-    if (this.isSortable()) {
-      if (this.sortable) {
-        this.sortable.destroy();
-      }
-      this.sortable = window.Sortable.create(container, {
-        animation: 150,
-        handle: ".jedi-array-drag",
-        disabled: this.disabled || this.readOnly,
-        onEnd: (evt) => {
-          this.instance.move(evt.oldIndex, evt.newIndex);
-        }
-      });
-    }
   }
 }
 class EditorArrayTableObject extends EditorArray {
@@ -5613,7 +5620,16 @@ class EditorArrayTableObject extends EditorArray {
   isSortable() {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
   }
+  getRenderedInstances() {
+    return this.instance.children.flatMap((child) => [child, ...child.children]);
+  }
   refreshUI() {
+    if (this.isRenderCurrent()) {
+      this.refreshAddBtn();
+      this.refreshDeleteAllBtn();
+      this.refreshJsonData();
+      return;
+    }
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
@@ -5710,6 +5726,7 @@ class EditorArrayTableObject extends EditorArray {
     this.refreshJsonData();
     this.refreshDisabledState();
     this.refreshScrollPosition(table.container);
+    this.markRendered();
     table.container.addEventListener("scroll", () => {
       this.lastScrollTop = table.container.scrollTop;
       this.lastScrollLeft = table.container.scrollLeft;
@@ -5720,21 +5737,6 @@ class EditorArrayTableObject extends EditorArray {
       top: this.lastScrollTop,
       left: this.lastScrollLeft
     });
-  }
-  refreshSortable(container) {
-    if (this.isSortable()) {
-      if (this.sortable) {
-        this.sortable.destroy();
-      }
-      this.sortable = window.Sortable.create(container, {
-        animation: 150,
-        handle: ".jedi-array-drag",
-        disabled: this.disabled || this.readOnly,
-        onEnd: (evt) => {
-          this.instance.move(evt.oldIndex, evt.newIndex);
-        }
-      });
-    }
   }
 }
 class EditorArrayChoices extends Editor {

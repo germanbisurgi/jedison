@@ -1,7 +1,7 @@
 ### 1.26.0
 
-- Improved performance of large arrays: editing a field or calling `setValue()` is now much faster (300 items: about 220 ms to 12 ms per edit). First render is unchanged
-- Added a "Large array" example and a "Sticky" sidebar checkbox to the playground
+- Improved performance of large arrays, including the `table` and `table-object` formats: editing a field or calling `setValue()` is now much faster (300 items: about 220 ms to 12 ms per edit). First render and the `nav` formats are unchanged
+- Added "Large array", "Large table" and "Large table of objects" examples and a "Sticky" sidebar checkbox to the playground
 
 ### 1.25.0
 

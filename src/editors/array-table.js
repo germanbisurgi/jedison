@@ -42,6 +42,13 @@ class EditorArrayTable extends EditorArray {
   }
 
   refreshUI () {
+    if (this.isRenderCurrent()) {
+      this.refreshAddBtn()
+      this.refreshDeleteAllBtn()
+      this.refreshJsonData()
+      return
+    }
+
     this.control.childrenSlot.innerHTML = ''
 
     const table = this.theme.getTable()
@@ -158,6 +165,7 @@ class EditorArrayTable extends EditorArray {
     this.refreshJsonData()
     this.refreshDisabledState()
     this.refreshScrollPosition(table.container)
+    this.markRendered()
 
     table.container.addEventListener('scroll', () => {
       this.lastScrollTop = table.container.scrollTop
@@ -170,23 +178,6 @@ class EditorArrayTable extends EditorArray {
       top: this.lastScrollTop,
       left: this.lastScrollLeft
     })
-  }
-
-  refreshSortable (container) {
-    if (this.isSortable()) {
-      if (this.sortable) {
-        this.sortable.destroy()
-      }
-
-      this.sortable = window.Sortable.create(container, {
-        animation: 150,
-        handle: '.jedi-array-drag',
-        disabled: this.disabled || this.readOnly,
-        onEnd: (evt) => {
-          this.instance.move(evt.oldIndex, evt.newIndex)
-        }
-      })
-    }
   }
 }
 
