@@ -363,6 +363,7 @@
       "title": "Spells",
       "type": "array",
       "x-format": "nav-horizontal",
+      "x-arrayMove": false,
       "x-titleTemplate": "{{ i1 }}) {{ value.name }}",
       "default": [
         {
@@ -483,7 +484,7 @@
               "type": "object",
               "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "noble", "default": "noble", "readOnly": true, "x-enforceConst": true },
+                "originType": { "type": "string", "const": "noble", "default": "noble", "readOnly": true, "x-enforceConst": true, "x-hidden": true },
                 "house": {
                   "title": "Noble House",
                   "type": "string",
@@ -507,7 +508,7 @@
               "type": "object",
               "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "commoner", "default": "commoner", "readOnly": true, "x-enforceConst": true },
+                "originType": { "type": "string", "const": "commoner", "default": "commoner", "readOnly": true, "x-enforceConst": true, "x-hidden": true },
                 "trade": {
                   "title": "Trade",
                   "type": "string",
@@ -526,7 +527,7 @@
               "type": "object",
               "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "outcast", "default": "outcast", "readOnly": true, "x-enforceConst": true },
+                "originType": { "type": "string", "const": "outcast", "default": "outcast", "readOnly": true, "x-enforceConst": true, "x-hidden": true },
                 "reason": {
                   "title": "Reason for Exile",
                   "type": "string",
@@ -541,7 +542,7 @@
               "type": "object",
               "required": ["originType"],
               "properties": {
-                "originType": { "type": "string", "const": "wanderer", "default": "wanderer", "readOnly": true, "x-enforceConst": true },
+                "originType": { "type": "string", "const": "wanderer", "default": "wanderer", "readOnly": true, "x-enforceConst": true, "x-hidden": true },
                 "yearsOnRoad": {
                   "title": "Years on the Road",
                   "type": "integer",
@@ -560,12 +561,7 @@
                 }
               }
             }
-          ],
-          "default": {
-            "originType": "noble",
-            "house": "House Oakenshield",
-            "title": "lord"
-          }
+          ]
         },
         "lifeGoal": {
           "title": "Life Goal",
@@ -598,6 +594,7 @@
       "title": "Party",
       "type": "array",
       "x-format": "nav-horizontal",
+      "x-arrayMove": false,
       "x-titleTemplate": "{{ value.name }}",
       "default": [
         { "name": "Brenna Ironforge", "role": "tank", "level": 8, "active": true },
