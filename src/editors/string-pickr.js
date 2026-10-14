@@ -67,7 +67,7 @@ class EditorStringPickr extends EditorString {
 
     this.refreshTemplates()
 
-    if (this.disabled) {
+    if (this.disabled || this.readOnly) {
       this.pickr.disable()
     } else {
       this.pickr.enable()

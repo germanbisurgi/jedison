@@ -44,5 +44,7 @@ export default {
   objectPropertyAdded: 'field was added to the form',
   objectPropertyRemoved: 'field was removed from the form',
   propertiesToggle: 'Properties',
-  collapseToggle: 'Collapse'
+  collapseToggle: 'Collapse',
+  editJson: 'Edit JSON',
+  viewJson: 'View JSON'
 }

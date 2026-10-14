@@ -38,6 +38,7 @@ class EditorArray extends Editor {
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
       editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.getOption('editJsonData'),
+      jsonDataContent: this.instance.jedison.translator.translate(this.instance.isReadOnly() ? 'viewJson' : 'editJson'),
       arrayAdd: getSchemaXOption(this.instance.schema, 'arrayAdd') ?? this.instance.jedison.getOption('arrayAdd'),
       arrayAddContent: getSchemaXOption(this.instance.schema, 'arrayAddContent') ?? this.instance.jedison.translator.translate('arrayAdd'),
       arrayFooterAdd: getSchemaXOption(this.instance.schema, 'arrayFooterAdd') ?? this.instance.jedison.getOption('arrayFooterAdd'),
@@ -309,21 +310,22 @@ class EditorArray extends Editor {
       })
 
       arrayActions.appendChild(btnGroup)
+      const readOnly = this.instance.isReadOnly()
 
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn)
       }
 
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn)
         btnGroup.appendChild(moveDownBtn)
       }
 
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn)
       }
 
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !this.instance.isReadOnly()) {
         btnGroup.appendChild(addAfterBtn)
       }
 

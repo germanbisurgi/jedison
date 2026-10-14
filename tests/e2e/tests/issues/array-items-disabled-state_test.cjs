@@ -11,5 +11,5 @@ BeforeSuite(({ I }) => {
 })
 
 Scenario('@issue @array-items-disabled-state', ({ I }) => {
-  I._waitForElement('#root-array-0-prop:disabled')
+  I._waitForElement('#root-array-0-prop[readonly]')
 })

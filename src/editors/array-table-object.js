@@ -75,10 +75,12 @@ class EditorArrayTableObject extends EditorArray {
 
     this.control.childrenSlot.appendChild(table.container)
 
+    const readOnly = this.instance.isReadOnly()
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, 'arrayButtonsPosition') ?? this.instance.jedison.getOption('arrayButtonsPosition')
     const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
+    const showButtons = !readOnly && (arrayDelete === true || arrayMove === true || arrayAddAfter === true || this.isSortable())
 
     // thead labels
     const th = this.theme.getTableHeader()
@@ -90,7 +92,7 @@ class EditorArrayTableObject extends EditorArray {
     th.appendChild(label)
 
     // Add controls header at the beginning (left) or end (right)
-    if (arrayButtonsPosition === 'left') {
+    if (arrayButtonsPosition === 'left' && showButtons) {
       table.thead.appendChild(th)
     }
 
@@ -134,7 +136,7 @@ class EditorArrayTableObject extends EditorArray {
     })
 
     // Add controls header at the end if position is right
-    if (arrayButtonsPosition === 'right') {
+    if (arrayButtonsPosition === 'right' && showButtons) {
       table.thead.appendChild(th)
     }
 
@@ -146,27 +148,27 @@ class EditorArrayTableObject extends EditorArray {
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true })
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index)
 
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn)
       }
 
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn)
       }
 
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn)
         btnGroup.appendChild(moveDownBtn)
       }
 
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !readOnly) {
         btnGroup.appendChild(addAfterBtn)
       }
 
       buttonsTd.appendChild(btnGroup)
 
       // Add buttons column at the beginning (left) or end (right)
-      if (arrayButtonsPosition === 'left') {
+      if (arrayButtonsPosition === 'left' && showButtons) {
         tbodyRow.appendChild(buttonsTd)
       }
 
@@ -188,7 +190,7 @@ class EditorArrayTableObject extends EditorArray {
       }
 
       // Add buttons column at the end if position is right
-      if (arrayButtonsPosition === 'right') {
+      if (arrayButtonsPosition === 'right' && showButtons) {
         tbodyRow.appendChild(buttonsTd)
       }
 

@@ -1,5 +1,4 @@
 /* global Feature Scenario */
-// file generated with AI assistance: Claude Code - 2026-07-01
 const theme = process.env.THEME || 'barebones'
 const pathToSchema = 'editors/object-radios'
 const defaultValue = { q1: { source: 'social_media', score: 4 }, q2: { rating: 'very_satisfied', score: 4 }, q3: { nps: 'promoter', score: 3 } }

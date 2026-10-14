@@ -270,11 +270,27 @@ class Editor {
     }
   }
 
+  /**
+   * Text-like fields honour the native `readonly` attribute (focusable and
+   * copyable); selects, checkboxes, radios and the like do not.
+   */
+  isTextLike (element) {
+    if (element.tagName === 'TEXTAREA') {
+      return true
+    }
+
+    return element.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'color', 'file', 'button', 'submit', 'reset', 'image', 'hidden'].includes(element.type)
+  }
+
   setReadOnlyAttribute () {
     if (this.readOnly) {
       const inputElements = this.control.container.querySelectorAll('input, textarea, select')
       inputElements.forEach((element) => {
-        element.setAttribute('always-disabled', '')
+        if (this.isTextLike(element)) {
+          element.setAttribute('readonly', '')
+        } else {
+          element.setAttribute('always-disabled', '')
+        }
       })
     }
   }
@@ -561,7 +577,7 @@ class Editor {
     const interactiveElements = this.control.container.querySelectorAll('button, input, select, textarea')
 
     interactiveElements.forEach((element) => {
-      if (this.disabled || this.readOnly || element.hasAttribute('always-disabled')) {
+      if (this.disabled || (this.readOnly && !this.isTextLike(element)) || element.hasAttribute('always-disabled')) {
         element.setAttribute('disabled', '')
       } else {
         element.removeAttribute('disabled', '')

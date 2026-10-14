@@ -520,10 +520,14 @@ class Theme {
 
     // toggle
     const toggle = this.getButton({
-      // content: config.propertiesToggleContent, // todo: use text config or something
+      content: config.content,
       id: 'jedi-json-data-toggle-' + config.id,
-      icon: 'edit'
+      icon: config.readOnly ? 'view' : 'edit'
     })
+
+    if (config.content) {
+      toggle.setAttribute('aria-label', config.content)
+    }
 
     toggle.classList.add('jedi-json-data-toggle')
     toggle.setAttribute('always-enabled', '')
@@ -573,7 +577,10 @@ class Theme {
     control.appendChild(label)
     control.appendChild(input)
     dialog.appendChild(copyBtn)
-    dialog.appendChild(saveBtn)
+
+    if (!config.readOnly) {
+      dialog.appendChild(saveBtn)
+    }
 
     return {
       dialog,
@@ -1009,7 +1016,9 @@ class Theme {
       content: config.description
     })
     const jsonData = this.getJsonData({
-      id: 'json-data-' + config.id
+      id: 'json-data-' + config.id,
+      readOnly: config.readOnly,
+      content: config.jsonDataContent
     })
     const propertiesContainer = this.getPropertiesSlot({
       id: 'properties-slot-' + config.id
@@ -1094,9 +1103,7 @@ class Theme {
     const switcherSlot = this.getSwitcherSlot()
     left.appendChild(switcherSlot)
 
-    if (config.readOnly === false) {
-      right.appendChild(actions)
-    }
+    right.appendChild(actions)
 
     body.appendChild(childrenSlot)
 
@@ -1104,11 +1111,11 @@ class Theme {
       actions.appendChild(jsonData.toggle)
     }
 
-    if (config.addProperty) {
+    if (config.addProperty && !config.readOnly) {
       actions.appendChild(quickAddPropertyToggle)
     }
 
-    if (config.enablePropertiesToggle) {
+    if (config.enablePropertiesToggle && !config.readOnly) {
       actions.appendChild(propertiesToggle)
       propertiesContainer.appendChild(ariaLive)
       propertiesContainer.appendChild(propertiesActivators)
@@ -1164,7 +1171,7 @@ class Theme {
     const propertiesActivators = this.getPropertiesActivators()
     const info = this.getInfo(config.info)
     const description = this.getDescription({ content: config.description })
-    const jsonData = this.getJsonData({ id: 'json-data-' + config.id })
+    const jsonData = this.getJsonData({ id: 'json-data-' + config.id, readOnly: config.readOnly, content: config.jsonDataContent })
     const propertiesContainer = this.getPropertiesSlot({ id: 'properties-slot-' + config.id })
     const propertiesToggle = this.getPropertiesToggle({
       content: config.propertiesToggleContent,
@@ -1238,9 +1245,7 @@ class Theme {
 
     body.appendChild(messages)
 
-    if (config.readOnly === false) {
-      right.appendChild(actions)
-    }
+    right.appendChild(actions)
 
     body.appendChild(childrenSlot)
     innerWrapper.appendChild(body)
@@ -1251,11 +1256,11 @@ class Theme {
       actions.appendChild(jsonData.toggle)
     }
 
-    if (config.addProperty) {
+    if (config.addProperty && !config.readOnly) {
       actions.appendChild(quickAddPropertyToggle)
     }
 
-    if (config.enablePropertiesToggle) {
+    if (config.enablePropertiesToggle && !config.readOnly) {
       actions.appendChild(propertiesToggle)
       propertiesContainer.appendChild(ariaLive)
       propertiesContainer.appendChild(propertiesActivators)
@@ -1431,7 +1436,9 @@ class Theme {
       content: config.description
     })
     const jsonData = this.getJsonData({
-      id: 'json-data-' + config.id
+      id: 'json-data-' + config.id,
+      readOnly: config.readOnly,
+      content: config.jsonDataContent
     })
     const collapse = this.getCollapse({
       id: collapseId,
@@ -1476,9 +1483,7 @@ class Theme {
     const switcherSlot = this.getSwitcherSlot()
     left.appendChild(switcherSlot)
 
-    if (config.readOnly === false) {
-      right.appendChild(actions)
-    }
+    right.appendChild(actions)
 
     actions.appendChild(btnGroup)
 
@@ -1486,11 +1491,11 @@ class Theme {
       btnGroup.appendChild(jsonData.toggle)
     }
 
-    if (deleteAllBtn) {
+    if (deleteAllBtn && !config.readOnly) {
       btnGroup.appendChild(deleteAllBtn)
     }
 
-    if (isSet(config.arrayAdd) && config.arrayAdd === true) {
+    if (isSet(config.arrayAdd) && config.arrayAdd === true && !config.readOnly) {
       btnGroup.appendChild(addBtn)
     }
 

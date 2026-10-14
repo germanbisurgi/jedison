@@ -44,7 +44,9 @@ export default {
     objectPropertyAdded: 'field was added to the form',
     objectPropertyRemoved: 'field was removed from the form',
     propertiesToggle: 'Properties',
-    collapseToggle: 'Collapse'
+    collapseToggle: 'Collapse',
+    editJson: 'Edit JSON',
+    viewJson: 'View JSON'
   },
   de: {
     errorAddPropertyPatternMismatch: 'Der Eigenschaftsname "{{ property }}" entspricht keiner erlaubten Eigenschaft oder keinem erlaubten Muster.',
@@ -91,7 +93,9 @@ export default {
     objectPropertyAdded: 'Feld wurde dem Formular hinzugefügt',
     objectPropertyRemoved: 'Feld wurde aus dem Formular entfernt',
     propertiesToggle: 'Eigenschaften',
-    collapseToggle: 'Einklappen'
+    collapseToggle: 'Einklappen',
+    editJson: 'JSON bearbeiten',
+    viewJson: 'JSON ansehen'
   },
   it: {
     errorAddPropertyPatternMismatch: 'Il nome della proprietà "{{ property }}" non corrisponde a nessuna proprietà o modello consentito.',
@@ -138,7 +142,9 @@ export default {
     objectPropertyAdded: 'Campo aggiunto al modulo',
     objectPropertyRemoved: 'Campo rimosso dal modulo',
     propertiesToggle: 'Proprietà',
-    collapseToggle: 'Comprimi'
+    collapseToggle: 'Comprimi',
+    editJson: 'Modifica JSON',
+    viewJson: 'Visualizza JSON'
   },
   es: {
     errorAddPropertyPatternMismatch: 'El nombre de propiedad "{{ property }}" no coincide con ninguna propiedad o patrón permitido.',
@@ -185,6 +191,8 @@ export default {
     objectPropertyAdded: 'campo fue añadido al formulario',
     objectPropertyRemoved: 'campo fue eliminado del formulario',
     propertiesToggle: 'Propiedades',
-    collapseToggle: 'Colapsar'
+    collapseToggle: 'Colapsar',
+    editJson: 'Editar JSON',
+    viewJson: 'Ver JSON'
   }
 }

@@ -461,7 +461,7 @@ class Instance extends EventEmitter {
       return true
     }
 
-    return this.parent ? this.parent.isReadOnly() : false
+    return this.parent ? this.parent.isReadOnly() : this.jedison.getOption('readOnly') === true
   }
 
   /**

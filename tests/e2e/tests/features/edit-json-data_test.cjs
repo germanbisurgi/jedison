@@ -18,6 +18,7 @@ Scenario('Should enable inline JSON editing and save changes @edit-json-data', (
 
   I.checkOption('#editJsonData')
   I._waitForElement('.jedi-ready')
+  I.see('Edit JSON', '#jedi-json-data-toggle-json-data-root')
   I._click('#jedi-json-data-toggle-json-data-root')
   I.clearField('#json-data-input-json-data-root')
   I.fillField('#json-data-input-json-data-root', testJsonData)

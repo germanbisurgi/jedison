@@ -82,6 +82,7 @@ class EditorArrayNav extends EditorArray {
       variant: variant
     })
 
+    const readOnly = this.instance.isReadOnly()
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
     const arrayAddAfter = getSchemaXOption(this.instance.schema, 'arrayAddAfter') ?? this.instance.jedison.getOption('arrayAddAfter')
@@ -95,20 +96,20 @@ class EditorArrayNav extends EditorArray {
     this.instance.children.forEach((child, index) => {
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index)
 
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn)
       }
 
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn)
         btnGroup.appendChild(moveDownBtn)
       }
 
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !readOnly) {
         btnGroup.appendChild(addAfterBtn)
       }
 
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn)
       }
 

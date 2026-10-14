@@ -227,6 +227,7 @@ import smoke from './json/editors/smoke.json'
 import array from './json/editors/array.json'
 import arrayButtonsContent from './json/editors/array-buttons-content.json'
 import arrayNoButtons from './json/editors/array-no-buttons.json'
+import arrayTableNoButtons from './json/editors/array-table-no-buttons.json'
 import arrayCheckboxes from './json/editors/array-checkboxes.json'
 import arrayCheckboxesInline from './json/editors/array-checkboxes-inline.json'
 import arrayCheckboxesSortable from './json/editors/array-checkboxes-sortable.json'
@@ -363,6 +364,8 @@ import oneOfRefs from './json/parsing/oneOf-refs.json'
 import anyOfRefs from './json/parsing/anyOf-refs.json'
 import recursiveRefs from './json/parsing/recursive-refs.json'
 import optionsOverrides from './json/features/options-overrides.json'
+import readOnlyExample from './json/features/read-only.json'
+import disabledExample from './json/features/disabled.json'
 import navWarning from './json/features/nav-warning.json'
 import ifThenElseValueOverrides from './json/issues/if-then-else-value-overrides.json'
 import ifThenElseInitialValue from './json/issues/if-then-else-initial-value.json'
@@ -437,6 +440,7 @@ export default {
           'editors/array': array,
           'editors/array-buttons-content': arrayButtonsContent,
           'editors/array-no-buttons': arrayNoButtons,
+          'editors/array-table-no-buttons': arrayTableNoButtons,
           'editors/array-checkboxes': arrayCheckboxes,
           'editors/array-checkboxes-inline': arrayCheckboxesInline,
           'editors/array-checkboxes-sortable': arrayCheckboxesSortable,
@@ -516,6 +520,8 @@ export default {
           'features/edit-json-data': editJsonData,
           'features/markdown-annotations': markdownAnnotations,
           'features/options-overrides': optionsOverrides,
+          'features/read-only': readOnlyExample,
+          'features/disabled': disabledExample,
           'features/nav-warning': navWarning,
           'features/switcher-modal': switcherModal,
           'features/switcher-select-inline': switcherSelectInline,
@@ -952,6 +958,9 @@ export default {
       const t2 = window.performance.now()
       console.log('init time', t2 - t1)
       window.editor = this.editor
+      if (this.schema && this.schema['x-playgroundDisabled']) {
+        this.editor.disable()
+      }
       this.editorChangeHandler()
       this.editor.on('change', this.editorChangeHandler)
 

@@ -65,6 +65,7 @@ class EditorObject extends Editor {
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
       editJsonData: getSchemaXOption(this.instance.schema, 'editJsonData') ?? this.instance.jedison.getOption('editJsonData'),
+      jsonDataContent: this.instance.jedison.translator.translate(this.instance.isReadOnly() ? 'viewJson' : 'editJson'),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, 'propertiesToggleContent') ?? this.instance.jedison.translator.translate('propertiesToggle'),
       collapseToggleContent: getSchemaXOption(this.instance.schema, 'collapseToggleContent') ?? this.instance.jedison.translator.translate('collapseToggle'),
       addPropertyContent: getSchemaXOption(this.instance.schema, 'addPropertyContent') ?? this.instance.jedison.translator.translate('objectAddProperty'),

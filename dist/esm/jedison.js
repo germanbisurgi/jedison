@@ -2173,7 +2173,7 @@ class Instance extends EventEmitter {
     if (getSchemaReadOnly(this.schema) === true) {
       return true;
     }
-    return this.parent ? this.parent.isReadOnly() : false;
+    return this.parent ? this.parent.isReadOnly() : this.jedison.getOption("readOnly") === true;
   }
   /**
    * Returns true if this instance's own schema is marked deprecated.
@@ -2387,11 +2387,25 @@ class Editor {
       }
     }
   }
+  /**
+   * Text-like fields honour the native `readonly` attribute (focusable and
+   * copyable); selects, checkboxes, radios and the like do not.
+   */
+  isTextLike(element) {
+    if (element.tagName === "TEXTAREA") {
+      return true;
+    }
+    return element.tagName === "INPUT" && !["checkbox", "radio", "range", "color", "file", "button", "submit", "reset", "image", "hidden"].includes(element.type);
+  }
   setReadOnlyAttribute() {
     if (this.readOnly) {
       const inputElements = this.control.container.querySelectorAll("input, textarea, select");
       inputElements.forEach((element) => {
-        element.setAttribute("always-disabled", "");
+        if (this.isTextLike(element)) {
+          element.setAttribute("readonly", "");
+        } else {
+          element.setAttribute("always-disabled", "");
+        }
       });
     }
   }
@@ -2625,7 +2639,7 @@ class Editor {
   refreshDisabledState() {
     const interactiveElements = this.control.container.querySelectorAll("button, input, select, textarea");
     interactiveElements.forEach((element) => {
-      if (this.disabled || this.readOnly || element.hasAttribute("always-disabled")) {
+      if (this.disabled || this.readOnly && !this.isTextLike(element) || element.hasAttribute("always-disabled")) {
         element.setAttribute("disabled", "");
       } else {
         element.removeAttribute("disabled", "");
@@ -3549,6 +3563,7 @@ const glyphicons = {
   info: "glyphicon glyphicon-question-sign",
   close: "glyphicon glyphicon-remove",
   edit: "glyphicon glyphicon-pencil",
+  view: "glyphicon glyphicon-eye-open",
   save: "glyphicon glyphicon-floppy-disk",
   copy: "glyphicon glyphicon-copy",
   switcher: "glyphicon glyphicon-chevron-down"
@@ -3566,6 +3581,7 @@ const bootstrapIcons = {
   info: "bi bi-question-circle",
   close: "bi bi-x",
   edit: "bi bi-pencil",
+  view: "bi bi-eye",
   save: "bi bi-floppy",
   copy: "bi bi-clipboard",
   switcher: "bi bi-chevron-down"
@@ -3583,6 +3599,7 @@ const fontAwesome3 = {
   info: "icon-question-sign",
   close: "icon-remove",
   edit: "icon-pencil",
+  view: "icon-eye-open",
   save: "icon-save",
   copy: "icon-copy",
   switcher: "icon-chevron-down"
@@ -3600,6 +3617,7 @@ const fontAwesome4 = {
   info: "fa fa-question-circle",
   close: "fa fa-times",
   edit: "fa fa-pencil",
+  view: "fa fa-eye",
   save: "fa fa-floppy-o",
   copy: "fa fa-clipboard",
   switcher: "fa fa-chevron-down"
@@ -3617,6 +3635,7 @@ const fontAwesome5 = {
   info: "fas fa-question-circle",
   close: "fas fa-times",
   edit: "fas fa-pencil-alt",
+  view: "fas fa-eye",
   save: "fas fa-save",
   copy: "fas fa-clipboard",
   switcher: "fas fa-chevron-down"
@@ -3634,6 +3653,7 @@ const fontAwesome6 = {
   info: "fa-solid fa-circle-question",
   close: "fa-solid fa-xmark",
   edit: "fa-solid fa-pencil",
+  view: "fa-solid fa-eye",
   save: "fa-solid fa-floppy-disk",
   copy: "fa-solid fa-clipboard",
   switcher: "fa-solid fa-chevron-down"
@@ -4416,6 +4436,7 @@ class EditorObject extends Editor {
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
       editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.getOption("editJsonData"),
+      jsonDataContent: this.instance.jedison.translator.translate(this.instance.isReadOnly() ? "viewJson" : "editJson"),
       propertiesToggleContent: getSchemaXOption(this.instance.schema, "propertiesToggleContent") ?? this.instance.jedison.translator.translate("propertiesToggle"),
       collapseToggleContent: getSchemaXOption(this.instance.schema, "collapseToggleContent") ?? this.instance.jedison.translator.translate("collapseToggle"),
       addPropertyContent: getSchemaXOption(this.instance.schema, "addPropertyContent") ?? this.instance.jedison.translator.translate("objectAddProperty"),
@@ -5118,6 +5139,7 @@ class EditorArray extends Editor {
       readOnly: this.instance.isReadOnly(),
       info: this.getInfo(),
       editJsonData: getSchemaXOption(this.instance.schema, "editJsonData") ?? this.instance.jedison.getOption("editJsonData"),
+      jsonDataContent: this.instance.jedison.translator.translate(this.instance.isReadOnly() ? "viewJson" : "editJson"),
       arrayAdd: getSchemaXOption(this.instance.schema, "arrayAdd") ?? this.instance.jedison.getOption("arrayAdd"),
       arrayAddContent: getSchemaXOption(this.instance.schema, "arrayAddContent") ?? this.instance.jedison.translator.translate("arrayAdd"),
       arrayFooterAdd: getSchemaXOption(this.instance.schema, "arrayFooterAdd") ?? this.instance.jedison.getOption("arrayFooterAdd"),
@@ -5339,17 +5361,18 @@ class EditorArray extends Editor {
         index: index2
       });
       arrayActions.appendChild(btnGroup);
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      const readOnly = this.instance.isReadOnly();
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn);
       }
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
       }
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn);
       }
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !this.instance.isReadOnly()) {
         btnGroup.appendChild(addAfterBtn);
       }
       this.control.childrenSlot.appendChild(container);
@@ -5492,17 +5515,19 @@ class EditorArrayTable extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const readOnly = this.instance.isReadOnly();
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.getOption("arrayButtonsPosition");
     const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
+    const showButtons = !readOnly && (arrayDelete === true || arrayMove === true || arrayAddAfter === true || this.isSortable());
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
       visuallyHidden: true
     });
     th.appendChild(label);
-    if (arrayButtonsPosition === "left") {
+    if (arrayButtonsPosition === "left" && showButtons) {
       table.thead.appendChild(th);
     }
     if (this.instance.children.length) {
@@ -5527,7 +5552,7 @@ class EditorArrayTable extends EditorArray {
       }
       table.thead.appendChild(thTitle);
     }
-    if (arrayButtonsPosition === "right") {
+    if (arrayButtonsPosition === "right" && showButtons) {
       table.thead.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
@@ -5535,21 +5560,21 @@ class EditorArrayTable extends EditorArray {
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn);
       }
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn);
       }
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
       }
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !readOnly) {
         btnGroup.appendChild(addAfterBtn);
       }
       buttonsTd.appendChild(btnGroup);
-      if (arrayButtonsPosition === "left") {
+      if (arrayButtonsPosition === "left" && showButtons) {
         tbodyRow.appendChild(buttonsTd);
       }
       const td = this.theme.getTableDefinition();
@@ -5557,7 +5582,7 @@ class EditorArrayTable extends EditorArray {
       (_b = (_a = child.ui.control.info) == null ? void 0 : _a.container) == null ? void 0 : _b.remove();
       td.appendChild(child.ui.control.container);
       tbodyRow.appendChild(td);
-      if (arrayButtonsPosition === "right") {
+      if (arrayButtonsPosition === "right" && showButtons) {
         tbodyRow.appendChild(buttonsTd);
       }
       table.tbody.appendChild(tbodyRow);
@@ -5633,17 +5658,19 @@ class EditorArrayTableObject extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const readOnly = this.instance.isReadOnly();
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
     const arrayButtonsPosition = getSchemaXOption(this.instance.schema, "arrayButtonsPosition") ?? this.instance.jedison.getOption("arrayButtonsPosition");
     const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
+    const showButtons = !readOnly && (arrayDelete === true || arrayMove === true || arrayAddAfter === true || this.isSortable());
     const th = this.theme.getTableHeader();
     const { label } = this.theme.getFakeLabel({
       content: "Controls",
       visuallyHidden: true
     });
     th.appendChild(label);
-    if (arrayButtonsPosition === "left") {
+    if (arrayButtonsPosition === "left" && showButtons) {
       table.thead.appendChild(th);
     }
     const value = this.instance.getValue();
@@ -5674,7 +5701,7 @@ class EditorArrayTableObject extends EditorArray {
       }
       table.thead.appendChild(th2);
     });
-    if (arrayButtonsPosition === "right") {
+    if (arrayButtonsPosition === "right" && showButtons) {
       table.thead.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
@@ -5682,21 +5709,21 @@ class EditorArrayTableObject extends EditorArray {
       const tbodyRow = document.createElement("tr");
       const buttonsTd = this.theme.getTableDefinition({ isButtonColumn: true });
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn);
       }
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn);
       }
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
       }
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !readOnly) {
         btnGroup.appendChild(addAfterBtn);
       }
       buttonsTd.appendChild(btnGroup);
-      if (arrayButtonsPosition === "left") {
+      if (arrayButtonsPosition === "left" && showButtons) {
         tbodyRow.appendChild(buttonsTd);
       }
       if (child.children.length) {
@@ -5715,7 +5742,7 @@ class EditorArrayTableObject extends EditorArray {
         td.appendChild(child.ui.control.container);
         tbodyRow.appendChild(td);
       }
-      if (arrayButtonsPosition === "right") {
+      if (arrayButtonsPosition === "right" && showButtons) {
         tbodyRow.appendChild(buttonsTd);
       }
       table.tbody.appendChild(tbodyRow);
@@ -6037,6 +6064,7 @@ class EditorArrayNav extends EditorArray {
     const tabList = this.theme.getTabList({
       variant
     });
+    const readOnly = this.instance.isReadOnly();
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
     const arrayAddAfter = getSchemaXOption(this.instance.schema, "arrayAddAfter") ?? this.instance.jedison.getOption("arrayAddAfter");
@@ -6047,17 +6075,17 @@ class EditorArrayNav extends EditorArray {
     tabContentCol.appendChild(tabContent);
     this.instance.children.forEach((child, index2) => {
       const { deleteBtn, moveUpBtn, moveDownBtn, dragBtn, btnGroup, addAfterBtn } = this.getButtons(index2);
-      if (isSet(arrayDelete) && arrayDelete === true) {
+      if (isSet(arrayDelete) && arrayDelete === true && !readOnly) {
         btnGroup.appendChild(deleteBtn);
       }
-      if (isSet(arrayMove) && arrayMove === true) {
+      if (isSet(arrayMove) && arrayMove === true && !readOnly) {
         btnGroup.appendChild(moveUpBtn);
         btnGroup.appendChild(moveDownBtn);
       }
-      if (isSet(arrayAddAfter) && arrayAddAfter === true) {
+      if (isSet(arrayAddAfter) && arrayAddAfter === true && !readOnly) {
         btnGroup.appendChild(addAfterBtn);
       }
-      if (this.isSortable()) {
+      if (this.isSortable() && !readOnly) {
         btnGroup.appendChild(dragBtn);
       }
       this.control.childrenSlot.appendChild(child.ui.control.container);
@@ -6590,7 +6618,7 @@ class EditorStringPickr extends EditorString {
   refreshUI() {
     if (!this.pickr) return;
     this.refreshTemplates();
-    if (this.disabled) {
+    if (this.disabled || this.readOnly) {
       this.pickr.disable();
     } else {
       this.pickr.enable();
@@ -6870,7 +6898,7 @@ class EditorArrayCheckboxes extends Editor {
     return window.Sortable && isSet(getSchemaXOption(this.instance.schema, "sortable"));
   }
   addDragHandles() {
-    if (!this.isSortable()) return;
+    if (!this.isSortable() || this.readOnly) return;
     this.control.checkboxControls.forEach((checkboxControl, index2) => {
       if (checkboxControl.classList.contains("jedi-checkbox-control")) return;
       const wrapper = document.createElement("div");
@@ -7172,6 +7200,140 @@ class EditorStringAce extends EditorString {
     }
   }
 }
+class EditorStringBpmn extends EditorString {
+  static resolves(schema) {
+    const format2 = getSchemaXOption(schema, "format");
+    return isSet(format2) && format2 === "bpmn" && window.BpmnJS && getSchemaType(schema) === "string";
+  }
+  build() {
+    this.control = this.theme.getTextareaControl({
+      title: this.getTitle(),
+      description: this.getDescription(),
+      id: this.getIdFromPath(this.instance.path),
+      titleIconClass: getSchemaXOption(this.instance.schema, "titleIconClass"),
+      titleHidden: getSchemaXOption(this.instance.schema, "titleHidden"),
+      info: this.getInfo()
+    });
+    const options = getSchemaXOption(this.instance.schema, "bpmn") ?? {};
+    this.bpmnContainer = document.createElement("div");
+    this.bpmnContainer.style.height = options.height || "400px";
+    this.bpmnContainer.style.width = options.width || "100%";
+    this.bpmnContainer.style.border = "1px solid #ced4da";
+    this.control.input.style.display = "none";
+    this.control.input.parentNode.insertBefore(this.bpmnContainer, this.control.input);
+    this.bpmn = new window.BpmnJS({ container: this.bpmnContainer });
+    this.lastXml = null;
+    this.buildToolbar(options);
+    this.importValue(this.instance.getValue());
+  }
+  buildToolbar(options) {
+    this.fileName = options.fileName || "diagram.bpmn";
+    this.importError = document.createElement("div");
+    const toolbar = this.theme.getBtnGroup();
+    this.importBtn = this.getTextButton("Import");
+    this.exportBtn = this.getTextButton("Export");
+    this.exportSvgBtn = this.getTextButton("Export SVG");
+    this.fileInput = document.createElement("input");
+    this.fileInput.type = "file";
+    this.fileInput.accept = ".bpmn,.xml";
+    this.fileInput.style.display = "none";
+    if (options.import !== false) toolbar.appendChild(this.importBtn);
+    if (options.export !== false) {
+      toolbar.appendChild(this.exportBtn);
+      toolbar.appendChild(this.exportSvgBtn);
+    }
+    toolbar.style.display = "block";
+    toolbar.style.marginTop = "0.5rem";
+    this.bpmnContainer.after(toolbar, this.fileInput, this.importError);
+  }
+  // The themes have no upload/download icons, so the label must stay visible
+  // even when btnContents is off (icon-only buttons).
+  getTextButton(content) {
+    const button = this.theme.getButton({ content });
+    button.textContent = content;
+    return button;
+  }
+  showImportError(message) {
+    this.importError.innerHTML = "";
+    if (message) {
+      this.importError.appendChild(this.theme.getErrorFeedback({ message }));
+    }
+  }
+  download(content, fileName, type2) {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([content], { type: type2 }));
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+  async importValue(value) {
+    const xml = typeof value === "string" ? value : "";
+    this.lastXml = xml;
+    try {
+      if (xml) {
+        await this.bpmn.importXML(xml);
+      } else {
+        await this.bpmn.createDiagram();
+      }
+      window.requestAnimationFrame(() => this.bpmn.get("canvas").zoom("fit-viewport", "auto"));
+      this.showImportError("");
+      return true;
+    } catch (e) {
+      console.error("BPMN diagram could not be imported.", e);
+      this.showImportError("The BPMN diagram could not be imported: " + e.message.split("\n")[0]);
+      return false;
+    }
+  }
+  addEventListeners() {
+    this.bpmn.on("commandStack.changed", async () => {
+      try {
+        const { xml } = await this.bpmn.saveXML({ format: true });
+        this.lastXml = xml;
+        if (xml !== this.instance.getValue()) {
+          this.instance.setValue(xml, true, "user");
+        }
+      } catch (e) {
+        console.error("BPMN diagram could not be exported.", e);
+      }
+    });
+    this.importBtn.addEventListener("click", () => this.fileInput.click());
+    this.fileInput.addEventListener("change", async () => {
+      const file = this.fileInput.files[0];
+      this.fileInput.value = "";
+      if (!file) return;
+      const xml = await file.text();
+      if (await this.importValue(xml)) {
+        this.instance.setValue(xml, true, "user");
+      }
+    });
+    this.exportBtn.addEventListener("click", async () => {
+      const { xml } = await this.bpmn.saveXML({ format: true });
+      this.download(xml, this.fileName, "application/xml");
+    });
+    this.exportSvgBtn.addEventListener("click", async () => {
+      const { svg } = await this.bpmn.saveSVG();
+      this.download(svg, this.fileName.replace(/\.[^.]+$/, "") + ".svg", "image/svg+xml");
+    });
+  }
+  refreshDisabledState() {
+    const locked = this.disabled || this.readOnly;
+    this.bpmnContainer.style.pointerEvents = locked ? "none" : "";
+    this.bpmnContainer.style.opacity = locked ? "0.6" : "1";
+    this.importBtn.disabled = locked;
+  }
+  refreshUI() {
+    super.refreshUI();
+    const value = this.instance.getValue();
+    const xml = typeof value === "string" ? value : "";
+    if (xml !== this.lastXml) {
+      this.importValue(xml);
+    }
+  }
+  destroy() {
+    this.bpmn.destroy();
+    super.destroy();
+  }
+}
 class EditorStringFilepond extends EditorString {
   static resolves(schema) {
     const format2 = getSchemaXOption(schema, "format");
@@ -7266,6 +7428,7 @@ class UiResolver {
       EditorStringFlatpickr,
       EditorStringIMask,
       EditorStringAce,
+      EditorStringBpmn,
       EditorStringFilepond,
       EditorStringInput,
       EditorNumberIMask,
@@ -7360,7 +7523,9 @@ const defaultTranslations = {
   objectPropertyAdded: "field was added to the form",
   objectPropertyRemoved: "field was removed from the form",
   propertiesToggle: "Properties",
-  collapseToggle: "Collapse"
+  collapseToggle: "Collapse",
+  editJson: "Edit JSON",
+  viewJson: "View JSON"
 };
 const translations = {
   en: {
@@ -7408,7 +7573,9 @@ const translations = {
     objectPropertyAdded: "field was added to the form",
     objectPropertyRemoved: "field was removed from the form",
     propertiesToggle: "Properties",
-    collapseToggle: "Collapse"
+    collapseToggle: "Collapse",
+    editJson: "Edit JSON",
+    viewJson: "View JSON"
   },
   de: {
     errorAddPropertyPatternMismatch: 'Der Eigenschaftsname "{{ property }}" entspricht keiner erlaubten Eigenschaft oder keinem erlaubten Muster.',
@@ -7455,7 +7622,9 @@ const translations = {
     objectPropertyAdded: "Feld wurde dem Formular hinzugefügt",
     objectPropertyRemoved: "Feld wurde aus dem Formular entfernt",
     propertiesToggle: "Eigenschaften",
-    collapseToggle: "Einklappen"
+    collapseToggle: "Einklappen",
+    editJson: "JSON bearbeiten",
+    viewJson: "JSON ansehen"
   },
   it: {
     errorAddPropertyPatternMismatch: 'Il nome della proprietà "{{ property }}" non corrisponde a nessuna proprietà o modello consentito.',
@@ -7502,7 +7671,9 @@ const translations = {
     objectPropertyAdded: "Campo aggiunto al modulo",
     objectPropertyRemoved: "Campo rimosso dal modulo",
     propertiesToggle: "Proprietà",
-    collapseToggle: "Comprimi"
+    collapseToggle: "Comprimi",
+    editJson: "Modifica JSON",
+    viewJson: "Visualizza JSON"
   },
   es: {
     errorAddPropertyPatternMismatch: 'El nombre de propiedad "{{ property }}" no coincide con ninguna propiedad o patrón permitido.',
@@ -7549,7 +7720,9 @@ const translations = {
     objectPropertyAdded: "campo fue añadido al formulario",
     objectPropertyRemoved: "campo fue eliminado del formulario",
     propertiesToggle: "Propiedades",
-    collapseToggle: "Colapsar"
+    collapseToggle: "Colapsar",
+    editJson: "Editar JSON",
+    viewJson: "Ver JSON"
   }
 };
 class Translator {
@@ -7615,6 +7788,7 @@ class Jedison extends EventEmitter {
       theme: null,
       refParser: null,
       editJsonData: false,
+      readOnly: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
       autoFlat: false,
@@ -8711,10 +8885,13 @@ class Theme {
       }
     });
     const toggle = this.getButton({
-      // content: config.propertiesToggleContent, // todo: use text config or something
+      content: config.content,
       id: "jedi-json-data-toggle-" + config.id,
-      icon: "edit"
+      icon: config.readOnly ? "view" : "edit"
     });
+    if (config.content) {
+      toggle.setAttribute("aria-label", config.content);
+    }
     toggle.classList.add("jedi-json-data-toggle");
     toggle.setAttribute("always-enabled", "");
     toggle.addEventListener("click", () => {
@@ -8752,7 +8929,9 @@ class Theme {
     control.appendChild(label);
     control.appendChild(input);
     dialog.appendChild(copyBtn);
-    dialog.appendChild(saveBtn);
+    if (!config.readOnly) {
+      dialog.appendChild(saveBtn);
+    }
     return {
       dialog,
       toggle,
@@ -9116,7 +9295,9 @@ class Theme {
       content: config.description
     });
     const jsonData = this.getJsonData({
-      id: "json-data-" + config.id
+      id: "json-data-" + config.id,
+      readOnly: config.readOnly,
+      content: config.jsonDataContent
     });
     const propertiesContainer = this.getPropertiesSlot({
       id: "properties-slot-" + config.id
@@ -9190,17 +9371,15 @@ class Theme {
     body.appendChild(messages);
     const switcherSlot = this.getSwitcherSlot();
     left.appendChild(switcherSlot);
-    if (config.readOnly === false) {
-      right.appendChild(actions);
-    }
+    right.appendChild(actions);
     body.appendChild(childrenSlot);
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
     }
-    if (config.addProperty) {
+    if (config.addProperty && !config.readOnly) {
       actions.appendChild(quickAddPropertyToggle);
     }
-    if (config.enablePropertiesToggle) {
+    if (config.enablePropertiesToggle && !config.readOnly) {
       actions.appendChild(propertiesToggle);
       propertiesContainer.appendChild(ariaLive);
       propertiesContainer.appendChild(propertiesActivators);
@@ -9252,7 +9431,7 @@ class Theme {
     const propertiesActivators = this.getPropertiesActivators();
     const info = this.getInfo(config.info);
     const description = this.getDescription({ content: config.description });
-    const jsonData = this.getJsonData({ id: "json-data-" + config.id });
+    const jsonData = this.getJsonData({ id: "json-data-" + config.id, readOnly: config.readOnly, content: config.jsonDataContent });
     const propertiesContainer = this.getPropertiesSlot({ id: "properties-slot-" + config.id });
     const propertiesToggle = this.getPropertiesToggle({
       content: config.propertiesToggleContent,
@@ -9314,9 +9493,7 @@ class Theme {
       body.appendChild(description);
     }
     body.appendChild(messages);
-    if (config.readOnly === false) {
-      right.appendChild(actions);
-    }
+    right.appendChild(actions);
     body.appendChild(childrenSlot);
     innerWrapper.appendChild(body);
     innerWrapper.appendChild(propertiesContainer);
@@ -9324,10 +9501,10 @@ class Theme {
     if (config.editJsonData) {
       actions.appendChild(jsonData.toggle);
     }
-    if (config.addProperty) {
+    if (config.addProperty && !config.readOnly) {
       actions.appendChild(quickAddPropertyToggle);
     }
-    if (config.enablePropertiesToggle) {
+    if (config.enablePropertiesToggle && !config.readOnly) {
       actions.appendChild(propertiesToggle);
       propertiesContainer.appendChild(ariaLive);
       propertiesContainer.appendChild(propertiesActivators);
@@ -9481,7 +9658,9 @@ class Theme {
       content: config.description
     });
     const jsonData = this.getJsonData({
-      id: "json-data-" + config.id
+      id: "json-data-" + config.id,
+      readOnly: config.readOnly,
+      content: config.jsonDataContent
     });
     const collapse = this.getCollapse({
       id: collapseId,
@@ -9516,17 +9695,15 @@ class Theme {
     body.appendChild(messages);
     const switcherSlot = this.getSwitcherSlot();
     left.appendChild(switcherSlot);
-    if (config.readOnly === false) {
-      right.appendChild(actions);
-    }
+    right.appendChild(actions);
     actions.appendChild(btnGroup);
     if (config.editJsonData) {
       btnGroup.appendChild(jsonData.toggle);
     }
-    if (deleteAllBtn) {
+    if (deleteAllBtn && !config.readOnly) {
       btnGroup.appendChild(deleteAllBtn);
     }
-    if (isSet(config.arrayAdd) && config.arrayAdd === true) {
+    if (isSet(config.arrayAdd) && config.arrayAdd === true && !config.readOnly) {
       btnGroup.appendChild(addBtn);
     }
     body.appendChild(childrenSlot);

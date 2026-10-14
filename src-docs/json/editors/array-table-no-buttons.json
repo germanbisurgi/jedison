@@ -1,0 +1,18 @@
+{
+  "x-arrayAdd": false,
+  "x-arrayMove": false,
+  "x-arrayDelete": false,
+  "type": "array",
+  "title": "Array table without buttons",
+  "description": "Table format with `x-arrayAdd`, `x-arrayMove` and `x-arrayDelete` set to `false`: the table has no buttons column.",
+  "x-format": "table",
+  "default": [
+    "Alice",
+    "Bob",
+    "Carl"
+  ],
+  "items": {
+    "title": "Name",
+    "type": "string"
+  }
+}

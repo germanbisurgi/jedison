@@ -47,6 +47,7 @@ class Jedison extends EventEmitter {
       theme: null,
       refParser: null,
       editJsonData: false,
+      readOnly: false,
       enablePropertiesToggle: false,
       enableCollapseToggle: false,
       autoFlat: false,

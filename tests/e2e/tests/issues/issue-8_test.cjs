@@ -11,8 +11,8 @@ BeforeSuite(({ I }) => {
 })
 
 Scenario('@issue @issue-8 array nav-vertical readonly should disable array item buttons', ({ I }) => {
-  I.dontSeeElement('.jedi-ready input:not(:disabled):not([always-enabled])')
-  I.dontSeeElement('.jedi-ready textarea:not(:disabled):not([always-enabled])')
+  I.dontSeeElement('.jedi-ready input:not(:disabled):not([readonly]):not([always-enabled])')
+  I.dontSeeElement('.jedi-ready textarea:not(:disabled):not([readonly]):not([always-enabled])')
   I.dontSeeElement('.jedi-ready select:not(:disabled):not([always-enabled])')
   I.dontSeeElement('.jedi-ready button:not(:disabled):not([always-enabled])')
 })

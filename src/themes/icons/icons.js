@@ -11,6 +11,7 @@ export const glyphicons = {
   info: 'glyphicon glyphicon-question-sign',
   close: 'glyphicon glyphicon-remove',
   edit: 'glyphicon glyphicon-pencil',
+  view: 'glyphicon glyphicon-eye-open',
   save: 'glyphicon glyphicon-floppy-disk',
   copy: 'glyphicon glyphicon-copy',
   switcher: 'glyphicon glyphicon-chevron-down'
@@ -29,6 +30,7 @@ export const bootstrapIcons = {
   info: 'bi bi-question-circle',
   close: 'bi bi-x',
   edit: 'bi bi-pencil',
+  view: 'bi bi-eye',
   save: 'bi bi-floppy',
   copy: 'bi bi-clipboard',
   switcher: 'bi bi-chevron-down'
@@ -47,6 +49,7 @@ export const fontAwesome3 = {
   info: 'icon-question-sign',
   close: 'icon-remove',
   edit: 'icon-pencil',
+  view: 'icon-eye-open',
   save: 'icon-save',
   copy: 'icon-copy',
   switcher: 'icon-chevron-down'
@@ -65,6 +68,7 @@ export const fontAwesome4 = {
   info: 'fa fa-question-circle',
   close: 'fa fa-times',
   edit: 'fa fa-pencil',
+  view: 'fa fa-eye',
   save: 'fa fa-floppy-o',
   copy: 'fa fa-clipboard',
   switcher: 'fa fa-chevron-down'
@@ -83,6 +87,7 @@ export const fontAwesome5 = {
   info: 'fas fa-question-circle',
   close: 'fas fa-times',
   edit: 'fas fa-pencil-alt',
+  view: 'fas fa-eye',
   save: 'fas fa-save',
   copy: 'fas fa-clipboard',
   switcher: 'fas fa-chevron-down'
@@ -101,6 +106,7 @@ export const fontAwesome6 = {
   info: 'fa-solid fa-circle-question',
   close: 'fa-solid fa-xmark',
   edit: 'fa-solid fa-pencil',
+  view: 'fa-solid fa-eye',
   save: 'fa-solid fa-floppy-disk',
   copy: 'fa-solid fa-clipboard',
   switcher: 'fa-solid fa-chevron-down'

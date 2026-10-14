@@ -75,7 +75,7 @@ class EditorArrayCheckboxes extends Editor {
   }
 
   addDragHandles () {
-    if (!this.isSortable()) return
+    if (!this.isSortable() || this.readOnly) return
     this.control.checkboxControls.forEach((checkboxControl, index) => {
       if (checkboxControl.classList.contains('jedi-checkbox-control')) return
       const wrapper = document.createElement('div')
