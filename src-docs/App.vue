@@ -336,6 +336,7 @@ import imaskSettings from './json/plugins/string-imask-settings.json'
 import raty from './json/plugins/number-raty.json'
 import stringAce from './json/plugins/string-ace.json'
 import stringAceOptions from './json/plugins/string-ace-options.json'
+import stringBpmn from './json/plugins/string-bpmn.json'
 import filepond from './json/plugins/string-filepond.json'
 import filepondDocuments from './json/plugins/string-filepond-documents.json'
 import custom from './json/custom/custom.json'
@@ -503,6 +504,7 @@ export default {
           'plugins/raty': raty,
           'plugins/ace': stringAce,
           'plugins/ace-options': stringAceOptions,
+          'plugins/bpmn': stringBpmn,
           'plugins/filepond': filepond,
           'plugins/filepond-documents': filepondDocuments,
         },

@@ -1,3 +1,7 @@
+### Unreleased
+
+- Added a BPMN editor (`x-format: "bpmn"`) for string fields holding BPMN 2.0 XML. It wraps [bpmn-js](https://github.com/bpmn-io/bpmn-js) and is used only when `window.BpmnJS` is loaded (the modeler script plus `diagram-js.css`, `bpmn-js.css` and `bpmn-font/css/bpmn.css`). Size via `"x-bpmn": { "height": "600px", "width": "100%" }`. Import, Export (XML) and Export SVG buttons sit under the diagram (`"import": false` / `"export": false` hide them, `"fileName"` sets the download name, default `diagram.bpmn`); Import is disabled when the field is disabled or read-only, and a file that cannot be parsed shows an error and leaves the value unchanged. Set `"x-purifyData": false` on the field, otherwise DOMPurify strips the XML tags. bpmn-js is not MIT licensed: its license requires the bpmn.io logo to stay visible
+
 ### 1.26.0
 
 - Improved performance of large arrays, including the `table` and `table-object` formats: editing a field or calling `setValue()` is now much faster (300 items: about 220 ms to 12 ms per edit). First render and the `nav` formats are unchanged

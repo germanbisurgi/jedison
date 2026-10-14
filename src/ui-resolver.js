@@ -41,6 +41,7 @@ import EditorAnyJson from './editors/any-json.js'
 import EditorArrayCheckboxes from './editors/array-checkboxes.js'
 import EditorNumberRange from './editors/number-range.js'
 import EditorStringAce from './editors/string-ace.js'
+import EditorStringBpmn from './editors/string-bpmn.js'
 import EditorStringFilepond from './editors/string-filepond.js'
 
 function byPriorityDescending (a, b) {
@@ -73,6 +74,7 @@ class UiResolver {
       EditorStringFlatpickr,
       EditorStringIMask,
       EditorStringAce,
+      EditorStringBpmn,
       EditorStringFilepond,
       EditorStringInput,
       EditorNumberImask,
