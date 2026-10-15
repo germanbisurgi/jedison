@@ -5456,6 +5456,8 @@ class EditorArrayTuple extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const theadRow = document.createElement("tr");
+    table.thead.appendChild(theadRow);
     const schemaPrefixItems = getSchemaPrefixItems(this.instance.schema);
     schemaPrefixItems.forEach((prefixItemSchema) => {
       const th = this.theme.getTableHeader();
@@ -5463,7 +5465,7 @@ class EditorArrayTuple extends EditorArray {
         content: getSchemaTitle(prefixItemSchema) ?? ""
       });
       th.appendChild(label);
-      table.thead.appendChild(th);
+      theadRow.appendChild(th);
     });
     const tbodyRow = document.createElement("tr");
     this.instance.children.forEach((child) => {
@@ -5515,6 +5517,8 @@ class EditorArrayTable extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const theadRow = document.createElement("tr");
+    table.thead.appendChild(theadRow);
     const readOnly = this.instance.isReadOnly();
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
@@ -5528,7 +5532,7 @@ class EditorArrayTable extends EditorArray {
     });
     th.appendChild(label);
     if (arrayButtonsPosition === "left" && showButtons) {
-      table.thead.appendChild(th);
+      theadRow.appendChild(th);
     }
     if (this.instance.children.length) {
       const schemaItems = getSchemaItems(this.instance.schema);
@@ -5550,10 +5554,10 @@ class EditorArrayTable extends EditorArray {
           thTitle.appendChild(info.container);
         }
       }
-      table.thead.appendChild(thTitle);
+      theadRow.appendChild(thTitle);
     }
     if (arrayButtonsPosition === "right" && showButtons) {
-      table.thead.appendChild(th);
+      theadRow.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
       var _a, _b;
@@ -5658,6 +5662,8 @@ class EditorArrayTableObject extends EditorArray {
     this.control.childrenSlot.innerHTML = "";
     const table = this.theme.getTable();
     this.control.childrenSlot.appendChild(table.container);
+    const theadRow = document.createElement("tr");
+    table.thead.appendChild(theadRow);
     const readOnly = this.instance.isReadOnly();
     const arrayDelete = getSchemaXOption(this.instance.schema, "arrayDelete") ?? this.instance.jedison.getOption("arrayDelete");
     const arrayMove = getSchemaXOption(this.instance.schema, "arrayMove") ?? this.instance.jedison.getOption("arrayMove");
@@ -5671,7 +5677,7 @@ class EditorArrayTableObject extends EditorArray {
     });
     th.appendChild(label);
     if (arrayButtonsPosition === "left" && showButtons) {
-      table.thead.appendChild(th);
+      theadRow.appendChild(th);
     }
     const value = this.instance.getValue();
     if (!isArray(value) || value.length === 0) {
@@ -5699,10 +5705,10 @@ class EditorArrayTableObject extends EditorArray {
         }
         th2.appendChild(info.container);
       }
-      table.thead.appendChild(th2);
+      theadRow.appendChild(th2);
     });
     if (arrayButtonsPosition === "right" && showButtons) {
-      table.thead.appendChild(th);
+      theadRow.appendChild(th);
     }
     this.instance.children.forEach((child, index2) => {
       var _a, _b;
