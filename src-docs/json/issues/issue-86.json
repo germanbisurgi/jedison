@@ -1,0 +1,41 @@
+{
+  "title": "Issue 86 - table header cells inside a <tr>",
+  "description": "Every table editor must put its header cells into a row: <thead><tr><th>, never <thead><th>.",
+  "type": "object",
+  "properties": {
+    "table": {
+      "title": "Table",
+      "type": "array",
+      "x-format": "table",
+      "default": ["a", "b"],
+      "items": {
+        "type": "string",
+        "title": "Item"
+      }
+    },
+    "tableObject": {
+      "title": "Table object",
+      "type": "array",
+      "x-format": "table-object",
+      "default": [
+        { "fieldA": "a", "fieldB": "b" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "fieldA": { "type": "string", "title": "Field A" },
+          "fieldB": { "type": "string", "title": "Field B" }
+        }
+      }
+    },
+    "tuple": {
+      "title": "Tuple",
+      "type": "array",
+      "x-format": "tuple",
+      "prefixItems": [
+        { "type": "string", "title": "First" },
+        { "type": "number", "title": "Second" }
+      ]
+    }
+  }
+}
