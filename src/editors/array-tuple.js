@@ -34,6 +34,11 @@ class EditorArrayTuple extends EditorArray {
     const table = this.theme.getTable()
     this.control.childrenSlot.appendChild(table.container)
 
+    // Header cells need a row of their own: a <th> directly inside <thead>
+    // is invalid HTML, and CSS like `thead > tr > th` would not match it.
+    const theadRow = document.createElement('tr')
+    table.thead.appendChild(theadRow)
+
     // thead — one header per prefixItem
     const schemaPrefixItems = getSchemaPrefixItems(this.instance.schema)
     schemaPrefixItems.forEach((prefixItemSchema) => {
@@ -42,7 +47,7 @@ class EditorArrayTuple extends EditorArray {
         content: getSchemaTitle(prefixItemSchema) ?? ''
       })
       th.appendChild(label)
-      table.thead.appendChild(th)
+      theadRow.appendChild(th)
     })
 
     // tbody — single row

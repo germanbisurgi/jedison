@@ -75,6 +75,11 @@ class EditorArrayTableObject extends EditorArray {
 
     this.control.childrenSlot.appendChild(table.container)
 
+    // Header cells need a row of their own: a <th> directly inside <thead>
+    // is invalid HTML, and CSS like `thead > tr > th` would not match it.
+    const theadRow = document.createElement('tr')
+    table.thead.appendChild(theadRow)
+
     const readOnly = this.instance.isReadOnly()
     const arrayDelete = getSchemaXOption(this.instance.schema, 'arrayDelete') ?? this.instance.jedison.getOption('arrayDelete')
     const arrayMove = getSchemaXOption(this.instance.schema, 'arrayMove') ?? this.instance.jedison.getOption('arrayMove')
@@ -93,7 +98,7 @@ class EditorArrayTableObject extends EditorArray {
 
     // Add controls header at the beginning (left) or end (right)
     if (arrayButtonsPosition === 'left' && showButtons) {
-      table.thead.appendChild(th)
+      theadRow.appendChild(th)
     }
 
     const value = this.instance.getValue()
@@ -132,12 +137,12 @@ class EditorArrayTableObject extends EditorArray {
         th.appendChild(info.container)
       }
 
-      table.thead.appendChild(th)
+      theadRow.appendChild(th)
     })
 
     // Add controls header at the end if position is right
     if (arrayButtonsPosition === 'right' && showButtons) {
-      table.thead.appendChild(th)
+      theadRow.appendChild(th)
     }
 
     // tbody rows
