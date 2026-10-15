@@ -1,3 +1,7 @@
+### 1.27.1
+
+- Fixed issue #86: table header cells were not wrapped in a `<tr>`, which produced invalid markup in the `table` and `table-object` formats
+
 ### 1.27.0
 
 - Added a BPMN editor (`x-format: "bpmn"`) for BPMN 2.0 XML strings, built on [bpmn-js](https://github.com/bpmn-io/bpmn-js) and used only when `window.BpmnJS` is loaded. Set `"x-purifyData": false` on the field. bpmn-js is not MIT licensed: its license requires the bpmn.io logo to stay visible
