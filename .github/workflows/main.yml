@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Node version
@@ -15,7 +15,7 @@ jobs:
         run: yarn unit
 
   e2e-barebones:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Node version
@@ -26,7 +26,7 @@ jobs:
         run: yarn e2e
 
   e2e-bootstrap3:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Node version
@@ -37,7 +37,7 @@ jobs:
         run: yarn e2e:b3
 
   e2e-bootstrap4:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Node version
@@ -48,7 +48,7 @@ jobs:
         run: yarn e2e:b4
 
   e2e-bootstrap5:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Node version

@@ -1,3 +1,7 @@
+### 1.27.2
+
+- Fixed issue #88: `format: "url"` validation could freeze the page and throw "too much recursion" on some URLs (regex backtracking). It now uses the native `URL` parser; accepted schemes (`http`, `https`, `ftp`) and the TLD/IPv4 host requirement are unchanged
+
 ### 1.27.1
 
 - Fixed issue #86: table header cells were not wrapped in a `<tr>`, which produced invalid markup in the `table` and `table-object` formats
