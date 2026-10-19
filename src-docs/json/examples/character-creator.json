@@ -477,6 +477,7 @@
           "description": "Your character's social background",
           "x-grid": { "columns": 6 },
           "x-discriminator": "originType",
+          "x-switcherInput": "select-inline",
           "oneOf": [
             {
               "title": "Noble",
