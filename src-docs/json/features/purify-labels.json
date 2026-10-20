@@ -1,0 +1,14 @@
+{
+  "title": "object",
+  "description": "",
+  "type": "object",
+  "additionalProperties": {
+    "type": "string"
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "<img src=x onerror=\"window.__xss = 'title'\">Name"
+    }
+  }
+}

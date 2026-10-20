@@ -41,24 +41,48 @@ export function clone (thing) {
 }
 
 /**
- * Returns escaped regexp
- * @param {string} string - The string
- * @return {string} Escaped regexp
- */
-/**
  * Compiles a schema pattern with unicode semantics, as JSON Schema requires.
  * Patterns that are only valid without the flag fall back to a plain RegExp.
  * @param {string} pattern
  * @return {RegExp}
  */
+const compiledPatterns = new Map()
+
 export function compilePattern (pattern) {
-  try {
-    return new RegExp(pattern, 'u')
-  } catch (error) {
-    return new RegExp(pattern)
+  if (!compiledPatterns.has(pattern)) {
+    let regexp
+
+    try {
+      regexp = new RegExp(pattern, 'u')
+    } catch (error) {
+      regexp = new RegExp(pattern)
+    }
+
+    compiledPatterns.set(pattern, regexp)
   }
+
+  return compiledPatterns.get(pattern)
 }
 
+/**
+ * Escapes the characters that have a meaning in HTML, for plain text that is set as innerHTML
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml (text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/**
+ * Returns escaped regexp
+ * @param {string} string - The string
+ * @return {string} Escaped regexp
+ */
 export function escapeRegExp (string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
 }

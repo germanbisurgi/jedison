@@ -1,4 +1,4 @@
-import { combineDeep, compileTemplate, filterAttributes, isArray, isObject, isSet, isString, pathToAttribute } from '../helpers/utils.js'
+import { combineDeep, compileTemplate, escapeHtml, filterAttributes, isArray, isObject, isSet, isString, pathToAttribute } from '../helpers/utils.js'
 import { getSchemaDescription, getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
@@ -392,11 +392,11 @@ class Editor {
         if (error.type === 'error') {
           hasErrors = true
           invalidFeedback = this.getErrorFeedback({
-            message: message
+            message: this.purifyMessage(message)
           })
         } else {
           invalidFeedback = this.getWarningFeedback({
-            message: message
+            message: this.purifyMessage(message)
           })
         }
 
@@ -452,6 +452,13 @@ class Editor {
   }
 
   /**
+   * Messages can contain data, like property names, so they are purified like titles are
+   */
+  purifyMessage (message) {
+    return this.purifyEnabled ? this.purifyContent(message, this.instance.jedison.getOption('domPurifyOptions')) : message
+  }
+
+  /**
    * Clean out HTML tags from txt
    */
   purifyContent (content, domPurifyOptions) {
@@ -466,9 +473,8 @@ class Editor {
       this.purifyCache.set(cacheKey, clean)
       return clean
     } else {
-      const tmp = document.createElement('div')
-      tmp.innerHTML = content
-      return (tmp.textContent || tmp.innerText)
+      // an inert document, an element that is not attached still loads images and runs their handlers
+      return new window.DOMParser().parseFromString(content, 'text/html').body.textContent
     }
   }
 
@@ -484,7 +490,9 @@ class Editor {
 
   getTitle () {
     let titleFromSchema = false
-    this.title = this.instance.getKey()
+    // the key can come from the data, and it is plain text, not html
+    const key = this.instance.getKey()
+    this.title = isSet(key) ? escapeHtml(key) : key
 
     const schemaTitle = getSchemaTitle(this.instance.schema)
 

@@ -6,7 +6,8 @@ import {
   isObject,
   isSet, isString,
   pathToAttribute,
-  compilePattern
+  compilePattern,
+  escapeHtml
 } from '../helpers/utils.js'
 import {
   getSchemaAdditionalProperties,
@@ -143,7 +144,7 @@ class EditorObject extends Editor {
 
     if (!this.isAddPropertyNameAllowed(propertyName)) {
       const message = compileTemplate(this.instance.jedison.translator.translate('errorAddPropertyPatternMismatch'), { property: propertyName })
-      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message }))
+      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message: this.purifyMessage(message) }))
       return
     }
 
@@ -226,7 +227,12 @@ class EditorObject extends Editor {
         const schemaTitle = getSchemaTitle(schema)
         const path = this.instance.path + this.instance.jedison.pathSeparator + property
         const id = pathToAttribute(path) + '-activator'
-        const title = isSet(schemaTitle) ? schemaTitle : property
+        const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
+        // a property name is plain text, a title is html
+        const title = isSet(schemaTitle)
+          ? (this.purifyEnabled ? this.purifyContent(schemaTitle, domPurifyOptions) : schemaTitle)
+          : escapeHtml(property)
+        const plainTitle = isSet(schemaTitle) ? schemaTitle : property
 
         const checkboxControl = this.theme.getCheckboxControl({
           id: id,
@@ -249,11 +255,11 @@ class EditorObject extends Editor {
             }
 
             this.instance.getChild(property).activate()
-            ariaLiveMessage.textContent = title + ' ' + this.instance.jedison.translator.translate('objectPropertyAdded')
+            ariaLiveMessage.textContent = plainTitle + ' ' + this.instance.jedison.translator.translate('objectPropertyAdded')
             ariaLive.appendChild(ariaLiveMessage)
           } else {
             this.instance.getChild(property).deactivate()
-            ariaLiveMessage.textContent = title + ' ' + this.instance.jedison.translator.translate('objectPropertyRemoved')
+            ariaLiveMessage.textContent = plainTitle + ' ' + this.instance.jedison.translator.translate('objectPropertyRemoved')
             ariaLive.appendChild(ariaLiveMessage)
           }
 
@@ -327,7 +333,7 @@ class EditorObject extends Editor {
 
       const optIn = this.theme.getCheckboxControl({
         id: child.path + '-opt-in',
-        title: child.path + '-opt-in',
+        title: escapeHtml(child.path + '-opt-in'),
         titleHidden: true
       })
 
