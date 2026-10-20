@@ -514,7 +514,7 @@ function getSchemaOneOf(schema) {
   return isArray(schema.oneOf) ? clone(schema.oneOf) : void 0;
 }
 function getSchemaUnevaluatedProperties(schema) {
-  return isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : void 0;
+  return isObject$1(schema.unevaluatedProperties) || isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : void 0;
 }
 function getSchemaUniqueItems(schema) {
   return isBoolean(schema.uniqueItems) ? clone(schema.uniqueItems) : void 0;
@@ -1576,66 +1576,87 @@ const draft07 = {
   type,
   uniqueItems
 };
+function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
+  if (isBoolean(schema)) {
+    return;
+  }
+  if (context.validator.refParser && hasOwn(schema, "$ref")) {
+    schema = context.validator.refParser.expand(schema);
+  }
+  const names = Object.keys(context.value);
+  const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
+  const merge = (subschema) => collectEvaluated(context, subschema, evaluated, true);
+  const properties2 = getSchemaProperties(schema);
+  const patternProperties2 = getSchemaPatternProperties(schema);
+  names.forEach((name) => {
+    const inProperties = isSet(properties2) && hasOwn(properties2, name);
+    const inPatternProperties = isSet(patternProperties2) && Object.keys(patternProperties2).some((pattern2) => new RegExp(pattern2).test(name));
+    if (inProperties || inPatternProperties) {
+      evaluated.add(name);
+    }
+  });
+  if (isSet(getSchemaAdditionalProperties(schema)) || includeOwnUnevaluated && isSet(getSchemaUnevaluatedProperties(schema))) {
+    names.forEach((name) => evaluated.add(name));
+  }
+  const allOf2 = getSchemaAllOf(schema);
+  if (isSet(allOf2)) {
+    allOf2.forEach(merge);
+  }
+  const anyOf2 = getSchemaAnyOf(schema);
+  const oneOf2 = getSchemaOneOf(schema);
+  [anyOf2, oneOf2].forEach((subschemas) => {
+    if (isSet(subschemas)) {
+      subschemas.filter(isValid).forEach(merge);
+    }
+  });
+  const schemaIf = getSchemaIf(schema);
+  if (isSet(schemaIf)) {
+    const schemaThen = getSchemaThen(schema);
+    const schemaElse = getSchemaElse(schema);
+    if (isValid(schemaIf)) {
+      merge(schemaIf);
+      if (isSet(schemaThen)) {
+        merge(schemaThen);
+      }
+    } else if (isSet(schemaElse)) {
+      merge(schemaElse);
+    }
+  }
+  const dependentSchemas2 = getSchemaDependentSchemas(schema);
+  if (isSet(dependentSchemas2)) {
+    Object.keys(dependentSchemas2).filter((name) => hasOwn(context.value, name)).forEach((name) => merge(dependentSchemas2[name]));
+  }
+}
 function unevaluatedProperties(context) {
   let errors = [];
-  const schemaUnevaluatedProperties = getSchemaUnevaluatedProperties(context.schema);
-  const schemaPatternProperties = getSchemaPatternProperties(context.schema);
-  const schemaProperties = getSchemaProperties(context.schema);
-  const schemaAllOf = getSchemaAllOf(context.schema);
-  const schemaAnyOf = getSchemaAnyOf(context.schema);
-  const schemaOneOf = getSchemaOneOf(context.schema);
-  if (isObject$1(context.value) && isSet(schemaUnevaluatedProperties)) {
-    let properties2 = isSet(schemaProperties) ? schemaProperties : {};
-    const unevaluatedProperties2 = schemaUnevaluatedProperties;
-    const patternProperties2 = schemaPatternProperties;
-    const ofSchemas = [
-      schemaAllOf,
-      schemaAnyOf,
-      schemaOneOf
-    ];
-    ofSchemas.forEach((subSchema) => {
-      if (isSet(subSchema)) {
-        subSchema.forEach((subschema) => {
-          if (isSet(subschema["properties"])) {
-            properties2 = { ...properties2, ...subschema["properties"] };
-          }
+  const unevaluatedSchema = getSchemaUnevaluatedProperties(context.schema);
+  if (isObject$1(context.value) && isSet(unevaluatedSchema)) {
+    const evaluated = /* @__PURE__ */ new Set();
+    collectEvaluated(context, context.schema, evaluated, false);
+    Object.keys(context.value).filter((property) => !evaluated.has(property)).forEach((property) => {
+      if (unevaluatedSchema === false) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "unevaluatedProperties",
+          messages: [
+            compileTemplate(context.translator.translate("errorUnevaluatedProperties"), {
+              property
+            })
+          ]
         });
+      } else if (isObject$1(unevaluatedSchema)) {
+        const propertyErrors = context.validator.getErrors(context.value[property], unevaluatedSchema, property, context.path + "/" + property).map((error) => {
+          return {
+            type: "error",
+            path: context.path + "/" + property,
+            constraint: "unevaluatedProperties",
+            messages: error.messages
+          };
+        });
+        errors = [...errors, ...propertyErrors];
       }
     });
-    if (properties2) {
-      Object.keys(context.value).forEach((property) => {
-        let definedInPatternProperty = false;
-        if (isSet(patternProperties2)) {
-          Object.keys(patternProperties2).forEach((pattern2) => {
-            const regexp = new RegExp(pattern2);
-            definedInPatternProperty = regexp.test(property);
-          });
-        }
-        if (!definedInPatternProperty && unevaluatedProperties2 === false && !hasOwn(properties2, property)) {
-          errors.push({
-            type: "error",
-            path: context.path,
-            constraint: "unevaluatedProperties",
-            messages: [
-              compileTemplate(context.translator.translate("errorUnevaluatedProperties"), {
-                property
-              })
-            ]
-          });
-        }
-        if (!definedInPatternProperty && isObject$1(unevaluatedProperties2) && !hasOwn(properties2, property)) {
-          const unevaluatedPropertiesErrors = context.validator.getErrors(context.value[property], unevaluatedProperties2, property, context.path + "/" + property).map((error) => {
-            return {
-              type: "error",
-              path: property,
-              constraint: "unevaluatedProperties",
-              messages: error.messages
-            };
-          });
-          errors = [...errors, ...unevaluatedPropertiesErrors];
-        }
-      });
-    }
   }
   return errors;
 }
@@ -1945,28 +1966,28 @@ class Instance extends EventEmitter {
    */
   register() {
     this.jedison.register(this);
-    if (this.children.length === 0) return;
     const registerChildRecursive = (child) => {
       this.jedison.register(child);
-      if (child.children.length > 0) {
-        child.children.forEach(registerChildRecursive);
-      }
+      child.getRegistrableChildren().forEach(registerChildRecursive);
     };
-    this.children.forEach(registerChildRecursive);
+    this.getRegistrableChildren().forEach(registerChildRecursive);
+  }
+  /**
+   * The child instances that register and unregister together with this instance
+   */
+  getRegistrableChildren() {
+    return this.children ?? [];
   }
   /**
    * Deletes a child instance reference from the instance list
    */
   unregister() {
     this.jedison.unregister(this);
-    if (this.children.length === 0) return;
     const unregisterChildRecursive = (child) => {
       this.jedison.unregister(child);
-      if (child.children.length > 0) {
-        child.children.forEach(unregisterChildRecursive);
-      }
+      child.getRegistrableChildren().forEach(unregisterChildRecursive);
     };
-    this.children.forEach(unregisterChildRecursive);
+    this.getRegistrableChildren().forEach(unregisterChildRecursive);
   }
   /**
    * Sets the default value of the instance based on it's type
@@ -2775,6 +2796,7 @@ class InstanceIfThenElse extends Instance {
     this.index = 0;
     this.schemas = [];
     this.ifThenElseSchemas = [];
+    this.schema = clone(this.schema);
     this.traverseSchema(this.schema);
     delete this.schema.if;
     delete this.schema.then;
@@ -2870,6 +2892,14 @@ class InstanceIfThenElse extends Instance {
     let withoutIf = this.instanceWithoutIf.getValue();
     if (isObject$1(withoutIf) && isObject$1(value)) {
       withoutIf = overwriteExistingProperties(withoutIf, value);
+      this.ifThenElseSchemas.forEach((item) => {
+        var _a;
+        Object.keys(((_a = item.if) == null ? void 0 : _a.properties) ?? {}).forEach((key) => {
+          if (hasOwn(value, key)) {
+            withoutIf[key] = value[key];
+          }
+        });
+      });
       return withoutIf;
     }
     return value;
@@ -3105,6 +3135,9 @@ class InstanceMultiple extends Instance {
   /**
    * Returns the index of the instance that has less validation errors
    */
+  getRegistrableChildren() {
+    return this.activeInstance ? this.activeInstance.getRegistrableChildren() : [];
+  }
   getFittestIndex(value) {
     const discriminator = getSchemaXOption(this.schema, "discriminator");
     if (isSet(discriminator) && isObject$1(value)) {
@@ -3534,6 +3567,7 @@ class InstanceArray extends Instance {
   refreshChildren() {
     const value = this.getValueRaw();
     if (!isArray(value)) {
+      this.children.forEach((child) => child.destroy());
       this.children = [];
       return;
     }
@@ -8319,12 +8353,16 @@ class RefParser {
     }, options);
     this.refs = {};
     this.data = {};
+    this.resources = {};
+    this.root = null;
     this.iterations = 0;
     this.maxIterations = 1e3;
     this.cycles = [];
     this.walker = new JsonWalker();
   }
   async dereference(schema) {
+    this.root = schema;
+    this.indexResources(schema);
     await this.collectRefs(schema);
     while (this.iterations < this.maxIterations) {
       if (this.refsResolved()) {
@@ -8363,17 +8401,108 @@ class RefParser {
       const nextPath = path ? `${path}/${key}` : `/${key}`;
       if (this.hasRef(schema)) {
         const ref = schema["$ref"];
-        if (this.isExternalRef(ref)) {
-          const resolvedSchema = await this.load(ref);
-          this.refs[ref] = resolvedSchema;
+        if (this.isExternalRef(ref) && this.lookup(ref) === null) {
+          const uri = ref.split("#")[0];
+          const resolvedSchema = await this.load(uri);
+          this.indexResources(resolvedSchema, uri);
+          this.resources[uri] = this.resources[uri] ?? resolvedSchema;
+          this.refs[ref] = this.lookup(ref);
           await this.collectRefs(resolvedSchema, nextPath);
         } else {
-          this.refs[ref] = this.data[ref] ?? null;
+          this.refs[ref] = this.lookup(ref) ?? this.data[ref] ?? null;
         }
       }
       this.data[path] = schema;
       await this.collectRefs(value, nextPath);
     }
+  }
+  /**
+   * Registers every $id and $anchor under its absolute URI. When the schema declares
+   * any $id (or was loaded from a URI), all $ref values are rewritten to absolute URIs
+   * so they resolve against the right base wherever they are expanded.
+   * @param schema
+   * @param baseUri URI the schema was loaded from, if any
+   */
+  indexResources(schema, baseUri = "") {
+    const skipped = ["const", "enum", "default", "examples"];
+    const schemaMaps = ["properties", "$defs", "definitions", "patternProperties", "dependentSchemas"];
+    const strip = (uri) => uri.split("#")[0];
+    const walk = (node, base, visit, isMap = false) => {
+      if (!this.isObject(node)) {
+        return;
+      }
+      if (Array.isArray(node)) {
+        node.forEach((child) => walk(child, base, visit));
+        return;
+      }
+      if (isMap) {
+        Object.values(node).forEach((child) => walk(child, base, visit));
+        return;
+      }
+      const nodeBase = typeof node.$id === "string" ? this.resolveUri(node.$id, base) : base;
+      visit(node, nodeBase);
+      for (const [key, value] of Object.entries(node)) {
+        if (!skipped.includes(key)) {
+          walk(value, nodeBase, visit, schemaMaps.includes(key));
+        }
+      }
+    };
+    let foundId = false;
+    walk(schema, baseUri, (node, base) => {
+      if (typeof node.$id === "string") {
+        foundId = true;
+        this.resources[strip(base)] = node;
+      }
+      if (typeof node.$anchor === "string") {
+        this.resources[strip(base) + "#" + node.$anchor] = node;
+      }
+    });
+    if (foundId || baseUri !== "") {
+      walk(schema, baseUri, (node, base) => {
+        if (this.hasRef(node)) {
+          node.$ref = this.resolveUri(node.$ref, base);
+        }
+      });
+    }
+  }
+  resolveUri(uri, base) {
+    try {
+      return new URL(uri, base || void 0).href;
+    } catch (error) {
+      return uri;
+    }
+  }
+  /**
+   * Finds the schema a $ref points to inside the registered resources, following
+   * JSON Pointer escaping (~0, ~1) and percent-encoding. Returns null if not found.
+   * @param ref
+   */
+  lookup(ref) {
+    const hashIndex = ref.indexOf("#");
+    const uri = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+    const fragment = hashIndex === -1 ? "" : ref.slice(hashIndex + 1);
+    const resource = uri === "" ? this.root : this.resources[uri];
+    if (!this.isObject(resource)) {
+      return null;
+    }
+    let target = resource;
+    if (fragment === "") {
+      return target;
+    }
+    if (!fragment.startsWith("/")) {
+      return this.resources[uri + "#" + fragment] ?? null;
+    }
+    try {
+      const tokens = fragment.slice(1).split("/").map((token) => {
+        return decodeURIComponent(token).replace(/~1/g, "/").replace(/~0/g, "~");
+      });
+      for (const token of tokens) {
+        target = this.isObject(target) ? target[token] : void 0;
+      }
+    } catch (error) {
+      return null;
+    }
+    return target === void 0 ? null : target;
   }
   hasRef(schema) {
     return typeof schema["$ref"] !== "undefined" && typeof schema["$ref"] === "string";
@@ -8438,7 +8567,14 @@ class RefParser {
     if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
       const ref = cloneSchema.$ref;
       delete cloneSchema["$ref"];
-      return this.expand(mergeDeep({}, this.refs[ref], cloneSchema));
+      const target = this.refs[ref];
+      if (target === false) {
+        return { ...cloneSchema, not: {} };
+      }
+      if (target === true) {
+        return this.expand(cloneSchema);
+      }
+      return this.expand(mergeDeep({}, target, cloneSchema));
     }
     return cloneSchema;
   }
