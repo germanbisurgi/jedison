@@ -6,6 +6,11 @@
 - Added `unevaluatedItems` validation (`prefixItems`, `items`, `contains`, `allOf`, valid `anyOf`/`oneOf` branches, `if`/`then`/`else` and `$ref` count as evaluated)
 - Added `assertFormat` checks for `date`, `time`, `date-time`, `duration`, `ipv4`, `ipv6`, `hostname`, `uri`, `uri-reference`, `uri-template`, `json-pointer`, `relative-json-pointer` and `regex`. Values of these formats that were silently accepted can now report errors
 - Fixed `pattern` and `patternProperties` to use unicode regex semantics, and an `$id` inside an unknown keyword is no longer treated as a schema identifier
+- Added multi-draft support: `$schema` drafts 4, 6, 7 and 2019-09 are normalized to 2020-12 (`items` array, `additionalItems`, `dependencies`, draft 4 `id` and boolean `exclusiveMinimum`/`exclusiveMaximum`, `$id: "#x"`). `$dynamicRef` and `$recursiveRef` are not supported
+- Added the `keepRefSiblings` option (default `false`): per spec, keywords next to `$ref` are ignored up to draft 7. Set it to `true` to keep merging them
+- Fixed `multipleOf` for decimals (`0.3` / `0.1`), `minLength` / `maxLength` to count code points, `$ref` to inherited keys such as `constructor`, and endless loops on self-referencing `$ref` chains and empty `$ref`
+- Fixed XSS through property names, schema titles, data keys and error messages used as labels
+- Fixed `purifyData` altering plain text such as `a < b`
 
 ### 1.28.0
 
