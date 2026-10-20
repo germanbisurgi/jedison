@@ -2,7 +2,7 @@
  * constrains unevaluatedProperties
  */
 
-import { compileTemplate, hasOwn, isBoolean, isObject, isSet } from '../../helpers/utils.js'
+import { compileTemplate, hasOwn, isBoolean, isObject, isSet, compilePattern } from '../../helpers/utils.js'
 import {
   getSchemaUnevaluatedProperties,
   getSchemaPatternProperties,
@@ -38,7 +38,7 @@ function collectEvaluated (context, schema, evaluated, includeOwnUnevaluated) {
 
   names.forEach((name) => {
     const inProperties = isSet(properties) && hasOwn(properties, name)
-    const inPatternProperties = isSet(patternProperties) && Object.keys(patternProperties).some((pattern) => new RegExp(pattern).test(name))
+    const inPatternProperties = isSet(patternProperties) && Object.keys(patternProperties).some((pattern) => compilePattern(pattern).test(name))
 
     if (inProperties || inPatternProperties) {
       evaluated.add(name)

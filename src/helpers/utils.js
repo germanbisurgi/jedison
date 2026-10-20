@@ -45,6 +45,20 @@ export function clone (thing) {
  * @param {string} string - The string
  * @return {string} Escaped regexp
  */
+/**
+ * Compiles a schema pattern with unicode semantics, as JSON Schema requires.
+ * Patterns that are only valid without the flag fall back to a plain RegExp.
+ * @param {string} pattern
+ * @return {RegExp}
+ */
+export function compilePattern (pattern) {
+  try {
+    return new RegExp(pattern, 'u')
+  } catch (error) {
+    return new RegExp(pattern)
+  }
+}
+
 export function escapeRegExp (string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
 }

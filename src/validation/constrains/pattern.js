@@ -1,4 +1,4 @@
-import { compileTemplate, isSet, isString } from '../../helpers/utils.js'
+import { compileTemplate, isSet, isString, compilePattern } from '../../helpers/utils.js'
 import { getSchemaPattern } from '../../helpers/schema.js'
 
 export function pattern (context) {
@@ -6,7 +6,7 @@ export function pattern (context) {
   const pattern = getSchemaPattern(context.schema)
 
   if (isString(context.value) && isSet(pattern)) {
-    const regexp = new RegExp(pattern)
+    const regexp = compilePattern(pattern)
     const invalid = !regexp.test(context.value)
 
     if (invalid) {

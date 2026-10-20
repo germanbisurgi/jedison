@@ -96,8 +96,13 @@ class RefParser {
    * @param baseUri URI the schema was loaded from, if any
    */
   indexResources (schema, baseUri = '') {
-    const skipped = ['const', 'enum', 'default', 'examples']
-    const schemaMaps = ['properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas']
+    // only keywords that hold subschemas are walked, so an $id inside an unknown keyword is ignored
+    const schemaKeywords = [
+      'additionalProperties', 'additionalItems', 'items', 'prefixItems', 'contains', 'not', 'if', 'then', 'else',
+      'propertyNames', 'unevaluatedItems', 'unevaluatedProperties', 'contentSchema', 'allOf', 'anyOf', 'oneOf',
+      'properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas', 'dependencies'
+    ]
+    const schemaMaps = ['properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas', 'dependencies']
     const strip = (uri) => uri.split('#')[0]
 
     const walk = (node, base, visit, isMap = false) => {
@@ -121,7 +126,7 @@ class RefParser {
       visit(node, nodeBase)
 
       for (const [key, value] of Object.entries(node)) {
-        if (!skipped.includes(key)) {
+        if (schemaKeywords.includes(key)) {
           walk(value, nodeBase, visit, schemaMaps.includes(key))
         }
       }

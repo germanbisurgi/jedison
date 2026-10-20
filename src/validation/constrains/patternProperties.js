@@ -1,4 +1,4 @@
-import { isObject, isSet } from '../../helpers/utils.js'
+import { isObject, isSet, compilePattern } from '../../helpers/utils.js'
 import { getSchemaPatternProperties } from '../../helpers/schema.js'
 
 export function patternProperties (context) {
@@ -8,7 +8,7 @@ export function patternProperties (context) {
   if (isObject(context.value) && isSet(patternProperties)) {
     Object.keys(context.value).forEach((propertyName) => {
       Object.keys(patternProperties).forEach((pattern) => {
-        const regexp = new RegExp(pattern)
+        const regexp = compilePattern(pattern)
         if (regexp.test(propertyName)) {
           const schema = patternProperties[pattern]
 

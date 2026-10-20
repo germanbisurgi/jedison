@@ -1,5 +1,5 @@
 import Instance from './instance.js'
-import { different, isSet, notSet, isObject, hasOwn, clone, isNumber, isArray } from '../helpers/utils.js'
+import { different, isSet, notSet, isObject, hasOwn, clone, isNumber, isArray, compilePattern } from '../helpers/utils.js'
 import {
   getSchemaAdditionalProperties,
   getSchemaDependentRequired,
@@ -121,7 +121,7 @@ class InstanceObject extends Instance {
     const schemaPatternProperties = this.schemaPatternProperties || {}
 
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
-      const compiledPatterns = Object.keys(schemaPatternProperties).map(p => new RegExp(p))
+      const compiledPatterns = Object.keys(schemaPatternProperties).map(p => compilePattern(p))
       Object.keys(value).forEach((propertyName) => {
         const matchesPattern = compiledPatterns.some(re => re.test(propertyName))
 
@@ -235,7 +235,7 @@ class InstanceObject extends Instance {
     } else if (isSet(schemaPatternProperties)) {
       // If no exact match in `properties`, check if it matches any pattern in `patternProperties`
       for (const pattern of Object.keys(schemaPatternProperties)) {
-        if (new RegExp(pattern).test(propertyName)) {
+        if (compilePattern(pattern).test(propertyName)) {
           schema = schemaPatternProperties[pattern]
           break
         }

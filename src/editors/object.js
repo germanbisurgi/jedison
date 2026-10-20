@@ -5,7 +5,8 @@ import {
   hasOwn,
   isObject,
   isSet, isString,
-  pathToAttribute
+  pathToAttribute,
+  compilePattern
 } from '../helpers/utils.js'
 import {
   getSchemaAdditionalProperties,
@@ -130,7 +131,7 @@ class EditorObject extends Editor {
 
     const patternProperties = getSchemaPatternProperties(this.instance.schema) || {}
 
-    return Object.keys(patternProperties).some((pattern) => new RegExp(pattern).test(propertyName))
+    return Object.keys(patternProperties).some((pattern) => compilePattern(pattern).test(propertyName))
   }
 
   addProperty (input, postAction) {

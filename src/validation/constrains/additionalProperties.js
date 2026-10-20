@@ -2,7 +2,7 @@
  * Constrains additionalProperties
  */
 
-import { compileTemplate, hasOwn, isObject, isSet } from '../../helpers/utils.js'
+import { compileTemplate, hasOwn, isObject, isSet, compilePattern } from '../../helpers/utils.js'
 import { getSchemaAdditionalProperties, getSchemaPatternProperties, getSchemaProperties } from '../../helpers/schema.js'
 
 export function additionalProperties (context) {
@@ -18,7 +18,7 @@ export function additionalProperties (context) {
 
     Object.keys(context.value).forEach((property) => {
       const definedInPatternProperty = Object.keys(patternProperties).some((pattern) => {
-        const regexp = new RegExp(pattern)
+        const regexp = compilePattern(pattern)
         return regexp.test(property)
       })
 
