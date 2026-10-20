@@ -1,7 +1,7 @@
-### Unreleased
+### 1.28.0
 
-- Added `ThemeTailwind4`, a theme for Tailwind CSS v4 (utility classes only, no extra JS). Tell Tailwind to scan Jedison, e.g. `@source "../node_modules/jedison/dist";`
-
+- Added `ThemeTailwind4`
+- 
 ### 1.27.2
 
 - Fixed issue #88: `format: "url"` validation could freeze the page and throw "too much recursion" on some URLs (regex backtracking). It now uses the native `URL` parser; accepted schemes (`http`, `https`, `ftp`) and the TLD/IPv4 host requirement are unchanged
