@@ -19,7 +19,6 @@
 - info variant popover
 
 #### Theme Improvements
-- Themes: Tailwind
 - Themes: spectre
 - Themes: ionic
 - Themes: material

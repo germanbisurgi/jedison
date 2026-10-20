@@ -165,6 +165,23 @@ yarn add jedison
 </script>
 ```
 
+### Using Tailwind CSS v4
+
+`Jedison.ThemeTailwind4` only adds Tailwind utility classes, so Tailwind has to scan Jedison's files or it will purge them. In your Tailwind CSS entry file:
+
+```css
+@import "tailwindcss";
+@source "../node_modules/jedison/dist";
+```
+
+```js
+const jedison = new Jedison.Create({
+    container: document.querySelector('#jedison-container'),
+    theme: new Jedison.ThemeTailwind4(),
+    schema: { "type": "string" }
+})
+```
+
 ## License
 
 Jedison is released under the MIT License, making it free for commercial and non-commercial use.

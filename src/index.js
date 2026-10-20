@@ -7,6 +7,7 @@ import Theme from './themes/theme.js'
 import ThemeBootstrap3 from './themes/bootstrap3.js'
 import ThemeBootstrap4 from './themes/bootstrap4.js'
 import ThemeBootstrap5 from './themes/bootstrap5.js'
+import ThemeTailwind4 from './themes/tailwind4.js'
 import EditorBoolean from './editors/boolean.js'
 import EditorBooleanRadios from './editors/boolean-radios.js'
 import EditorBooleanSelect from './editors/boolean-select.js'
@@ -78,6 +79,7 @@ export default {
   ThemeBootstrap3,
   ThemeBootstrap4,
   ThemeBootstrap5,
+  ThemeTailwind4,
   RefParser,
   Create,
   version,

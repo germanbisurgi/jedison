@@ -1,3 +1,5 @@
+require('dotenv').config({ quiet: true })
+
 const show = process.env.SHOW || false
 const width = 1400
 const height = 5000

@@ -624,6 +624,7 @@ export default {
         'bootstrap5',
         'bootstrap4',
         'bootstrap3',
+        'tailwind4',
         'barebones'
       ],
       iconLibs: [
@@ -748,6 +749,14 @@ export default {
           'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js'
         ])
         break
+      case 'tailwind4':
+        // The playground page itself is built with Bootstrap classes. Put Bootstrap in a
+        // cascade layer below Tailwind's utilities so it can't override the theme.
+        this.loadBootstrapInLayer('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css')
+        this.loadScripts([
+          'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
+        ])
+        break
     }
 
     switch (this.iconLib) {
@@ -803,6 +812,9 @@ export default {
           break
         case 'bootstrap5':
           theme = new Jedison.ThemeBootstrap5()
+          break
+        case 'tailwind4':
+          theme = new Jedison.ThemeTailwind4()
           break
       }
 
@@ -1109,6 +1121,15 @@ export default {
         linkElement.href = resource
         head.appendChild(linkElement)
       }
+    },
+    loadBootstrapInLayer(url) {
+      fetch(url)
+        .then(response => response.text())
+        .then(css => {
+          const style = document.createElement('style')
+          style.textContent = '@layer base, bootstrap, utilities;\n@layer bootstrap {\n' + css + '\n}'
+          document.head.insertBefore(style, document.head.firstChild)
+        })
     },
     loadScripts(scriptUrls, callback) {
       let currentIndex = 0

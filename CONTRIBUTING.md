@@ -22,6 +22,7 @@ yarn e2e       # codeceptjs against the built playground (bootstrap5 theme)
 yarn e2e:b3    # same suite against bootstrap3/4 themes
 yarn e2e:b4
 yarn e2e:b5
+yarn e2e:tw4   # same suite against the tailwind4 theme
 ```
 
 `yarn e2e:grep` runs a single scenario headed, with steps/debug output — useful
@@ -32,10 +33,18 @@ SHOW=true THEME='bootstrap5' yarn e2e:grep
 ```
 
 A PR is expected to pass `yarn lint`, `yarn unit`, and the relevant `yarn e2e:*`
-suite before review. To run all four themes in one go, quote the script name as
+suite before review. To run all themes in one go, quote the script name as
 `yarn "e2e:*"` — it really is named with a `*`, so in zsh an unquoted
 `yarn e2e:*` aborts with `no matches found`, while bash only gets away with it
 because no file happens to match the pattern.
+
+On Apple Silicon the Chromium that puppeteer downloads is Intel-only and fails
+with `spawn Unknown system error -88`. Point the tests at your installed Chrome
+with a git-ignored `.env` file in the repo root:
+
+```bash
+PUPPETEER_EXECUTABLE_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+```
 
 ## What the build scripts write where
 

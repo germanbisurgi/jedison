@@ -7,7 +7,8 @@ const accordionToggle = {
   barebones: '.jedi-accordion-toggle',
   bootstrap3: '.panel-heading',
   bootstrap4: '.card-header .btn-link',
-  bootstrap5: '.accordion-button'
+  bootstrap5: '.accordion-button',
+  tailwind4: '.jedi-accordion-toggle'
 }[theme]
 
 Scenario('Should keep the accordion toggle usable when the editor is disabled @disabled-view-controls @object-accordion', ({ I }) => {

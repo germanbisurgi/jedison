@@ -465,7 +465,7 @@
           "description": "Where your character hails from",
           "enum": ["silverwood-forest", "iron-peaks", "sunhaven", "the-wild-steppes", "crystal-coast", "shadow-fen"],
           "x-enumTitles": ["Silverwood Forest", "Iron Peaks", "Sunhaven", "The Wild Steppes", "Crystal Coast", "Shadow Fen"],
-          "x-grid": { "columns": 6 },
+          "x-grid": { "columns": 12 },
           "x-messages": {
             "enum": "Choose a recognized homeland from the known world."
           },
@@ -475,12 +475,12 @@
           "title": "Origin",
           "type": "object",
           "description": "Your character's social background",
-          "x-grid": { "columns": 6 },
+          "x-grid": { "columns": 12 },
           "x-discriminator": "originType",
           "x-switcherInput": "select-inline",
           "oneOf": [
             {
-              "title": "Noble",
+              "title": "Origin",
               "x-switcherTitle": "Noble",
               "type": "object",
               "required": ["originType"],
@@ -504,7 +504,7 @@
               }
             },
             {
-              "title": "Commoner",
+              "title": "Origin",
               "x-switcherTitle": "Commoner",
               "type": "object",
               "required": ["originType"],
@@ -523,7 +523,7 @@
               }
             },
             {
-              "title": "Outcast",
+              "title": "Origin",
               "x-switcherTitle": "Outcast",
               "type": "object",
               "required": ["originType"],

@@ -65,3 +65,21 @@ jobs:
           path: tests/e2e/output
           if-no-files-found: 'ignore'
           retention-days: 30
+  e2e-tailwind4:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Node version
+        run: node -v
+      - name: Install
+        run: yarn install
+      - name: Test
+        run: yarn e2e:tw4
+      - name: Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: codeceptjs-output-tailwind4
+          path: tests/e2e/output
+          if-no-files-found: 'ignore'
+          retention-days: 30
