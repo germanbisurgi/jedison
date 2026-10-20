@@ -1,4 +1,5 @@
 import { mergeDeep } from '../helpers/utils.js'
+import { SCHEMA_KEYWORDS, SCHEMA_MAPS, getDraft, normalizeSchema } from '../helpers/draft.js'
 import JsonWalker from '../json-walker.js'
 
 class RefParser {
@@ -6,13 +7,15 @@ class RefParser {
     this.options = Object.assign({
       detectRecursion: true,
       fetch: typeof fetch === 'function' ? fetch.bind(globalThis) : undefined,
-      fetchOptions: {}
+      fetchOptions: {},
+      keepRefSiblings: false // up to draft 7 the siblings of $ref are ignored, true keeps them
     }, options)
 
     this.refs = {}
     this.data = {}
     this.resources = {}
     this.root = null
+    this.draft = 2020
     this.iterations = 0
     this.maxIterations = 1000
     this.cycles = []
@@ -21,6 +24,8 @@ class RefParser {
 
   async dereference (schema) {
     this.root = schema
+    this.draft = getDraft(schema)
+    normalizeSchema(schema, this.draft)
     this.indexResources(schema)
     await this.collectRefs(schema)
 
@@ -72,7 +77,8 @@ class RefParser {
 
         if (this.isExternalRef(ref) && this.lookup(ref) === null) {
           const uri = ref.split('#')[0]
-          const resolvedSchema = await this.load(uri)
+          const loaded = await this.load(uri)
+          const resolvedSchema = normalizeSchema(loaded, loaded?.$schema ? getDraft(loaded) : this.draft)
           this.indexResources(resolvedSchema, uri)
           this.resources[uri] = this.resources[uri] ?? resolvedSchema
           this.refs[ref] = this.lookup(ref)
@@ -96,13 +102,11 @@ class RefParser {
    * @param baseUri URI the schema was loaded from, if any
    */
   indexResources (schema, baseUri = '') {
-    // only keywords that hold subschemas are walked, so an $id inside an unknown keyword is ignored
-    const schemaKeywords = [
-      'additionalProperties', 'additionalItems', 'items', 'prefixItems', 'contains', 'not', 'if', 'then', 'else',
-      'propertyNames', 'unevaluatedItems', 'unevaluatedProperties', 'contentSchema', 'allOf', 'anyOf', 'oneOf',
-      'properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas', 'dependencies'
-    ]
-    const schemaMaps = ['properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas', 'dependencies']
+    const schemaKeywords = SCHEMA_KEYWORDS
+    const schemaMaps = SCHEMA_MAPS
+    // a $ref next to an $id or $anchor makes them siblings that may have to be ignored
+    const ignored = (node) => this.hasRef(node) && this.ignoresRefSiblings()
+    const hasOwnId = (node) => typeof node.$id === 'string' && !ignored(node)
     const strip = (uri) => uri.split('#')[0]
 
     const walk = (node, base, visit, isMap = false) => {
@@ -121,7 +125,7 @@ class RefParser {
         return
       }
 
-      const nodeBase = typeof node.$id === 'string' ? this.resolveUri(node.$id, base) : base
+      const nodeBase = hasOwnId(node) ? this.resolveUri(node.$id, base) : base
 
       visit(node, nodeBase)
 
@@ -135,12 +139,12 @@ class RefParser {
     let foundId = false
 
     walk(schema, baseUri, (node, base) => {
-      if (typeof node.$id === 'string') {
+      if (hasOwnId(node)) {
         foundId = true
         this.resources[strip(base)] = node
       }
 
-      if (typeof node.$anchor === 'string') {
+      if (typeof node.$anchor === 'string' && !ignored(node)) {
         this.resources[strip(base) + '#' + node.$anchor] = node
       }
     })
@@ -193,7 +197,7 @@ class RefParser {
       })
 
       for (const token of tokens) {
-        target = this.isObject(target) ? target[token] : undefined
+        target = this.isObject(target) && Object.prototype.hasOwnProperty.call(target, token) ? target[token] : undefined
       }
     } catch (error) {
       return null
@@ -282,23 +286,39 @@ class RefParser {
     }
   }
 
-  expand (schema) {
+  ignoresRefSiblings () {
+    return this.draft <= 7 && !this.options.keepRefSiblings
+  }
+
+  expand (schema, seen = new Set()) {
     const cloneSchema = JSON.parse(JSON.stringify(schema))
 
     if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
       const ref = cloneSchema.$ref
+
+      // a chain of refs that leads back to itself would never end
+      if (seen.has(ref)) {
+        delete cloneSchema.$ref
+        return cloneSchema
+      }
+
+      seen.add(ref)
       delete cloneSchema['$ref']
       const target = this.refs[ref]
+
+      if (this.ignoresRefSiblings()) {
+        Object.keys(cloneSchema).forEach((key) => delete cloneSchema[key])
+      }
 
       if (target === false) {
         return { ...cloneSchema, not: {} }
       }
 
       if (target === true) {
-        return this.expand(cloneSchema)
+        return this.expand(cloneSchema, seen)
       }
 
-      return this.expand(mergeDeep({}, target, cloneSchema))
+      return this.expand(mergeDeep({}, target, cloneSchema), seen)
     }
 
     return cloneSchema

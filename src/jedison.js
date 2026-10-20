@@ -1,3 +1,4 @@
+import { normalizeSchema } from './helpers/draft.js'
 import Validator from './validation/validator.js'
 import EventEmitter from './event-emitter.js'
 import InstanceIfThenElse from './instances/if-then-else.js'
@@ -96,6 +97,7 @@ class Jedison extends EventEmitter {
       debug: false,
       audacity: true,
       switcherTypeLabels: {},
+      keepRefSiblings: false, // up to draft 7 the siblings of $ref are ignored, true keeps them (for backwards compatibility)
       keepMissingSchemaFields: false // for backwards compatibility
     }, options)
 
@@ -166,6 +168,10 @@ class Jedison extends EventEmitter {
      */
     this.refParser = this.options.refParser ? this.options.refParser : null
 
+    if (this.refParser && this.options.keepRefSiblings) {
+      this.refParser.options.keepRefSiblings = true
+    }
+
     this.walker = new JsonWalker()
 
     /**
@@ -226,6 +232,9 @@ class Jedison extends EventEmitter {
           break
       }
     }
+
+    // schemas written for older drafts are rewritten into the 2020-12 shape, on a copy
+    this.options.schema = normalizeSchema(clone(this.options.schema))
 
     this.schema = this.options.schema
 
