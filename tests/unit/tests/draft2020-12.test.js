@@ -1,17 +1,29 @@
 /* global describe it expect */
+const fs = require('fs')
+const path = require('path')
 const Jedison = require('../../../dist/cjs/jedison.cjs')
+
+// Serves the suite's remote documents from disk, everything else goes over the network
+const remotesDir = path.join(__dirname, '../../../node_modules/json-schema-test-suite/remotes/')
+const fetchRemote = async (url) => {
+  if (url.startsWith('http://localhost:1234/')) {
+    const file = path.join(remotesDir, url.replace('http://localhost:1234/', ''))
+    return { ok: true, json: async () => JSON.parse(fs.readFileSync(file, 'utf8')) }
+  }
+  return fetch(url)
+}
 
 const suites = [
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/additionalProperties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/allOf'),
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/anchor'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/anchor'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/anyOf'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/boolean_schema'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/const'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/contains'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/content'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/default'),
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/defs'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/defs'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/dependentRequired'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/dependentSchemas'),
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/dynamicRef'),
@@ -40,14 +52,25 @@ const suites = [
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/prefixItems'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/properties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/propertyNames'),
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/ref'), // todo: next
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/refRemote'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/ref'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/refRemote'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/required'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/type'),
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedItems'),
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedProperties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/uniqueItems')
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/vocabulary'),
+]
+
+// Known gaps, as 'scenario > test':
+// - unevaluatedProperties scope after $ref
+// - the remote metaschema relies on $dynamicRef, which is not supported
+const knownGaps = [
+  'ref creates new scope when adjacent to keywords > referenced subschema doesn\'t see annotations from properties',
+  'remote ref, containing refs itself > remote ref valid',
+  'remote ref, containing refs itself > remote ref invalid',
+  'validate definition against metaschema > valid definition schema',
+  'validate definition against metaschema > invalid definition schema'
 ]
 
 for (let i = 0; i < suites.length; i++) {
@@ -57,8 +80,9 @@ for (let i = 0; i < suites.length; i++) {
     describe(scenario.description, () => {
       for (let k = 0; k < scenario.tests.length; k++) {
         const test = scenario.tests[k]
-        it(test.description, async () => {
-          const refParser = new Jedison.RefParser()
+        const run = knownGaps.includes(scenario.description + ' > ' + test.description) ? it.skip : it
+        run(test.description, async () => {
+          const refParser = new Jedison.RefParser({ fetch: fetchRemote })
           await refParser.dereference(scenario.schema)
 
           const jedison = new Jedison.Create({

@@ -11,6 +11,8 @@ class RefParser {
 
     this.refs = {}
     this.data = {}
+    this.resources = {}
+    this.root = null
     this.iterations = 0
     this.maxIterations = 1000
     this.cycles = []
@@ -18,6 +20,8 @@ class RefParser {
   }
 
   async dereference (schema) {
+    this.root = schema
+    this.indexResources(schema)
     await this.collectRefs(schema)
 
     while (this.iterations < this.maxIterations) {
@@ -66,12 +70,15 @@ class RefParser {
       if (this.hasRef(schema)) {
         const ref = schema['$ref']
 
-        if (this.isExternalRef(ref)) {
-          const resolvedSchema = await this.load(ref)
-          this.refs[ref] = resolvedSchema
+        if (this.isExternalRef(ref) && this.lookup(ref) === null) {
+          const uri = ref.split('#')[0]
+          const resolvedSchema = await this.load(uri)
+          this.indexResources(resolvedSchema, uri)
+          this.resources[uri] = this.resources[uri] ?? resolvedSchema
+          this.refs[ref] = this.lookup(ref)
           await this.collectRefs(resolvedSchema, nextPath)
         } else {
-          this.refs[ref] = this.data[ref] ?? null
+          this.refs[ref] = this.lookup(ref) ?? this.data[ref] ?? null
         }
       }
 
@@ -79,6 +86,115 @@ class RefParser {
 
       await this.collectRefs(value, nextPath)
     }
+  }
+
+  /**
+   * Registers every $id and $anchor under its absolute URI. When the schema declares
+   * any $id (or was loaded from a URI), all $ref values are rewritten to absolute URIs
+   * so they resolve against the right base wherever they are expanded.
+   * @param schema
+   * @param baseUri URI the schema was loaded from, if any
+   */
+  indexResources (schema, baseUri = '') {
+    const skipped = ['const', 'enum', 'default', 'examples']
+    const schemaMaps = ['properties', '$defs', 'definitions', 'patternProperties', 'dependentSchemas']
+    const strip = (uri) => uri.split('#')[0]
+
+    const walk = (node, base, visit, isMap = false) => {
+      if (!this.isObject(node)) {
+        return
+      }
+
+      if (Array.isArray(node)) {
+        node.forEach((child) => walk(child, base, visit))
+        return
+      }
+
+      if (isMap) {
+        // keys are names chosen by the author, not keywords
+        Object.values(node).forEach((child) => walk(child, base, visit))
+        return
+      }
+
+      const nodeBase = typeof node.$id === 'string' ? this.resolveUri(node.$id, base) : base
+
+      visit(node, nodeBase)
+
+      for (const [key, value] of Object.entries(node)) {
+        if (!skipped.includes(key)) {
+          walk(value, nodeBase, visit, schemaMaps.includes(key))
+        }
+      }
+    }
+
+    let foundId = false
+
+    walk(schema, baseUri, (node, base) => {
+      if (typeof node.$id === 'string') {
+        foundId = true
+        this.resources[strip(base)] = node
+      }
+
+      if (typeof node.$anchor === 'string') {
+        this.resources[strip(base) + '#' + node.$anchor] = node
+      }
+    })
+
+    if (foundId || baseUri !== '') {
+      walk(schema, baseUri, (node, base) => {
+        if (this.hasRef(node)) {
+          node.$ref = this.resolveUri(node.$ref, base)
+        }
+      })
+    }
+  }
+
+  resolveUri (uri, base) {
+    try {
+      return new URL(uri, base || undefined).href
+    } catch (error) {
+      return uri
+    }
+  }
+
+  /**
+   * Finds the schema a $ref points to inside the registered resources, following
+   * JSON Pointer escaping (~0, ~1) and percent-encoding. Returns null if not found.
+   * @param ref
+   */
+  lookup (ref) {
+    const hashIndex = ref.indexOf('#')
+    const uri = hashIndex === -1 ? ref : ref.slice(0, hashIndex)
+    const fragment = hashIndex === -1 ? '' : ref.slice(hashIndex + 1)
+    const resource = uri === '' ? this.root : this.resources[uri]
+
+    if (!this.isObject(resource)) {
+      return null
+    }
+
+    let target = resource
+
+    if (fragment === '') {
+      return target
+    }
+
+    if (!fragment.startsWith('/')) {
+      return this.resources[uri + '#' + fragment] ?? null
+    }
+
+    try {
+      const tokens = fragment.slice(1).split('/').map((token) => {
+        return decodeURIComponent(token).replace(/~1/g, '/').replace(/~0/g, '~')
+      })
+
+      for (const token of tokens) {
+        target = this.isObject(target) ? target[token] : undefined
+      }
+    } catch (error) {
+      return null
+    }
+
+    return target === undefined ? null : target
   }
 
   hasRef (schema) {
@@ -167,7 +283,17 @@ class RefParser {
     if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
       const ref = cloneSchema.$ref
       delete cloneSchema['$ref']
-      return this.expand(mergeDeep({}, this.refs[ref], cloneSchema))
+      const target = this.refs[ref]
+
+      if (target === false) {
+        return { ...cloneSchema, not: {} }
+      }
+
+      if (target === true) {
+        return this.expand(cloneSchema)
+      }
+
+      return this.expand(mergeDeep({}, target, cloneSchema))
     }
 
     return cloneSchema
