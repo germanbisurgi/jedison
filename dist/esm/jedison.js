@@ -25,12 +25,21 @@ function clone(thing) {
   }
   return obj;
 }
+const compiledPatterns = /* @__PURE__ */ new Map();
 function compilePattern(pattern2) {
-  try {
-    return new RegExp(pattern2, "u");
-  } catch (error) {
-    return new RegExp(pattern2);
+  if (!compiledPatterns.has(pattern2)) {
+    let regexp;
+    try {
+      regexp = new RegExp(pattern2, "u");
+    } catch (error) {
+      regexp = new RegExp(pattern2);
+    }
+    compiledPatterns.set(pattern2, regexp);
   }
+  return compiledPatterns.get(pattern2);
+}
+function escapeHtml(text) {
+  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -603,6 +612,114 @@ class SchemaGenerator {
     };
   }
 }
+const SCHEMA_KEYWORDS = [
+  "additionalProperties",
+  "additionalItems",
+  "items",
+  "prefixItems",
+  "contains",
+  "not",
+  "if",
+  "then",
+  "else",
+  "propertyNames",
+  "unevaluatedItems",
+  "unevaluatedProperties",
+  "contentSchema",
+  "allOf",
+  "anyOf",
+  "oneOf",
+  "properties",
+  "$defs",
+  "definitions",
+  "patternProperties",
+  "dependentSchemas",
+  "dependencies"
+];
+const SCHEMA_MAPS = ["properties", "$defs", "definitions", "patternProperties", "dependentSchemas", "dependencies"];
+const DRAFTS = {
+  "json-schema.org/draft-04/schema": 4,
+  "json-schema.org/draft-06/schema": 6,
+  "json-schema.org/draft-07/schema": 7,
+  "json-schema.org/draft/2019-09/schema": 2019,
+  "json-schema.org/draft/2020-12/schema": 2020
+};
+function getDraft(schema) {
+  if (!isObject$1(schema) || !isString(schema.$schema)) {
+    return 2020;
+  }
+  return DRAFTS[schema.$schema.replace(/^https?:\/\//, "").replace(/#$/, "")] ?? 2020;
+}
+function normalizeNode(node, draft) {
+  if (draft === 4 && isString(node.id) && !hasOwn(node, "$id")) {
+    node.$id = node.id;
+    delete node.id;
+  }
+  if (draft <= 7 && isString(node.$id) && node.$id.startsWith("#")) {
+    node.$anchor = node.$id.slice(1);
+    delete node.$id;
+  }
+  if (node.$ref === "") {
+    node.$ref = "#";
+  }
+  if (isString(node.$ref) && node.$ref.includes("#")) {
+    const hashIndex = node.$ref.indexOf("#");
+    const fragment = node.$ref.slice(hashIndex).replace(/\/items\/([0-9]+)(?=\/|$)/g, "/prefixItems/$1");
+    node.$ref = node.$ref.slice(0, hashIndex) + fragment;
+  }
+  if (draft === 4) {
+    [["exclusiveMinimum", "minimum"], ["exclusiveMaximum", "maximum"]].forEach(([exclusive, limit]) => {
+      if (isBoolean(node[exclusive])) {
+        if (node[exclusive] && hasOwn(node, limit)) {
+          node[exclusive] = node[limit];
+          delete node[limit];
+        } else {
+          delete node[exclusive];
+        }
+      }
+    });
+  }
+  if (isArray(node.items)) {
+    node.prefixItems = node.items;
+    if (hasOwn(node, "additionalItems")) {
+      node.items = node.additionalItems;
+    } else {
+      delete node.items;
+    }
+  }
+  delete node.additionalItems;
+  if (isObject$1(node.dependencies)) {
+    Object.entries(node.dependencies).forEach(([name, dependency]) => {
+      const target = isArray(dependency) ? "dependentRequired" : "dependentSchemas";
+      node[target] = node[target] ?? {};
+      node[target][name] = dependency;
+    });
+    delete node.dependencies;
+  }
+}
+function walk(node, draft, isMap = false) {
+  if (isArray(node)) {
+    node.forEach((child) => walk(child, draft));
+    return;
+  }
+  if (!isObject$1(node)) {
+    return;
+  }
+  if (isMap) {
+    Object.values(node).forEach((child) => walk(child, draft));
+    return;
+  }
+  normalizeNode(node, draft);
+  SCHEMA_KEYWORDS.forEach((keyword) => {
+    if (hasOwn(node, keyword)) {
+      walk(node[keyword], draft, SCHEMA_MAPS.includes(keyword));
+    }
+  });
+}
+function normalizeSchema(schema, draft = getDraft(schema)) {
+  walk(schema, draft);
+  return schema;
+}
 function allOf(context) {
   let errors = [];
   const allOf2 = getSchemaAllOf(context.schema);
@@ -641,8 +758,7 @@ function minLength(context) {
   const errors = [];
   const minLength2 = getSchemaMinLength(context.schema);
   if (isString(context.value) && isSet(minLength2)) {
-    context.value = context.value.replace(/[\uDCA9]/g, "");
-    const invalid = context.value.length < minLength2;
+    const invalid = [...context.value].length < minLength2;
     if (invalid) {
       errors.push({
         type: "error",
@@ -654,6 +770,85 @@ function minLength(context) {
           })
         ]
       });
+    }
+  }
+  return errors;
+}
+function _const(context) {
+  const errors = [];
+  const schemaConst = getSchemaConst(context.schema);
+  if (isSet(schemaConst)) {
+    const valueIsNotEqualConst = different(context.value, schemaConst);
+    const invalid = valueIsNotEqualConst;
+    if (invalid) {
+      errors.push({
+        type: "error",
+        path: context.path,
+        constraint: "const",
+        messages: [
+          compileTemplate(context.translator.translate("errorConst"), {
+            const: JSON.stringify(schemaConst)
+          })
+        ]
+      });
+    }
+  }
+  return errors;
+}
+function contains(context) {
+  const errors = [];
+  const contains2 = getSchemaContains(context.schema);
+  const minContains = getSchemaMinContains(context.schema);
+  const maxContains = getSchemaMaxContains(context.schema);
+  if (isArray(context.value) && isSet(contains2)) {
+    let counter = 0;
+    context.value.forEach((item, index2) => {
+      const containsErrors = context.validator.getErrors(item, contains2, index2, context.path + "/" + index2);
+      if (containsErrors.length === 0) {
+        counter++;
+      }
+    });
+    const containsInvalid = counter === 0;
+    if (isSet(minContains)) {
+      const minContainsInvalid = counter < minContains;
+      if (minContainsInvalid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "minContains",
+          messages: [
+            compileTemplate(context.translator.translate("errorMinContains"), {
+              counter,
+              minContains
+            })
+          ]
+        });
+      }
+    } else {
+      if (containsInvalid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "contains",
+          messages: [context.translator.translate("errorContains")]
+        });
+      }
+    }
+    if (isSet(maxContains)) {
+      const maxContainsInvalid = counter > maxContains;
+      if (maxContainsInvalid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "maxContains",
+          messages: [
+            compileTemplate(context.translator.translate("errorMaxContains"), {
+              counter,
+              maxContains
+            })
+          ]
+        });
+      }
     }
   }
   return errors;
@@ -703,6 +898,51 @@ function anyOf(context) {
         });
       }
     }
+  }
+  return errors;
+}
+function dependentRequired(context) {
+  const errors = [];
+  const dependentRequired2 = getSchemaDependentRequired(context.schema);
+  if (isObject$1(context.value) && isSet(dependentRequired2)) {
+    let missingProperties = [];
+    Object.keys(dependentRequired2).forEach((key) => {
+      if (isSet(context.value[key])) {
+        const requiredProperties = dependentRequired2[key];
+        if (isArray(requiredProperties)) {
+          missingProperties = requiredProperties.filter((property) => {
+            return !hasOwn(context.value, property);
+          });
+        }
+      }
+    });
+    const invalid = missingProperties.length > 0;
+    if (invalid) {
+      errors.push({
+        type: "error",
+        path: context.path,
+        constraint: "dependentRequired",
+        messages: [
+          compileTemplate(context.translator.translate("errorDependentRequired"), {
+            dependentRequired: missingProperties.join(", ")
+          })
+        ]
+      });
+    }
+  }
+  return errors;
+}
+function dependentSchemas(context) {
+  let errors = [];
+  const dependentSchemas2 = getSchemaDependentSchemas(context.schema);
+  if (isObject$1(context.value) && isSet(dependentSchemas2)) {
+    Object.keys(dependentSchemas2).forEach((key) => {
+      if (isSet(context.value[key])) {
+        const dependentSchema = dependentSchemas2[key];
+        const tmpErrors = context.validator.getErrors(context.value, dependentSchema, context.key, context.path);
+        errors = [...errors, ...tmpErrors];
+      }
+    });
   }
   return errors;
 }
@@ -766,12 +1006,13 @@ function exclusiveMinimum(context) {
   }
   return errors;
 }
-const DIGITS = "[0-9]";
+const DATE = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/;
+const TIME = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]+)?(?:(z)|([+-])([0-9]{2}):([0-9]{2}))$/i;
 function isLeapYear(year) {
   return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
 }
 function isDate(value) {
-  const match = new RegExp(`^(${DIGITS}{4})-(${DIGITS}{2})-(${DIGITS}{2})$`).exec(value);
+  const match = DATE.exec(value);
   if (!match) {
     return false;
   }
@@ -780,7 +1021,7 @@ function isDate(value) {
   return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1];
 }
 function isTime(value) {
-  const match = new RegExp(`^(${DIGITS}{2}):(${DIGITS}{2}):(${DIGITS}{2})(?:\\.${DIGITS}+)?(?:(z)|([+-])(${DIGITS}{2}):(${DIGITS}{2}))$`, "i").exec(value);
+  const match = TIME.exec(value);
   if (!match) {
     return false;
   }
@@ -853,7 +1094,8 @@ function hasValidAuthority(rest) {
   }
   const authority = rest.slice(2).split(/[/?#]/)[0];
   const host = authority.slice(authority.lastIndexOf("@") + 1);
-  if (/[[\]]/.test(authority.slice(0, authority.lastIndexOf("@") + 1))) {
+  const userinfo = authority.slice(0, Math.max(authority.lastIndexOf("@"), 0));
+  if (/[[\]@]/.test(userinfo)) {
     return false;
   }
   const bracket = /^\[([^\]]*)\](?::[0-9]*)?$/.exec(host);
@@ -960,6 +1202,28 @@ function format(context) {
   }
   return errors;
 }
+function ifThenElse(context) {
+  const schemaIf = getSchemaIf(context.schema);
+  const schemaThen = getSchemaThen(context.schema);
+  const schemaElse = getSchemaElse(context.schema);
+  if (isSet(schemaIf)) {
+    if (notSet(schemaThen) && notSet(schemaElse)) {
+      return [];
+    }
+    if (schemaIf === true) {
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
+    }
+    if (schemaIf === false) {
+      return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
+    }
+    const ifErrors = context.validator.getErrors(context.value, schemaIf, context.key, context.path);
+    if (ifErrors.length === 0) {
+      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
+    }
+    return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
+  }
+  return [];
+}
 function items(context) {
   const errors = [];
   const items2 = getSchemaItems(context.schema);
@@ -1021,8 +1285,7 @@ function maxLength(context) {
   const errors = [];
   const maxLength2 = getSchemaMaxLength(context.schema);
   if (isString(context.value) && isSet(maxLength2)) {
-    context.value = context.value.replace(/[\uDCA9]/g, "");
-    const invalid = context.value.length > maxLength2;
+    const invalid = [...context.value].length > maxLength2;
     if (invalid) {
       errors.push({
         type: "error",
@@ -1120,6 +1383,19 @@ function minProperties(context) {
   }
   return errors;
 }
+const decimals = (number) => {
+  const match = /\.([0-9]+)$/.exec(String(number));
+  return match ? match[1].length : 0;
+};
+function divides(value, multipleOf2) {
+  const scale = Math.pow(10, Math.max(decimals(value), decimals(multipleOf2)));
+  const scaledValue = Math.round(value * scale);
+  const scaledMultipleOf = Math.round(multipleOf2 * scale);
+  if (scale > 1 && Number.isSafeInteger(scaledValue) && Number.isSafeInteger(scaledMultipleOf) && scaledMultipleOf !== 0) {
+    return scaledValue % scaledMultipleOf === 0;
+  }
+  return value / multipleOf2 === Math.floor(value / multipleOf2);
+}
 function multipleOf(context) {
   const errors = [];
   const multipleOf2 = getSchemaMultipleOf(context.schema);
@@ -1127,7 +1403,7 @@ function multipleOf(context) {
     if (context.value === 0) {
       return errors;
     }
-    const isMultipleOf = context.value / multipleOf2 === Math.floor(context.value / multipleOf2);
+    const isMultipleOf = divides(context.value, multipleOf2);
     const invalid = !isMultipleOf || context.value.toString().includes("e");
     if (invalid) {
       errors.push({
@@ -1271,6 +1547,56 @@ function patternProperties(context) {
           errors = [...errors, ...editorErrors];
         }
       });
+    });
+  }
+  return errors;
+}
+function prefixItems(context) {
+  const errors = [];
+  const prefixItems2 = getSchemaPrefixItems(context.schema);
+  if (isArray(context.value) && isSet(prefixItems2)) {
+    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
+    prefixItems2.forEach((itemSchema, index2) => {
+      const itemValue = context.value[index2];
+      if (isSet(itemValue)) {
+        const tmpErrors = context.validator.getErrors(itemValue, itemSchema, index2, context.path + "/" + index2);
+        if (tmpErrors.length > 0) {
+          const error = {
+            type: "error",
+            path: context.path,
+            constraint: "prefixItems",
+            messages: [
+              compileTemplate(context.translator.translate("errorPrefixItems"), {
+                index: index2
+              })
+            ]
+          };
+          if (enableSubErrors) {
+            error.subErrors = tmpErrors;
+          }
+          errors.push(error);
+        }
+      }
+    });
+  }
+  return errors;
+}
+function propertyNames(context) {
+  const errors = [];
+  const schemaPropertyNames = getSchemaPropertyNames(context.schema);
+  if (isObject$1(context.value) && isSet(schemaPropertyNames)) {
+    Object.keys(context.value).forEach((propertyName) => {
+      const invalid = context.validator.getErrors(propertyName, schemaPropertyNames, propertyName, context.path).length > 0;
+      if (invalid) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "propertyNames",
+          messages: [
+            compileTemplate(context.translator.translate("errorPropertyNames"), { propertyName })
+          ]
+        });
+      }
     });
   }
   return errors;
@@ -1474,276 +1800,91 @@ function additionalProperties(context) {
   }
   return errors;
 }
-const draft04 = {
-  additionalProperties,
-  allOf,
-  anyOf,
-  enum: _enum,
-  exclusiveMaximum,
-  exclusiveMinimum,
-  format,
-  items,
-  maximum,
-  maxItems,
-  maxLength,
-  maxProperties,
-  minimum,
-  minItems,
-  minLength,
-  minProperties,
-  multipleOf,
-  not,
-  oneOf,
-  pattern,
-  patternProperties,
-  properties,
-  required,
-  type,
-  uniqueItems
-};
-function _const(context) {
-  const errors = [];
-  const schemaConst = getSchemaConst(context.schema);
-  if (isSet(schemaConst)) {
-    const valueIsNotEqualConst = different(context.value, schemaConst);
-    const invalid = valueIsNotEqualConst;
-    if (invalid) {
-      errors.push({
-        type: "error",
-        path: context.path,
-        constraint: "const",
-        messages: [
-          compileTemplate(context.translator.translate("errorConst"), {
-            const: JSON.stringify(schemaConst)
-          })
-        ]
-      });
-    }
-  }
-  return errors;
-}
-function contains(context) {
-  const errors = [];
-  const contains2 = getSchemaContains(context.schema);
-  const minContains = getSchemaMinContains(context.schema);
-  const maxContains = getSchemaMaxContains(context.schema);
-  if (isArray(context.value) && isSet(contains2)) {
-    let counter = 0;
-    context.value.forEach((item, index2) => {
-      const containsErrors = context.validator.getErrors(item, contains2, index2, context.path + "/" + index2);
-      if (containsErrors.length === 0) {
-        counter++;
-      }
-    });
-    const containsInvalid = counter === 0;
-    if (isSet(minContains)) {
-      const minContainsInvalid = counter < minContains;
-      if (minContainsInvalid) {
-        errors.push({
-          type: "error",
-          path: context.path,
-          constraint: "minContains",
-          messages: [
-            compileTemplate(context.translator.translate("errorMinContains"), {
-              counter,
-              minContains
-            })
-          ]
-        });
-      }
-    } else {
-      if (containsInvalid) {
-        errors.push({
-          type: "error",
-          path: context.path,
-          constraint: "contains",
-          messages: [context.translator.translate("errorContains")]
-        });
-      }
-    }
-    if (isSet(maxContains)) {
-      const maxContainsInvalid = counter > maxContains;
-      if (maxContainsInvalid) {
-        errors.push({
-          type: "error",
-          path: context.path,
-          constraint: "maxContains",
-          messages: [
-            compileTemplate(context.translator.translate("errorMaxContains"), {
-              counter,
-              maxContains
-            })
-          ]
-        });
-      }
-    }
-  }
-  return errors;
-}
-function dependentRequired(context) {
-  const errors = [];
-  const dependentRequired2 = getSchemaDependentRequired(context.schema);
-  if (isObject$1(context.value) && isSet(dependentRequired2)) {
-    let missingProperties = [];
-    Object.keys(dependentRequired2).forEach((key) => {
-      if (isSet(context.value[key])) {
-        const requiredProperties = dependentRequired2[key];
-        if (isArray(requiredProperties)) {
-          missingProperties = requiredProperties.filter((property) => {
-            return !hasOwn(context.value, property);
-          });
-        }
-      }
-    });
-    const invalid = missingProperties.length > 0;
-    if (invalid) {
-      errors.push({
-        type: "error",
-        path: context.path,
-        constraint: "dependentRequired",
-        messages: [
-          compileTemplate(context.translator.translate("errorDependentRequired"), {
-            dependentRequired: missingProperties.join(", ")
-          })
-        ]
-      });
-    }
-  }
-  return errors;
-}
-function dependentSchemas(context) {
-  let errors = [];
-  const dependentSchemas2 = getSchemaDependentSchemas(context.schema);
-  if (isObject$1(context.value) && isSet(dependentSchemas2)) {
-    Object.keys(dependentSchemas2).forEach((key) => {
-      if (isSet(context.value[key])) {
-        const dependentSchema = dependentSchemas2[key];
-        const tmpErrors = context.validator.getErrors(context.value, dependentSchema, context.key, context.path);
-        errors = [...errors, ...tmpErrors];
-      }
-    });
-  }
-  return errors;
-}
-function ifThenElse(context) {
-  const schemaIf = getSchemaIf(context.schema);
-  const schemaThen = getSchemaThen(context.schema);
-  const schemaElse = getSchemaElse(context.schema);
-  if (isSet(schemaIf)) {
-    if (notSet(schemaThen) && notSet(schemaElse)) {
-      return [];
-    }
-    if (schemaIf === true) {
-      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
-    }
-    if (schemaIf === false) {
-      return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
-    }
-    const ifErrors = context.validator.getErrors(context.value, schemaIf, context.key, context.path);
-    if (ifErrors.length === 0) {
-      return isSet(schemaThen) ? context.validator.getErrors(context.value, schemaThen, context.key, context.path) : [];
-    }
-    return isSet(schemaElse) ? context.validator.getErrors(context.value, schemaElse, context.key, context.path) : [];
-  }
-  return [];
-}
-function prefixItems(context) {
-  const errors = [];
-  const prefixItems2 = getSchemaPrefixItems(context.schema);
-  if (isArray(context.value) && isSet(prefixItems2)) {
-    const enableSubErrors = getSchemaXOption(context.schema, "subErrors") ?? context.validator.subErrors;
-    prefixItems2.forEach((itemSchema, index2) => {
-      const itemValue = context.value[index2];
-      if (isSet(itemValue)) {
-        const tmpErrors = context.validator.getErrors(itemValue, itemSchema, index2, context.path + "/" + index2);
-        if (tmpErrors.length > 0) {
-          const error = {
-            type: "error",
-            path: context.path,
-            constraint: "prefixItems",
-            messages: [
-              compileTemplate(context.translator.translate("errorPrefixItems"), {
-                index: index2
-              })
-            ]
-          };
-          if (enableSubErrors) {
-            error.subErrors = tmpErrors;
-          }
-          errors.push(error);
-        }
-      }
-    });
-  }
-  return errors;
-}
-const draft06 = {
-  additionalProperties,
-  allOf,
-  anyOf,
-  const: _const,
-  contains,
-  dependentRequired,
-  dependentSchemas,
-  enum: _enum,
-  exclusiveMaximum,
-  exclusiveMinimum,
-  format,
-  if: ifThenElse,
-  items,
-  maximum,
-  maxItems,
-  maxLength,
-  maxProperties,
-  minimum,
-  minItems,
-  minLength,
-  minProperties,
-  multipleOf,
-  not,
-  oneOf,
-  pattern,
-  patternProperties,
-  properties,
-  prefixItems,
-  required,
-  type,
-  uniqueItems
-};
-const draft07 = {
-  additionalProperties,
-  allOf,
-  anyOf,
-  const: _const,
-  contains,
-  dependentRequired,
-  dependentSchemas,
-  enum: _enum,
-  exclusiveMaximum,
-  exclusiveMinimum,
-  format,
-  if: ifThenElse,
-  items,
-  maximum,
-  maxItems,
-  maxLength,
-  maxProperties,
-  minimum,
-  minItems,
-  minLength,
-  minProperties,
-  multipleOf,
-  not,
-  oneOf,
-  pattern,
-  patternProperties,
-  properties,
-  prefixItems,
-  required,
-  type,
-  uniqueItems
-};
 function collectEvaluated$1(context, schema, evaluated, includeOwnUnevaluated) {
+  if (isBoolean(schema)) {
+    return;
+  }
+  if (context.validator.refParser && hasOwn(schema, "$ref")) {
+    const { $ref, ...siblings } = schema;
+    collectEvaluated$1(context, context.validator.refParser.expand({ $ref }), evaluated, true);
+    schema = siblings;
+  }
+  const indexes = context.value.map((item, index2) => index2);
+  const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
+  const merge = (subschema) => collectEvaluated$1(context, subschema, evaluated, true);
+  const prefixItems2 = getSchemaPrefixItems(schema);
+  if (isSet(prefixItems2)) {
+    indexes.slice(0, prefixItems2.length).forEach((index2) => evaluated.add(index2));
+  }
+  if (isSet(getSchemaItems(schema)) || includeOwnUnevaluated && isSet(getSchemaUnevaluatedItems(schema))) {
+    indexes.forEach((index2) => evaluated.add(index2));
+  }
+  const contains2 = getSchemaContains(schema);
+  if (isSet(contains2)) {
+    context.value.forEach((item, index2) => {
+      if (context.validator.getErrors(item, contains2, index2, context.path + "/" + index2).length === 0) {
+        evaluated.add(index2);
+      }
+    });
+  }
+  const allOf2 = getSchemaAllOf(schema);
+  if (isSet(allOf2)) {
+    allOf2.forEach(merge);
+  }
+  [getSchemaAnyOf(schema), getSchemaOneOf(schema)].forEach((subschemas) => {
+    if (isSet(subschemas)) {
+      subschemas.filter(isValid).forEach(merge);
+    }
+  });
+  const schemaIf = getSchemaIf(schema);
+  if (isSet(schemaIf)) {
+    const schemaThen = getSchemaThen(schema);
+    const schemaElse = getSchemaElse(schema);
+    if (isValid(schemaIf)) {
+      merge(schemaIf);
+      if (isSet(schemaThen)) {
+        merge(schemaThen);
+      }
+    } else if (isSet(schemaElse)) {
+      merge(schemaElse);
+    }
+  }
+}
+function unevaluatedItems(context) {
+  let errors = [];
+  const unevaluatedSchema = getSchemaUnevaluatedItems(context.schema);
+  if (isArray(context.value) && isSet(unevaluatedSchema)) {
+    const evaluated = /* @__PURE__ */ new Set();
+    collectEvaluated$1(context, context.schema, evaluated, false);
+    context.value.forEach((item, index2) => {
+      if (evaluated.has(index2)) {
+        return;
+      }
+      if (unevaluatedSchema === false) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "unevaluatedItems",
+          messages: [
+            compileTemplate(context.translator.translate("errorUnevaluatedItems"), { index: index2 })
+          ]
+        });
+      } else if (isObject$1(unevaluatedSchema)) {
+        const itemErrors = context.validator.getErrors(item, unevaluatedSchema, index2, context.path + "/" + index2).map((error) => {
+          return {
+            type: "error",
+            path: context.path + "/" + index2,
+            constraint: "unevaluatedItems",
+            messages: error.messages
+          };
+        });
+        errors = [...errors, ...itemErrors];
+      }
+    });
+  }
+  return errors;
+}
+function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
   if (isBoolean(schema)) {
     return;
   }
@@ -1752,7 +1893,7 @@ function collectEvaluated$1(context, schema, evaluated, includeOwnUnevaluated) {
   }
   const names = Object.keys(context.value);
   const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
-  const merge = (subschema) => collectEvaluated$1(context, subschema, evaluated, true);
+  const merge = (subschema) => collectEvaluated(context, subschema, evaluated, true);
   const properties2 = getSchemaProperties(schema);
   const patternProperties2 = getSchemaPatternProperties(schema);
   names.forEach((name) => {
@@ -1799,7 +1940,7 @@ function unevaluatedProperties(context) {
   const unevaluatedSchema = getSchemaUnevaluatedProperties(context.schema);
   if (isObject$1(context.value) && isSet(unevaluatedSchema)) {
     const evaluated = /* @__PURE__ */ new Set();
-    collectEvaluated$1(context, context.schema, evaluated, false);
+    collectEvaluated(context, context.schema, evaluated, false);
     Object.keys(context.value).filter((property) => !evaluated.has(property)).forEach((property) => {
       if (unevaluatedSchema === false) {
         errors.push({
@@ -1827,145 +1968,7 @@ function unevaluatedProperties(context) {
   }
   return errors;
 }
-const draft201909 = {
-  additionalProperties,
-  allOf,
-  anyOf,
-  const: _const,
-  contains,
-  dependentRequired,
-  dependentSchemas,
-  enum: _enum,
-  exclusiveMaximum,
-  exclusiveMinimum,
-  format,
-  if: ifThenElse,
-  items,
-  maximum,
-  maxItems,
-  maxLength,
-  maxProperties,
-  minimum,
-  minItems,
-  minLength,
-  minProperties,
-  multipleOf,
-  not,
-  oneOf,
-  pattern,
-  patternProperties,
-  propertie: properties,
-  prefixItems,
-  required,
-  type,
-  unevaluatedProperties,
-  uniqueItems
-};
-function propertyNames(context) {
-  const errors = [];
-  const schemaPropertyNames = getSchemaPropertyNames(context.schema);
-  if (isObject$1(context.value) && isSet(schemaPropertyNames)) {
-    Object.keys(context.value).forEach((propertyName) => {
-      const invalid = context.validator.getErrors(propertyName, schemaPropertyNames, propertyName, context.path).length > 0;
-      if (invalid) {
-        errors.push({
-          type: "error",
-          path: context.path,
-          constraint: "propertyNames",
-          messages: [
-            compileTemplate(context.translator.translate("errorPropertyNames"), { propertyName })
-          ]
-        });
-      }
-    });
-  }
-  return errors;
-}
-function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
-  if (isBoolean(schema)) {
-    return;
-  }
-  if (context.validator.refParser && hasOwn(schema, "$ref")) {
-    const { $ref, ...siblings } = schema;
-    collectEvaluated(context, context.validator.refParser.expand({ $ref }), evaluated, true);
-    schema = siblings;
-  }
-  const indexes = context.value.map((item, index2) => index2);
-  const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
-  const merge = (subschema) => collectEvaluated(context, subschema, evaluated, true);
-  const prefixItems2 = getSchemaPrefixItems(schema);
-  if (isSet(prefixItems2)) {
-    indexes.slice(0, prefixItems2.length).forEach((index2) => evaluated.add(index2));
-  }
-  if (isSet(getSchemaItems(schema)) || includeOwnUnevaluated && isSet(getSchemaUnevaluatedItems(schema))) {
-    indexes.forEach((index2) => evaluated.add(index2));
-  }
-  const contains2 = getSchemaContains(schema);
-  if (isSet(contains2)) {
-    context.value.forEach((item, index2) => {
-      if (context.validator.getErrors(item, contains2, index2, context.path + "/" + index2).length === 0) {
-        evaluated.add(index2);
-      }
-    });
-  }
-  const allOf2 = getSchemaAllOf(schema);
-  if (isSet(allOf2)) {
-    allOf2.forEach(merge);
-  }
-  [getSchemaAnyOf(schema), getSchemaOneOf(schema)].forEach((subschemas) => {
-    if (isSet(subschemas)) {
-      subschemas.filter(isValid).forEach(merge);
-    }
-  });
-  const schemaIf = getSchemaIf(schema);
-  if (isSet(schemaIf)) {
-    const schemaThen = getSchemaThen(schema);
-    const schemaElse = getSchemaElse(schema);
-    if (isValid(schemaIf)) {
-      merge(schemaIf);
-      if (isSet(schemaThen)) {
-        merge(schemaThen);
-      }
-    } else if (isSet(schemaElse)) {
-      merge(schemaElse);
-    }
-  }
-}
-function unevaluatedItems(context) {
-  let errors = [];
-  const unevaluatedSchema = getSchemaUnevaluatedItems(context.schema);
-  if (isArray(context.value) && isSet(unevaluatedSchema)) {
-    const evaluated = /* @__PURE__ */ new Set();
-    collectEvaluated(context, context.schema, evaluated, false);
-    context.value.forEach((item, index2) => {
-      if (evaluated.has(index2)) {
-        return;
-      }
-      if (unevaluatedSchema === false) {
-        errors.push({
-          type: "error",
-          path: context.path,
-          constraint: "unevaluatedItems",
-          messages: [
-            compileTemplate(context.translator.translate("errorUnevaluatedItems"), { index: index2 })
-          ]
-        });
-      } else if (isObject$1(unevaluatedSchema)) {
-        const itemErrors = context.validator.getErrors(item, unevaluatedSchema, index2, context.path + "/" + index2).map((error) => {
-          return {
-            type: "error",
-            path: context.path + "/" + index2,
-            constraint: "unevaluatedItems",
-            messages: error.messages
-          };
-        });
-        errors = [...errors, ...itemErrors];
-      }
-    });
-  }
-  return errors;
-}
-const draft202012 = {
+const constraints = {
   additionalProperties,
   allOf,
   anyOf,
@@ -2012,14 +2015,7 @@ class Validator {
     this.assertFormat = config.assertFormat ? config.assertFormat : false;
     this.translator = config.translator ? config.translator : false;
     this.subErrors = config.subErrors ?? false;
-    this.draft = draft202012;
-    this.jsonSchemaDrafts = {
-      "http://json-schema.org/draft-04/schema#": draft04,
-      "http://json-schema.org/draft-06/schema#": draft06,
-      "http://json-schema.org/draft-07/schema#": draft07,
-      "https://json-schema.org/draft/2019-09/schema": draft201909,
-      "https://json-schema.org/draft/2020-12/schema": draft202012
-    };
+    this.defaultConstraints = constraints;
   }
   /**
    * Validates a value against it's schema
@@ -2039,7 +2035,7 @@ class Validator {
     if (this.refParser && isObject$1(schema) && hasOwn(schema, "$ref")) {
       schema = this.refParser.expand(schema);
     }
-    const allConstraints = { ...this.draft, ...this.constraints };
+    const allConstraints = { ...this.defaultConstraints, ...this.constraints };
     for (const [constraintName, constraint] of Object.entries(allConstraints)) {
       if (hasOwn(schema, constraintName)) {
         const context = {
@@ -2352,7 +2348,9 @@ class Instance extends EventEmitter {
   purify(value) {
     const purifyData = getSchemaXOption(this.schema, "purifyData") ?? this.jedison.getOption("purifyData");
     if (typeof value === "string" && purifyData && typeof window !== "undefined" && window.DOMPurify) {
-      value = window.DOMPurify.sanitize(value);
+      const clean = window.DOMPurify.sanitize(value);
+      const cleanText = new window.DOMParser().parseFromString(clean, "text/html").body.textContent;
+      value = cleanText === value ? value : clean;
     }
     return value;
   }
@@ -2773,11 +2771,11 @@ class Editor {
         if (error.type === "error") {
           hasErrors = true;
           invalidFeedback = this.getErrorFeedback({
-            message
+            message: this.purifyMessage(message)
           });
         } else {
           invalidFeedback = this.getWarningFeedback({
-            message
+            message: this.purifyMessage(message)
           });
         }
         this.control.messages.appendChild(invalidFeedback);
@@ -2824,6 +2822,12 @@ class Editor {
     this.refreshUI();
   }
   /**
+   * Messages can contain data, like property names, so they are purified like titles are
+   */
+  purifyMessage(message) {
+    return this.purifyEnabled ? this.purifyContent(message, this.instance.jedison.getOption("domPurifyOptions")) : message;
+  }
+  /**
    * Clean out HTML tags from txt
    */
   purifyContent(content, domPurifyOptions) {
@@ -2836,9 +2840,7 @@ class Editor {
       this.purifyCache.set(cacheKey, clean);
       return clean;
     } else {
-      const tmp = document.createElement("div");
-      tmp.innerHTML = content;
-      return tmp.textContent || tmp.innerText;
+      return new window.DOMParser().parseFromString(content, "text/html").body.textContent;
     }
   }
   getHtmlFromMarkdown(content) {
@@ -2851,7 +2853,8 @@ class Editor {
   }
   getTitle() {
     let titleFromSchema = false;
-    this.title = this.instance.getKey();
+    const key = this.instance.getKey();
+    this.title = isSet(key) ? escapeHtml(key) : key;
     const schemaTitle = getSchemaTitle(this.instance.schema);
     if (isSet(schemaTitle)) {
       this.title = schemaTitle;
@@ -3508,9 +3511,9 @@ class InstanceObject extends Instance {
     const schemaAdditionalProperties = this.schemaAdditionalProperties;
     const schemaPatternProperties = this.schemaPatternProperties || {};
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
-      const compiledPatterns = Object.keys(schemaPatternProperties).map((p) => compilePattern(p));
+      const compiledPatterns2 = Object.keys(schemaPatternProperties).map((p) => compilePattern(p));
       Object.keys(value).forEach((propertyName) => {
-        const matchesPattern = compiledPatterns.some((re) => re.test(propertyName));
+        const matchesPattern = compiledPatterns2.some((re) => re.test(propertyName));
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
           delete value[propertyName];
         }
@@ -4792,7 +4795,7 @@ class EditorObject extends Editor {
     this.control.quickAddPropertyControl.messages.replaceChildren();
     if (!this.isAddPropertyNameAllowed(propertyName)) {
       const message = compileTemplate(this.instance.jedison.translator.translate("errorAddPropertyPatternMismatch"), { property: propertyName });
-      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message }));
+      this.control.quickAddPropertyControl.messages.appendChild(this.getErrorFeedback({ message: this.purifyMessage(message) }));
       return;
     }
     const schema = this.instance.getPropertySchema(propertyName);
@@ -4858,7 +4861,9 @@ class EditorObject extends Editor {
         const schemaTitle = getSchemaTitle(schema);
         const path = this.instance.path + this.instance.jedison.pathSeparator + property;
         const id = pathToAttribute(path) + "-activator";
-        const title = isSet(schemaTitle) ? schemaTitle : property;
+        const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
+        const title = isSet(schemaTitle) ? this.purifyEnabled ? this.purifyContent(schemaTitle, domPurifyOptions) : schemaTitle : escapeHtml(property);
+        const plainTitle = isSet(schemaTitle) ? schemaTitle : property;
         const checkboxControl = this.theme.getCheckboxControl({
           id,
           title,
@@ -4875,11 +4880,11 @@ class EditorObject extends Editor {
               this.instance.createChild(schema, property);
             }
             this.instance.getChild(property).activate();
-            ariaLiveMessage.textContent = title + " " + this.instance.jedison.translator.translate("objectPropertyAdded");
+            ariaLiveMessage.textContent = plainTitle + " " + this.instance.jedison.translator.translate("objectPropertyAdded");
             ariaLive.appendChild(ariaLiveMessage);
           } else {
             this.instance.getChild(property).deactivate();
-            ariaLiveMessage.textContent = title + " " + this.instance.jedison.translator.translate("objectPropertyRemoved");
+            ariaLiveMessage.textContent = plainTitle + " " + this.instance.jedison.translator.translate("objectPropertyRemoved");
             ariaLive.appendChild(ariaLiveMessage);
           }
           this.control.propertiesContainer.close();
@@ -4930,7 +4935,7 @@ class EditorObject extends Editor {
     this.instance.children.forEach((child) => {
       const optIn = this.theme.getCheckboxControl({
         id: child.path + "-opt-in",
-        title: child.path + "-opt-in",
+        title: escapeHtml(child.path + "-opt-in"),
         titleHidden: true
       });
       optIn.input.checked = child.isActive;
@@ -8142,6 +8147,8 @@ class Jedison extends EventEmitter {
       debug: false,
       audacity: true,
       switcherTypeLabels: {},
+      keepRefSiblings: false,
+      // up to draft 7 the siblings of $ref are ignored, true keeps them (for backwards compatibility)
       keepMissingSchemaFields: false
       // for backwards compatibility
     }, options);
@@ -8160,6 +8167,9 @@ class Jedison extends EventEmitter {
     this.theme = null;
     this.uiResolver = null;
     this.refParser = this.options.refParser ? this.options.refParser : null;
+    if (this.refParser && this.options.keepRefSiblings) {
+      this.refParser.options.keepRefSiblings = true;
+    }
     this.walker = new JsonWalker();
     this.lastFocusedId = null;
     this.isEditor = false;
@@ -8206,6 +8216,7 @@ class Jedison extends EventEmitter {
           break;
       }
     }
+    this.options.schema = normalizeSchema(clone(this.options.schema));
     this.schema = this.options.schema;
     this.validator = new Validator({
       refParser: this.refParser,
@@ -8606,12 +8617,15 @@ class RefParser {
     this.options = Object.assign({
       detectRecursion: true,
       fetch: typeof fetch === "function" ? fetch.bind(globalThis) : void 0,
-      fetchOptions: {}
+      fetchOptions: {},
+      keepRefSiblings: false
+      // up to draft 7 the siblings of $ref are ignored, true keeps them
     }, options);
     this.refs = {};
     this.data = {};
     this.resources = {};
     this.root = null;
+    this.draft = 2020;
     this.iterations = 0;
     this.maxIterations = 1e3;
     this.cycles = [];
@@ -8619,6 +8633,8 @@ class RefParser {
   }
   async dereference(schema) {
     this.root = schema;
+    this.draft = getDraft(schema);
+    normalizeSchema(schema, this.draft);
     this.indexResources(schema);
     await this.collectRefs(schema);
     while (this.iterations < this.maxIterations) {
@@ -8660,7 +8676,8 @@ class RefParser {
         const ref = schema["$ref"];
         if (this.isExternalRef(ref) && this.lookup(ref) === null) {
           const uri = ref.split("#")[0];
-          const resolvedSchema = await this.load(uri);
+          const loaded = await this.load(uri);
+          const resolvedSchema = normalizeSchema(loaded, (loaded == null ? void 0 : loaded.$schema) ? getDraft(loaded) : this.draft);
           this.indexResources(resolvedSchema, uri);
           this.resources[uri] = this.resources[uri] ?? resolvedSchema;
           this.refs[ref] = this.lookup(ref);
@@ -8681,64 +8698,43 @@ class RefParser {
    * @param baseUri URI the schema was loaded from, if any
    */
   indexResources(schema, baseUri = "") {
-    const schemaKeywords = [
-      "additionalProperties",
-      "additionalItems",
-      "items",
-      "prefixItems",
-      "contains",
-      "not",
-      "if",
-      "then",
-      "else",
-      "propertyNames",
-      "unevaluatedItems",
-      "unevaluatedProperties",
-      "contentSchema",
-      "allOf",
-      "anyOf",
-      "oneOf",
-      "properties",
-      "$defs",
-      "definitions",
-      "patternProperties",
-      "dependentSchemas",
-      "dependencies"
-    ];
-    const schemaMaps = ["properties", "$defs", "definitions", "patternProperties", "dependentSchemas", "dependencies"];
+    const schemaKeywords = SCHEMA_KEYWORDS;
+    const schemaMaps = SCHEMA_MAPS;
+    const ignored = (node) => this.hasRef(node) && this.ignoresRefSiblings();
+    const hasOwnId = (node) => typeof node.$id === "string" && !ignored(node);
     const strip = (uri) => uri.split("#")[0];
-    const walk = (node, base, visit, isMap = false) => {
+    const walk2 = (node, base, visit, isMap = false) => {
       if (!this.isObject(node)) {
         return;
       }
       if (Array.isArray(node)) {
-        node.forEach((child) => walk(child, base, visit));
+        node.forEach((child) => walk2(child, base, visit));
         return;
       }
       if (isMap) {
-        Object.values(node).forEach((child) => walk(child, base, visit));
+        Object.values(node).forEach((child) => walk2(child, base, visit));
         return;
       }
-      const nodeBase = typeof node.$id === "string" ? this.resolveUri(node.$id, base) : base;
+      const nodeBase = hasOwnId(node) ? this.resolveUri(node.$id, base) : base;
       visit(node, nodeBase);
       for (const [key, value] of Object.entries(node)) {
         if (schemaKeywords.includes(key)) {
-          walk(value, nodeBase, visit, schemaMaps.includes(key));
+          walk2(value, nodeBase, visit, schemaMaps.includes(key));
         }
       }
     };
     let foundId = false;
-    walk(schema, baseUri, (node, base) => {
-      if (typeof node.$id === "string") {
+    walk2(schema, baseUri, (node, base) => {
+      if (hasOwnId(node)) {
         foundId = true;
         this.resources[strip(base)] = node;
       }
-      if (typeof node.$anchor === "string") {
+      if (typeof node.$anchor === "string" && !ignored(node)) {
         this.resources[strip(base) + "#" + node.$anchor] = node;
       }
     });
     if (foundId || baseUri !== "") {
-      walk(schema, baseUri, (node, base) => {
+      walk2(schema, baseUri, (node, base) => {
         if (this.hasRef(node)) {
           node.$ref = this.resolveUri(node.$ref, base);
         }
@@ -8777,7 +8773,7 @@ class RefParser {
         return decodeURIComponent(token).replace(/~1/g, "/").replace(/~0/g, "~");
       });
       for (const token of tokens) {
-        target = this.isObject(target) ? target[token] : void 0;
+        target = this.isObject(target) && Object.prototype.hasOwnProperty.call(target, token) ? target[token] : void 0;
       }
     } catch (error) {
       return null;
@@ -8842,19 +8838,30 @@ class RefParser {
       }
     }
   }
-  expand(schema) {
+  ignoresRefSiblings() {
+    return this.draft <= 7 && !this.options.keepRefSiblings;
+  }
+  expand(schema, seen = /* @__PURE__ */ new Set()) {
     const cloneSchema = JSON.parse(JSON.stringify(schema));
     if (this.isObject(cloneSchema) && this.hasRef(cloneSchema)) {
       const ref = cloneSchema.$ref;
+      if (seen.has(ref)) {
+        delete cloneSchema.$ref;
+        return cloneSchema;
+      }
+      seen.add(ref);
       delete cloneSchema["$ref"];
       const target = this.refs[ref];
+      if (this.ignoresRefSiblings()) {
+        Object.keys(cloneSchema).forEach((key) => delete cloneSchema[key]);
+      }
       if (target === false) {
         return { ...cloneSchema, not: {} };
       }
       if (target === true) {
-        return this.expand(cloneSchema);
+        return this.expand(cloneSchema, seen);
       }
-      return this.expand(mergeDeep({}, target, cloneSchema));
+      return this.expand(mergeDeep({}, target, cloneSchema), seen);
     }
     return cloneSchema;
   }
@@ -13323,20 +13330,20 @@ function tokenize(path) {
 }
 function withDescendants(nodeRef) {
   const list = [nodeRef];
-  const walk = (container) => {
+  const walk2 = (container) => {
     if (Array.isArray(container)) {
       container.forEach((value, index2) => {
         list.push({ parent: container, key: index2, value });
-        walk(value);
+        walk2(value);
       });
     } else if (isObject(container)) {
       Object.keys(container).forEach((key) => {
         list.push({ parent: container, key, value: container[key] });
-        walk(container[key]);
+        walk2(container[key]);
       });
     }
   };
-  walk(nodeRef.value);
+  walk2(nodeRef.value);
   return list;
 }
 function applySelector(container, selector, out) {
