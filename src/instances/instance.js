@@ -156,16 +156,19 @@ class Instance extends EventEmitter {
   register () {
     this.jedison.register(this)
 
-    if (this.children.length === 0) return
-
     const registerChildRecursive = (child) => {
       this.jedison.register(child)
-      if (child.children.length > 0) {
-        child.children.forEach(registerChildRecursive)
-      }
+      child.getRegistrableChildren().forEach(registerChildRecursive)
     }
 
-    this.children.forEach(registerChildRecursive)
+    this.getRegistrableChildren().forEach(registerChildRecursive)
+  }
+
+  /**
+   * The child instances that register and unregister together with this instance
+   */
+  getRegistrableChildren () {
+    return this.children ?? []
   }
 
   /**
@@ -174,16 +177,12 @@ class Instance extends EventEmitter {
   unregister () {
     this.jedison.unregister(this)
 
-    if (this.children.length === 0) return
-
     const unregisterChildRecursive = (child) => {
       this.jedison.unregister(child)
-      if (child.children.length > 0) {
-        child.children.forEach(unregisterChildRecursive)
-      }
+      child.getRegistrableChildren().forEach(unregisterChildRecursive)
     }
 
-    this.children.forEach(unregisterChildRecursive)
+    this.getRegistrableChildren().forEach(unregisterChildRecursive)
   }
 
   /**

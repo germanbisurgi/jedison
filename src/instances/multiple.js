@@ -204,6 +204,10 @@ class InstanceMultiple extends Instance {
   /**
    * Returns the index of the instance that has less validation errors
    */
+  getRegistrableChildren () {
+    return this.activeInstance ? this.activeInstance.getRegistrableChildren() : []
+  }
+
   getFittestIndex (value) {
     // discriminator validation
     const discriminator = getSchemaXOption(this.schema, 'discriminator')

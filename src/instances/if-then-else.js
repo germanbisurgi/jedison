@@ -34,6 +34,9 @@ class InstanceIfThenElse extends Instance {
     this.schemas = []
     this.ifThenElseSchemas = []
 
+    // never strip the conditionals from the schema object the caller passed in
+    this.schema = clone(this.schema)
+
     this.traverseSchema(this.schema)
 
     delete this.schema.if
@@ -179,6 +182,16 @@ class InstanceIfThenElse extends Instance {
 
     if (isObject(withoutIf) && isObject(value)) {
       withoutIf = overwriteExistingProperties(withoutIf, value)
+
+      // properties that only the "if" schemas declare still decide the branch
+      this.ifThenElseSchemas.forEach((item) => {
+        Object.keys(item.if?.properties ?? {}).forEach((key) => {
+          if (hasOwn(value, key)) {
+            withoutIf[key] = value[key]
+          }
+        })
+      })
+
       return withoutIf
     }
 

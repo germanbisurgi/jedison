@@ -144,6 +144,7 @@ class InstanceArray extends Instance {
     const value = this.getValueRaw()
 
     if (!isArray(value)) {
+      this.children.forEach((child) => child.destroy())
       this.children = []
       return
     }
