@@ -1,3 +1,9 @@
+### 1.28.1
+
+- Fixed `$ref` resolution: refs now resolve against the nearest `$id` (relative and URN base URIs), `$anchor` is supported, `~0`, `~1` and `%XX` are decoded in JSON pointers, and `$ref` to a boolean schema works. Remote refs are loaded by document URL and honor the `#/pointer` instead of returning the whole document
+- Fixed `unevaluatedProperties` to follow the spec: a property only counts as evaluated if a keyword that applied touched it (`anyOf`/`oneOf` branches must validate; `additionalProperties`, `if`/`then`/`else`, `dependentSchemas` and `$ref` are handled), and a schema is accepted as value, not only a boolean. Forms that passed only because of a non-matching branch can now report errors
+- Fixed `if`/`then`/`else`: a property declared only inside `if` now decides the branch, errors from the branch that was active before no longer remain after `setValue()`, and the schema object passed to `Jedison` is no longer stripped of its `if`/`then`/`else`
+
 ### 1.28.0
 
 - Added `ThemeTailwind4`
