@@ -1,4 +1,5 @@
-import { compileTemplate, isSet, isString } from '../../helpers/utils.js'
+import { compileTemplate, hasOwn, isSet, isString } from '../../helpers/utils.js'
+import { formatChecks } from '../format-checks.js'
 import { getSchemaFormat, getSchemaXOption } from '../../helpers/schema.js'
 
 // Native parser instead of a regex: nested quantifiers backtracked exponentially (issue #88)
@@ -32,7 +33,15 @@ export function format (context) {
       regexp = new RegExp(/^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/i)
     }
 
-    const invalid = format === 'url' ? !isValidUrl(context.value) : isSet(regexp) && !regexp.test(context.value)
+    let invalid = false
+
+    if (format === 'url') {
+      invalid = !isValidUrl(context.value)
+    } else if (hasOwn(formatChecks, format)) {
+      invalid = !formatChecks[format](context.value)
+    } else if (isSet(regexp)) {
+      invalid = !regexp.test(context.value)
+    }
 
     if (invalid) {
       errors.push({
