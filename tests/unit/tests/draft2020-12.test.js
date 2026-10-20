@@ -56,7 +56,7 @@ const suites = [
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/refRemote'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/required'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/type'),
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedItems'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedItems'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedProperties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/uniqueItems')
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/vocabulary'),
@@ -71,7 +71,10 @@ const knownGaps = [
   'remote ref, containing refs itself > remote ref invalid',
   'validate definition against metaschema > valid definition schema',
   'validate definition against metaschema > invalid definition schema',
-  'unevaluatedProperties with $dynamicRef > with no unevaluated properties'
+  'unevaluatedProperties with $dynamicRef > with no unevaluated properties',
+  'unevaluatedItems with $ref > with no unevaluated items',
+  'unevaluatedItems before $ref > with no unevaluated items',
+  'unevaluatedItems with $dynamicRef > with no unevaluated items'
 ]
 
 for (let i = 0; i < suites.length; i++) {

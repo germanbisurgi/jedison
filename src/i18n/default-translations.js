@@ -29,6 +29,7 @@ export default {
   errorProperties: 'The following properties do not comply with their schemas: {{ properties }}',
   errorRequired: 'Must have the required properties: {{ required }}.',
   errorType: 'Must be of type {{ type }}.',
+  errorUnevaluatedItems: 'Has invalid unevaluated item at index {{ index }}',
   errorUnevaluatedProperties: 'Has invalid unevaluated property "{{ property }}"',
   errorUniqueItems: 'Must have unique items.',
   arrayDelete: 'Delete item',

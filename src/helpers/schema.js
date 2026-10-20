@@ -254,6 +254,10 @@ export function getSchemaOneOf (schema) {
   return isArray(schema.oneOf) ? clone(schema.oneOf) : undefined
 }
 
+export function getSchemaUnevaluatedItems (schema) {
+  return isObject(schema.unevaluatedItems) || isBoolean(schema.unevaluatedItems) ? clone(schema.unevaluatedItems) : undefined
+}
+
 export function getSchemaUnevaluatedProperties (schema) {
   return isObject(schema.unevaluatedProperties) || isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : undefined
 }
@@ -305,6 +309,7 @@ export default {
   getSchemaTitle,
   getSchemaType,
   getSchemaOneOf,
+  getSchemaUnevaluatedItems,
   getSchemaUnevaluatedProperties,
   getSchemaUniqueItems
 }

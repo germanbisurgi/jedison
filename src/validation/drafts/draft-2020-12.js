@@ -30,6 +30,7 @@ import { type } from '../constrains/type.js'
 import { maximum } from '../constrains/maximum.js'
 import { uniqueItems } from '../constrains/uniqueItems.js'
 import { additionalProperties } from '../constrains/additionalProperties.js'
+import { unevaluatedItems } from '../constrains/unevaluatedItems.js'
 import { unevaluatedProperties } from '../constrains/unevaluatedProperties.js'
 
 export default {
@@ -64,6 +65,7 @@ export default {
   properties: properties,
   required: required,
   type: type,
+  unevaluatedItems: unevaluatedItems,
   unevaluatedProperties: unevaluatedProperties,
   uniqueItems: uniqueItems
 }
