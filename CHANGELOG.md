@@ -1,4 +1,4 @@
-### 1.28.1
+### 1.29.0
 
 - Fixed `$ref` resolution: refs now resolve against the nearest `$id` (relative and URN base URIs), `$anchor` is supported, `~0`, `~1` and `%XX` are decoded in JSON pointers, and `$ref` to a boolean schema works. Remote refs are loaded by document URL and honor the `#/pointer` instead of returning the whole document
 - Fixed `unevaluatedProperties` to follow the spec: a property only counts as evaluated if a keyword that applied touched it (`anyOf`/`oneOf` branches must validate; `additionalProperties`, `if`/`then`/`else`, `dependentSchemas` and `$ref` are handled), and a schema is accepted as value, not only a boolean. Forms that passed only because of a non-matching branch can now report errors
