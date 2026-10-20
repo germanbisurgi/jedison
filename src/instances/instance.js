@@ -328,7 +328,12 @@ class Instance extends EventEmitter {
     const purifyData = getSchemaXOption(this.schema, 'purifyData') ?? this.jedison.getOption('purifyData')
 
     if (typeof value === 'string' && purifyData && typeof window !== 'undefined' && window.DOMPurify) {
-      value = window.DOMPurify.sanitize(value)
+      const clean = window.DOMPurify.sanitize(value)
+
+      // DOMPurify returns html, so plain text like "a < b" would come back as "a &lt; b".
+      // When the text it holds is the same as the input, nothing was removed and the input stays.
+      const cleanText = new window.DOMParser().parseFromString(clean, 'text/html').body.textContent
+      value = cleanText === value ? value : clean
     }
 
     return value

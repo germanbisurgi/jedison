@@ -22,3 +22,9 @@ Scenario('Should @purify-value XSS from setValue() via textarea', async ({ I }) 
   I.click('#set-value')
   I.seeInField('#editor-value', '"bla"')
 })
+
+Scenario('Should @purify-value keep plain text that only looks like markup', async ({ I }) => {
+  I.waitForElement('#root')
+  I._fillField('#root', 'a < b & c > d')
+  I.seeInField('#editor-value', '"a < b & c > d"')
+})
