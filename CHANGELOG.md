@@ -3,6 +3,9 @@
 - Fixed `$ref` resolution: refs now resolve against the nearest `$id` (relative and URN base URIs), `$anchor` is supported, `~0`, `~1` and `%XX` are decoded in JSON pointers, and `$ref` to a boolean schema works. Remote refs are loaded by document URL and honor the `#/pointer` instead of returning the whole document
 - Fixed `unevaluatedProperties` to follow the spec: a property only counts as evaluated if a keyword that applied touched it (`anyOf`/`oneOf` branches must validate; `additionalProperties`, `if`/`then`/`else`, `dependentSchemas` and `$ref` are handled), and a schema is accepted as value, not only a boolean. Forms that passed only because of a non-matching branch can now report errors
 - Fixed `if`/`then`/`else`: a property declared only inside `if` now decides the branch, errors from the branch that was active before no longer remain after `setValue()`, and the schema object passed to `Jedison` is no longer stripped of its `if`/`then`/`else`
+- Added `unevaluatedItems` validation (`prefixItems`, `items`, `contains`, `allOf`, valid `anyOf`/`oneOf` branches, `if`/`then`/`else` and `$ref` count as evaluated)
+- Added `assertFormat` checks for `date`, `time`, `date-time`, `duration`, `ipv4`, `ipv6`, `hostname`, `uri`, `uri-reference`, `uri-template`, `json-pointer`, `relative-json-pointer` and `regex`. Values of these formats that were silently accepted can now report errors
+- Fixed `pattern` and `patternProperties` to use unicode regex semantics, and an `$id` inside an unknown keyword is no longer treated as a schema identifier
 
 ### 1.28.0
 
