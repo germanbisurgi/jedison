@@ -6,8 +6,8 @@ export function minLength (context) {
   const minLength = getSchemaMinLength(context.schema)
 
   if (isString(context.value) && isSet(minLength)) {
-    context.value = context.value.replace(/[\uDCA9]/g, '') // remove Unicode code points
-    const invalid = (context.value.length < minLength)
+    // length counts Unicode code points, not UTF-16 units
+    const invalid = ([...context.value].length < minLength)
 
     if (invalid) {
       errors.push({

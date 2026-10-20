@@ -6,8 +6,8 @@ export function maxLength (context) {
   const maxLength = getSchemaMaxLength(context.schema)
 
   if (isString(context.value) && isSet(maxLength)) {
-    context.value = context.value.replace(/[\uDCA9]/g, '') // remove Unicode code points
-    const invalid = (context.value.length > maxLength)
+    // length counts Unicode code points, not UTF-16 units
+    const invalid = ([...context.value].length > maxLength)
 
     if (invalid) {
       errors.push({

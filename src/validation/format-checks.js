@@ -1,14 +1,15 @@
 // Native format checks, each returns true when the value is valid.
 // Parsers instead of nested-quantifier regexes, those backtracked exponentially (issue #88).
 
-const DIGITS = '[0-9]'
+const DATE = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/
+const TIME = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]+)?(?:(z)|([+-])([0-9]{2}):([0-9]{2}))$/i
 
 function isLeapYear (year) {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
 }
 
 export function isDate (value) {
-  const match = new RegExp(`^(${DIGITS}{4})-(${DIGITS}{2})-(${DIGITS}{2})$`).exec(value)
+  const match = DATE.exec(value)
 
   if (!match) {
     return false
@@ -21,7 +22,7 @@ export function isDate (value) {
 }
 
 export function isTime (value) {
-  const match = new RegExp(`^(${DIGITS}{2}):(${DIGITS}{2}):(${DIGITS}{2})(?:\\.${DIGITS}+)?(?:(z)|([+-])(${DIGITS}{2}):(${DIGITS}{2}))$`, 'i').exec(value)
+  const match = TIME.exec(value)
 
   if (!match) {
     return false
@@ -123,8 +124,9 @@ function hasValidAuthority (rest) {
 
   const authority = rest.slice(2).split(/[/?#]/)[0]
   const host = authority.slice(authority.lastIndexOf('@') + 1)
+  const userinfo = authority.slice(0, Math.max(authority.lastIndexOf('@'), 0))
 
-  if (/[[\]]/.test(authority.slice(0, authority.lastIndexOf('@') + 1))) {
+  if (/[[\]@]/.test(userinfo)) {
     return false
   }
 

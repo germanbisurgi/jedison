@@ -10,7 +10,7 @@ const cases = {
   ipv4: [['192.168.0.1', true], ['256.1.1.1', false], ['1.1.1', false], ['01.1.1.1', false]],
   ipv6: [['::1', true], ['2001:db8::8a2e:370:7334', true], ['::ffff:192.0.2.1', true], ['1::2::3', false], ['12345::', false]],
   hostname: [['example.com', true], ['-bad.com', false], ['bad-.com', false], ['a..b', false]],
-  uri: [['https://example.org/a?b#c', true], ['/relative', false], ['http://exa mple.org', false]],
+  uri: [['https://example.org/a?b#c', true], ['/relative', false], ['http://exa mple.org', false], ['http://a@b@c/', false]],
   'uri-reference': [['/relative', true], ['#frag', true], ['\\\\bad', false]],
   'json-pointer': [['/foo/0', true], ['foo', false], ['/a~2', false]],
   regex: [['^[a-z]+$', true], ['^(abc', false]]
