@@ -25,6 +25,13 @@ function clone(thing) {
   }
   return obj;
 }
+function compilePattern(pattern2) {
+  try {
+    return new RegExp(pattern2, "u");
+  } catch (error) {
+    return new RegExp(pattern2);
+  }
+}
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -513,6 +520,9 @@ function getSchemaType(schema) {
 function getSchemaOneOf(schema) {
   return isArray(schema.oneOf) ? clone(schema.oneOf) : void 0;
 }
+function getSchemaUnevaluatedItems(schema) {
+  return isObject$1(schema.unevaluatedItems) || isBoolean(schema.unevaluatedItems) ? clone(schema.unevaluatedItems) : void 0;
+}
 function getSchemaUnevaluatedProperties(schema) {
   return isObject$1(schema.unevaluatedProperties) || isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : void 0;
 }
@@ -562,6 +572,7 @@ const Schema = {
   getSchemaTitle,
   getSchemaType,
   getSchemaOneOf,
+  getSchemaUnevaluatedItems,
   getSchemaUnevaluatedProperties,
   getSchemaUniqueItems
 };
@@ -755,6 +766,155 @@ function exclusiveMinimum(context) {
   }
   return errors;
 }
+const DIGITS = "[0-9]";
+function isLeapYear(year) {
+  return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+}
+function isDate(value) {
+  const match = new RegExp(`^(${DIGITS}{4})-(${DIGITS}{2})-(${DIGITS}{2})$`).exec(value);
+  if (!match) {
+    return false;
+  }
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1];
+}
+function isTime(value) {
+  const match = new RegExp(`^(${DIGITS}{2}):(${DIGITS}{2}):(${DIGITS}{2})(?:\\.${DIGITS}+)?(?:(z)|([+-])(${DIGITS}{2}):(${DIGITS}{2}))$`, "i").exec(value);
+  if (!match) {
+    return false;
+  }
+  const [hour, minute, second] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const offsetHour = match[6] === void 0 ? 0 : Number(match[6]);
+  const offsetMinute = match[7] === void 0 ? 0 : Number(match[7]);
+  if (hour > 23 || minute > 59 || second > 60 || offsetHour > 23 || offsetMinute > 59) {
+    return false;
+  }
+  if (second === 60) {
+    const sign = match[5] === "-" ? -1 : 1;
+    const utcMinutes = (hour * 60 + minute - sign * (offsetHour * 60 + offsetMinute) + 2880) % 1440;
+    return utcMinutes === 1439;
+  }
+  return true;
+}
+function isDateTime(value) {
+  const parts = value.split(/t/i);
+  return parts.length === 2 && isDate(parts[0]) && isTime(parts[1]);
+}
+function isDuration(value) {
+  const week = /^P[0-9]+W$/.test(value);
+  const full = /^P(?:[0-9]+Y)?(?:[0-9]+M)?(?:[0-9]+D)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?$/.test(value);
+  return week || full && value !== "P" && !value.endsWith("T");
+}
+function isIpv4(value) {
+  const parts = value.split(".");
+  return parts.length === 4 && parts.every((part) => /^(0|[1-9][0-9]{0,2})$/.test(part) && Number(part) <= 255);
+}
+function isIpv6(value) {
+  let address = value;
+  let groupsNeeded = 8;
+  const lastColon = address.lastIndexOf(":");
+  const tail = address.slice(lastColon + 1);
+  if (tail.includes(".")) {
+    if (!isIpv4(tail)) {
+      return false;
+    }
+    address = address.slice(0, lastColon + 1) + "0:0";
+  }
+  const halves = address.split("::");
+  if (halves.length > 2) {
+    return false;
+  }
+  const toGroups = (half) => half === "" ? [] : half.split(":");
+  const groups = halves.flatMap(toGroups);
+  if (!groups.every((group) => /^[0-9a-fA-F]{1,4}$/.test(group))) {
+    return false;
+  }
+  if (halves.length === 2) {
+    groupsNeeded = 7;
+    return groups.length <= groupsNeeded;
+  }
+  return groups.length === groupsNeeded;
+}
+function isHostname(value) {
+  if (value.length === 0 || value.length > 253) {
+    return false;
+  }
+  return value.split(".").every((label) => {
+    const validChars = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/.test(label);
+    const reservedHyphens = label.slice(2, 4) === "--" && !/^xn--/i.test(label);
+    return validChars && !reservedHyphens;
+  });
+}
+const URI_CHARS = /^(?:[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*$/;
+function hasValidAuthority(rest) {
+  if (!rest.startsWith("//")) {
+    return true;
+  }
+  const authority = rest.slice(2).split(/[/?#]/)[0];
+  const host = authority.slice(authority.lastIndexOf("@") + 1);
+  if (/[[\]]/.test(authority.slice(0, authority.lastIndexOf("@") + 1))) {
+    return false;
+  }
+  const bracket = /^\[([^\]]*)\](?::[0-9]*)?$/.exec(host);
+  if (bracket) {
+    return isIpv6(bracket[1]) || /^v[0-9a-fA-F]+\.[A-Za-z0-9\-._~!$&'()*+,;=:]+$/.test(bracket[1]);
+  }
+  return /^[^:[\]]*(?::[0-9]*)?$/.test(host);
+}
+function isUri(value) {
+  const match = /^([A-Za-z][A-Za-z0-9+.-]*):(.*)$/s.exec(value);
+  if (!match) {
+    return false;
+  }
+  const rest = match[2];
+  const fragmentIndex = rest.indexOf("#");
+  if (fragmentIndex !== -1 && rest.indexOf("#", fragmentIndex + 1) !== -1) {
+    return false;
+  }
+  return URI_CHARS.test(value) && hasValidAuthority(rest) && !/[[\]]/.test(rest.replace(/^\/\/[^/?#]*/, ""));
+}
+function isUriReference(value) {
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(value)) {
+    return isUri(value);
+  }
+  if (/^[^/?#]*:/.test(value)) {
+    return false;
+  }
+  return isUri("x:" + (value.startsWith("//") ? value : value.replace(/^/, "")));
+}
+function isUriTemplate(value) {
+  return /^(?:[^{}\s]|\{[^{}\s]*\})*$/.test(value);
+}
+function isJsonPointer(value) {
+  return /^(?:\/(?:[^~/]|~[01])*)*$/.test(value);
+}
+function isRelativeJsonPointer(value) {
+  return /^(?:0|[1-9][0-9]*)(?:#|(?:\/(?:[^~/]|~[01])*)*)$/.test(value);
+}
+function isRegex(value) {
+  try {
+    new RegExp(value, "u");
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+const formatChecks = {
+  date: isDate,
+  time: isTime,
+  "date-time": isDateTime,
+  duration: isDuration,
+  ipv4: isIpv4,
+  ipv6: isIpv6,
+  hostname: isHostname,
+  uri: isUri,
+  "uri-reference": isUriReference,
+  "uri-template": isUriTemplate,
+  "json-pointer": isJsonPointer,
+  "relative-json-pointer": isRelativeJsonPointer,
+  regex: isRegex
+};
 function isValidUrl(value) {
   if (/\s/.test(value)) {
     return false;
@@ -779,7 +939,14 @@ function format(context) {
     if (format2 === "uuid") {
       regexp = new RegExp(/^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/i);
     }
-    const invalid = format2 === "url" ? !isValidUrl(context.value) : isSet(regexp) && !regexp.test(context.value);
+    let invalid = false;
+    if (format2 === "url") {
+      invalid = !isValidUrl(context.value);
+    } else if (hasOwn(formatChecks, format2)) {
+      invalid = !formatChecks[format2](context.value);
+    } else if (isSet(regexp)) {
+      invalid = !regexp.test(context.value);
+    }
     if (invalid) {
       errors.push({
         type: "error",
@@ -1067,7 +1234,7 @@ function pattern(context) {
   const errors = [];
   const pattern2 = getSchemaPattern(context.schema);
   if (isString(context.value) && isSet(pattern2)) {
-    const regexp = new RegExp(pattern2);
+    const regexp = compilePattern(pattern2);
     const invalid = !regexp.test(context.value);
     if (invalid) {
       errors.push({
@@ -1090,7 +1257,7 @@ function patternProperties(context) {
   if (isObject$1(context.value) && isSet(patternProperties2)) {
     Object.keys(context.value).forEach((propertyName) => {
       Object.keys(patternProperties2).forEach((pattern2) => {
-        const regexp = new RegExp(pattern2);
+        const regexp = compilePattern(pattern2);
         if (regexp.test(propertyName)) {
           const schema = patternProperties2[pattern2];
           const editorErrors = context.validator.getErrors(context.value[propertyName], schema, propertyName, context.path + "/" + propertyName).map((error) => {
@@ -1279,7 +1446,7 @@ function additionalProperties(context) {
     const patternProperties2 = schemaPatternProperties || {};
     Object.keys(context.value).forEach((property) => {
       const definedInPatternProperty = Object.keys(patternProperties2).some((pattern2) => {
-        const regexp = new RegExp(pattern2);
+        const regexp = compilePattern(pattern2);
         return regexp.test(property);
       });
       const isDefinedInProperties = hasOwn(properties2, property);
@@ -1576,7 +1743,7 @@ const draft07 = {
   type,
   uniqueItems
 };
-function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
+function collectEvaluated$1(context, schema, evaluated, includeOwnUnevaluated) {
   if (isBoolean(schema)) {
     return;
   }
@@ -1585,12 +1752,12 @@ function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
   }
   const names = Object.keys(context.value);
   const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
-  const merge = (subschema) => collectEvaluated(context, subschema, evaluated, true);
+  const merge = (subschema) => collectEvaluated$1(context, subschema, evaluated, true);
   const properties2 = getSchemaProperties(schema);
   const patternProperties2 = getSchemaPatternProperties(schema);
   names.forEach((name) => {
     const inProperties = isSet(properties2) && hasOwn(properties2, name);
-    const inPatternProperties = isSet(patternProperties2) && Object.keys(patternProperties2).some((pattern2) => new RegExp(pattern2).test(name));
+    const inPatternProperties = isSet(patternProperties2) && Object.keys(patternProperties2).some((pattern2) => compilePattern(pattern2).test(name));
     if (inProperties || inPatternProperties) {
       evaluated.add(name);
     }
@@ -1632,7 +1799,7 @@ function unevaluatedProperties(context) {
   const unevaluatedSchema = getSchemaUnevaluatedProperties(context.schema);
   if (isObject$1(context.value) && isSet(unevaluatedSchema)) {
     const evaluated = /* @__PURE__ */ new Set();
-    collectEvaluated(context, context.schema, evaluated, false);
+    collectEvaluated$1(context, context.schema, evaluated, false);
     Object.keys(context.value).filter((property) => !evaluated.has(property)).forEach((property) => {
       if (unevaluatedSchema === false) {
         errors.push({
@@ -1714,6 +1881,90 @@ function propertyNames(context) {
   }
   return errors;
 }
+function collectEvaluated(context, schema, evaluated, includeOwnUnevaluated) {
+  if (isBoolean(schema)) {
+    return;
+  }
+  if (context.validator.refParser && hasOwn(schema, "$ref")) {
+    const { $ref, ...siblings } = schema;
+    collectEvaluated(context, context.validator.refParser.expand({ $ref }), evaluated, true);
+    schema = siblings;
+  }
+  const indexes = context.value.map((item, index2) => index2);
+  const isValid = (subschema) => context.validator.getErrors(context.value, subschema, context.key, context.path).length === 0;
+  const merge = (subschema) => collectEvaluated(context, subschema, evaluated, true);
+  const prefixItems2 = getSchemaPrefixItems(schema);
+  if (isSet(prefixItems2)) {
+    indexes.slice(0, prefixItems2.length).forEach((index2) => evaluated.add(index2));
+  }
+  if (isSet(getSchemaItems(schema)) || includeOwnUnevaluated && isSet(getSchemaUnevaluatedItems(schema))) {
+    indexes.forEach((index2) => evaluated.add(index2));
+  }
+  const contains2 = getSchemaContains(schema);
+  if (isSet(contains2)) {
+    context.value.forEach((item, index2) => {
+      if (context.validator.getErrors(item, contains2, index2, context.path + "/" + index2).length === 0) {
+        evaluated.add(index2);
+      }
+    });
+  }
+  const allOf2 = getSchemaAllOf(schema);
+  if (isSet(allOf2)) {
+    allOf2.forEach(merge);
+  }
+  [getSchemaAnyOf(schema), getSchemaOneOf(schema)].forEach((subschemas) => {
+    if (isSet(subschemas)) {
+      subschemas.filter(isValid).forEach(merge);
+    }
+  });
+  const schemaIf = getSchemaIf(schema);
+  if (isSet(schemaIf)) {
+    const schemaThen = getSchemaThen(schema);
+    const schemaElse = getSchemaElse(schema);
+    if (isValid(schemaIf)) {
+      merge(schemaIf);
+      if (isSet(schemaThen)) {
+        merge(schemaThen);
+      }
+    } else if (isSet(schemaElse)) {
+      merge(schemaElse);
+    }
+  }
+}
+function unevaluatedItems(context) {
+  let errors = [];
+  const unevaluatedSchema = getSchemaUnevaluatedItems(context.schema);
+  if (isArray(context.value) && isSet(unevaluatedSchema)) {
+    const evaluated = /* @__PURE__ */ new Set();
+    collectEvaluated(context, context.schema, evaluated, false);
+    context.value.forEach((item, index2) => {
+      if (evaluated.has(index2)) {
+        return;
+      }
+      if (unevaluatedSchema === false) {
+        errors.push({
+          type: "error",
+          path: context.path,
+          constraint: "unevaluatedItems",
+          messages: [
+            compileTemplate(context.translator.translate("errorUnevaluatedItems"), { index: index2 })
+          ]
+        });
+      } else if (isObject$1(unevaluatedSchema)) {
+        const itemErrors = context.validator.getErrors(item, unevaluatedSchema, index2, context.path + "/" + index2).map((error) => {
+          return {
+            type: "error",
+            path: context.path + "/" + index2,
+            constraint: "unevaluatedItems",
+            messages: error.messages
+          };
+        });
+        errors = [...errors, ...itemErrors];
+      }
+    });
+  }
+  return errors;
+}
 const draft202012 = {
   additionalProperties,
   allOf,
@@ -1746,6 +1997,7 @@ const draft202012 = {
   properties,
   required,
   type,
+  unevaluatedItems,
   unevaluatedProperties,
   uniqueItems
 };
@@ -3256,7 +3508,7 @@ class InstanceObject extends Instance {
     const schemaAdditionalProperties = this.schemaAdditionalProperties;
     const schemaPatternProperties = this.schemaPatternProperties || {};
     if (this.jedison.isEditor && enforceAdditionalProperties && isSet(schemaAdditionalProperties) && schemaAdditionalProperties === false) {
-      const compiledPatterns = Object.keys(schemaPatternProperties).map((p) => new RegExp(p));
+      const compiledPatterns = Object.keys(schemaPatternProperties).map((p) => compilePattern(p));
       Object.keys(value).forEach((propertyName) => {
         const matchesPattern = compiledPatterns.some((re) => re.test(propertyName));
         if (!hasOwn(this.properties, propertyName) && !matchesPattern) {
@@ -3346,7 +3598,7 @@ class InstanceObject extends Instance {
       schema = schemaProperties[propertyName];
     } else if (isSet(schemaPatternProperties)) {
       for (const pattern2 of Object.keys(schemaPatternProperties)) {
-        if (new RegExp(pattern2).test(propertyName)) {
+        if (compilePattern(pattern2).test(propertyName)) {
           schema = schemaPatternProperties[pattern2];
           break;
         }
@@ -4531,7 +4783,7 @@ class EditorObject extends Editor {
       return true;
     }
     const patternProperties2 = getSchemaPatternProperties(this.instance.schema) || {};
-    return Object.keys(patternProperties2).some((pattern2) => new RegExp(pattern2).test(propertyName));
+    return Object.keys(patternProperties2).some((pattern2) => compilePattern(pattern2).test(propertyName));
   }
   addProperty(input, postAction) {
     const propertyName = input.value.split(" ").join("");
@@ -7556,6 +7808,7 @@ const defaultTranslations = {
   errorProperties: "The following properties do not comply with their schemas: {{ properties }}",
   errorRequired: "Must have the required properties: {{ required }}.",
   errorType: "Must be of type {{ type }}.",
+  errorUnevaluatedItems: "Has invalid unevaluated item at index {{ index }}",
   errorUnevaluatedProperties: 'Has invalid unevaluated property "{{ property }}"',
   errorUniqueItems: "Must have unique items.",
   arrayDelete: "Delete item",
@@ -7607,6 +7860,7 @@ const translations = {
     errorProperties: "The following properties do not comply with their schemas: {{ properties }}",
     errorRequired: "Must have the required properties: {{ required }}.",
     errorType: "Must be of type {{ type }}.",
+    errorUnevaluatedItems: "Has invalid unevaluated item at index {{ index }}",
     errorUnevaluatedProperties: 'Has invalid unevaluated property "{{ property }}"',
     errorUniqueItems: "Must have unique items.",
     arrayDelete: "Delete item",
@@ -7656,6 +7910,7 @@ const translations = {
     errorProperties: "Die folgenden Eigenschaften entsprechen nicht ihren Schemata: {{ properties }}",
     errorRequired: "Muss die erforderlichen Eigenschaften haben: {{ required }}.",
     errorType: "Muss vom Typ {{ type }} sein.",
+    errorUnevaluatedItems: "Hat ein ungültiges nicht bewertetes Element an Index {{ index }}",
     errorUnevaluatedProperties: 'Hat eine ungültige nicht bewertete Eigenschaft "{{ property }}"',
     errorUniqueItems: "Muss eindeutige Elemente haben.",
     arrayDelete: "Element löschen",
@@ -7705,6 +7960,7 @@ const translations = {
     errorProperties: "Le seguenti proprietà non rispettano i loro schemi: {{ properties }}",
     errorRequired: "Deve avere le proprietà richieste: {{ required }}.",
     errorType: "Deve essere di tipo {{ type }}.",
+    errorUnevaluatedItems: "Ha un elemento non valutato non valido all'indice {{ index }}",
     errorUnevaluatedProperties: 'Ha una proprietà non valutata non valida "{{ property }}"',
     errorUniqueItems: "Deve avere elementi univoci.",
     arrayDelete: "Elimina elemento",
@@ -7754,6 +8010,7 @@ const translations = {
     errorProperties: "Las siguientes propiedades no cumplen con sus esquemas: {{ properties }}",
     errorRequired: "Debe tener las propiedades requeridas: {{ required }}.",
     errorType: "Debe ser del tipo {{ type }}.",
+    errorUnevaluatedItems: "Tiene un elemento no evaluado no válido en el índice {{ index }}",
     errorUnevaluatedProperties: 'Tiene una propiedad no evaluada no válida "{{ property }}"',
     errorUniqueItems: "Debe tener elementos únicos.",
     arrayDelete: "Eliminar elemento",
@@ -8424,8 +8681,31 @@ class RefParser {
    * @param baseUri URI the schema was loaded from, if any
    */
   indexResources(schema, baseUri = "") {
-    const skipped = ["const", "enum", "default", "examples"];
-    const schemaMaps = ["properties", "$defs", "definitions", "patternProperties", "dependentSchemas"];
+    const schemaKeywords = [
+      "additionalProperties",
+      "additionalItems",
+      "items",
+      "prefixItems",
+      "contains",
+      "not",
+      "if",
+      "then",
+      "else",
+      "propertyNames",
+      "unevaluatedItems",
+      "unevaluatedProperties",
+      "contentSchema",
+      "allOf",
+      "anyOf",
+      "oneOf",
+      "properties",
+      "$defs",
+      "definitions",
+      "patternProperties",
+      "dependentSchemas",
+      "dependencies"
+    ];
+    const schemaMaps = ["properties", "$defs", "definitions", "patternProperties", "dependentSchemas", "dependencies"];
     const strip = (uri) => uri.split("#")[0];
     const walk = (node, base, visit, isMap = false) => {
       if (!this.isObject(node)) {
@@ -8442,7 +8722,7 @@ class RefParser {
       const nodeBase = typeof node.$id === "string" ? this.resolveUri(node.$id, base) : base;
       visit(node, nodeBase);
       for (const [key, value] of Object.entries(node)) {
-        if (!skipped.includes(key)) {
+        if (schemaKeywords.includes(key)) {
           walk(value, nodeBase, visit, schemaMaps.includes(key));
         }
       }
