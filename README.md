@@ -93,6 +93,21 @@ But Jedison is flexible enough to support other patterns too - you might use it 
 - Pure server-side JSON validation in your backend services (headless mode)
 - Hybrid approaches where different parts of the schema are used in different contexts
 
+## Multiple JSON Schema drafts
+
+Jedison follows draft 2020-12 and also understands schemas written for draft-04, draft-06, draft-07 and 2019-09. Declare the draft with `$schema` and Jedison normalizes the schema, so the same form and validation work for all of them:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": [{ "type": "number" }, { "type": "number" }],
+  "additionalItems": false
+}
+```
+
+Validation is tested against the official [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) for every supported draft. `$dynamicRef` and `$recursiveRef` are not supported.
+
 ## Install
 
 ### Using ES Module
