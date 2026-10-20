@@ -57,20 +57,24 @@ const suites = [
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/required'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/type'),
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedItems'),
-  // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedProperties'),
+  require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/unevaluatedProperties'),
   require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/uniqueItems')
   // require('../../../node_modules/json-schema-test-suite/tests/draft2020-12/vocabulary'),
 ]
 
 // Known gaps, as 'scenario > test':
 // - unevaluatedProperties scope after $ref
+// - if/then/else keeps the child instances of the branch used before setValue
 // - the remote metaschema relies on $dynamicRef, which is not supported
 const knownGaps = [
   'ref creates new scope when adjacent to keywords > referenced subschema doesn\'t see annotations from properties',
   'remote ref, containing refs itself > remote ref valid',
   'remote ref, containing refs itself > remote ref invalid',
   'validate definition against metaschema > valid definition schema',
-  'validate definition against metaschema > invalid definition schema'
+  'validate definition against metaschema > invalid definition schema',
+  'unevaluatedProperties with $dynamicRef > with no unevaluated properties',
+  'unevaluatedProperties with if/then/else > when if is true and has no unevaluated properties',
+  'unevaluatedProperties with if/then/else, then not defined > when if is true and has no unevaluated properties'
 ]
 
 for (let i = 0; i < suites.length; i++) {

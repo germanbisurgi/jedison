@@ -255,7 +255,7 @@ export function getSchemaOneOf (schema) {
 }
 
 export function getSchemaUnevaluatedProperties (schema) {
-  return isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : undefined
+  return isObject(schema.unevaluatedProperties) || isBoolean(schema.unevaluatedProperties) ? clone(schema.unevaluatedProperties) : undefined
 }
 
 export function getSchemaUniqueItems (schema) {
