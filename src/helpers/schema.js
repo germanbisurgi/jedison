@@ -51,6 +51,12 @@ export function getSchemaDependentSchemas (schema) {
 }
 
 export function getSchemaDescription (schema) {
+  const summary = getSchemaXOption(schema, 'summary')
+
+  if (isString(summary)) {
+    return clone(summary)
+  }
+
   return isString(schema.description) ? clone(schema.description) : undefined
 }
 

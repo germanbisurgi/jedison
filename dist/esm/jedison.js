@@ -376,6 +376,10 @@ function getSchemaDependentSchemas(schema) {
   return isObject$1(schema.dependentSchemas) ? clone(schema.dependentSchemas) : void 0;
 }
 function getSchemaDescription(schema) {
+  const summary = getSchemaXOption(schema, "summary");
+  if (isString(summary)) {
+    return clone(summary);
+  }
   return isString(schema.description) ? clone(schema.description) : void 0;
 }
 function getSchemaElse(schema) {

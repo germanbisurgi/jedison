@@ -1,3 +1,7 @@
+### 1.30.0
+
+- Added `x-summary`: when set, it is shown in the form instead of `description`, so a short UI text can sit next to a long `description` kept for API docs. It supports the same markdown and templates as `description`
+
 ### 1.29.1
 
 - Fixed `enum: []`: an empty `enum` accepted every value, it now rejects all of them

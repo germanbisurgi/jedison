@@ -407,6 +407,7 @@ import switcherModal from './json/features/switcher-modal.json'
 import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
 import titleIconClass from './json/features/title-icon-class.json'
+import xSummary from './json/features/x-summary.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
 import xButtons from './json/features/x-buttons.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
@@ -530,6 +531,7 @@ export default {
           'features/switcher-select-inline': switcherSelectInline,
           'features/navigate-to': navigateTo,
           'features/title-icon-class': titleIconClass,
+          'features/x-summary': xSummary,
           'features/switcher-type-labels': switcherTypeLabels,
           'features/x-buttons': xButtons,
           'parsing/json-patch': jsonPatch,

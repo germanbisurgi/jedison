@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "title": "X Summary",
+  "description": "The `x-summary` option replaces `description` in the form.",
+  "x-summary": "The `x-summary` option replaces `description` in the form, keeping the long `description` for API docs.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "Long description for the API documentation. It is not shown because x-summary is set.",
+      "x-summary": "Short summary shown in the form."
+    },
+    "email": {
+      "type": "string",
+      "title": "E-Mail",
+      "description": "Without x-summary the description is shown."
+    }
+  }
+}
