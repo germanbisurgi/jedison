@@ -6,8 +6,7 @@ Feature('issue-8 array nav-vertical readonly buttons')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-8 array nav-vertical readonly should disable array item buttons', ({ I }) => {

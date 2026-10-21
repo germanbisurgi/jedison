@@ -57,6 +57,20 @@ module.exports = function () {
         document.querySelector(locator).dispatchEvent(new Event('change'))
       }, locator, value)
     },
+    // Changing a playground select reloads the page. Wait until the new page is ready,
+    // the old page also has .jedi-ready and would let the next step run mid-navigation.
+    _selectAndWaitForReload: function (locator, value, param, timeout = waitTime) {
+      this.selectOption(locator, value)
+      this.waitForFunction(function (param, value) {
+        return new URLSearchParams(window.location.search).get(param) === value && !!document.querySelector('.jedi-ready')
+      }, [param, value], timeout)
+    },
+    _selectExample: function (example, timeout) {
+      this._selectAndWaitForReload('#examples', example, 'example', timeout)
+    },
+    _selectShowErrors: function (showErrors) {
+      this._selectAndWaitForReload('#show-errors', showErrors, 'showErrors')
+    },
     _setEditorValue: function (value) {
       this.fillField('#editor-value', value)
       this._scrollTo('#set-value')

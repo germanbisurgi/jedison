@@ -6,8 +6,7 @@ Feature('object')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('@editor @object-buttons-content should override object buttons content', ({I}) => {

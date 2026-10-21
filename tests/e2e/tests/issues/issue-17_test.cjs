@@ -15,8 +15,7 @@ Feature('issue-17 should set correct data when using additionalProperties')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-17 should set correct data when using additionalProperties', ({ I }) => {

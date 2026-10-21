@@ -6,8 +6,7 @@ Feature('purify-labels')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('Should @purify-labels not run scripts from titles', async ({ I }) => {

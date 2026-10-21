@@ -7,8 +7,7 @@ Feature('issue-86 table header cells are wrapped in a <tr>')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-86 no <th> is a direct child of <thead>', ({ I }) => {

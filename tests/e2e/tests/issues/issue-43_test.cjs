@@ -7,8 +7,7 @@ Feature('issue-43 nav badge not cleared after cross-field constraint errors are 
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-43 switching frame to GALACTIC shows badge, switching back to J2000 clears badge', ({ I }) => {

@@ -6,8 +6,7 @@ Feature('navigate-to')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('navigateTo activates correct ancestor tabs for a deeply nested path @navigate-to', ({ I }) => {

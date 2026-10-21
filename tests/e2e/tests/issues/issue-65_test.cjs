@@ -9,8 +9,7 @@ Feature('issue-65 nav tab focus must survive an if/then branch swap')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-65 toggling a field in one tab keeps that tab active instead of jumping to the first', ({ I }) => {

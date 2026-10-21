@@ -7,8 +7,7 @@ Feature('issue-79 x-buttons on an array editor keeps firing after refreshUI()')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-79 the button fires on the very first click', async ({ I }) => {
@@ -28,8 +27,7 @@ Scenario('@issue @issue-79 the button fires on the very first click', async ({ I
 // click handler must survive that, not just the initial render.
 Scenario('@issue @issue-79 the button keeps firing after the array editor re-renders', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 
   I.executeScript(() => {
     window.__fillCount = 0

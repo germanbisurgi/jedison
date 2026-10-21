@@ -7,8 +7,7 @@ Feature('issue-84 nullable object with default null crashes the editor')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-84 renders and starts as null', ({ I }) => {

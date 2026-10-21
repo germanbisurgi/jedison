@@ -6,8 +6,7 @@ Feature('issue-31 x-titleTemplate fallback when placeholder is empty')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-31 tab with a name shows the resolved value', ({ I }) => {

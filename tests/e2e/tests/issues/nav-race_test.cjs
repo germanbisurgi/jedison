@@ -11,8 +11,7 @@ BeforeSuite(({ I }) => {
 
 // Plain nav: editing a field then immediately clicking another tab must switch.
 Scenario('@nav-race plain nav edit-then-click switches tab @nav-race', ({ I }) => {
-  I.selectOption('#examples', 'editors/object-nav-horizontal')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-nav-horizontal')
   I._click('a[href$="root-strings"]')
   I.wait(1)
   I.fillField('[data-path="#/strings/string"] input', 'hello')
@@ -23,8 +22,7 @@ Scenario('@nav-race plain nav edit-then-click switches tab @nav-race', ({ I }) =
 
 // if/then nav (issue #65): edit a field then click a tab must switch.
 Scenario('@nav-race if/then nav edit-then-click switches tab @nav-race', ({ I }) => {
-  I.selectOption('#examples', 'issue/issue-65')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('issue/issue-65')
   I._checkOption('[data-path="#/service/bgpenabled"] input')
   I._click('a[href$="root-interface"]')
   I._checkOption('[data-path="#/interface/ipv6enabled"] input')

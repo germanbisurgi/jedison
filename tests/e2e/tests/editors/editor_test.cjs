@@ -6,14 +6,12 @@ Feature('editor')
 
 Scenario('@editor @ready should have class "jedi-ready" when ready', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
 })
 
 Scenario('@editor @create should create all kind of editors', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
   I._waitForElement('[data-path="#"]')
   I._waitForElement('[data-path="#/booleans"]')
   I._waitForElement('[data-path="#/booleans/boolean"]')
@@ -44,8 +42,7 @@ Scenario('@editor @create should create all kind of editors', ({ I }) => {
 
 Scenario('@editor @destroy should destroy', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
   I._scrollTo('#destroy-editor')
   I._click('#destroy-editor')
   I.dontSeeElement('[data-schemapath="root"]')
@@ -53,8 +50,7 @@ Scenario('@editor @destroy should destroy', ({ I }) => {
 
 Scenario('@editor should @disable and @enable', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
   I._checkOption('[id="enablePropertiesToggle"]')
   I._waitForElement('.jedi-ready')
   I._waitForElement('#disable-editor')
@@ -74,8 +70,7 @@ Scenario('@editor should @disable and @enable', ({ I }) => {
 
 Scenario('@editor @setValue() should set value', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
   I._scrollTo('#editor-value')
   I.fillField('#editor-value', JSON.stringify(jsonData))
   I._scrollTo('#set-value')
@@ -98,20 +93,16 @@ Scenario('@editor @setValue() should set value', async ({ I }) => {
 
 Scenario('@editor @editor-showErrors @showErrors should determine if and when validation errors are displayed', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/smoke')
-  I._waitForElement('.jedi-ready')
-  I.selectOption('#show-errors', 'always')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/smoke')
+  I._selectShowErrors('always')
   I._waitForElement('.jedi-error-message')
-  I.selectOption('#show-errors', 'change')
-  I._waitForElement('.jedi-ready')
+  I._selectShowErrors('change')
   I.dontSeeElement('.jedi-error-message')
   I.selectOption('#root-booleans-boolean-select', 'true')
   I.dontSeeElement('.jedi-error-message')
   I.selectOption('#root-booleans-boolean-select', 'false')
   I._waitForElement('.jedi-ready')
-  I.selectOption('#show-errors', 'never')
-  I._waitForElement('.jedi-ready')
+  I._selectShowErrors('never')
   I.dontSeeElement('.jedi-error-message')
   I.selectOption('#root-booleans-boolean-select', 'true')
   I.dontSeeElement('.jedi-error-message')
@@ -122,8 +113,7 @@ Scenario('@editor @editor-showErrors @showErrors should determine if and when va
 Scenario('@editor @showValidationErrors should programmatically display validation errors', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I._waitForElement('.jedi-ready')
-  I.selectOption('#examples', 'validator/const')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('validator/const')
   I._click('#show-validation-errors')
   I._waitForText('Must have value of: "test"', '[data-path="#/string"]')
   I._waitForText('Must have value of: 2.5', '[data-path="#/number"]')
@@ -137,8 +127,7 @@ Scenario('@editor @showValidationErrors should programmatically display validati
 Scenario('@editor be able to use @translations', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I._waitForElement('.jedi-ready')
-  I.selectOption('#examples', 'validator/const')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('validator/const')
   I.selectOption('#language', 'de')
   I._waitForElement('.jedi-ready')
   I._click('#show-validation-errors')

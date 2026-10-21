@@ -60,40 +60,34 @@ BeforeSuite(({ I }) => {
 })
 
 Scenario('editing one item does not rebuild the other items @large-array-rendering @array', async ({ I }) => {
-  I.selectOption('#examples', 'examples/large-array')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-array', 60)
   await editOneCellKeepsOtherRows(I)
 })
 
 Scenario('editing one row does not rebuild the other rows @large-array-rendering @array-table', async ({ I }) => {
-  I.selectOption('#examples', 'examples/large-table')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-table', 60)
   await editOneCellKeepsOtherRows(I)
 })
 
 Scenario('editing one row does not rebuild the other rows @large-array-rendering @array-table-object', async ({ I }) => {
-  I.selectOption('#examples', 'examples/large-table-object')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-table-object', 60)
   await editOneCellKeepsOtherRows(I)
 })
 
 Scenario('dropping a dragged item keeps the screen in sync @large-array-rendering @array', async ({ I }) => {
   ensureSortable(I)
-  I.selectOption('#examples', 'examples/large-array')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-array', 60)
   await dropFirstRowAtEnd(I)
 })
 
 Scenario('dropping a dragged row keeps the screen in sync @large-array-rendering @array-table', async ({ I }) => {
   ensureSortable(I)
-  I.selectOption('#examples', 'examples/large-table')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-table', 60)
   await dropFirstRowAtEnd(I)
 })
 
 Scenario('dropping a dragged row keeps the screen in sync @large-array-rendering @array-table-object', async ({ I }) => {
   ensureSortable(I)
-  I.selectOption('#examples', 'examples/large-table-object')
-  I.waitForElement('.jedi-ready', 60)
+  I._selectExample('examples/large-table-object', 60)
   await dropFirstRowAtEnd(I)
 })

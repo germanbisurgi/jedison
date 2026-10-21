@@ -6,10 +6,8 @@ Feature('const')
 Scenario('@constraint @const should display validation errors', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I._waitForElement('.jedi-ready')
-  I.selectOption('#examples', 'validator/const')
-  I._waitForElement('.jedi-ready')
-  I.selectOption('#show-errors', 'always')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('validator/const')
+  I._selectShowErrors('always')
 
   // string
   I._scrollTo('[data-path="#/string"]')

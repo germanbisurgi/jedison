@@ -7,8 +7,7 @@ Feature('issue-56 setValue() on a deactivated instance must reactivate it')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-56 setValue() called directly on a deactivated instance reactivates it and its value reaches the root', async ({ I }) => {

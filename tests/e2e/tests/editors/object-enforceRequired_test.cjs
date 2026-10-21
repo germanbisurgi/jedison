@@ -5,8 +5,7 @@ Feature('object')
 
 Scenario('@editor @object @enforceRequired should always shor required properties in editor', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-enforceRequired')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-enforceRequired')
 
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify({
     "a": 1,

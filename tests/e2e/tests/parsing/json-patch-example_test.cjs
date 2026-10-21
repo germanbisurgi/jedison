@@ -6,8 +6,7 @@ Feature('markdown-annotation')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('Should use @expand allOf and oneOf schemas and @mergeAllOf in @jsonPatchExample', ({I}) => {

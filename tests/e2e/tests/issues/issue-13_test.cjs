@@ -6,8 +6,7 @@ Feature('issue-13 InstanceIfThenElse should propagate arrayTemplateData to sub-i
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-13 InstanceIfThenElse should propagate arrayTemplateData to sub-instances', ({ I }) => {

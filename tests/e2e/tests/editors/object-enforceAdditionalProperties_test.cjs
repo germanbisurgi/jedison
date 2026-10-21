@@ -5,8 +5,7 @@ Feature('object')
 
 Scenario('@editor @object @enforceAdditionalProperties should remove all properties that are not listed in `properties` or `patternProperties`', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-enforceAdditionalProperties')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-enforceAdditionalProperties')
 
   I._waitForValue('[id="jedi-hidden-input"]', JSON.stringify({
     "a": 0,
@@ -45,8 +44,7 @@ Scenario('@editor @object @enforceAdditionalProperties should remove all propert
 
 Scenario('@editor @object @enforceAdditionalProperties `Add property` should only accept a name matching `properties` or `patternProperties`', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-enforceAdditionalProperties')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-enforceAdditionalProperties')
 
   I._click('.jedi-quick-add-property-toggle')
   I.fillField('#jedi-quick-add-property-input-root', 'id_test')

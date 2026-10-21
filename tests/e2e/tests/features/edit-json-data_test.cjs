@@ -6,8 +6,7 @@ Feature('edit-json-data')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('Should enable inline JSON editing and save changes @edit-json-data', ({ I }) => {

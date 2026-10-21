@@ -6,8 +6,7 @@ Feature('title-icon-class')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}&iconLib=fontawesome5`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@feature @title-icon-class string input should show icon in label', ({ I }) => {

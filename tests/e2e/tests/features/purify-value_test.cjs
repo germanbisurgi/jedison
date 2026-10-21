@@ -6,8 +6,7 @@ Feature('purify-value')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('Should @purify-value XSS from direct input', async ({ I }) => {

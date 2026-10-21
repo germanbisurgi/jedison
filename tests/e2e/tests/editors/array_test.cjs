@@ -6,8 +6,7 @@ Feature('array')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('@editor @array should have @title and @description', ({ I }) => {
@@ -35,8 +34,7 @@ Scenario('@array-object @enableCollapseToggle should collapse and expand content
 
 Scenario('@editor @array @array-nav-vertical', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/array-nav-vertical')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/array-nav-vertical')
 
   if (theme === 'barebones') {
     I._waitForElement('.jedi-nav-list')
@@ -62,8 +60,7 @@ Scenario('@editor @array @array-nav-vertical', ({ I }) => {
 
 Scenario('@editor @array @array-nav-horizontal', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/array-nav-horizontal')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/array-nav-horizontal')
 
   if (theme === 'barebones') {
     I._waitForElement('.jedi-nav-list')

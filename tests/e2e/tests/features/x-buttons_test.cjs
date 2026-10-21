@@ -41,8 +41,7 @@ Feature('x-buttons')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}&iconLib=fontawesome5`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@feature @x-buttons renders buttons with label, hook class and custom attributes', ({ I }) => {

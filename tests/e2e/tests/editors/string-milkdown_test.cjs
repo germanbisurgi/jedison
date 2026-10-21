@@ -9,8 +9,7 @@ Feature('Milkdown')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
   I._waitForElement('.milkdown .ProseMirror')
 });
 

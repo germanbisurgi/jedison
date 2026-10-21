@@ -7,8 +7,7 @@ Feature('issue-78 x-defaultProperties acts as a whitelist for optional propertie
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 // firstName/lastName are required but absent from x-defaultProperties - required must win regardless.
@@ -50,8 +49,7 @@ Scenario('@issue @issue-78 a property\'s own x-defaultProperty:true is shown eve
 // button closes it instead of opening it when it is already open.
 Scenario('@issue @issue-78 a property\'s own x-defaultProperty:false stays hidden even when listed in x-defaultProperties', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 
   I.dontSeeElement('[data-path="#/website"]')
 

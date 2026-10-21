@@ -6,8 +6,7 @@ Feature('type')
 Scenario('@constraint @type should display validation errors', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I._waitForElement('.jedi-ready')
-  I.selectOption('#examples', 'validator/type')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('validator/type')
   I._scrollTo('[data-path="#"]')
   I.fillField('#editor-value', JSON.stringify({
     string: 1,

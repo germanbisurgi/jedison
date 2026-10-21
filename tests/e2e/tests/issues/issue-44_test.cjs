@@ -7,8 +7,7 @@ Feature('issue-44 optional object property with required sub-properties should n
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-44 absent optional property with required sub-properties produces no errors', ({ I }) => {

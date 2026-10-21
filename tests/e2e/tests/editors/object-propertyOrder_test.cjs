@@ -5,8 +5,7 @@ Feature('object')
 
 Scenario('@editor @object should sort by @propertyOrder', async ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-propertyOrder')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-propertyOrder')
 
   let labelTexts
 

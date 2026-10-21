@@ -13,8 +13,7 @@ const accordionToggle = {
 
 Scenario('Should keep the accordion toggle usable when the editor is disabled @disabled-view-controls @object-accordion', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-accordion')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-accordion')
   I._scrollTo('#disable-editor')
   I._click('#disable-editor')
   I.dontSeeElement(`.jedi-ready ${accordionToggle}[disabled]`)
@@ -25,8 +24,7 @@ Scenario('Should keep the accordion toggle usable when the editor is disabled @d
 
 Scenario('Should let a disabled editor show and copy but not save JSON data @disabled-view-controls @edit-json-data', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'features/edit-json-data')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('features/edit-json-data')
   I.checkOption('#editJsonData')
   I._waitForElement('.jedi-ready')
   I._scrollTo('#disable-editor')

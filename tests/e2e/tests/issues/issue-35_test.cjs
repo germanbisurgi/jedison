@@ -7,8 +7,7 @@ Feature('issue-35 anyOf embedSwitcher child instances registration')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-35 active branch children should be registered in jedison.instances', async ({ I }) => {

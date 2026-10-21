@@ -5,8 +5,7 @@ Feature('read-only')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'features/read-only')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('features/read-only')
 })
 
 Scenario('Should hide the properties toggle and keep collapse usable @read-only', ({ I }) => {

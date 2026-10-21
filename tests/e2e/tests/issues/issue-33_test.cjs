@@ -6,8 +6,7 @@ Feature('issue-33 allOf multiple if/then/else independence')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-33 when size is not large both element_b and element_d should be hidden', ({ I }) => {

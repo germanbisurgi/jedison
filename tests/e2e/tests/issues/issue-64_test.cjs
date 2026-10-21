@@ -7,8 +7,7 @@ Feature('issue-64 x-info not duplicated per row in table-object arrays')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @issue-64 info button appears once per column header, never inside rows', ({ I }) => {

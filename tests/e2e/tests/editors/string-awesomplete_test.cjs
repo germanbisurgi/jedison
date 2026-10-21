@@ -10,8 +10,7 @@ Feature('Awesomplete')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('@plugin @string-awesomplete should have @title, and @description', ({I}) => {

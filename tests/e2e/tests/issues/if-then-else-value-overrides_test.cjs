@@ -6,8 +6,7 @@ Feature('if-then-else-value-overrides')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @if-then-else-value-overrides should be fixed', ({ I }) => {

@@ -6,8 +6,7 @@ Feature('object-categories')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@editor @object-categories should render @categoryOrder tabs in specified order', ({ I }) => {

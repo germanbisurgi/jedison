@@ -6,8 +6,7 @@ Feature('x-hidden')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('@editor with @x-hidden option should be hidden', ({I}) => {

@@ -6,8 +6,7 @@ Feature('object')
 
 BeforeSuite(({I}) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 });
 
 Scenario('@editor @object should have @title and @description', ({ I }) => {
@@ -56,8 +55,7 @@ Scenario('@editor @object @enableCollapseToggle should collapse and expand conte
 
 Scenario('@editor @object @object-grid rows and columns', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-grid')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-grid')
 
   if (theme === 'barebones') {
     I.seeNumberOfVisibleElements('.jedi-ready .jedi-row', 13)
@@ -143,8 +141,7 @@ Scenario('@editor @object @object-grid rows and columns', ({ I }) => {
 
 Scenario('@editor @object @object-nav-vertical', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-nav-vertical')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-nav-vertical')
 
   if (theme === 'barebones') {
     I._waitForElement('.jedi-nav-list')
@@ -170,8 +167,7 @@ Scenario('@editor @object @object-nav-vertical', ({ I }) => {
 
 Scenario('@editor @object @object-nav-horizontal', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', 'editors/object-nav-horizontal')
-  I._waitForElement('.jedi-ready')
+  I._selectExample('editors/object-nav-horizontal')
 
   if (theme === 'barebones') {
     I._waitForElement('.jedi-nav-list')

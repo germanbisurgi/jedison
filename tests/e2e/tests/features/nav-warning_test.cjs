@@ -6,8 +6,7 @@ Feature('nav-warning')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('Should show nav warning with title attribute @nav-warning', ({ I }) => {

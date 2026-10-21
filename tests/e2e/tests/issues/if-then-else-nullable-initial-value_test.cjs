@@ -10,8 +10,7 @@ Feature('issue if-then-else-initial-value-nullable')
 
 BeforeSuite(({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
-  I.selectOption('#examples', pathToSchema)
-  I._waitForElement('.jedi-ready')
+  I._selectExample(pathToSchema)
 })
 
 Scenario('@issue @if-then-else-initial-value-nullable should set initial value correctly', ({ I }) => {
