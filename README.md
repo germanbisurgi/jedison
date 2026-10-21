@@ -108,6 +108,18 @@ Jedison follows draft 2020-12 and also understands schemas written for draft-04,
 
 Validation is tested against the official [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) for every supported draft. `$dynamicRef` and `$recursiveRef` are not supported.
 
+## Coming from JSON Editor?
+
+The [JSON Editor](https://github.com/json-editor/json-editor) README says the library is in maintenance mode and points to Jedison for active development.
+
+| | Jedison | JSON Editor |
+|---|---|---|
+| JSON Schema drafts | 4, 6, 7, 2019-09, 2020-12 | 3 and 4 |
+| Themes | Bootstrap 3, 4, 5, Tailwind 4 | Bootstrap 3, 4, 5, Spectre, Tailwind |
+| Status | Actively developed | Maintenance mode |
+
+The basic API is close (`getValue`, `setValue`, `on('change')`). See the [comparison and migration guide](https://germanbisurgi.github.io/jedison-docs/compare-json-editor.html).
+
 ## Install
 
 ### Using ES Module
