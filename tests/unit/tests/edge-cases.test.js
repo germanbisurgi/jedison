@@ -59,3 +59,58 @@ describe('refs that cannot be resolved normally', () => {
     expect(await errorsWithRefs(schema, { name: 'a', child: { name: 1 } })).not.toStrictEqual([])
   })
 })
+
+describe('empty enum', () => {
+  it('rejects every value', () => {
+    for (const value of ['x', 1, null, {}, [], true]) {
+      const jedison = new Jedison.Create({ schema: { enum: [] } })
+      jedison.setValue(value)
+      expect(jedison.getErrors().length).toBe(1)
+    }
+  })
+})
+
+describe('$ref with siblings', () => {
+  it('applies the siblings and the referenced schema separately', async () => {
+    const schema = { $defs: { a: { minimum: 5 } }, $ref: '#/$defs/a', minimum: 3, type: 'number' }
+
+    expect(await errorsWithRefs(schema, 4)).not.toStrictEqual([])
+    expect(await errorsWithRefs(schema, 5)).toStrictEqual([])
+  })
+
+  it('keeps both prefixItems', async () => {
+    const schema = { $defs: { a: { prefixItems: [true, { type: 'string' }] } }, $ref: '#/$defs/a', prefixItems: [{ type: 'string' }], unevaluatedItems: false }
+
+    expect(await errorsWithRefs(schema, ['a', 'b'])).toStrictEqual([])
+    expect(await errorsWithRefs(schema, ['a', 1])).not.toStrictEqual([])
+  })
+
+  it('does not let the referenced schema see sibling properties as evaluated', async () => {
+    const schema = { $defs: { a: { unevaluatedProperties: false } }, $ref: '#/$defs/a', properties: { x: { type: 'string' } } }
+
+    expect(await errorsWithRefs(schema, { x: 'a' })).not.toStrictEqual([])
+  })
+
+  it('still merges annotations and keeps the type for forms', async () => {
+    const parser = new RefParser()
+    const schema = { $defs: { a: { type: 'object', properties: { n: { type: 'string' } } } }, properties: { p: { $ref: '#/$defs/a', title: 'Home' } } }
+    await parser.dereference(schema)
+
+    expect(parser.expand(schema.properties.p)).toStrictEqual({ type: 'object', properties: { n: { type: 'string' } }, title: 'Home' })
+  })
+
+  it('merges properties and required of the siblings and the referenced schema', async () => {
+    const parser = new RefParser()
+    const schema = {
+      $defs: { a: { type: 'object', required: ['x'], properties: { x: { type: 'string' } } } },
+      properties: { p: { $ref: '#/$defs/a', required: ['y'], properties: { y: { type: 'number' } } } }
+    }
+    await parser.dereference(schema)
+
+    expect(parser.expand(schema.properties.p)).toStrictEqual({
+      type: 'object',
+      required: ['x', 'y'],
+      properties: { x: { type: 'string' }, y: { type: 'number' } }
+    })
+  })
+})

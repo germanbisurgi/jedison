@@ -1,3 +1,8 @@
+### 1.29.1
+
+- Fixed `enum: []`: an empty `enum` accepted every value, it now rejects all of them
+- Fixed keywords next to `$ref` (draft 2019-09 and later): when the siblings and the referenced schema define the same keyword (for example `minimum` or `prefixItems`), or the referenced schema uses `unevaluatedProperties` / `unevaluatedItems`, both now apply separately as the spec requires instead of the sibling overwriting the other. `required` lists of both are combined. Siblings that only add `title`, `description`, `properties` and similar keep merging as before
+
 ### 1.29.0
 
 - Fixed `$ref` resolution: refs now resolve against the nearest `$id` (relative and URN base URIs), `$anchor` is supported, `~0`, `~1` and `%XX` are decoded in JSON pointers, and `$ref` to a boolean schema works. Remote refs are loaded by document URL and honor the `#/pointer` instead of returning the whole document

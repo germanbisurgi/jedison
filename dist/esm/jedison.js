@@ -948,8 +948,8 @@ function dependentSchemas(context) {
 }
 function _enum(context) {
   const errors = [];
-  const schemaEnum = getSchemaEnum(context.schema);
-  if (isSet(schemaEnum)) {
+  const schemaEnum = context.schema.enum;
+  if (isArray(schemaEnum)) {
     const invalid = !schemaEnum.some((e) => JSON.stringify(context.value) === JSON.stringify(e));
     if (invalid) {
       errors.push({
@@ -8612,6 +8612,8 @@ class Jedison extends EventEmitter {
   }
 }
 Jedison.version = version;
+const ANNOTATION_KEYWORDS = ["title", "description", "default", "examples", "deprecated", "readOnly", "writeOnly", "$comment", "$defs", "definitions", "$id", "$anchor", "$schema"];
+const MERGED_KEYWORDS = ["properties", "patternProperties", "dependentSchemas", "dependentRequired", "required"];
 class RefParser {
   constructor(options = {}) {
     this.options = Object.assign({
@@ -8861,9 +8863,41 @@ class RefParser {
       if (target === true) {
         return this.expand(cloneSchema, seen);
       }
+      if (this.mustApplySeparately(target, cloneSchema)) {
+        return this.expand(this.applySeparately(target, cloneSchema), seen);
+      }
+      if (Array.isArray(target.required) && Array.isArray(cloneSchema.required)) {
+        cloneSchema.required = [.../* @__PURE__ */ new Set([...target.required, ...cloneSchema.required])];
+      }
       return this.expand(mergeDeep({}, target, cloneSchema), seen);
     }
     return cloneSchema;
+  }
+  /**
+   * Siblings and a $ref target are merged, so that forms keep their `type` and `properties`.
+   * Merging is not enough when both define the same keyword, or when the target decides
+   * about unevaluated properties/items: the spec evaluates them as separate subschemas.
+   * @param target
+   * @param siblings
+   * @returns {boolean}
+   */
+  mustApplySeparately(target, siblings) {
+    if (!this.isObject(target)) {
+      return false;
+    }
+    const annotation = (key) => ANNOTATION_KEYWORDS.includes(key) || key.startsWith("x-");
+    const siblingKeys = Object.keys(siblings).filter((key) => !annotation(key));
+    if (siblingKeys.length === 0) {
+      return false;
+    }
+    return "unevaluatedProperties" in target || "unevaluatedItems" in target || siblingKeys.some((key) => !MERGED_KEYWORDS.includes(key) && key in target);
+  }
+  applySeparately(target, siblings) {
+    const schema = { ...siblings, allOf: [...siblings.allOf || [], JSON.parse(JSON.stringify(target))] };
+    if ("type" in target && !("type" in siblings)) {
+      schema.type = target.type;
+    }
+    return schema;
   }
   expandRecursive(schema) {
     let mustContinue = true;

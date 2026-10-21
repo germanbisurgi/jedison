@@ -63,17 +63,13 @@ const suites = [
 ]
 
 // Known gaps, as 'scenario > test':
-// - unevaluatedProperties scope after $ref
 // - the remote metaschema relies on $dynamicRef, which is not supported
 const knownGaps = [
-  'ref creates new scope when adjacent to keywords > referenced subschema doesn\'t see annotations from properties',
   'remote ref, containing refs itself > remote ref valid',
   'remote ref, containing refs itself > remote ref invalid',
   'validate definition against metaschema > valid definition schema',
   'validate definition against metaschema > invalid definition schema',
   'unevaluatedProperties with $dynamicRef > with no unevaluated properties',
-  'unevaluatedItems with $ref > with no unevaluated items',
-  'unevaluatedItems before $ref > with no unevaluated items',
   'unevaluatedItems with $dynamicRef > with no unevaluated items'
 ]
 

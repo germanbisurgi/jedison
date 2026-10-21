@@ -1,11 +1,11 @@
-import { compileTemplate, isSet } from '../../helpers/utils.js'
-import { getSchemaEnum } from '../../helpers/schema.js'
+import { compileTemplate, isArray } from '../../helpers/utils.js'
 
 export function _enum (context) {
   const errors = []
-  const schemaEnum = getSchemaEnum(context.schema)
+  // not getSchemaEnum(): an empty enum is valid and rejects every value
+  const schemaEnum = context.schema.enum
 
-  if (isSet(schemaEnum)) {
+  if (isArray(schemaEnum)) {
     const invalid = !schemaEnum.some(e => JSON.stringify(context.value) === JSON.stringify(e))
 
     if (invalid) {

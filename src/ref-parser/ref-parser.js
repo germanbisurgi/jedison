@@ -2,6 +2,12 @@ import { mergeDeep } from '../helpers/utils.js'
 import { SCHEMA_KEYWORDS, SCHEMA_MAPS, getDraft, normalizeSchema } from '../helpers/draft.js'
 import JsonWalker from '../json-walker.js'
 
+// keywords where a sibling of $ref simply wins over the target's value
+const ANNOTATION_KEYWORDS = ['title', 'description', 'default', 'examples', 'deprecated', 'readOnly', 'writeOnly', '$comment', '$defs', 'definitions', '$id', '$anchor', '$schema']
+
+// keywords that are merged with the target's, forms depend on that
+const MERGED_KEYWORDS = ['properties', 'patternProperties', 'dependentSchemas', 'dependentRequired', 'required']
+
 class RefParser {
   constructor (options = {}) {
     this.options = Object.assign({
@@ -318,10 +324,55 @@ class RefParser {
         return this.expand(cloneSchema, seen)
       }
 
+      if (this.mustApplySeparately(target, cloneSchema)) {
+        return this.expand(this.applySeparately(target, cloneSchema), seen)
+      }
+
+      // both lists of required properties must hold
+      if (Array.isArray(target.required) && Array.isArray(cloneSchema.required)) {
+        cloneSchema.required = [...new Set([...target.required, ...cloneSchema.required])]
+      }
+
       return this.expand(mergeDeep({}, target, cloneSchema), seen)
     }
 
     return cloneSchema
+  }
+
+  /**
+   * Siblings and a $ref target are merged, so that forms keep their `type` and `properties`.
+   * Merging is not enough when both define the same keyword, or when the target decides
+   * about unevaluated properties/items: the spec evaluates them as separate subschemas.
+   * @param target
+   * @param siblings
+   * @returns {boolean}
+   */
+  mustApplySeparately (target, siblings) {
+    if (!this.isObject(target)) {
+      return false
+    }
+
+    const annotation = (key) => ANNOTATION_KEYWORDS.includes(key) || key.startsWith('x-')
+    const siblingKeys = Object.keys(siblings).filter((key) => !annotation(key))
+
+    if (siblingKeys.length === 0) {
+      return false
+    }
+
+    return 'unevaluatedProperties' in target ||
+      'unevaluatedItems' in target ||
+      siblingKeys.some((key) => !MERGED_KEYWORDS.includes(key) && key in target)
+  }
+
+  applySeparately (target, siblings) {
+    const schema = { ...siblings, allOf: [...(siblings.allOf || []), JSON.parse(JSON.stringify(target))] }
+
+    // forms need to know the type of the field
+    if ('type' in target && !('type' in siblings)) {
+      schema.type = target.type
+    }
+
+    return schema
   }
 
   expandRecursive (schema) {

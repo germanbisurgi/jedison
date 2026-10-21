@@ -32,9 +32,7 @@ const knownGaps = [
   'remote ref, containing refs itself > remote ref invalid',
   'validate definition against metaschema > valid definition schema',
   'validate definition against metaschema > invalid definition schema',
-  'ref creates new scope when adjacent to keywords > referenced subschema doesn\'t see annotations from properties',
-  'unevaluatedItems with $ref > with no unevaluated items',
-  'unevaluatedItems before $ref > with no unevaluated items',
+  'unevaluatedItems with $recursiveRef > with no unevaluated items',
   'unevaluatedItems with $recursiveRef > with unevaluated items',
   'unevaluatedProperties with $recursiveRef > with no unevaluated properties',
   'schema that uses custom metaschema with with no validation vocabulary > no validation: invalid number, but it still validates'
