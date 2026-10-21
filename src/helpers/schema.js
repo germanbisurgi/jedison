@@ -50,11 +50,16 @@ export function getSchemaDependentSchemas (schema) {
   return isObject(schema.dependentSchemas) ? clone(schema.dependentSchemas) : undefined
 }
 
-export function getSchemaDescription (schema) {
+export function getSchemaSummary (schema) {
   const summary = getSchemaXOption(schema, 'summary')
+  return isString(summary) ? clone(summary) : undefined
+}
 
-  if (isString(summary)) {
-    return clone(summary)
+export function getSchemaDescription (schema) {
+  const summary = getSchemaSummary(schema)
+
+  if (summary !== undefined) {
+    return summary
   }
 
   return isString(schema.description) ? clone(schema.description) : undefined
@@ -312,6 +317,7 @@ export default {
   getSchemaReadOnly,
   getSchemaRequired,
   getSchemaThen,
+  getSchemaSummary,
   getSchemaTitle,
   getSchemaType,
   getSchemaOneOf,

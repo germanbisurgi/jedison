@@ -1,3 +1,7 @@
+### 1.31.0
+
+- Changed `x-summary`: when a `description` is also set, the full `description` now stays available behind a collapsed toggle under the summary (a native `<details>` element, class `jedi-summary`) instead of being dropped. Without a `description`, nothing changes
+
 ### 1.30.0
 
 - Added `x-summary`: when set, it is shown in the form instead of `description`, so a short UI text can sit next to a long `description` kept for API docs. It supports the same markdown and templates as `description`

@@ -375,10 +375,14 @@ function getSchemaDependentRequired(schema) {
 function getSchemaDependentSchemas(schema) {
   return isObject$1(schema.dependentSchemas) ? clone(schema.dependentSchemas) : void 0;
 }
-function getSchemaDescription(schema) {
+function getSchemaSummary(schema) {
   const summary = getSchemaXOption(schema, "summary");
-  if (isString(summary)) {
-    return clone(summary);
+  return isString(summary) ? clone(summary) : void 0;
+}
+function getSchemaDescription(schema) {
+  const summary = getSchemaSummary(schema);
+  if (summary !== void 0) {
+    return summary;
   }
   return isString(schema.description) ? clone(schema.description) : void 0;
 }
@@ -582,6 +586,7 @@ const Schema = {
   getSchemaReadOnly,
   getSchemaRequired,
   getSchemaThen,
+  getSchemaSummary,
   getSchemaTitle,
   getSchemaType,
   getSchemaOneOf,
@@ -2875,14 +2880,24 @@ class Editor {
     return this.title;
   }
   getDescription() {
+    const summary = getSchemaSummary(this.instance.schema);
+    const fullDescription = this.instance.schema.description;
+    if (isSet(summary) && isString(fullDescription) && fullDescription !== summary) {
+      const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
+      const summaryPurifyOptions = combineDeep({}, domPurifyOptions, { FORBID_TAGS: ["p"] });
+      this.description = '<details class="jedi-summary"><summary>' + this.renderAnnotation(summary, summaryPurifyOptions) + "</summary>" + this.renderAnnotation(fullDescription, domPurifyOptions) + "</details>";
+      return this.description;
+    }
     const schemaDescription = getSchemaDescription(this.instance.schema);
     if (isSet(schemaDescription)) {
-      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description));
-      this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description;
-      const domPurifyOptions = this.instance.jedison.getOption("domPurifyOptions");
-      this.description = this.purifyEnabled ? this.purifyContent(this.description, domPurifyOptions) : this.description;
+      this.description = this.renderAnnotation(schemaDescription, this.instance.jedison.getOption("domPurifyOptions"));
     }
     return this.description;
+  }
+  renderAnnotation(text, domPurifyOptions) {
+    let html = compileTemplate(text, this.instance.getTemplateData(this.description));
+    html = this.markdownEnabled ? this.getHtmlFromMarkdown(html) : html;
+    return this.purifyEnabled ? this.purifyContent(html, domPurifyOptions) : html;
   }
   getInfo(schema = null) {
     const _schema = schema ?? this.instance.schema;

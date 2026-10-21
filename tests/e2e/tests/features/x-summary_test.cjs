@@ -9,11 +9,16 @@ BeforeSuite(({ I }) => {
   I._selectExample(pathToSchema)
 })
 
-Scenario('@feature @x-summary should show x-summary instead of description', ({ I }) => {
-  I._waitForText('Short summary shown in the form.', '[data-path="#/name"]')
+Scenario('@feature @x-summary should show the summary and collapse the description', ({ I }) => {
+  I._waitForText('Short text shown in the form.', '[data-path="#/name"]')
   I.dontSee('Long description for the API documentation', '[data-path="#/name"]')
 })
 
-Scenario('@feature @x-summary should fall back to description', ({ I }) => {
-  I._waitForText('Without x-summary the description is shown.', '[data-path="#/email"]')
+Scenario('@feature @x-summary should expand the description on click', ({ I }) => {
+  I.click('[data-path="#/name"] details.jedi-summary > summary')
+  I._waitForText('Long description for the API documentation', '[data-path="#/name"]')
+})
+
+Scenario('@feature @x-summary should show the description when there is no summary', ({ I }) => {
+  I._waitForText('Without x-summary the description is shown as usual.', '[data-path="#/email"]')
 })

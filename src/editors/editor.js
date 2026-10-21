@@ -1,5 +1,5 @@
 import { combineDeep, compileTemplate, escapeHtml, filterAttributes, isArray, isObject, isSet, isString, pathToAttribute } from '../helpers/utils.js'
-import { getSchemaDescription, getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
+import { getSchemaDescription, getSchemaSummary, getSchemaTitle, getSchemaType, getSchemaXOption } from '../helpers/schema.js'
 
 /**
  * Represents an Editor instance.
@@ -516,18 +516,34 @@ class Editor {
   }
 
   getDescription () {
+    const summary = getSchemaSummary(this.instance.schema)
+    const fullDescription = this.instance.schema.description
+
+    // x-summary is shown instead of the description; the full description stays
+    // reachable behind a native <details> toggle (collapsed by default)
+    if (isSet(summary) && isString(fullDescription) && fullDescription !== summary) {
+      const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
+      const summaryPurifyOptions = combineDeep({}, domPurifyOptions, { FORBID_TAGS: ['p'] })
+
+      this.description = '<details class="jedi-summary"><summary>' + this.renderAnnotation(summary, summaryPurifyOptions) + '</summary>' + this.renderAnnotation(fullDescription, domPurifyOptions) + '</details>'
+
+      return this.description
+    }
+
     const schemaDescription = getSchemaDescription(this.instance.schema)
 
     if (isSet(schemaDescription)) {
-      this.description = compileTemplate(schemaDescription, this.instance.getTemplateData(this.description))
-      this.description = this.markdownEnabled ? this.getHtmlFromMarkdown(this.description) : this.description
-
-      const domPurifyOptions = this.instance.jedison.getOption('domPurifyOptions')
-
-      this.description = this.purifyEnabled ? this.purifyContent(this.description, domPurifyOptions) : this.description
+      this.description = this.renderAnnotation(schemaDescription, this.instance.jedison.getOption('domPurifyOptions'))
     }
 
     return this.description
+  }
+
+  renderAnnotation (text, domPurifyOptions) {
+    let html = compileTemplate(text, this.instance.getTemplateData(this.description))
+    html = this.markdownEnabled ? this.getHtmlFromMarkdown(html) : html
+
+    return this.purifyEnabled ? this.purifyContent(html, domPurifyOptions) : html
   }
 
   getInfo (schema = null) {
