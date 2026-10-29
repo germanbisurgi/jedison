@@ -1,3 +1,7 @@
+### 1.31.1
+
+- Fixed array editors ignoring `x-card: false` and the global `card: false` option: the card (fieldset and legend) was always rendered, for example with `x-format: nav-horizontal`. Arrays now render without the card like objects do; the buttons and the title row stay
+
 ### 1.31.0
 
 - Changed `x-summary`: when a `description` is also set, the full `description` now stays available behind a collapsed toggle under the summary (a native `<details>` element, class `jedi-summary`) instead of being dropped. Without a `description`, nothing changes
