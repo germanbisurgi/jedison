@@ -58,6 +58,13 @@ Scenario('@editor @array @array-nav-vertical', ({ I }) => {
   }
 })
 
+Scenario('@editor @array @x-card should not render a card when x-card is false', ({ I }) => {
+  I.amOnPage(`playground.html?theme=${theme}`)
+  I._selectExample('experimental/array-no-card')
+  I._waitForElement('.jedi-nav-list')
+  I.seeNumberOfElements('[data-path="#"] > fieldset', 0)
+})
+
 Scenario('@editor @array @array-nav-horizontal', ({ I }) => {
   I.amOnPage(`playground.html?theme=${theme}`)
   I._selectExample('editors/array-nav-horizontal')

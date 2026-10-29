@@ -1,0 +1,21 @@
+{
+  "type": "array",
+  "title": "Array without card",
+  "description": "Use x-card: false to remove the panel/card chrome from any array editor.",
+  "x-card": false,
+  "x-format": "nav-horizontal",
+  "items": {
+    "type": "object",
+    "title": "Person",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Name"
+      }
+    }
+  },
+  "default": [
+    { "name": "Albert" },
+    { "name": "Betti" }
+  ]
+}

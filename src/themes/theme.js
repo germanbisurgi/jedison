@@ -1546,6 +1546,145 @@ class Theme {
     }
   }
 
+  /**
+   * Flat variant of getArrayControl — same interface but no fieldset/legend/collapse/card-body.
+   */
+  getArrayControlFlat (config) {
+    const container = document.createElement('div')
+    const actions = this.getActionsSlot()
+    const body = document.createElement('div')
+    const messages = this.getMessagesSlot()
+    const childrenSlot = this.getChildrenSlot()
+    const btnGroup = this.getBtnGroup()
+    const addBtn = this.getArrayBtnAdd({ content: config.arrayAddContent })
+    const footerAddBtn = this.getArrayBtnAdd({ content: config.arrayFooterAddContent })
+    const deleteAllBtn = config.arrayDeleteAll === true
+      ? this.getArrayBtnDeleteAll({ content: config.arrayDeleteAllContent })
+      : null
+    const footerDeleteAllBtn = config.arrayFooterDeleteAll === true
+      ? this.getArrayBtnDeleteAll({ content: config.arrayFooterDeleteAllContent })
+      : null
+    const footerBtnGroup = this.getBtnGroup()
+    const footer = this.getArrayFooter()
+    const info = this.getInfo(config.info)
+    const description = this.getDescription({ content: config.description })
+    const jsonData = this.getJsonData({
+      id: 'json-data-' + config.id,
+      readOnly: config.readOnly,
+      content: config.jsonDataContent
+    })
+    const switcherSlot = this.getSwitcherSlot()
+
+    // Stubs for interface compatibility (not rendered as card chrome)
+    const collapse = document.createElement('div')
+    const collapseToggle = document.createElement('div')
+    const infoContainer = document.createElement('div')
+
+    const legend = document.createElement('div')
+    legend.classList.add('jedi-editor-legend')
+    legend.style.display = 'flex'
+    legend.style.justifyContent = 'space-between'
+    legend.style.alignItems = 'center'
+    const left = document.createElement('div')
+    left.classList.add('jedi-editor-legend-left')
+    const right = document.createElement('div')
+    right.classList.add('jedi-editor-legend-right')
+    right.style.display = 'flex'
+    right.style.alignItems = 'center'
+    legend.appendChild(left)
+    legend.appendChild(right)
+
+    const legendText = document.createElement('label')
+    legendText.classList.add('jedi-title', 'jedi-legend')
+    legendText.textContent = config.title || ''
+    if (config.titleHidden) {
+      this.visuallyHidden(legendText)
+    }
+    left.appendChild(legendText)
+    left.appendChild(switcherSlot)
+
+    if (config?.info?.variant === 'modal') {
+      this.infoAsModal(info, config.id, config.info)
+    }
+
+    if (config.editJsonData) {
+      container.appendChild(jsonData.dialog)
+    }
+
+    if (isObject(config.info)) {
+      while (info.container.firstChild) {
+        infoContainer.appendChild(info.container.firstChild)
+      }
+    }
+
+    const innerWrapper = document.createElement('div')
+    innerWrapper.appendChild(legend)
+    innerWrapper.appendChild(body)
+    container.appendChild(innerWrapper)
+
+    if (config.description) {
+      body.appendChild(description)
+    }
+
+    body.appendChild(messages)
+    right.appendChild(actions)
+    actions.appendChild(btnGroup)
+
+    if (config.editJsonData) {
+      btnGroup.appendChild(jsonData.toggle)
+    }
+
+    if (deleteAllBtn && !config.readOnly) {
+      btnGroup.appendChild(deleteAllBtn)
+    }
+
+    if (isSet(config.arrayAdd) && config.arrayAdd === true && !config.readOnly) {
+      btnGroup.appendChild(addBtn)
+    }
+
+    body.appendChild(childrenSlot)
+
+    const showFooter = (
+      (config.arrayFooterAdd === true || config.arrayFooterDeleteAll === true) &&
+      config.readOnly === false
+    )
+
+    if (showFooter) {
+      if (footerDeleteAllBtn) {
+        footerBtnGroup.appendChild(footerDeleteAllBtn)
+      }
+      if (config.arrayFooterAdd === true) {
+        footerBtnGroup.appendChild(footerAddBtn)
+      }
+      if (config.arrayFooterButtonsPosition === 'right') {
+        footerBtnGroup.style.marginLeft = 'auto'
+      }
+      footer.appendChild(footerBtnGroup)
+      innerWrapper.appendChild(footer)
+    }
+
+    return {
+      container,
+      collapseToggle,
+      collapse,
+      body,
+      actions,
+      messages,
+      childrenSlot,
+      btnGroup,
+      addBtn,
+      jsonData,
+      legend,
+      legendText,
+      infoContainer,
+      switcherSlot,
+      footerAddBtn,
+      deleteAllBtn,
+      footerDeleteAllBtn,
+      innerWrapper
+    }
+  }
+
   getArrayItem (config = {}) {
     const container = document.createElement('div')
     const body = document.createElement('div')

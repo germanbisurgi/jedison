@@ -28,7 +28,10 @@ class EditorArray extends Editor {
   }
 
   build () {
-    this.control = this.theme.getArrayControl({
+    const card = getSchemaXOption(this.instance.schema, 'card') ?? this.instance.jedison.getOption('card')
+    const getControl = card === false ? 'getArrayControlFlat' : 'getArrayControl'
+
+    this.control = this.theme[getControl]({
       title: this.getTitle(),
       description: this.getDescription(),
       titleHidden: getSchemaXOption(this.instance.schema, 'titleHidden'),

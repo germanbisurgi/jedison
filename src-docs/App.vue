@@ -411,6 +411,7 @@ import xSummary from './json/features/x-summary.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
 import xButtons from './json/features/x-buttons.json'
 import experimentalObjectNoCard from './json/experimental/object-no-card.json'
+import experimentalArrayNoCard from './json/experimental/array-no-card.json'
 import {isSet} from "../src/helpers/utils.js"
 
 
@@ -621,6 +622,7 @@ export default {
         },
         'Experimental': {
           'experimental/object-no-card': experimentalObjectNoCard,
+          'experimental/array-no-card': experimentalArrayNoCard,
         },
       },
       example: 'examples/character-creator',
