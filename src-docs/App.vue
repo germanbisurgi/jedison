@@ -406,6 +406,7 @@ import purifyDataExample from './json/features/purify-data.json'
 import switcherModal from './json/features/switcher-modal.json'
 import switcherSelectInline from './json/features/switcher-select-inline.json'
 import navigateTo from './json/features/navigate-to.json'
+import setLanguage from './json/features/set-language.json'
 import titleIconClass from './json/features/title-icon-class.json'
 import xSummary from './json/features/x-summary.json'
 import switcherTypeLabels from './json/features/switcher-type-labels.json'
@@ -531,6 +532,7 @@ export default {
           'features/switcher-modal': switcherModal,
           'features/switcher-select-inline': switcherSelectInline,
           'features/navigate-to': navigateTo,
+          'features/set-language': setLanguage,
           'features/title-icon-class': titleIconClass,
           'features/x-summary': xSummary,
           'features/switcher-type-labels': switcherTypeLabels,

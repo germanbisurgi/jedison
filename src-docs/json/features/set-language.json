@@ -1,0 +1,18 @@
+{
+  "title": "Set Language",
+  "description": "Call editor.setLanguage('de') from the browser console to switch UI texts and validation messages at runtime. Available: en, de, it, es.",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "title": "Name", "minLength": 3 },
+    "tags": {
+      "type": "array",
+      "title": "Tags",
+      "items": { "type": "string", "title": "Tag" }
+    }
+  },
+  "default": {
+    "name": "",
+    "tags": ["one", "two"]
+  }
+}

@@ -10,7 +10,7 @@ class Translator {
   }
 
   translate (message) {
-    let translation = this.translations[this.language][message]
+    let translation = this.translations[this.language]?.[message]
 
     if (notSet(translation)) {
       translation = this.defaultTranslations[message]

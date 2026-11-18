@@ -266,11 +266,7 @@ class Jedison extends EventEmitter {
   }
 
   bindEventListeners () {
-    if (this.root) {
-      this.root.on('change', (initiator) => {
-        this.emit('change', initiator)
-      })
-    }
+    this.bindRootEventListeners()
 
     this.on('instance-change', (instance) => {
       const callbacks = this.watched[instance.path]
@@ -301,6 +297,17 @@ class Jedison extends EventEmitter {
       }
       document.addEventListener('focus', this._onFocus, true)
       document.addEventListener('keydown', this._onKeydown)
+    }
+  }
+
+  /**
+   * Forwards root change events to jedison listeners
+   */
+  bindRootEventListeners () {
+    if (this.root) {
+      this.root.on('change', (initiator) => {
+        this.emit('change', initiator)
+      })
     }
   }
 
@@ -583,6 +590,34 @@ class Jedison extends EventEmitter {
    */
   setValue () {
     this.root.setValue(...arguments)
+    this.updateInstancesWatchedData()
+  }
+
+  /**
+   * Changes the language of UI texts and validation messages.
+   * In editor mode the form is rebuilt, because button texts are translated when the editors are built.
+   * @param {string} language
+   */
+  setLanguage (language) {
+    this.translator.language = language
+
+    if (!this.isEditor) {
+      return
+    }
+
+    const value = this.getValue()
+
+    this.root.destroy()
+
+    this.root = this.createInstance({
+      jedison: this,
+      schema: this.schema,
+      path: this.rootName
+    })
+
+    this.root.setValue(value, false)
+    this.bindRootEventListeners()
+    this.container.appendChild(this.root.ui.control.container)
     this.updateInstancesWatchedData()
   }
 
