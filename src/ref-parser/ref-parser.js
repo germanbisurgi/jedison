@@ -221,7 +221,7 @@ class RefParser {
       return false
     }
 
-    return ref.startsWith('http') || ref.startsWith('https')
+    return ref[0] !== '#'
   }
 
   isObject (value) {
