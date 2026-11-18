@@ -1,3 +1,7 @@
+### 1.32.0
+
+- Added `setLanguage(language)` (issue #89) to change the language at runtime
+
 ### 1.31.1
 
 - Fixed array editors ignoring `x-card: false` and the global `card: false` option: the card (fieldset and legend) was always rendered, for example with `x-format: nav-horizontal`. Arrays now render without the card like objects do; the buttons and the title row stay
